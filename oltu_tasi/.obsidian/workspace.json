@@ -1,0 +1,291 @@
+{
+  "main": {
+    "id": "89a5c4113c622535",
+    "type": "split",
+    "children": [
+      {
+        "id": "5da7305be5a2fed0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2ccc614211a70888",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Docker/Dockerfile.md",
+                "mode": "source",
+                "source": false
+              },
+              "pinned": true
+            }
+          },
+          {
+            "id": "528874e776045cac",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/Javascript/javascript Dersleri.md",
+                "mode": "source",
+                "source": false
+              },
+              "pinned": true
+            }
+          },
+          {
+            "id": "aaceac4d997532c7",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Web Servers/Nginx/Nginx Directives.md",
+                "mode": "source",
+                "source": false
+              },
+              "pinned": true
+            }
+          },
+          {
+            "id": "d306f6929260f75e",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Web Servers/Nginx/Nginx Config File.md",
+                "mode": "source",
+                "source": false
+              },
+              "pinned": true
+            }
+          },
+          {
+            "id": "1b2b3bb1787cc178",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "57ac89bcf39d2a29",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Web Servers/Nginx/Nginx location modifier.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "08639e4df48de3e1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Web Servers/Nginx/Nginx Directives.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "f8d14e9f0e0a81ef",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/Bash_Script/Bash Script.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ],
+        "currentTab": 4
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "d5556bf1a29019bd",
+    "type": "split",
+    "children": [
+      {
+        "id": "b4564d569f5d8867",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f36ea74e416a148d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "cf4a75b75808d0d3",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "556592daf3366e79",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "1413189cf439f38e",
+    "type": "split",
+    "children": [
+      {
+        "id": "4405787cda20666b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3c1a7e42fde10876",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "README.md",
+                "collapseAll": true,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "044ba3f2a9ffbc76",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "README.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "e5eaae6931d69487",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "fcb19dadf91e237d",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "README.md"
+              }
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "horizontal",
+    "width": 226.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "1b2b3bb1787cc178",
+  "lastOpenFiles": [
+    "Web Servers/Nginx/Nginx Config File.md",
+    "README.md",
+    "Programlama/Bash_Script/Bash Script.md",
+    "Database/PostgreSQL/Pictures/if-modified-since.png",
+    "Web Servers/Nginx/Nginx Directives.md",
+    "Web Servers/Nginx/Nginx location modifier.md",
+    "Programlama/Javascript/javascript Dersleri.md",
+    "Docker/Docker Komutları.md",
+    "Linux Command/Linux komutları.md",
+    "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
+    "Database/PostgreSQL/Tablo Oluşturma - CREATE.md",
+    "Linux Command/Systemd.md",
+    "2024-08-17.md",
+    "Docker/Dockerfile.md",
+    "Database/PostgreSQL/Veri Girişi - INSERT.md",
+    "Database/PostgreSQL/Pictures/Left_Join.png",
+    "Database/PostgreSQL/Database Oluşturma.md",
+    "Programlama/Golang/Golang.md",
+    "Programlama/Golang/Golang Egzersiz.md",
+    "Web Servers/Nginx/Kaynaklar.md",
+    "Web Servers/Nginx/Nginx Komutları.md",
+    "Docker/Docker Swarm.md",
+    "DevOps/Jenkins/Jenkins Eklentilerim.md",
+    "Docker/Docker Compose.md",
+    "DevOps/Jenkins/Jenkins Kurulumu.md",
+    "Database/PostgreSQL/Veri Silme.md",
+    "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
+    "Database/PostgreSQL/Tabloda Değişiklik - ALTER.md",
+    "Programlama/Golang",
+    "Ansible",
+    "Programlama/Bash_Script",
+    "Programlama/Javascript",
+    "Programlama",
+    "Jenkins",
+    "Pasted image 20240810145256.png",
+    "Database/PostgreSQL/Pictures/cache_control_no_store.png",
+    "Linux Command/Processes",
+    "Docker",
+    "Web Servers/Nginx",
+    "Web Servers",
+    "Database/PostgreSQL/Pictures/inner_join.png",
+    "Database/PostgreSQL/Pictures/employee_table.png",
+    "Database/PostgreSQL/Pictures/department_table.png",
+    "Database/PostgreSQL/Pictures/unknown.png",
+    "Database/PostgreSQL/unknown.png.png",
+    "Untitled.canvas"
+  ]
+}
