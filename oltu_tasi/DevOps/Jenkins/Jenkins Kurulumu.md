@@ -1,3 +1,5 @@
+### İşletim Sistemi Üzerine Kurulum:
+
 [Jenkins Official Installation Site](https://www.jenkins.io/doc/book/installing/linux/)
 
 >[!INFO] Bilgi
@@ -47,5 +49,7 @@ $ sudo systemctl status jenkins.service
 > [!TIP]
 > Giriş ekranında açıkladığı gibi `sudo cat /var/lib/jenkins/secrets/initialAdminPassword` ile Administrator password şifresini alabiliriz.
 
+### Docker Üzerine Kurulum:
 
+[TechWorld with Nana](https://www.youtube.com/watch?v=pMO26j2OUME&list=PLy7NrYWoggjw_LIiDK1LXdNN82uYuuuiC)
 

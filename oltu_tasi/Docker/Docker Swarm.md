@@ -40,23 +40,30 @@ $ docker service create \
 > Task(Görev): Node'lar içerisinde çalışan container'ları kast eder.
 
 
-```
+```shell
 $ docker node ls
 ```
 > **Explanation:**
 > Docker swarm'ın hem *worker* hem de *manager* düğümlerini listeler
 
-```
+```shell
 $ docker node ps 
 ```
 > **Explanation:** Manager makine
 > Bir yada birden çok çalışan düğüm üzerinde task'ları lister, varsayılan olarak mevcut düğüm üzerindekini listeler. `docker node ps self` veya `docker node ps portainer` yukarıdaki ile aynı anlama gelir.
 
-```
+```shell
 $ docker node ps nfsserver
 ```
 > **Explanation:** Worker makine
 > nfsserver makinesindeki task'ları listeler
+
+```shell
+$ docker node inspect nfsserver
+```
+> **Explanation:** Manager makine
+> 1. Bu komut *manager makine* üzerinden yapılıyor ve nfsserver node bir *worker makine*
+> 2. Bu komut bize nfsserver içerisine girmeden durumu ve IP adresini alabiliriz.
 ## Docker Swarm Service
 >[!INFO] Bilgi
 > + microservis => servis => app (container)
@@ -148,7 +155,7 @@ services:
       - backend
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints: [node.role == manager]         # 2
   vote:
     image: dockersamples/examplevotingapp_vote:before
     ports:
@@ -173,7 +180,7 @@ services:
       - db
     deploy:
       replicas: 2
-      update_config:
+      update_config:                                   # 1 
         parallelism: 2
       restart_policy:
         condition: on-failure
@@ -194,8 +201,8 @@ services:
         delay: 10s
         max_attempts: 3
         window: 120s
-      placement:
-        constraints: [node.role == manager]
+      placement:                                       # stack line
+        constraints: [node.role == manager]            # 2
   visualizer:
     image: dockersamples/visualizer:stable
     ports:
@@ -205,7 +212,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints: [node.role == manager]            # 2
 networks:
   frontend:
   backend:
@@ -215,10 +222,11 @@ volumes:
 ```
 
 > **Explanation:**
-> +  [[Docker Compose#update_config|update_config]] bakınız. (Docker compose ile aynı)
+> 1.  [[Docker Compose#update_config|update_config]] bakınız. (Docker compose ile aynı)
+> 2. `[node.role == hostname]` hostname alanına ne yazarsak o servis o hostname üzerinde çalışacak. 
 
 
-```
+```shell
 $ docker stack deploy --compose-file docker_stack.yml voteapplication
 ```
 > **Explanation:**
@@ -229,15 +237,181 @@ $ docker stack ls
 > **Explanation:**
 > swarm'daki stack'leri listeler
 
-```
+```shell
 $ docker stack ps voteapplication 
 ```
 > **Explanation:**
 > voteapplication bir stack'dir. Bu komut voteapplication'ın da mevcut olan task'ları listeyecektir.
 
-```
+```shell
 $ docker stack services ls
 ```
 > **Explanation:**
 > stack ile oluşturulmuş servisleri listeler.
+
+## Docker Swarm Secret
+
+> [!TIP] Ipucu
+> docker'ın swarm orkestrasyonuda:
+> 1. docker stack de yaml dosyasında 
+>  ```
+> placement:
+ >   constraints: [node.role == worker]
+>  ```
+>  2. Yada `docker --constraint=node.role==worker` 
+>  Eğer worker yazarsak herhangi bir worker da çalışır veya manager yazarsak her hangi bir manager da çalışır o container ama direk makinenin(hostname) yazarsak belirlediğimiz hostname de çalışır.
+
+###### Örnek 1:  having problems
+```shell
+$ openssl rand -base64 10 | docker secret create db_root_password -
+```
+> **Explanation:**
+> [[Linux komutları#openssl|openssl]] için bakınız.
+> openssl rastgele oluşturulan değeri docker secret'e yönlendiriyoruz ve db_root_password adında oluşturuyoruz.
+
+```shell
+$ openssl rand -base64 10 | docker secret create db_dba_password -
+```
+> **Explanation:**
+> [[Linux komutları#openssl|openssl]] için bakınız.
+
+```bash
+$ docker secret ls
+```
+> **Explanation:**
+> secret'leri listeler
+
+```bash
+$ docker secret rm db_root_password
+```
+> **Explanation:**
+> Eğer secret'leri silmek isterseniz; secret(db_root_password) adını veya secret ID vererek silme işlemini gerçekleştirebilirsiniz. Yukarıda secret adı verilmiş. Eğer secret adını veya secret ID görmek için `docker secret ls` kulanız.
+
+```bash
+$ docker secret inspect db_root_password
+```
+> **Explanation:**
+> Oluşturmuş olduğumuz secret için detaylı bilgi almak için kullanabiliriz
+
+
+```yaml
+version: "3.3"
+
+services:
+  db:
+    image: mysql
+    secrets:
+      - db_root_password                        # 2 
+      - db_dba_password                         # 2
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == worker]
+      resources:
+        reservations:
+          memory: 128M
+        limits:
+          memory: 256M
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_USER: dba
+      MYSQL_DATABASE: mydb
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_PASSWORD_FILE: /run/secrets/db_dba_password
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: /opt/docker/volumes/mysql
+        target: /var/lib/mysql
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+
+secrets:
+  db_root_password:                    # 1
+    external: true
+  db_dba_password:                     # 1
+    external: true
+```
+
+> **Explanation:**
+> 1. `external: true`, Compose dosyasının bu secret'ları doğrudan oluşturmayacağını, bunun yerine Docker Swarm içinde zaten var olan secret'ları kullanacağını belirtir. Yani, bu secret'lar daha önce `docker secret create` komutu ile oluşturulmuş olmalıdır. Zaten yukarıda oluşturduk.
+> 2. Bir Docker Compose dosyasında bir hizmete secret eklemek için, secret'ı servis tanımı altında `secrets` anahtarına eklemeniz gerekir:
+> Kaynak: BTK akademi
+
+
+> [!WARNING] Uyarı:
+> Mysql de mydb adında veritabanı oluşturulamadı!
+
+---
+###### Örnek 2: Wordpress ve mariadb
+
+```shell
+$ echo "write your password" | docker secret create root_db_password -
+```
+> **Explanation:**
+> *write your password* şifremiz oluşturulmuş olan `root_db_password` içerisine yazılacaktır. İsterseniz yukarıdaki [[Docker Swarm#Örnek 1 having problems|örnek 1]] de olduğu gibi openssl kullanılarak rastgele şifrede oluşturulabilir.
+> Bu secret mariadb için oluşturuluyor.
+
+```shell
+$ echo "write your password" | docker secret create wp_db_password -
+```
+> **Explanation:**
+> Yukarıdaki işlemi *wordpress* için yapıyoruz.
+
+```shell
+$ docker secret ls
+```
+> **Explanation:**
+> Oluşturulan secret'leri listeleyebilirsiniz.
+
+```shell
+$ docker network create -d overlay wp
+```
+> **Explanation:**
+>Makineler(Host) arasındaki haberleşmeyi sağlamak için *overlay* ağ kuruyoruz.
+>-d veya --driver parametresi, ağı yönetmek için sürücü seçiyoruz.
+>*overlay* ağın isimi de wp oluyor.
+
+```shell
+$ docker service create \
+	--name mariadb \
+	--replicas 1 \
+	--constraint=node.role==manager \
+	--network wp \
+	--secret source=root_db_password,target=root_db_password \
+	--secret source=wp_db_password,target=wp_db_password \
+	-e MYSQL_ROOT_PASSWORD_FILE=/run/secrets/root_db_password \
+	-e MYSQL_PASSWORD_FILE=/run/secrets/wp_db_password \
+	-e MYSQL_USER=wp \
+	-e MYSQL_DATABASE=wp \
+	mariadb:10.1
+```
+> **Explanation:**
+> Kaynak: BTK akademi
+
+```shell
+$ docker service create \
+	--name wordpress \
+	--replicas 1 \
+	--constraint=node.role==worker \
+	--network wp \
+	--publish 80:80 \
+	--secret source=wp_db_password,target=wp_db_password,mode=0400 \
+	-e WORDPRESS_DB_USER=wp \
+	-e WORDPRESS_DB_PASSWORD_FILE=/run/secrets/wp_db_password \
+	-e WORDPRESS_DB_HOST=mariadb \
+	-e WORDPRESS_DB_NAME=wp \
+	wordpress:4.7
+```
+
+> **Explanation:**
+> Kaynak: BTK akademi
+
+
+
+
+
 

@@ -100,7 +100,7 @@
       when: ansible_distribution == "AlmaLinux"
 
     - name: install update (Ubuntu)
-      tags: always               # 1
+      tags: always                                   # 1
       apt:
         upgrade: dist
         update_cache: yes
@@ -135,14 +135,14 @@
 
   tasks:
     - name: install mariadb package (AlmaLinux)
-      tags: almalinux,db,mariadb    # 2
+      tags: almalinux,db,mariadb                     # 2
       dnf:
         name: mariadb
         state: latest
       when: ansible_distribution == "AlmaLinux"
 
     - name: install mariadb package (Ubuntu)
-      tags: ubuntu,db,mariadb      # 2
+      tags: ubuntu,db,mariadb                        # 2
       apt:
         name: mariadb-server
         state: latest
@@ -163,10 +163,100 @@
 > 2. Buradaki etiketler(tags) kendi ama doğrultusunda etiketlenmiştir; 
 > 	+ Örneğin: `ansible-playbook --tags db site.yamk` ile sadece ==db== ile etiketlenmiş olan play içerisindeki task'lar etkilenecektir.
 > 	+ *Birden fazla etiket eklemek*: `ansible-playbook --tags "apache,db" site.yamk`
-> 3. Video [Bağlantısı](https://www.youtube.com/watch?v=gH_A-0zYLyw&list=PLT98CRl2KxKEUHie1m24-wkyHpEsa4Y70&index=10)
+> 3. Video: [Learn Linux TV](https://www.youtube.com/watch?v=gH_A-0zYLyw&list=PLT98CRl2KxKEUHie1m24-wkyHpEsa4Y70&index=10)
 
 ```
 $ ansible-playbook --list-tags site.yaml
 ```
 > **Explanation:**
 > Yukarıdaki(örnek 2) ansible playbook olan site.yaml dosyasındaki tüm etiketleri(tags) listeliyecektir.
+
+###### Örnek 3: Bir Dosyayı Sunucuya Kopyalama
+```yaml
+---
+
+- hosts: all
+  become: true
+
+  pre_tasks:
+    - name: install updates (RHEL)
+      tags: always               
+      dnf:
+        update_only: yes      
+        update_cache: yes
+      when: ansible_distribution == "AlmaLinux"
+
+    - name: install update (Ubuntu)
+      tags: always               
+      apt:
+        upgrade: dist
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
+
+  tasks:
+    - name: install apache and php for ubuntu servers
+      tags: apache,php,ubuntu     
+      apt:
+        name:
+          - apache2
+          - libapache-2-mod-php
+        state: present
+          # update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: install apache and php for RHEL servers
+      tags: apache,php,almalinux   
+      dnf:
+        name:
+          - httpd
+          - php
+        state: present
+          # update_cache: yes
+      when: ansible_distribution == "AlmaLinux"
+    
+	- name: copy default html file for site 
+	  tags: apache, apache2, httpd
+	  copy:                                        # 1
+	    src: default_site.html                     # 2
+	    dest: /var/www/html/index.html             # 2
+	    owner: root                                # 4
+	    group: root                                # 4
+	    mode: 0644                                 # 5
+
+- hosts: db_servers
+  become: true
+
+  tasks:
+    - name: install mariadb package (AlmaLinux)
+      tags: almalinux,db,mariadb    
+      dnf:
+        name: mariadb
+        state: latest
+      when: ansible_distribution == "AlmaLinux"
+
+    - name: install mariadb package (Ubuntu)
+      tags: ubuntu,db,mariadb      
+      apt:
+        name: mariadb-server
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+- hosts: file_servers
+  become: true
+  tags: samba
+  tasks:
+    - name: install samba package
+      package:        
+        name: samba
+        state: latest
+```
+> **Explanation:**
+> 1. Kopyalama işlemini gerçekleştirmek için `copy` modülünü kullanıyoruz.
+> 2. `src` yönergesi bizim kaynağımız(source) göstermektedir. Öncelikle playbook dosyamızın bulunduğu dizinde `mkdir files` komut ile *files* adında bir dizin oluşturmamız gerekmektedir. Daha sonrasında files dizin içerisine kaynaklarımız verebiliriz. files klasörün içerisine **default_site.html** var. 
+> 	+ `scp files/default_site.html 192.168.1.X:/var/www/html/index.html` aynı işlemi yapıyor.
+> 3. Hedefteki dosyanın(*index.html*) sahibini **root** yapıyoruz ve grubunu **root** yapıyoruz. 
+> 	+ `chown root:root index.html` ile aynı işlemi yapıyor.
+> 4. `chmod 644 index.html` ile aynı işlemi yapıyor.

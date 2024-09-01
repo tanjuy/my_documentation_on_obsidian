@@ -69,7 +69,7 @@ http {
 >  + [[Nginx Directives#Cache-Control|Cache-Control]]  başlığında açıklanmış
 >  + [[Nginx location modifier#Örnek 1| location_1]] 
 
-![Cache-Control no-store](Pictures/cache_control_no_store.png)
+![Cache-Control no-store](cache_control_no_store.png)
 ## HTTP If-Modified-Since:
 > [!INFO] Bilgi:
 > + if-modified-since sadece istemci(client) tarafında mevcuttur. Server tarafında mevcut değildir.  nginx yapılandırma dosyasında yapılandırmayı desteklememektedir.
@@ -170,8 +170,86 @@ Content-Length: 12567
 ## WhiteList Server to NGINX
 > **Konu Amaçı:** sunucuyu nginx'te nasıl beyaz listeye alabileceğimizi göreceğiz. Yani Web siteniz belirli sayfaları herkese açık olmamalı örneğin; web sitenizin admin panel gibi son kullanıcıya açık olmamalı. Web sitesinde bazı sayfaları kullanıcılar kısıtlamamız gerekiyor.
 
+###### Örnek 1: En basit gösterimi - whitelistIP
+```nginx
+user www-data;
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        server_name 192.168.1.125;
+
+        root /var/www/html/bloggingtemplate/;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+
+        location ~ \.(png) {                           # 1
+            try_files $uri $uri/ =404;
+            allow 192.168.1.104;                       # 2
+            deny all;                                  # 2
+        }
+    }
+}
+```
+> **Explanation:**
+> 1. .png uzantlı dosyaları kapsamaktadır. Ayrıca  tilda(~): küçük büyük harf duyarlığı vardır. Bakınız: [[Nginx location modifier#Regex Case Sensitive Eşleşme|Regex Case Sensitive Eşleşme]] 
+> 2. location context alanına bakarsak allow directive 192.168.1.104'lu IP'ye izin verirken deny directive tüm diğer IP'lere engellemektedir.
+> Eğer 192.168.1.125'li IP'den giriş yaparsak, log dosyası bunu gösterir:
+ `192.168.1.103 - - [22/Aug/2024:14:56:47 +0300] "GET /assets/images/clients/c5.png HTTP/1.1" 403 153 "http://192.168.1.125/" "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"`
+> Log dosyasında göründüğü gibi png uzantlı dosyaya **403 hata** kodunu vermektedir.
+
+###### Örnek 2: Nginx'e whiteListIP dahil etme
+```nginx
+user www-data;
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        server_name 192.168.1.125;
+
+        root /var/www/html/bloggingtemplate/;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+
+        location ~ \.(png) {
+            try_files $uri $uri/ =404;
+            include /etc/nginx/whiteListIP;        # 1
+            deny all;
+        }
+    }
+}
+```
+
+###### Örnek 2.1: whiteListIP dosyası
+```nginx
+allow 127.0.0.1;                    # 2
+# allow 192.168.1.0/24;
+
+allow 192.168.1.104;
+```
+> **Explanation:**
+> 1. [[Nginx Config File#Örnek 1 En basit gösterimi - whitelistIP|Örnek 2]] deki ile aynı ama IP'leri nginx config dosyasına yazmaya başlarsak dosyanın karmaşıklığı artar Diğer yandan Yukarıdaki whiteListIP dosyasına yazarak ve bu dosyayıda yukarıdaki nginx config(Örnek 2) dosyasına dahil ederek daha düzenli bir yapı oluşturabiliriz.
+> 2. whiteListeIP dosyasına izin vermek istedğiniz IP'leri yazabilirsiniz.
+
+>[!CAUTION]
+> *Allow veya Deny directive'leri* kullanılarak giriş verilmeyen sayfalar `403 kod hatası(403 Forbidden)`  vermektedir. Bunun anlamı sayfa kaynaklarını olmadığı değil. Buraya kullanıcıları erişim yetkisin olmadığın bilgisini verir.
 
 
-
-
+## Kaynaklar Erişimi Kısıtlama - Limit Access on Resources
 

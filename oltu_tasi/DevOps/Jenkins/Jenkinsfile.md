@@ -1,0 +1,3 @@
+## Declarative Pipeline
+
+## Scripted Pipeline
