@@ -69,7 +69,7 @@ http {
 >  + [[Nginx Directives#Cache-Control|Cache-Control]]  başlığında açıklanmış
 >  + [[Nginx location modifier#Örnek 1| location_1]] 
 
-![Cache-Control no-store](cache_control_no_store.png)
+![Cache-Control no-store](images/cache_control_no_store.png)
 ## HTTP If-Modified-Since:
 > [!INFO] Bilgi:
 > + if-modified-since sadece istemci(client) tarafında mevcuttur. Server tarafında mevcut değildir.  nginx yapılandırma dosyasında yapılandırmayı desteklememektedir.

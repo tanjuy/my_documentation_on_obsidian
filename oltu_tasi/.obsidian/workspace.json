@@ -62,39 +62,13 @@
             }
           },
           {
-            "id": "2e929c3f8b0f7b5a",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Ansible/Playbook Config.md",
-                "mode": "preview",
-                "source": false
-              },
-              "pinned": true
-            }
-          },
-          {
-            "id": "1a74a5c0d610300e",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Web Servers/Nginx/Nginx Config File.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
             "id": "5643c7f7e8e84561",
             "type": "leaf",
             "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Git/Git.md",
+                "file": "Git/Git Dersi.md",
                 "mode": "source",
                 "source": false
               },
@@ -102,19 +76,55 @@
             }
           },
           {
-            "id": "0dcf1abad550edbd",
+            "id": "8de6d65257f24a63",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Programlama/Bash_Script/Bash Script.md",
+                "file": "Programlama/Bash_Script/Bash Script Apps.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "4855da886efed0fa",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Linux Command/Linux komutları.md",
+                "mode": "preview",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "10840bd9b4593284",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Windows Commands/PowerShell.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "4f431463a8f99aa9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/Bash_Script/Bash Script Apps.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 8
       }
     ],
     "direction": "vertical"
@@ -143,7 +153,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "Pic",
+                "query": "powe",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -180,7 +190,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Web Servers/Nginx/Nginx Config File.md",
+                "file": "Programlama/Bash_Script/Bash Script Apps.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -197,7 +207,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Web Servers/Nginx/Nginx Config File.md",
+                "file": "Programlama/Bash_Script/Bash Script Apps.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -220,7 +230,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Web Servers/Nginx/Nginx Config File.md"
+                "file": "Programlama/Bash_Script/Bash Script Apps.md"
               }
             }
           }
@@ -241,24 +251,30 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "f36ea74e416a148d",
+  "active": "4f431463a8f99aa9",
   "lastOpenFiles": [
-    "Web Servers/Nginx/Kaynaklar.md",
+    "Programlama/Bash_Script/Bash Script.md",
+    "Git/Git Dersi.md",
+    "Linux Command/Linux komutları.md",
+    "Windows Commands/PowerShell.md",
+    "Windows Commands/CMD.md",
+    "Programlama/Bash_Script/Bash Script Apps.md",
+    "Ansible/ansible.cfg.md",
+    "Windows Commands/Winget Komutları.md",
+    "Docker/Docker Swarm.md",
+    "Linux Command/tmux.md",
+    "Ansible/Playbook Config.md",
     "Web Servers/Nginx/Nginx Config File.md",
+    "Linux Command/Vim.md",
+    "Ansible/ad hoc commands.md",
+    "Web Servers/Nginx/Kaynaklar.md",
     "Web Servers/Nginx/images/cache_control_no_store.png",
     "Web Servers/Nginx/Nginx Directives.md",
     "Web Servers/Nginx/images",
-    "Ansible/ad hoc commands.md",
-    "Programlama/Bash_Script/Bash Script.md",
-    "Windows Commands/Winget Komutları.md",
     "Linux Command/Linux Paket Komutları.md",
-    "Git/Git.md",
-    "Ansible/Playbook Config.md",
     "Programlama/Javascript/javascript Dersleri.md",
     "Docker/Dockerfile.md",
-    "Docker/Docker Swarm.md",
     "Git",
-    "Linux Command/Linux komutları.md",
     "Web Servers/HTTP.md",
     "DevOps/Jenkins/Jenkins Kurulumu.md",
     "DevOps/Jenkins/Jenkins Eklentilerim.md",
@@ -267,12 +283,7 @@
     "Docker/Docker Compose.md",
     "Database/PostgreSQL/Database Oluşturma.md",
     "Database/MySQL",
-    "README.md",
-    "Web Servers/Nginx/Nginx location modifier.md",
     "Database/PostgreSQL/Pictures/if-modified-since.png",
-    "Docker/Docker Komutları.md",
-    "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
-    "Database/PostgreSQL/Tablo Oluşturma - CREATE.md",
     "Database/PostgreSQL/Pictures/Left_Join.png",
     "Programlama/Golang",
     "Ansible",

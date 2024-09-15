@@ -39,3 +39,55 @@ $ shutdown -k 22:30:25
 > **Explanation:**
 > Yukarıdaki komut gibi çalışır ama burada belirlen zaman verilmiştir. Uyarı mesajı tüm terminaller 22:30:24 sadece kapanacağı uyarısı verir.
 
+### echo
+```shell
+$ echo "Linux is Awesome"
+```
+> **Explanation:**
+
+### find
+###### Örnek 1: Temel Kullanımı
+```shell
+$ find /usr -name words
+```
+> **Explanation:**
+
+
+### grep
+###### Örnek 1: 
+```shell
+$ cat /usr/share/dict/words | grep "Ankara"
+```
+> **Explanation:**
+
+###### Örnek 1.1: Alternatif Kullanım
+```shell
+$ grep "Ankara" /usr/share/dict/words
+```
+> **Explanation:**
+
+###### Örnek 2: -i parametresi
+```shell
+$ grep -i "ankara" /usr/share/dict/words
+```
+> **Explanation:**
+###### Örnek 3: -v parametresi
+```shell
+$ grep -v "ankara" /usr/share/dict/words
+```
+> **Explanation:**
+
+###### Örnek 4: -n parametresi
+```shell
+$ grep -n "Istanbul" /usr/share/dict/words
+```
+
+### who
+```
+$ who
+```
+> **Explanation:**
+> + Sistemde oturum açmış kullanıcılar hakkında bilgi almak için kullanılır.
+> + Komut, hangi kullanıcıların sistemde aktif olduğunu, hangi terminal oturumlarında bulunduklarını ve oturum açma zamanlarını gösterir.
+> +  Kullanıcı adı  - Terminal - Oturum açma zamanı - Kullanıcının bağlı olduğu IP adresi
+### tty

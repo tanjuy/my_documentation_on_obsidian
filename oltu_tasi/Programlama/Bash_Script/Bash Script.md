@@ -1,4 +1,4 @@
-
+#Bash_Script 
 
 >[!INFO] Bilgi:
 > Bash açılımı:  *Bourne Again Shell*
@@ -88,7 +88,7 @@ echo $tamSayi                # 4
 >Değişkenlerimize değer atarken yukarıda da olduğu gibi boşluk bırakmamalıyız!
 >Değişkenleri tanımlarken değişken önüne rakam vermeyiniz. Örneğin; `5ad=linux`
 
-##### $variable ile ${variable} kıyaslama:
+##### `$variable` ile`${variable}` kıyaslama:
 > [!CAUTION] Dikkat:
 > `distro="Ubuntu"` değişken tanımlarsak, 2 farklı şekilde kullanabiliriz:
 >`$distro` ile `${distro}` kullanımın temel olarak arasında bir fark yok ama `${distro}` daha fazla ek özellikleri vardır.
@@ -233,7 +233,7 @@ echo "Distro sırası: ${distros[0]}, ${distros[1]}, ${distros[2]}"
 
 
 ### Bash Script Argümanlar
-> Bash Script çalıştırılmadan verilen girdilerdir.
+> Bash Script çalıştırılmadan verilen girdilerdir. Argümanların bir diğer adı **Pozisyonel parametreler** ve İngilizcesi: **Positional parameters** 
 
 ###### Örnek 1: $1, $2, $3 ... 
 **Bash Script Dosyası: bash_argument**
@@ -255,7 +255,7 @@ $ ./bash_argumants Linux Mac Windows
 > Dosyayı(Bash Script) çalıştırma aşmasında argüman olarak Linux($1), Mac($2) ve Windows($3) argümanlarını verdik ve her biri sırasıyla değişkenlere atandı.
 >  Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
->[!CAUTION] Uyarı:
+>[!CAUTION]
 >$0 dosyanın isimine karşılık gelir yani $0 eşittir ./bash_arguments.sh
 
 ###### Örnek 2: Tüm Argümanlar `$@`
@@ -273,8 +273,8 @@ $ ./bash_arguments Linux Mac
 ```
 
 > **Explanation:**
-> Tüm değişkenlere karşılık gelmektedir. $@ eşittir $1, $2, $3 ... 
-> Değişkenlerde kullanılan süslü parantez de mevcuttur: ${@} 
+> Tüm değişkenlere karşılık gelmektedir. $@ eşittir `$1, $2, $3 ...` 
+> Değişkenlerde kullanılan süslü parantez de mevcuttur: `${@}` 
 >  Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
 > [!WARNING] Uyarı:
@@ -283,6 +283,8 @@ $ ./bash_arguments Linux Mac
 ###### Örnek 3: $@ de sıfırıncı indeks
 **Bash Script Dosyası: bash_arguments.sh**
 ```bash
+#!/usr/bin/env bash
+
 echo "Girilen Argüman Sayısı: $#"           # Linux Mac Windows
 dizi=($@)
 # dizi=("$@")
@@ -319,7 +321,7 @@ $ ./bash_arguments.sh Linux Mac Windows Solaris
 
 **Bash Script Dosyası: bash_arguments.sh**
 ```bash
-echo $#
+echo "Argüman Sayısı: $#"
 diziAt=("$@")
 diziStar=("$*")
 
@@ -352,6 +354,52 @@ $ ./bash_arguments Linux Mac Windows Solaris
 >  `$#` veya `${#}` bash script özel değişkenleri, her ikiside aynı çıktıyı verir ve girilen(Linux Mac Windows Solaris) argüman saysını(4) verir.
 >  Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
+### Shift Komutu:
+**Tanım:** Bash script'te `shift` komutu, pozisyonel parametreleri (komut satırı argümanlarını) sola kaydırarak yönetir. Pozisyonel parametreler, bir bash script'e geçirilen argümanları ifade eder ve `$1`, `$2`, `$3`, ... gibi sembollerle erişilir. `shift` komutu her kullanıldığında, pozisyonel parametreler bir kez sola kaydırılır ve ilk argüman (`$1`) devre dışı kalır.
+
+
+> [!WARNING]
+> `shift` komutu `$0` argümanında kaydırma yapmaz.  `shift` komut kaydırma işlemini `$1` argümanı ile yapmaya başlar. 
+
+###### Örnek 1: Basit Kullanımı
+```bash
+#!/usr/bin/env bash
+
+echo "1.Argüman: $1"                    # windows          
+echo "2.Argüman: $2"                    # linux
+shift                                   # Pozisyonel parametreleri sola kaydır.
+echo "shift'ten sonra 1.Argüman: $1"    # linux
+echo "shift'ten sonra 2.Argüman: $2"    # unix
+```
+
+**Terminal:**
+```shell
+$ ./apps.sh windows linux unix
+```
+
+> **Explanation:**
+> 1. Eğer bu bash script'in adı `apps.sh` olursa ve linux terminal de  
+> 	+ 1.Argüman: windows, 2.Argüman: linux  olacaktır.
+> 2. *Shift komutndan sonra*:
+> 	+ 1.Argüman: linux, 2. Argüman: unix olacaktır.
+
+###### Örnek 2: shift parametresi ile
+```bash
+#!/usr/bin/env bash
+
+echo "1.Argüman: $1"                 # windows        
+echo "2.Argüman: $2"                 # unix
+echo "3.Argüman: $3"                 # linux
+shift 2                              # Pozisyonel parametreleri 2 adım kaydır.
+echo "Shift'ten sonra 1.Argüman: $1" # linux
+```
+
+**Terminal:**
+```shell
+$ ./apps.sh windows unix linux
+```
+> **Explanation:**
+> Eğer bash script dosyanın adı `apps.sh` olursa ve girilen argümanlarda 2 adım kaydırdığımızda(*shift komutu*) sadece *linux* çıktısını verecektir
 
 ### Mantık Komutları:
 #### test komutu:
@@ -762,6 +810,12 @@ echo "Kalan  : $(expr $sayi1 % $sayi2)"
 > Örnek 2 yaptığımızın aynı işlemleri yaptık ama `expr` komutunu kullandık.
 > **Burada dikkat edilmesi gereken nokta** aritmetik operatörler arasına kesinlikle boşluk bırakmalıyız ve ayrıca çarpma işlemi de kullanılan yıldız işaret özel karakteri olmasını engellemek için ters slash(/) yıldız işaretin önüne koyuyoruz.
 
+
+
+> [!TIP] 
+> `((i++))` veya `i=$((i+1))` döngülerde `i` değişkenini her döngüde artırır.
+> `((i--))` veya `i=$((i-1))` döngülerde `i` değişkenini her döngüde azaltır.
+
 #### Ondalıklı(Float) Sayılar ile
 
 > [!INFO] Bilgi:
@@ -876,11 +930,17 @@ esac
 
 **Tanım:** dizi,  birden fazla veriyi tek bir değişken altında saklamaya olanak tanıyan bir veri yapısıdır.
 
+> [!WARNING]
+> Dizilerde dizi elemanlarını ayıran *boşluk* dur.
+> `dizi=("Linux" "Unix" "Mac" "Windows")     #  Yazımı Doğru` 
+> `dizi=("Linux", "Unix", "Mac", "Windows")   #  Yazımı Yanlış Virgül olmayacak`
+
+
 ###### Örnek 1:  Basit Kullanımı:
 ```bash
 #!/usr/bin/bash
 
-OS=( "Linux", "Windows", "Unix" )
+OS=( "Linux" "Windows" "Unix" )
 
 echo "Tüm dizin: ${OS[@]}"                  # Tüm dizi elemanlarını gösterir.
 echo "index 2: ${OS[2]}"                    # Çıktı: Unix
@@ -897,7 +957,7 @@ echo "Tüm dizinin index sayısı: ${#OS[@]}"  # Çıktı: 3
 ```bash
 #!/usr/bin/env bash
 
-OS=( "Linux", "Windows", "Unix" )
+OS=( "Linux" "Windows" "Unix" )
 
 echo "Tüm dizi: ${OS[@]}"
 OS[3]='Mac'
@@ -910,7 +970,7 @@ echo "Tüm dizi tekrar: ${OS[@]}"
 ```bash
 #!/usr/bin/bash
 
-OS=( "Linux", "Windows", "Unix" )
+OS=( "Linux" "Windows" "Unix" )
 
 echo -e "Tüm dizi\t\t: ${OS[@]}"           # Çıktı: Linux, Windows, Unix
 unset OS[1] 
@@ -1020,3 +1080,596 @@ done                                     # 3
 > 2.  echo komutunda `\n` yorumlanması için `-e` parametresi kullanıldı.
 > 3. `for loop` bittiğini söylemek için `done` sona ekliyoruz.
 
+###### Örnek 3: brace expansion ile
+```bash
+#!/usr/bin/bash
+
+for i in {1..5}; do                   # Çıktı: 1 2 3 4 5
+# for i in {1..10..2}; do             # Çıktı: 2 4 6 8 10
+	echo "Sayı: $i"
+done
+```
+> **Explanation:** 
+> - `{1..5}` kullanabilmek için bash versiyonun 3 üzerinde olması gerekir. `echo $BASH_VERSION` komut ile veya `bash --version` komutu ile bash versiyonu öğrenebiliriz.
+> - Yukarıdaki Örnek 1 gibi `1 2 3 4 5` ifadesi `{1..5}` eş değerdir.
+> - `{1..10..2}`  ifadesi sayılar arasında 2'şer olarak gider. Syntax: `{start..stop..step}` 
+
+#### Select Döngüsü:
+```bash
+select variable in list
+do
+	<expression>
+done
+```
+
+###### Örnek 1: Basit Kullanımı
+```bash
+#!/usr/bin/bash
+
+select il in Ankara İzmir İstanbul
+do
+	echo "$il seçildi."
+done
+```
+> **Explanation:** 
+> + Kullanıcının bir menüden seçim yapmasını sağlayan bir döngü yapısıdır.
+> + Verilen seçenekleri(`Ankara İzmir İstanbul`) numaralandırılmış bir menü olarak ekranda gösterir.
+
+###### Örnek 2: Select ile Dizi Kullanımı
+```bash
+#!/usr/bin/bash
+
+iller=("Ankara" "İstanbul" "İzmir")               # 1
+select il in ${iller[@]}                          # 2
+do
+	echo "$il seçildi."
+done
+```
+> **Explanation:** 
+> 1. [[Bash Script#Diziler(Arrays)|Dizler]] bakınız.
+> 2. Bu adımda diziyi(`${iller[@]}`) entegrasyonu yapıyoruz.
+###### Örnek 3: Select ile if Kullanımı:
+```bash
+#!/usr/bin/env bash
+
+echo "Bir meyve seçin: "
+select fruit in Elma Armut Portakal Çilek
+do
+	if [ -n "$fruit" ]; then                      # 1
+		echo "Seçiminiz $fruit"
+		break                                     # 2
+	else
+		echo "Geçersiz seçim. Lütfen tekrar deneyiniz."
+	fi
+done
+```
+> **Explanation:** 
+> 1. [[Bash Script#test komutu#3.String Karşılaştırılması|Strings Karşılaştırma]] bakınız.
+> 2. `break` döngüleri kırar.
+
+###### Örnek 4: Select ile case Kullanımı:
+```bash
+#!/usr/bin/env bash
+
+distros=("Ubuntu" "Debian" "Arch_Linux")                  # 1
+echo "Bir il seçiniz: "
+select distro in ${distros[@]}                            # 1
+do
+	case $distro in                                       # 2
+	Ubuntu )
+		echo "Ubuntu  seçildi.";;                         
+	Debian )
+		echo "Debian seçildi."                            # 3
+		echo "Debian bitti.";;
+	Arch_Linux )
+		echo "Arch Linux seçildi.";;
+	* )
+		echo "1-3 arasında değer giriniz!";;
+	esac
+done
+```
+> **Explanation:** 
+> 1. [[Bash Script#Diziler(Arrays)|Dizilere]] bakınız.
+> 2. [[Bash Script#Case Kullanımı|Case Kullanımına]] bakınız.
+> 3. `;;`: Bu bloğun sonunu belirtir. Bu sayede, eşleşen duruma ait komutlar çalıştıktan sonra diğer durumlara bakılmaz.
+
+#### Until Döngüsü:
+```bash
+until condition
+do
+	<expression>
+done
+```
+
+###### Örnek 1: Basit Kullanımı
+```bash
+#!/usr/bin/bash
+
+i=0
+until [ $i -ge 10 ]; do                   # 1
+# until (($i >= 10)); do                  # yukardakine alternatif
+	echo "Sayı: $i"
+	((i++))               #  i=$((i+1))   # 2
+done
+```
+> **Explanation:** 
+> 1. [[Bash Script#test komutu|test komutuna]]  bakınız. `-ge` : büyük veya eşittir. 
+> 2.  Her döngüde değeri artıracaktır. 
+#### Break - Continue Anahtarları
+
+###### Örnek 1: Break
+```bash
+#!/usr/bin/env bash
+
+for ((i=0; i<=10; i++)); do                       # 1
+	if [ $i -gt 5 ]; then                         # 2
+		echo "Çıkılıyor..."
+		break                                     # 3
+	fi
+	echo $i
+done 
+```
+> **Explanation:** 
+> 1. [[Bash Script#For Döngüsü|For Döngüsüne]] bakınız.
+> 2. [[Bash Script#Koşul İfadeleri IF, ELIF and ELSE|Koşul ifadeleri]] bakınınız.
+> 3. Bir döngüden (loop) çıkmak için kullanılır. `for`, `while`,`select` veya `until` gibi döngü yapılarında döngünün çalışmasını sonlandırıp, döngüden çıkışı sağlar.
+> 	- if koşulu sağlandığında yani değişken 5'den büyük olduğunda `break` komut çalışacaktır.
+
+###### Örnek 2: Continue
+```bash
+#!/usr/bin/env bash
+
+for ((i=0; i<=10; i++ )); do                      # 1
+	if [ $i -eq 2 -o $i -eq 6 ]; then             # 2
+		echo "Değer yok"
+		continue                                  # 3
+	fi
+	echo "$i"
+done
+```
+> **Explanation:** 
+> 1. [[Bash Script#For Döngüsü|For Döngüsüne]] bakınız.
+> 2. [[Bash Script#Koşul İfadeleri IF, ELIF and ELSE|Koşul ifadeleri]] bakınınız.
+> 3. Bir döngünün (loop) mevcut iterasyonunu atlayıp, bir sonraki iterasyona geçmek için kullanılır.
+> 	+ if koşulu sağlandığında yani değişken 2 veya 6'ya eşit olunduğunda `continue` döngüyü baş alır.
+
+### Fonksiyonlar
+```bash
+function function_name() {                # Fonksiyonu Tanımlama
+	<expression>
+}
+
+function_name                             # Fonksiyonu Çağırma
+```
+
+```bash
+function_name() {                         # Fonksiyonu Tanımlama
+	<expression>                          # Dikkat: function anahtarı yok!
+}
+
+function_name                             # Fonksiyonu Çağırma
+```
+
+```bash
+function function_name() {                
+	echo "Your name: $1 $2..."           # Fonksiyonun argüman alması $1
+}
+
+function_name "Ahmet Hasan..."           # Fonksiyon parametesi alması Ahmet
+```
+
+###### Örnek 1: Basit Kullanımı
+```bash
+#!/usr/bin/env bash
+
+function Merhaba() {                     # 1
+	echo "Merhaba Dünya"
+}
+
+cikis () {                               # 2 
+	exit                                 # 3
+}
+
+Merhaba                                  # 4
+cikis                                    # 4
+```
+> **Explanation:** 
+> 1. `function` anahtarını kullanarak fonksiyon tanımlanmıştır.
+> 2. `function` anahtarı kullanılmadan fonksiyon tanımlanmıştır. Her ikisi de aynı sonucu vermektedir.
+> 3. `exit` komut ile de bash script çalışmasını durduruyor.
+> 4. Fonksiyonların çalışabilmesi için onları çağrılması gerekir. Burada da fonksiyon çağrılıyor.
+
+###### Örnek 2:  Bir sayın karesini alma
+```bash
+#!/usr/bin/env bash
+
+echo -e "Bir sayı giriniz :\c"; read sayi          # 1
+
+function karesiYap() {                             # 2
+	echo "Sayının karesi: $((sayi*sayi))"
+}
+
+karesiYap                                          # 3
+```
+> **Explanation:** 
+> 1. [[Linux komutları#echo|echo]] komutuna bakınız.
+> 2. Burada karsiYap adında fonksiyon tanımlıyoruz.
+> 3. Fonksiyonun çalışması için çağırıyoruz.
+
+###### Örnek 3: Fonksiyon argüman ve parametre alması
+```bash
+#!/usr/bin/env bash
+
+function distros() {                             # 1
+	echo "Linux Dağıtımları: $1 $2 $3"           # 2
+}
+
+distros "Ubuntu" "Arch Linux" "Debian"           # 3
+```
+> **Explanation:** 
+> 1. `distros` adında bir fonksiyon tanımlıyoruz.
+> 2. 3 tane argüman(`$1 $2 $3`) girişi tanımlıyoruz istenirse daha fazlası tanımlanabilir.
+> 3. Ve yukarıda tanımlanan 3 argümana karşılık olarak 3 tane parametre(`"Ubuntu" "Arch Linux" "Debian"`) veriyoruz.
+
+##### Global & Local Değişken
+**Global Değişken:** Her yerden ulaşılabilen değişkenlere denir.
+**Local Değişken:** Sadece tanımlandığı fonksiyon içinde geçerli olan değişkendir. Bir fonksiyon içinde `local` anahtar kelimesi ile tanımlanan bir değişken, sadece o fonksiyonun içinde kullanılabilir.
+###### Örnek 1:
+```bash
+#!/usr/bin/env bash
+
+function distroName() {
+	local distro=$1                            # 1
+	echo "Disto Name: $distro"
+}
+
+distroName Debian
+echo "Distro: $distro"                         # 2
+```
+> **Explanation:** 
+> 1. Burada `local` adında kullandığımız anahtar kelimesine dikkat edin. Bu değişkenin yerel olmasını sağlıyor yani fonksiyon bittiğinde değişkenin ömrü de bitiyor. 
+> 2. Eğer yukarıda `local` anahtarı kullanmazsak global değişken olacak ve burada da ekrana `Debian` çıktısı verecektir.
+> 	+ `local` anahtarı kaldırarak test ediniz.
+
+### Meta Karakterler:
+##### Tanım:
++ Özel bir anlama sahip olan karakterlerdir.
++ Normalde yazı karakteri olarak kullanılmazlar; komutların işlenme şeklini değiştirirler, anlamlarını genişletirler ya da bazı işlemleri kontrol ederler.
+##### `;` Noktalı virgül:
+```shell
+$ ls; date
+```
+> **Explanation:** 
+> Aynı satırda birden fazla komut çalıştırmak için kullanılır. Burada `ls` komut çalışır ardından `date` komut çalışıtır.
+
+##### `*` Yıldız:
+```shell
+$ ls -l s*
+```
+> **Explanation:** 
+> `ls` komutu listelerken s ile başlayan dizin veya dosyaları listeler yani *yıldız* herhangi bir karakter dizini temsil eder.
+
+##### `?` Soru işareti:
+```shell
+$ ls /bin/??
+```
+> **Explanation:** 
+> `ls` komut bin dizin altında 2 karakterli dizin veya dosya listeleyecektir yani *soru işareti* bir karakteri temsil eder.
+
+##### `[]` Köşeli parantez:
+###### Örnek 1: `[123]` kullanımı
+```shell
+$ ls dosya[12].txt
+```
+> **Explanation:** 
+> + Eğer bulunduğunuz dizinde `dosya1.txt` veya `dosy2.txt` var ise listeleyecektir.
+> + `dosya[12].txt` anlamı `dosya1.txt` veya `dosya2.txt` veya her ikisi demektir.
+
+###### Örnek 2: `[1-3]` kullanımı
+```shell
+$ ls dosya[1-3].txt
+```
+> **Explanation:** 
+> + `[1-3]` arasındaki sayıları yazar.
+> + `dosya[1-3].txt` anlamı `dosya1.txt` veya `dosya2.txt` veya `dosya3.txt` veya hepsi demektir.
+
+##### `{}` Süslü parantez:
+###### Örnek 1: {1..5} kullanımı
+```shell
+$ echo {1..5}                    # çıktı: 1 2 3 4 5
+```
+> **Explanation:** 
+> + 1'den 5'e kadar olan sayıları ekran basar.
+
+
+> [!TIP]
+> + `{sayı..sayı..adım}` veya `{alfabe..alfabe}` gibi yapılara *brace expansion* veya *türkçesi süslü parantez genişlemesi* denir.
+> + `for loop` veya türkçesi ile `for döngüleri` ile sık sık kullanılır. [[Bash Script#For Döngüsü#For Şablonu 2|For loop]] bakınız.
+
+###### Örnek 2: {1,2,3} kullanımı
+```shell
+$ touch dosya{1,2,3}.txt
+```
+> **Explanation:** 
+> + Burada süslü parantez genişlemesi(brace expansion) ile tek komut ile birden fazla dosya oluşturuyoruz.
+> + **Çıktı**: dosya1.txt, dosya2.txt, dosya3.txt olacaktır.
+
+```shell
+$ mkdir -p proje/{src,bin,doc}
+```
+> **Explanation:** 
+> + Bu komut da yukarıdakinin aynısı ama burada dizinler oluşturuyoruz.
+> + **Çıktı:**  proje/src, proje/bin, proje/doc olacaktır.
+
+###### Örnek 3: String ile 
+```shell
+$ echo Merhaba{" Ali", "Mehmet"}
+```
+> **Explanation:** 
+> + Karakter dizileri ile kombinasyon yapılabilir.
+> + **Çıktı:** Merhaba Ali Merhaba Mehmet
+
+```shell
+$ touch file.txt{,.bak}
+```
+> **Explanation:** 
+> + Dosyayı alıp verilen 2. isime göre yeniden adlandırıyor.
+> + **Çıktı:** file.txt.bak olacaktır.
+
+###### Örnek 4: Sayı ile alfabe kombinasyonu
+```shell
+$ touch file_{a,b,c}{1..5}.txt
+```
+> **Explanation:** 
+> + `{a,b,c}` ile `{1..5}` kombinasyonu ile dosya oluşturuyoruz.
+> + **Çıktı:** file_a1.txt  file_a3.txt  file_a5.txt  file_b2.txt  file_b4.txt  file_c1.txt  file_c3.txt  file_c5.txt file_a2.txt  file_a4.txt  file_b1.txt  file_b3.txt  file_b5.txt  file_c2.txt  file_c4.txt
+> + **Uyarı:** file_ isimden sonra gelen yapıya dikkat ediniz.
+
+### Tırnak İşareti Kullanımı(Quotes)
+
+
+> [!TIP]
+> 1. **Ters Tırnak(Backtick)**   \`Command\`
+> 2. **Düz Tek Tırnak**             'String'
+> 3. **Düz Çift Tırnak**            "String + Variables + Escape Characters"
+
+#### Düz Çift Tırnak:
+**Tanım:** Tıpkı tek tırnak da olduğu gibi karakter dizinlerini ekrana basar ama eğer karakter dizinlerin içerisinde *değişken* veya *kaçış karakterleri* varsa bunlar yorumlanır.
+
+```shell
+$ echo "Kullanıcı: $USER"                  # Çıktı Kullanıcı: ottoman              
+```
+> **Explanation:**
+> + USER sistem değişkeni yorumlanır ve değişkenin içerisindeki yazdırılır.
+> + **Uyarı:** Lütfen aynı komut *tek tırnak* ile uygulayıp karşılaştırın.
+#### Ters Tırnak(Backtick):
+###### Örnek 1: Temel Kullanımı
+```shell
+$ echo `date`
+```
+> **Explanation:**
+> Ters tırnak içerisinde komut çalışır ve `echo` komut çalışan çıktıyı ekrana basar.
+
+###### Örnek 2: Alternatifi
+```shell
+$ echo $(date)
+```
+> **Explanation:**
+> Ters tırnak(backtick) yaptığı işin aynısını yapar yani backtick'e bir alternatif.
+
+###### Örnel 3: Çift Tırnak İçerisinde Kullanımı
+```shell
+$ echo "Sistemin adı `hostname`"
+```
+> **Explanation:**
+> + Backtick içerisinde yazılan hostname bir komut olduğu için önce hostname komut çalışır ardından echo komut çalışır.
+> + Çift tırnak *değişkenleri, escape characters(kaçış dizinlerini)* ve *backtick* içerisindeki komutları yorumlar.
+#### Düz Tek Tırnak:
+**Tanım:** Tek tırnaklar, içindeki her şeyi **kelime anlamında** alır ve hiçbir değişken, özel karakter veya kaçış dizisi (`\`) değerlendirilmez. Yani, ne yazarsanız o çıktı olarak alınır.
+
+```shell
+$ echo 'Kullanıcı: $USER'                  # Çıktı: Kullanıcı: $USER
+```
+> **Explanation:**
+> + USER bir sistem değişkendir ama tek tırnaktan dolayı değişkeni(`$USER`) yorumlamadı.
+> + **Uyarı:** Lütfen aynı komut *çift tırnak* ile uygulayıp karşılaştırın.
+
+
+### Yönlendirme(Redirection)
+#### Tanım:
+ + **Yönlendirme (redirection)**, komutların çıktısını bir dosyaya kaydetme, hataları başka bir yere yönlendirme veya bir dosyadaki verileri komutlara giriş olarak kullanma gibi işlemleri ifade eder.
+ 
+
+> [!INFO]
+> 3 iletişim kanalı var;
+> 1. INPUT **------------->** Klavye `<`  (0)
+> 2. OUTPUT **----------->** Ekran (Standart Output - Çıktı) `1>` (1)
+> 3. OUTPUT **----------->** Ekran (Standart Error - Hata) `2>` (2)
+
+###### Örnek 1: Command `>` file
+```shell
+$ history > gecmis.txt
+```
+> **Explanation:**
+> + `history` komut çıktısını ekran basmak yerine `gecmis.txt` dosyaya yönlendirecektir.
+> + **UYARI:** `gecmis.txt` dosya içeriği doluysa üzerinde yazacaktır(override).
+
+###### Örnek 1.1: Command > file ile  noclobber
+```shell
+$ set -o noclobber
+```
+> **Explanation:**
+> + Bash'in üzerine yazma korumasını açar.
+> + Eğer bir dosyaya `>` operatörü ile yazmaya çalıştığınızda dosya zaten varsa, Bash bir hata verecek ve dosya *üzerine yazılmasını(no override)* engelleyecektir.
+
+```shell
+$ echo "Linux is awesome" > gecmis.txt        # Çıktı: file exists: gecmis.txt
+```
+> **Explanation:**
+> + **Noclobber** seçeneği aktif olduğu için `gecmis.txt` dosyasını üzerine yazılamıyacaktır.
+> + Ve hata verecektir; *file exists: gecmis.txt*
+
+
+> [!TIP]
+> `Command 1> file` ile `Command > file` aynı anlama gelmektedir ve aynı çıktıyı vermektedir.
+
+```shell
+$ echo "Linux is awesome" >| gecmis.txt
+```
+> **Explanation:**
+> + Eğer `noclobber` aktifse ve yine de bir dosyanın üzerine yazmak istiyorsanız, `>|` operatörünü kullanabilirsiniz.
+
+**Veya**
+
+```shell
+$ set +o noclobber
+```
+> **Explanation:**
+> + Eğer üzerine yazma korumasını devre dışı bırakmak isterseniz
+> + `noclobber` seçeneğini devre dışı bırakır.
+
+
+###### Örnek 2: Command `2>` file
+```shell
+$ find /etc -name network 2> hata.txt
+```
+> **Explanation:**
+> + `find` komut ile `/etc` dizini içerisinde `network` kelimesini arıyoruz. 
+> + Eğer hata yok ise ekrana basar aksi taktirde hataları `2>` ile `hata.txt` dosyasına yazar.
+
+###### Örnek 3: Command `>>` file
+```shell
+$ echo "Bu metini dosyanın sonuna ekle" >> gecmis.txt
+```
+> **Explanation:**
+> + `echo` komutu çıktısını ekrana basmak yerine `gecmis.txt` dosyanın sonuna ekler.
+> + **UYARI:** `gecmis.txt` dosyanın içeriğini silmeden dosyanın sonuna ekleyecektir.
+
+###### Örnek 4: Command  `>` file `2>&1`
+```shell
+$ find /etc -name network > hatalıHatasız.txt 2>&1
+```
+> **Explanation:**
+> + `find` komut ile `/etc` dizini içerisinde `network` kelimesini arıyoruz.
+> + Tüm çıktıları yani hatasız çıktıyı ve hatalı çıktıyı `hatalıHatasız.txt` dosyasına yazar.
+> + Alternatif Komut: `$ find /etc -name network &> hatalıHatasız.txt`
+
+###### Örnek 4.1: Command `&>>` file
+```shell
+$ find /etc -name network &>> hatalHatasız.txt
+```
+> **Explanation:**
+> + `find` komut ile `/etc` dizini içerisinde `network` kelimesini arıyoruz.
+> + Tüm çıktıları yani hatasız çıktıyı ve hatalı çıktıyı `hatalıHatasız.txt` dosyasına yazar.
+> + **UYARI:** `hatalHatasız.txt` dosyanın içeriğini silmeden dosyanın sonuna ekleyecektir.
+###### Örnek 4.2: Command `>` file `2>` error
+```shell
+$ find /etc -name network > hatasız.txt 2> hatalı.txt
+```
+> **Explanation:**
+> + `find` komut ile `/etc` dizini içerisinde `network` kelimesini arıyoruz.
+> + Hata çıktısını `hatalı.txt` dosyasına ve hata vermeyen çıktıları da `hatalı.txt` dosyasına yönlendiriyoruz.
+
+###### Örnek 5: Command < file
+```shell
+$ cat < gecmis.txt
+```
+> **Explanation:**
+> + Hatırlarsanız `histroy > gecmis.txt` komutunu kullanmıştık ve dosyanın içerisine `histroy` komutun çıktısın aktarmıştık.
+> + `gecmis.txt` dosyanın içeriğini `cat` komutuna yönlendiriyoruz ve `cat` komutu da çıktıyı ekran aktarıyor.
+
+### Kurallı İfadeler(Regular Expressions-RegEx)
+###### Tanım: 
++ Bash scriptlerde **Regular Expressions (RegEx)**, bir metin içerisinde belirli bir desen (pattern) tanımlamak ve bu deseni aramak için kullanılan güçlü bir yapıdır.
++ RegEx, özellikle metin işleme ve manipülasyon işlemlerinde yaygın olarak kullanılır.
++ Bash, RegEx'i `grep`, `sed`, `awk`, `[[ ... ]]` gibi komutlarla kullanmanıza olanak tanır.
+###### Bash'te RegEx Kullanım Alanları:
+1. **Desen Arama(Pattern) ve Eşleşme:** Bir metinde belirli bir deseni (kelime, sayı vb.) bulmak için kullanılır.
+2. **Metin İşleme**: `sed` ve `awk` gibi araçlarla metin üzerinde işlem yapmak (örneğin, bir deseni değiştirmek).
+3. **Koşul Kontrolleri**: `[[ ... ]]` yapısıyla RegEx ile koşul kontrolü yapılabilir.
+###### RegEx Sembolleri ve Anlamları:
+| Sembol | Anlamı                                                                       |
+| ------ | ---------------------------------------------------------------------------- |
+| `.`    | Herhangi bir karakter                                                        |
+| `^`    | Satırın başını ifade eder (başlangıç)                                        |
+| `$`    | Satırın sonunu ifade eder (bitiş)                                            |
+| `*`    | Sıfır veya daha fazla tekrar                                                 |
+| `+`    | Bir veya daha fazla tekrar                                                   |
+| `?`    | Sıfır veya bir kez                                                           |
+| `[]`   | Köşeli parantez içindeki karakterlerden herhangi biri                        |
+| `[^]`  | Köşeli parantez içindeki karakterler dışındaki herhangi bir karakter         |
+| `\`    | Kaçış karakteri, özel karakterleri normal bir karakter olarak kullanmak için |
+| `()`   | Grup oluşturmak                                                              |
+
+> [!WARNING]
+> Bash script'deki [[Bash Script#Meta Karakterler|meta karakterleri]] ile RegEx'deki benzer ve farklı yönleri var ama her ikisi de farklı amaçlara hizmet eder.
+
+###### Örnek 1: Şapka(`^`)
+```shell
+$ cat /usr/share/dict/words | grep "^kar"
+```
+> **Explanation:**
+> + Pipe (`|`)  ile `cat` komut çıktısını `grep` komutuna yönlendiriyoruz.
+> + `grep` komutu `kar` ile başlayan kelimeleri ekrana basar. Çünkü `kar` önünde  şapka(`^`) karakteri var.
+
+###### Örnek 2: Dolar(`$`)
+```shell
+$ cat /usr/share/dict/words | grep "kar$"
+```
+> **Explanation:**
+> + Pipe (`|`)  ile `cat` komut çıktısını `grep` komutuna yönlendiriyoruz.
+> + `grep` komutu `kar` ile bitten kelimeleri erkana basar. Çünkü `kar` sonunda dolar(`$`) karakteri var.
+
+###### Örnek 3: Nokta(`.`)
+```shell
+$ cat /usr/share/dict/words | grep ".kar."
+```
+> **Explanation:**
+> + Nokta(`.`) herhangi bir karakter ile eşleşmeyi ifade etmektedir. Örneğin; Ana**kara**, D**akar'**\s gibi.
+
+###### Örnek 4: Yıldız(`*`)
+```shell
+$ cat /usr/share/dict/words | grep "^kar*"
+```
+> **Explanation:**
+> + `kar` kelimesi veya `ka` ile başlayan kelimeleri ekrana basar. Örneğin; **ka**yak, **kar**te, gibi.
+> + Yıldız(`*`) kendine önce olan veya olmayan harfleri arar.
+> + **UYARI:** Yıldız(`*`) ifadesi meta karakter için farkı anlamı var ama *regex* için farklı bir anlamı var.
+
+#### Koşullu ifadelerde RegEx
+###### Tanım:
++ Bash, RegEx kontrolleri için `[[ ... ]]` yapısını ve `=~` operatörünü destekler.
++ `[[ ... ]]` yapısı `test` komutundan daha gelişmiş yapıya sahiptir. 
++ `test` komutu *regex* desteklemektedir.
+
+
+> [!TIP]
+> Regex bir çok programlama yapılarında kullanılmaktadır ve hemen hemen benzerdir. Regex yapısını anlamanın en kolay yolu pratik yapmaktır.
+
+###### Genel Şablonu:
+```bash
+if [[ $varible =~ regex_pattern ]]; then
+	# Koşul doğru ise çalıştırılacak kodlar
+else
+	# Koşul yanlış ise çalıştırılacak kodlar
+fi
+```
+
+###### Örnek 1: `[[ ... ]]` ile RegEx Kullanımı
+```bash
+#!/usr/bin/bash
+
+text="linuxIsAwesome123"
+if [[ $text =~ ^l[a-zA-Z]*[0-9]+$ ]];then
+	echo "Desen(pattern) eşleşti."
+else
+	echo "Eşleşme Yok!"
+fi
+```
+> **Explanation:**
+> + if yapısı için [[Bash Script#Koşul İfadeleri IF, ELIF and ELSE|Koşul ifadeleri]] bakınız.
+> + `^l` : l harfi ile başlayan kelimelere bakar.
+> + `[a-zA-Z]` : a'dan z'e veya A'dan Z'e  kadar olan harflerden herhangi bir olabilir.
+> + `*` işareti önündeki harflerden sıfır veya daha fazlası ile eşleşme yapar.
+> + `[0-9]`: 0'dan 9'a kadar her hangi bir sayı olabilir.
+> + `+` işareti `*` işaretine benzer ama en az bir sayı olmak zorundadır.
