@@ -55,7 +55,7 @@
               "type": "markdown",
               "state": {
                 "file": "Programlama/Bash_Script/Bash Script.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               },
               "pinned": true
@@ -69,62 +69,26 @@
               "type": "markdown",
               "state": {
                 "file": "Git/Git Dersi.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               },
               "pinned": true
             }
           },
           {
-            "id": "8de6d65257f24a63",
+            "id": "a1591f60c17282b6",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Programlama/Bash_Script/Bash Script Apps.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "4855da886efed0fa",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Linux Command/Linux komutları.md",
-                "mode": "preview",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "10840bd9b4593284",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Windows Commands/PowerShell.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "4f431463a8f99aa9",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/Bash_Script/Bash Script Apps.md",
+                "file": "Linux Command/SSH.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
         ],
-        "currentTab": 8
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -153,7 +117,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "powe",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -190,7 +154,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Programlama/Bash_Script/Bash Script Apps.md",
+                "file": "Git/Git Dersi.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -207,7 +171,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Programlama/Bash_Script/Bash Script Apps.md",
+                "file": "Git/Git Dersi.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -230,7 +194,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Programlama/Bash_Script/Bash Script Apps.md"
+                "file": "Git/Git Dersi.md"
               }
             }
           }
@@ -251,14 +215,16 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "4f431463a8f99aa9",
+  "active": "5643c7f7e8e84561",
   "lastOpenFiles": [
+    "Linux Command/SSH.md",
     "Programlama/Bash_Script/Bash Script.md",
     "Git/Git Dersi.md",
+    "Programlama/Bash_Script/Bash Script Apps.md",
     "Linux Command/Linux komutları.md",
+    "2024-09-17.md",
     "Windows Commands/PowerShell.md",
     "Windows Commands/CMD.md",
-    "Programlama/Bash_Script/Bash Script Apps.md",
     "Ansible/ansible.cfg.md",
     "Windows Commands/Winget Komutları.md",
     "Docker/Docker Swarm.md",
@@ -280,8 +246,6 @@
     "DevOps/Jenkins/Jenkins Eklentilerim.md",
     "DevOps/Jenkins/Jenkinsfile.md",
     "Database/MySQL/Database işlemleri.md",
-    "Docker/Docker Compose.md",
-    "Database/PostgreSQL/Database Oluşturma.md",
     "Database/MySQL",
     "Database/PostgreSQL/Pictures/if-modified-since.png",
     "Database/PostgreSQL/Pictures/Left_Join.png",

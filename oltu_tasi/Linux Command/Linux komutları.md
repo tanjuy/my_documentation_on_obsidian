@@ -91,3 +91,24 @@ $ who
 > + Komut, hangi kullanıcıların sistemde aktif olduğunu, hangi terminal oturumlarında bulunduklarını ve oturum açma zamanlarını gösterir.
 > +  Kullanıcı adı  - Terminal - Oturum açma zamanı - Kullanıcının bağlı olduğu IP adresi
 ### tty
+```bash
+$ tty
+```
+> **Explanation:**
+
+### trash-cli
+###### Komutun Yüklenmesi
+```bash
+$ sudo apt install trash-cli
+```
+
+###### Dosyayı Çöpe Taşıma:
+```bash
+$ trash-put [dosya_yolu]
+```
+> **Explanation:**
+> genellikle dosyaları **`~/.local/share/Trash`** klasörüne taşır.
+
+
+
+

@@ -136,7 +136,13 @@ string="Linux is Awesome"
 echo ${string:6:5}                 # çıktı: is Aw
 ```
 > **Explanation:**
-> Değişkenimizi tutmuş olduğu karakter dizini dilimleyebiliyoruz.
+> 1. Değişkenimizi tutmuş olduğu karakter dizini dilimleyebiliyoruz.
+> 2. Temel yapısı: **${variable:start:length}**
+> 	+ **variable:** Parçalanacak olan dizgeyi barındıran değişkenin adıdır.
+> 	+ **start:** Dizgedeki başlangıç noktasıdır. Bu indeks sıfırdan başlar. Yani ilk karakter `0`, ikinci karakter `1` vb. şeklinde numaralandırılır.
+> 	+ **length:** strat'dan sonra kaç karakter alınacağını belirtir.
+> 3. **6:** start'a karşılık gelir, **5:** length'e karşılık gelir.
+> 4. **Özeti:** *string değişkeninin 6. karakterine gel ve 6. karakterden sonra 5 karakter al.*
 
 ###### Örnek 5: Büyük harf -> Küçük harf
 ```bash
@@ -560,8 +566,9 @@ fi
  ==  / eşit is               / if [[ "$a" == "$b" ]]
 ```
 
-> [!INFO] Bilgi
+> [!INFO]
 > `[[ ... ]]`  ifadesi `test` komutunda göre daha güçlü ve daha esnektir. 
+
 
 ###### Örnek  1: if koşulu
 ```bash
@@ -716,6 +723,42 @@ fi
 > Birinci if de düzenli dosya var mı diye bakıyoruz. if'in içindeki if'de dosya yazılabilir mi diye bakıyoruz.
 > Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=a5Vumkx-PCM&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=12)
 
+##### 4. Not(`!`) operatörü
+```bash
+if ! command; then
+  <expression>
+fi
+```
+
+###### Örnek 1: Dosya kontrolünde Not operatörü
+```bash
+#!/usr/bin/bash
+
+if ! [ -f "/usr/share/dict/word" ]; then
+	echo "word dosyası yok!"
+else
+	echo "word dosyası mevcuttur."
+fi
+```
+> **Explanation:**
+> + **`-f "dosya.txt"`** dosyanın var olup olmadığını kontrol eder.
+> + `!` operatörü ile eğer dosya yoksa (`false` dönerse), bu durum tersine çevrilir ve `if` bloğu çalışır.
+
+###### Örnek 2: id komutunda Not operatörü
+```bash
+#!/usr/bin/bash
+
+user="ottoman"
+if ! id "ottoman" &> /dev/null; then
+	echo "Kullanıcı mevcut değil."
+else
+	echo "Kullanıcı mevcıt"
+fi
+```
+> **Explanation:**
+> + Eğer `ottoman` adında kullanıcı yok ise; `if` bloğu `false` olacaktır. Not(`!`) operatörü `false` değerini  `true` yapacak ve `if` bloğu çalışacaktır.
+> + Eğer `ottoman` adında kullanıcı var ise; `if` bloğu `true` olacaktır. Not(!) operatörü `true` değerini `false` yapacak sonuç olarak `else`  bloğu çalışacaktır.
+
 
 ### AND ve OR operatörleri
 
@@ -763,7 +806,7 @@ fi
 > 3. Yukarıdaki örnek 1 de olduğu gibi `[[ ... ]]` komut `||` operatörünü desteklemektedir.  Ayrıca dikkat ederseniz test komutları olan `-gt` ve `-lt` desteklemektedir.
 
 ### Aritmatik İşlemler
-#### Tam Sayılar(Integer) ile
+####  1. Tam Sayılar(Integer) ile
 ###### Söz dizimi - Syntax:
 ```bash
 ((expression))
@@ -776,6 +819,49 @@ echo $((1+1))                            # Çıktı: 2
 ```
 > **Explanation:**
 > Burada dikkat etmemiz gereken nokta çift paranteze alma olmalıdır. Ayrıca terminal de direk de deneyebilirsiniz: `$ echo $((1+1))` 
+
+> [!TIP]
+> - Bash script'te **`(( ... ))`** yapısı;
+> - **Aritmetik İşlemler**: Toplama, çıkarma, çarpma, bölme gibi matematiksel işlemleri yapmak.
+>- **Karşılaştırmalar**: Sayısal değerlerin karşılaştırılması (eşitlik, büyüklük, küçüklük gibi).
+>- **Değişken Değerlerini Güncelleme**: Değişkenlerin değerini güncellemek ve arttırma/azaltma işlemleri yapmak. `((i++))`,  `((x=x+1)), ((x+=1))` gibi.
+
+> [!INFO]
+> 1. `$(( ... ))` Yapısı
+> 	- **Sonucu döndürür**: `echo` komutuyla veya bir değişkenle kullanılabilir.
+> 	- **Daha çok çıktı üretmek için kullanılır**.
+> 1. `(( ... ))` Yapısı
+> 	- **Sonuç döndürmez**, ancak değişkenlerin değerini günceller.
+> 	- Çıktı üretmez, sadece değişkenler üzerinde işlem yapar.
+> 	- Bir koşul ifadesi içinde (örneğin `if`, `while`) kullanılabilir.
+
+|    Yapı    |                      Amacı                       |                    Kullanım Alanı                     |                    Sonuç                    |
+| :--------: | :----------------------------------------------: | :---------------------------------------------------: | :-----------------------------------------: |
+| `$((...))` |          Değer üretir ve çıktı döndürür          |        Değişken atamak, `echo` ile çıktı almak        | Sonucu bir değişkene atar veya ekrana basar |
+| `((...))`  | Aritmetik işlemi çalıştırır ve exit status döner | Değişkenin değerini güncellemek, koşullarda kullanmak | Çıktı üretmez, sadece exit status döndürür  |
+
+###### Örnek a: `(( ... ))` yapısı
+```bash
+#!/usr/bin/bash
+
+a=5
+b=3
+((a += b))
+echo "a: $a"
+```
+> **Explanation:**
+> `((a+=b))` aritmetik işlemi yapar ve değeri `a` değişkeni üzerinde ekler.
+###### Örnek b: `$(( ... ))` Yapısı
+```bash
+#!/usr/bin/bash
+
+a=7
+b=6
+sonuc=$((a+b))
+echo "Sonuc: $sonuc"
+```
+> **Explanation:**
+> `a` ve `b` toplama işlemini yapar ve `sonuc` adındaki değişkene atar.
 
 ###### Örnek 2: Değişkenler ile Toplama:
 ```bash
@@ -816,7 +902,7 @@ echo "Kalan  : $(expr $sayi1 % $sayi2)"
 > `((i++))` veya `i=$((i+1))` döngülerde `i` değişkenini her döngüde artırır.
 > `((i--))` veya `i=$((i-1))` döngülerde `i` değişkenini her döngüde azaltır.
 
-#### Ondalıklı(Float) Sayılar ile
+#### 2. Ondalıklı(Float) Sayılar ile
 
 > [!INFO] Bilgi:
 > Ondalıklı sayılarla işlem yapabilmemiz için `bc` komutunu kullanıyoruz:
@@ -869,6 +955,85 @@ echo "scale=4; $sayi2^3" | bc -l           # Çıktı: 27            # 2
 > **Explanation:**
 > 1. `bc -l` komutundaki `-l` parametresi matematik kütüphanesini kullanmamıza izin vermektedir. Böylelikle sqrt fonksiyonundan faydalanabiliyoruz. 
 > 2. Yine burada da `bc -l` komutundaki `-l` parametresi sayesinde sayi2 içerisindeki 3'ün küpünü alabildik.
+
+#### 3. Let Komutu:
+###### Tanım:
++ Bash script'te **`let`** komutu, aritmetik işlemler yapmak için kullanılan eski ve basit bir yapıdır.
++ **`let`** komutu, değişkenlerin değerlerini güncellemek veya aritmetik hesaplamalar yapmak için kullanılır.
++ Aslında, **`(( ... ))`** yapısının alternatiflerinden biridir.
++ `let` komutu, **değişken isimlerinin başında `$` işareti kullanmanıza gerek kalmadan** aritmetik işlemleri yürütür ve sonuçları değişkenlere atar.
++ Ancak, modern Bash de genellikle **`(( ... ))`** kullanımı daha yaygındır, çünkü daha esnektir ve daha okunabilir kod yazmanıza olanak tanır.
+###### Örnek 1:  Temel Kullanımı
+```bash
+#!/usr/bin/bash
+
+let "toplam = 5 + 4"
+echo "Sonuc: $toplam"
+```
+> **Explanation:**
+> + İki değeri toplar ve toplam değişkenine atar.
+###### Örnek 2: Değişkenin Değerini Artırma veya Azaltma
+```bash
+#!/usr/bin/bash
+
+let "x = 10"
+echo "x'in ilk değeri: $x"             # Çıktı: x'in ilk değeri: 10
+
+let "x++"
+echo "x'in değeri: $x"                 # Çıktı: x'in değeri: 11
+
+let "x--"
+echo "x'in yeni değeri: $x"            # Çıktı: x'in yeni değeri: 10
+```
+> **Explanation:**
+> + `x++` x'in değerini bir artırır ve `x--` x'in değerini bir azaltır.
+> + C programlamadan gelen bir özellik.
+
+###### Örnek 3: Birden Fazla Aritmetik İşlem
+```bash
+#!/usr/bin/bash
+
+let "a = 5"
+let "b = 8"
+let "c = a * b + 2"
+echo "c'in değeri: $c"          # Çıktı: c'in değeri: 42
+```
+
+###### Örnek 4: if ile birlikte kullanma
+```bash
+#!/usr/bin/bash
+
+let "a = 5"                             # 1
+let "b = 3"
+
+if let "a >= b"; then                   # 2
+	echo "a, b'den büyüktür."
+else
+	echo "a, b'den küçük veya eşittir."
+fi
+```
+> **Explanation:**
+> 1. `let` komut ile *değişken* tanımlayabiliyoruz.
+> 2. `if` bloklarında koşul kontrolleri içinde kullanabiliyoruz.
+##### `let` ve `(( ... ))` Karşılaştırması
+- Bash'te modern kullanımda, **`(( ... ))`** yapısı, **`let`** komutuna göre daha yaygın ve esnek bir yöntemdir.
+- `(( ... ))` kullanımı, özellikle büyük ve karmaşık ifadelerde daha okunabilir kod yazmanızı sağlar.
+###### Örnek 1: let ile
+```bash
+#!/usr/bin/bash
+
+let "a = 5 + 6"
+echo "a'ın değeri: $a"            # Çıktı: a'ın değeri: 11
+```
+
+```bash
+#!/usr/bin/bash
+
+(( a = 5 + 6))
+echo "a'ın değeri: $a"            # Çıktı: a'ın değeri: 11
+```
+> **Explanation:**
+> + İki kodu karşılaştırınız.
 
 ### Case Kullanımı
 ```bash
@@ -925,6 +1090,25 @@ esac
 > 3. Özel bir karakter örneğin `},[, % veya +`  girildiğinde bu blok çalışacaktır.
 > 4. `*` da ise hiç bir blok çalışmadığında çalışacak olan bloktur.
 > Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=HDxzd__1rTs&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=14)
+
+###### Örnek 3: `|` kullanımı
+```bash
+#!/usr/bin/bash
+
+ay=$(date +%m)                                 # 1
+
+case $ay in
+	2 )
+		echo "Bu ay 28 gündür. 4 yılda 29 gündür.";;
+	04|06|09|11 )                              # 2
+		echo "Bu ay 30 gündür.";;
+	* )
+		echo "Bu ay 31 gündür.";;
+esac
+```
+> **Explanation:**
+> 1. `date` komutun `+%m` format yapısını kullanarak o zaman dilimin tarihini `ay` adlı değişkene atıyoruz.
+> 2. `04|06|09|11` yapısında; Pipe(`|`) simgesin `case` için özel anlamı var. Bu simgenin anlamı *veya* denilebilir. `ay` değişkenin değeri, 04 veya 06 veya 09 veya 11 olursa `case`'in bu bloğu çalışacaktır.  
 
 ### Diziler(Arrays)
 
@@ -1636,7 +1820,7 @@ $ cat /usr/share/dict/words | grep "^kar*"
 > + Yıldız(`*`) kendine önce olan veya olmayan harfleri arar.
 > + **UYARI:** Yıldız(`*`) ifadesi meta karakter için farkı anlamı var ama *regex* için farklı bir anlamı var.
 
-#### Koşullu ifadelerde RegEx
+##### Koşullu ifadelerde RegEx
 ###### Tanım:
 + Bash, RegEx kontrolleri için `[[ ... ]]` yapısını ve `=~` operatörünü destekler.
 + `[[ ... ]]` yapısı `test` komutundan daha gelişmiş yapıya sahiptir. 
@@ -1673,3 +1857,88 @@ fi
 > + `*` işareti önündeki harflerden sıfır veya daha fazlası ile eşleşme yapar.
 > + `[0-9]`: 0'dan 9'a kadar her hangi bir sayı olabilir.
 > + `+` işareti `*` işaretine benzer ama en az bir sayı olmak zorundadır.
+
+##### POSIX Karakterleri
+
+- `[:blank:]`: boşluk karakterlerini ifade etmek için kullanılır.
+- **`[:space:]`**: Tüm boşluk karakterlerini (tab, newline, space vs.) içerir.
+- **`[:alnum:]`**: Alfabetik harfler ve sayılar (a-z, A-Z, 0-9).
+- **`[:digit:]`**: Sadece rakamlar (0-9).
+- **`[:alpha:]`**: Sadece alfabetik harfler (a-z, A-Z).
+
+###### Örnek 1: `[:blank:]` kullanımı
+```bash
+$ echo "Merhaba     Dünya" | grep -P "[[:blank:]]"
+```
+> **Explanation:**
+> + **`[:blank:]`** karakter sınıfı kullanılarak metindeki **boşluk veya tab karakterleri** aranır.
+> + Eğer satırda boşluk karakteri varsa `grep` bunu bulacaktır.
+
+### Hata Ayıklama (Debugging)
++ Bash script'te **hata ayıklama (debugging)**, bir script’in çalışma sürecini adım adım izleyerek, hataların veya beklenmeyen davranışların nedenini bulmaya yönelik bir yöntemdir.
++ Bash script'lerde hata ayıklama, script'in nasıl çalıştığını daha iyi anlamaya ve yanlış sonuçlara neden olan hataları düzeltmeye yardımcı olur.
+##### bash -x ile
+###### Örnek 1: Temel Kullanımı
+```bash
+#!/usr/bin/bash                       # 1  alternatif: #!/usr/bin/bash -x
+
+sayi=0
+
+while ((sayi <= 10); do                # 2
+	sleep 3
+	echo "Sayı: $sayi"
+	((sayi++))
+done
+```
+
+**Terminal:**
+```shell
+$ bash -x ./scriptFile.sh
+```
+
+**Çıktı:**
+```shell
++ sayi=0
+./let_komutu.sh: line 40: syntax error near unexpected token `do'
+./let_komutu.sh: line 40: `while ((sayi <= 10); do'
+```
+
+> **Explanation:**
+> 1.  Eğer `#!/usr/bin/bash` yerine `#!/usr/bin/bash -x`  komutu yazarsanız, direk olarak bash script'i `./scriptFile.sh` ile çalıştırabilirsiniz.
+> 2. `while` komutu yazılırken `)` eksik yazılarak hata oluşturulmuştur. Bundan dolayı `Çıktı` da `sayi=0` ekrana basmış daha sonrasında yani `while` komutunda hata vermiştir.
+
+##### set -x ve set +x ile
+###### Örnek 1.1: Temel Kullanımı
+```bash
+#!/usr/bin/bash
+
+sayi=0
+set -x                        # Komut izlemeyi açar.
+while ((sayi <= 10); do       
+	sleep 3
+set +x                        # Komut izlemeyi kapatır.
+	echo "Sayı: $sayi"
+	((++sayi))
+done
+```
+
+**Terminal:**
+```shell
+$ ./scriptFile.sh
+```
+
+**Çıktı:**
+```shell
++ (( sayi <= 10 ))
++ sleep 3
++ set +x
+Sayı: 0
+```
+> **Explanation:**
+> + `set -x` ile `set +x` arasında aldığımız yerleri hata ayıklama(debugging) yapacak ama diğer dışarda kalan kodları hata ayıklamaya girmeyecektir.
+
+
+
+
+
+

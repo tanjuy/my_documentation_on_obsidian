@@ -76,16 +76,126 @@ fi
 > 3. `-f` parametresi dosya olup olmadığına bakar.
 > 4. `-e` parametresi dosya veya dizin olup olmadığına bakar.
 
-###### Uygulama 4: Positional Arg. - Aritmatik İşlem
+###### Uygulama 4: Positional Arg. - Aritmatik İşlem - fonksiyon
+```bash
+#!/usr/bin/env bash
+
+function dort_islem() {          # 1
+    x=$1
+    y=$2
+
+	topla=$((x+y))               # 2
+    cikarma=$((x-y))
+    carpma=$((x*y))
+    bolme=$((x/y))
+
+    echo "$1+$2=$topla"
+    echo "$1-$2=$cikarma"
+    echo "$1x$2=$carpma"
+    echo "$1/$2=$bolme"
+}
+
+x=$1                             # 3
+y=$2
+
+if [ $# -lt 2 ]; then            # 4
+    echo "Lütfen 2 adet sayı giriniz"
+    echo "Kullanım şekli: $0 sayı1 sayı2"
+	exit 1
+
+elif ! [[ "$x" =~ ^[[:blank:]]*[0-9]*[[:blank:]]*$ ]]; then      # 5
+    echo "Hatalı sayı: $x"
+    exit 2
+
+elif ! [[ "$y" =~ ^[[:blank:]]*[0-9]*[[:blank:]]*$ ]]; then      # 5
+    echo "Hatalı sayı: $y"
+    exit 3
+
+else
+	dort_islem $x $y        # 6
+fi
+```
+
+```bash
+$ ./app4.sh 10 5
+```
+> **Explanation:**
+> 1. `dort_islem` adında fonksiyon tanımladık
+> 2. Aritmetik işlemlerin nasıl yapıldığına dikkat ile inceleyiniz.
+> 3. Positional Arg. kullanarak kullanıcıdan girdi alıyoruz.
+> 4. `test` komutu ile girilen argüman sayısını kontrol ediyoruz.
+> 5. `RegEx` ile birinci argümanın ve ikinci argümanın doğru girildiğini kontrol ediyoruz.
+> 6. `dort_islem` adındaki fonksiyonu çağırıp ve parametrelerini fonksiyon veriyoruz. 
+
+###### Uygullama 3: Faktöriyel Hesaplama
 ```bash
 #!/usr/bin/bash
 
-x="$1"
-y="$2"
+function faktoriyel() {          # 1
+    ((i=1))
+	((faktoriyel=1))
+    while ((i<=$1)); do          # 2 
+        ((faktoriyel*=i))        # eş değeri: ((faktoriyel=faktoriyel*i))
+	    ((i++))
+	done
+}
 
-topla=$((x+y))
-echo "$x + $y = $topla"
+
+sayi="$1"
+if [ $# -lt 1 ]; then            # 3
+    echo "Sayı girmediniz"
+    echo "Kullanım şekli: $0 sayi"
+	exit 1
+
+elif [[ "$sayi" =~ ^[[:blank:]]*[[:digit:]]*[[:blank:]]*$ ]]   # 4
+then
+	faktoriyel $sayi            # 5
+
+else
+    echo "Hatalı sayı: $sayi"
+    exit 1
+fi
+
+echo "$sayi faktoriyel: $faktoriyel"     # 6
 ```
 > **Explanation:**
-> Terminal: `./app4.sh 4 5` ile değerleri girilir. Toplam sonucu ekrana basar.
+> 1. `faktoriyel` adında fonksiyon tanımladık ve görevi faktöriyel hesaplama yapıyor.
+> 2. Matematiksel işlemler kullandığımız için `((..))` yapısını kullandık.
+> 3. `test` komut ile positional arg. sayısını kontrol ediyoruz.
+> 4. Girilen position arg. sayısını `regex` ile doğru yazıldığını kontrol ediyoruz.
+> 5. `$faktoriyel` değişkeni ile sonucu ekrana basıyoruz ama dikkat edilmesi gereken nokta bu değişken fonksiyon içerisinde tanımlandığıdır yani değişken global'dir.
 
+###### Uygulama 4: Sayı Tahmin Oyunu
+```bash
+#!/usr/bin/bash
+
+random=$(( ($RANDOM%100)+1 ))                  # 1
+
+echo "1 ile 100 arasında (1 ve 100 dahil) bir sayı tuttum"
+echo "Bil bakalım..."
+
+echo -e "1 ile 100 arasında sayı giriniz: \c"; read tahmin
+let tahminSayisi=1                             # 2
+
+while ((tahmin != random)); do
+
+	if ((tahmin > random)); then
+		echo "Daha küçük bir sayı giriniz!"
+		
+	elif ((tahnin < random)); then
+		echo "Daha büyük bir sayı giriniz!"
+	fi
+	echo -e "1 ile 100 arasında sayı giriniz: \c"; read tahmin
+	let tahminSayisi++
+done
+
+echo "${tahminSayisi}. defada bildiniz."
+
+if [ $tahminSayisi -lt 6 ]; then
+	echo "TEBRIKLER"
+fi
+```
+> **Explanation:**
+> 1. `$RANDOM` bir sistem değişkeni ve rastgele sayılar üretir ama bu sayılar genelde 3 ile 5 veya daha fazla olabilir bu yüzden `%` operatörü ve 100 ile kalanını alarak 0-99 arasında değerler üretmesini sağlıyoruz. +1 ile aralığı 1-100 arasına çekiyoruz.
+> 2. `let` ile değişken tanımlanmıştır. `let` komutu değişken tanımlama, aritmetik işleri hesaplama ve `if` de koşul durumları oluşturma gibi görevleri mevcuttur.
+> 	+ `(( ... ))` ile de aynı görevleri yapar.
