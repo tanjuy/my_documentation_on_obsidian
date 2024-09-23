@@ -1,4 +1,13 @@
-### Komut Modu
+## Komut Modu
+
+### Tuş Kombinasyonları
+##### Silme:
+1. `d^` : İmlecin bulunduğu noktadan en başına kadar siler.
+2. `d$`: İmlecin bulunduğu noktadan en sonuna kadar siler.
+3. `dd`: İmlecin bulunduğu tüm satırı siler.
+
+##### Kopyalama:
+1. `yy` : 
 
 #### set komutu:
 ###### Örnek 1: clipboard'dan vim'e kopyalama

@@ -149,6 +149,11 @@ $ git commit -m "message"
 
 #### Branch Oluşturma:
 
+> [!TIP]
+> +  Genellikle yazılım da özellik için yeni bir branch açıldığında isimlendirme `feat-featureName`  şeklinde olur
+> + `featureName` branch için açılacak özellik için verilecek isimdir. Örneğin; `feat-login` veya feat-css gibi.
+
+
 ```shell
 $ git branch dev
 ```
@@ -168,7 +173,7 @@ $ git branch
 ```
 > **Explanation:**
 > - Oluşturmuş olduğumuz branch'leri görmek için veya listelemek için bu komut kullanılabilir.
-> - `-a` parametresi kullanılırsa hem uzaktaki hemde yereldeki branch'leri listeler.
+> - `-a` parametresi kullanılırsa *hem uzaktaki hemde yereldeki branch'leri listeler.*
 
 #### Branch'ler Arasında Geçiş:
 ```shell
@@ -184,12 +189,17 @@ $ git switch dev
 > - Eğer `main` branch de iseniz, bu komut ile dev branch'ine geçersiniz.
 > - `switch` git'e yeni gelen bir komuttur bunun nedeni `checkout` bir fazla görevi var ilken `switch` tek görevi branch'ler arasında geçiştir.
 
+
+> [!CAUTOIN]
+> + Eğer **Working Directory** alanında oluşturulmuş bir dosya var iken `git switch dev` komut ile başka branch'e geçiş yapmaya çalışırsak hata verecektir.
+> + Eğer oluşturmuş olduğumuz dosyayı **stage(index) area** eklersek ve `git switch dev` komut ile başka branch'e geçiş yaparsak, geçiş yaptığımız branch'e oluşturduğumuz dosyada gelecektir.
+
 #### Branch'leri Birleştirme:
 ```shell
 $ git merge dev 
 ```
 > **Explanation:**
-> - Eğer `git branch` komut verirsek ve komut bize main branch'ini verirse yukarıda komut uygulayabiliriz.
+> - Eğer `git branch` komut verirsek ve komut bize *main* branch'ini verirse yukarıda komut uygulayabiliriz.
 > - Bu komut `main` branch'i ile `dev` branch'ini birleştirir.
 
 
@@ -200,6 +210,74 @@ $ git merge dev
 > ```
 > Birleştirme aşamasında branch'ler arasında bir fark var demektir.
 
+##### Fast-forward:
+
+> [!NOTE]
+> + **main branch:**  commit_1m----commit_2m-----------------------------------commit_3m----
+> + **fast branch:**  -----------------------------------commit_1f-----commit_2f--------------------
+> + **Nihai Sonuc:** commit_1m----commit_2m-----commit_3m----commit_1f----commit_2f---
+> + main branch'deki dosyalar: html ve css  --- fast branch'deki dosyalar: javascript
+> + Eğer fark etiyseniz fast branch'inde hem dosya farklı hem de commit aralığı farklı yani main branch'inde yapılmayan commit fast branch'inde yapılmıştır.
+
+###### Örnek: Fast-forward Çıktısına
+```shell
+╭─ottoman@ottoman ~/gitDerleri ‹main›
+╰─$ git merge fastForward
+Updating 8de5f50..cca1102
+Fast-forward
+ fast.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+ create mode 100644 fast.txt
+```
+> **Explanation:**
+> + Dikkat ederseniz git bize çıktısında bu işlemin bir *Fast-forward* olduğunu sölüyor.
+
+##### Merge Conflict:
+
+> [!NOTE]
+> + Git'te **merge conflict** (birleştirme çakışması), iki dalı birleştirirken Git'in otomatik olarak birleştiremeyeceği çelişkili değişiklikler olduğunda ortaya çıkar.
+> + Yani, iki dalda aynı dosyanın aynı bölümleri üzerinde farklı değişiklikler yapılmışsa Git bu durumu çözemez ve birleştirme işlemi kullanıcı müdahalesi gerektirir.
+
+###### Örnek 1: main branch ve feat-greeting branch
+**main branch ve selamlama.py dosyası**
+```python
+#!/usr/bin/python3
+
+print("Hello, world")
+```
+
+**feat-greeting branch ve selamlama.py dosyası**
+```python
+#!/usr/bin/python3
+
+print("Merhaba, Git")
+```
+> **Explanation:**
+> + Eğer bu 2 branch'i birleştirdiğimizde, git conflict hatası ekrana basıyor.
+> 	 ```
+> 	 Auto-merging test.txt
+ >	CONFLICT (content): Merge conflict in test.txt
+ >	Automatic merge failed; fix conflicts and then commit the result.
+> 	 ```
+> + Her iki branch de aynı dosya mevcut ve aynı dosya üzerinde değişiklik yapılıyor. Bundan dolayı git de kafa karışıklığı oluşturuyor ve bu işi otomatik gerçekleşemeyeceğini bunun manuel yapılmasını söylüyor.
+> + Git'in kendi mesajında da söylediği gibi;
+> 	1. Dosyayı kendi talebinize uygun olarak düzenliğin
+> 	2. `git add fileName` komut ile index(stage) area gönderin.
+> 	3. `git commit -m "short message` komut ile commit ediniz.
+
+#### Takım Çalışması (contributor):
+###### Temel Kullanımı:
+```shell
+git fetch
+```
+> **Explanation:**
+>  + Eğer bir projede birden fazla gelişici var ise ve bu geliştiriciler belli aralıklar ile `git push` ile `repo`'ya kod gönderiyor ise, bundan dolayı çakışmalar olacaktır.
+>  + `git fetch` ile `repo`'dan kodlar çekilir ve  daha sonrasında `git merge` ile birleştirilir. Böylelikle çakışmaları manüel olarak düzenleyebiliriz.
+
+
+> [!CAUTION]
+> + **`git fetch`**: Sadece uzak depodaki değişiklikleri indirir, ancak mevcut çalışma dalınıza bu değişiklikleri birleştirmez.
+> + **`git pull`**: Hem uzak depodaki değişiklikleri indirir hem de bu değişiklikleri yerel dalınıza birleştirir (fetch + merge yapar).
 
 ## Yerel Depoda İşlemler(Local Repository)
 
@@ -234,6 +312,47 @@ directory/
 > 	+ git'in takibinde çıkarmak için: `git rm --cached <file_name>` veya 
 > 	+ tüm dosyaları çıkarmak için: `git rm -r --cached` .
 
+#### Git HEAD:
+* Git'te **HEAD**, çalışma dizininde hangi commit'in aktif olduğunu belirten bir referanstır.
+* Yani, HEAD, *Git'te şu anda hangi dalda çalıştığınızı ve bu dalın en son commit'ini işaret eder.* Genellikle bir dalın en son commit'ini gösterir
+* **Normal durumda**: HEAD genellikle bir dalı işaret eder, yani `HEAD` bir dal adıyla eşleştirilir, ve o dalın en son commit'ini gösterir.
+* **Detached HEAD (kopuk HEAD) durumu**: Eğer doğrudan bir commit'e (hash'e) checkout yaparsanız, HEAD artık bir dala değil, doğrudan o commit'e işaret eder. - Bu durumda HEAD kopuktur ve bu şekilde yapılan değişiklikler bir dala bağlı olmadığı için dikkatli olunması gerekir.
+
+#### Git checkout:
++ Git'te **branch**, **commit**'ler, dosyalar veya dizinler arasında geçiş yapmanızı sağlayan bir komuttur.
++ Farklı bir dal veya commit'e geçmek, belirli bir dosyanın daha eski bir versiyonuna dönmek veya yeni bir dal oluşturmak gibi işlemler için kullanılır.
+
+###### 1. Branch Değiştirme:
+```shell
+$ git checkout dev
+```
+>**Explanation:**
+>+ Bulunduğu branch'den `dev` branch'ine geçiş yapar.
+
+
+> [!WARNING]
+> + `git checkout`'un `branch` değiştirme işlevi, Git 2.23 sürümünden itibaren `git switch` komutuyla değiştirilmiştir.
+> + Ancak, `checkout` hâlâ kullanılabilir.
+
+###### 2. Yeni Branch Oluşturma ve Ona(`-b`):
+```shell
+$ git checkout -b prod
+```
+>**Explanation:**
+>+ Yeni bir dal oluşturup aynı anda o dala geçmek için `-b` seçeneğiyle `git checkout` kullanılabilir.
+>+ **Alternatif:** `git switch -c prod`
+
+###### 3. Belirli Bir Commit veya Tag'e Geçme:
+```shell
+$ git checkout c107365
+```
+> **Explanation:**
+> + Belirli bir commit'in içeriklerine bakmak veya o commit'e geçiş yapmak için commit hash'i ile `checkout` yapılabilir.
+> + `c107365` hash'ine sahip commit'e geçiş yapar.
+> + Ancak bu, **"detached HEAD"** durumuna yol açar; yani şu an aktif olan HEAD bir *branch* üzerinde değil, belirli bir *commit* üzerindedir.
+#### Git diff:
+
+
 #### Git rm
 ###### Örnek 1: Temel Kullanımı:
 ```shell
@@ -260,7 +379,6 @@ $ git rm -r --cached directoryName
 > 2. **Kullanıcı (Global) Düzey**: Kullanıcı düzeyindeki ayarlar, sistem düzeyindeki ayarların üzerine yazar.
 > 3. **Sistem (System) Düzey**: En düşük önceliğe sahiptir ve tüm kullanıcılar için geçerlidir.
 
-#### Git config parametreleri:
 ###### Örnek 1:  --list  
 ```shell
 $ git config --list
@@ -294,7 +412,24 @@ $ git config --local user.name "username@gmail.com"
 ##### Git config Özelleştirme:
 **İngilizce:** [Basic Client Configuration](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration)
 
-###### Örnek 1: core.editor (set)
+###### 1. branch.`<branch-name>`.merge:
+```shell
+$ git config branch.main.merge "main"
+```
+> **Explanation:**
+> + Git'in, belirli bir dalın hangi uzaktaki dal (remote branch) ile birleştirileceğini tanımlar.
+> + Örneğin, `branch.main.merge` ayarı, `main` dalının hangi uzaktaki dal ile birleştirileceğini tanımlar.
+> + Bu ayar, genellikle `git pull` komutunun nasıl çalışacağını belirlemek için kullanılır.(**Kullanım amacı**)
+> + Eğer `branch.main.merge` ayarı belirli bir uzaktaki dalı işaret ediyorsa, `git pull`, `git push` ve `git fetch` komutu çalıştırıldığında, `main` dalı otomatik olarak bu ayar ile tanımlanan uzak daldan değişiklikleri birleştirir.(**Kullanım amacı**)
+
+```conf
+[branch "main"]
+    remote = origin
+    merge = refs/heads/main
+```
+> **Explanation:**
+> + `.git/config` dosyasındaki bir yapılandırma örneği verilmiştir.
+###### 1.  core.editor (set)
 ```bash
 $ git config --global core.editor "vim"
 ```
@@ -302,12 +437,20 @@ $ git config --global core.editor "vim"
 > *  Eğer `git` düzenleyici(editor) kullanması gerektiğinde burada ayarlanmış olan `vim` ile açılacaktır.
 > * Daha fazla bilgi için [Setup and Config](https://git-scm.com/book/en/v2/Appendix-C%3A-Git-Commands-Setup-and-Config) bakınız.
 
-###### Örnek 1.1: core.editor (get)
+###### 1.1. core.editor (get)
 ```shell
 $ git config --global core.editor
 ```
 > **Explanation:**
 > * `core.editor` ayarlanmışsa ekran değerini basar.
+
+###### 2. remote.origin.url
+```shell
+$ git config --local remote.origin.url "ssh url veya https url"
+```
+> **Explanation:**
+> + Git repo'unuza giderek `<> Code` yeşil butonu tıklayarak, ssh url veya https url kopya alarak yeniden URL düzenleyebilirsiniz. 
+
 #### Git status:
 ###### Örnek 1: Temel Kullanımı
 ```shell
@@ -360,13 +503,66 @@ $ git branch -d prod
 > + Bu işlem yerel depoda gerçekleşecektir ama 
 > + eğer uzak depolarda(remote repository) için [[Git Dersi#Uzak Depoda İşlemler(Remote Repository)#Örnek 1 origin de branch silme|Uzak Depoda Branch Silme]] bakınız.
 
+#### Git stash:
++ Git'te **stash**, üzerinde çalıştığınız, henüz commit'lenmemiş değişiklikleri geçici olarak kaydederek (yani "stash"leyerek), çalışma dizininizi temizlemenize ve başka bir dala veya göreve geçiş yapmanıza olanak tanıyan bir özelliktir.
++ Örneğin, bir dosya üzerinde değişiklik yapıyorsunuz ve bu değişiklikleri henüz commit'lemek istemiyorsunuz, ama acilen başka bir dalda çalışmanız gerekiyor.
++ Bu durumda, `stash` komutunu kullanarak geçici olarak bu değişiklikleri saklayabilirsiniz, dal değiştirip gerekli işlemi yaptıktan sonra da bu değişiklikleri geri getirebilirsiniz.
++ `stack` Türkçe karşılığı saklamak, gizlemek anlamındadır.
+
+###### Değişikleri saklamak
+```shell
+$ git stash
+```
+> **Explanation:**
+> + Üzerinde çalıştığınız değişiklikleri saklar ve çalışma dizinini temizler, yani working directory'i temizler veya saklar.
+
+###### Stash'leri listelemek
+```shell
+$ git stash list
+```
+> **Explanation:**
+> + Daha önce `stash`lenen değişikliklerin listesini gösterir. Her stash bir isimle (örneğin, `stash@{0}`) etiketlenir.
+
+###### Stash'lenen Değişiklikleri Geri Yüklemek:
+```shell
+$ git stash apply
+```
+> **Explanation:**
+> + en son `stash`lenen değişiklikleri geri getirir.
+> + Ancak, `stash`lenen değişiklikleri listeden silmez, sadece geri yükler.
+
+```shell
+$ git stash apply stash@{1}
+```
+> **Explanation:**
+> + Eğer belirli bir stash'i geri yüklemek istiyorsanız, bu şekilde belirtebilirsiniz.
+###### Stash'i Geri Yükleyip Listeden Silmek:
+```shell
+$ git stash pop
+```
+> **Explanation:**
+> + En son yapılan stash'i geri yükler ve aynı zamanda stash listesinden kaldırır.
+
+###### Belirli Bir Stash'i Silmek:
+```shell
+$ git stash drop stash@{0}
+```
+> **Explanation:**
+> + Belirtilen stash'i listeden siler.
+
+###### Tüm Stash'leri Silmek:
+```shell
+$ git stash clear
+```
+> **Explanation:**
+> + Tüm stash'leri temizler yani siller.
 #### Git log:
 
 > [!TIP] 
 > + Git'te **`HEAD`**, şu an **aktif olan branch'te veya commit'te** bulunduğunuz yeri temsil eden bir referanstır.
 > + `HEAD`, projenizde hangi branch'te çalıştığınızı ya da belirli bir commit'i işaret eden göstergedir.
 
-###### Örnek 1: Temel Kullanımı
+###### 1. Temel Kullanımı(local):
 ```bash
 $ git log
 ```
@@ -374,7 +570,14 @@ $ git log
 > 1. Mevcut dalda yapılan tüm commit'leri sıralar
 > 2. *Commit hash değeri, Yazar(Author), Tarih(Date), Commit mesajı* ile ekrana basar.
 
-###### Örnek 2: --oneline parametresi
+###### 1a. Temel Kullanımı(remote):
+```shell
+$ git log origin/main
+```
+> **Explanation:**
+> + Uzak daldaki commit'leri görmek için şu komutu kullanabilirsiniz.
+> + `origin/main` dalındaki commit'leri listeler. Eğer başka bir dalı incelemek istiyorsanız, dal adını değiştirerek kullanabilirsiniz.
+###### 2. --oneline parametresi
 ```shell
 $ git log --oneline
 ```
@@ -552,6 +755,17 @@ $ git commit
 > **Explanation:**
 > - Eğer `-m` parametresini kullanmanda çalıştırsak, git ayarlanmış düzenleyici(editor) açılacaktır.
 
+###### Örnek 3: -am parametresi
+```shell
+$ git commit -am "short explanation about commit"
+```
+> **Explanation:**
+> 1. `-a` : Daha önce Git tarafından takip edilen (yani, Git'in izlediği) dosyalardaki tüm değişiklikleri otomatik olarak sahneye (stage) ekler. Yeni dosyalar sahneye eklenmez; sadece daha önce commit'lenmiş dosyalardaki değişiklikler eklenir.
+> 	- **`-a` parametresi yalnızca takip edilen dosyaları etkiler**: Yani, henüz Git'e eklenmemiş (yeni olan) dosyalar bu komutla sahneye eklenmez. Yeni dosyaları commit'lemek için önce `git add <dosya>` komutunu kullanmanız gerekir.
+> 2. `-m "message"`: Commit mesajını doğrudan komut satırında belirtmenizi sağlar.
+> 3. Özetlemek gerekirse; hem `git add .` hem de `git commit -m "message"` aynı anda yapar. 
+
+
 #### Git revert:
 ###### Örnek 1: Basit Kullanımı
 ```shell
@@ -607,10 +821,30 @@ $ git reset --hard 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125
 * Git'te **`origin`**, yerel (local) repository'nizin bağlantılı olduğu **uzaktaki (remote) repository'nin** varsayılan adıdır.
 * Git, bir projeyi yerel bilgisayarınıza kopyalarken uzaktaki bir sunucuda veya GitHub, GitLab gibi servislerde barındırılan repository'ye bağlanır.
 * Bu uzaktaki repository'ye **remote** denir ve varsayılan ismi **`origin`** olarak atanır.
+
+
+#### Git fetch:
+###### Temel Kullanımı:
+```shell
+$ git fetch 
+```
+> **Explanation:**
+> + Git'te uzak bir depodaki (`remote`) değişiklikleri yerel depoya indirmenizi sağlayan bir komuttur.
+> + Ancak bu komut, indirilen değişiklikleri mevcut çalışma dalınıza (branch) otomatik olarak birleştirmez.
+> + Yani, uzak depodan (örneğin, `origin`) en son commit'leri ve referansları (branch, tag vb.) alır, ancak bunları otomatik olarak yerel dalınıza eklemez.
+> + Bu sayede uzak depodaki güncellemelerden haberdar olabilir ve daha sonra bu değişiklikleri yerel deponuza birleştirmeyi (merge) veya yeniden uygulamayı (rebase) seçebilirsiniz.
+
+###### --prune parametesi:
+```shell
+$ git fetch --prune
+```
+> **Explanation:**
+> + Uzak depoda silinen dalları da yerel deponuzdan temizlemek için `--prune` seçeneği kullanılır.
+
 ##### Git remote:
 
 ##### Git push:
-###### Örnek 1: origin de branch silme
+###### 1. origin de branch silme:
 ```shell
 $ git push origin --delete <branch-name>
 ```
@@ -619,6 +853,10 @@ $ git push origin --delete <branch-name>
 > + Bu komut `prod` adındaki uzak depodaki branch'i silecektir.
 > + `origin` burada varsayılan uzaktaki repository'nin adıdır.
 
+###### 2. push -u parametresi:
+```bash
+$ git push -u origin main
+```
 ### Kaynaklar
 + [Official Git Documantion](https://git-scm.com/book/en/v2)
 + [Resmi Git Belgesi](https://git-scm.com/book/tr/v2)

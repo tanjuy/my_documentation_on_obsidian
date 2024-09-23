@@ -1,6 +1,6 @@
 #Bash_Script 
 
->[!INFO] Bilgi:
+>[!INFO]
 > Bash açılımı:  *Bourne Again Shell*
 > Ubuntu da yüklü olan Shell'ler `/etc/shells` dosyasında mevcuttur.
 >``` bash
@@ -24,6 +24,9 @@ echo "Merhaba Dünya"    # 1
 > 	+ Uyarı 2'deki işlemleri geçekleştiriyoruz.
 > 	+ Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=CGJ8XZf8nPc&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=2)
 
+> [!TIP]
+> `#!` gibi başlayan komutlar `shebang` nedir. Örneğin; yukarıda olduğu gibi `#!/usr/bin/bash`
+
 ### Script Çalıştırma:
 ```shell
 $ bash Merhaba_dünya.sh                              # 1 yol
@@ -40,7 +43,7 @@ $ ./Merhaba_dünya.sh
 
 ### Değişkenlar:
 
->[!INFO] Bilgi:
+>[!INFO]
 >İki tür değiken(variable) vardır;
 >1. *Sistem değişkenleri (System Variables)*: İşletim sistemi ile gelen değikenlerdir.
 >2. *Kullanıcı değişkenleri (User Variables)*: Sonradan kullanıcı tarafından oluşturulan değişkenlerdir.
@@ -63,6 +66,8 @@ echo $PWD                      # 4
 > 	3. Çalıştırılan ev dizini verir: `/home/ottoman`
 > 	4. `$ pwd` komutunda olduğu gibi çalışma dizini verir.
 > Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=WC_Wk_NZ0C4&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=3)
+
+1. `$HOSTNAME`: 
 ##### Kullanıcı Değişkenleri:
 ```bash
 # User Variables
@@ -118,7 +123,7 @@ echo OS_distro
 > **Explanation:**
 > Süslü parantezler ile yeni bir değişken oluşturduk.
 
-###### Örnek 3: Değişkenin Varsayılan Değeri:
+###### 3. Değişkenin Varsayılan Değeri:
 ```bash
 #!/usr/bin/env bash
 
@@ -128,7 +133,50 @@ echo "${distro:-Ubuntu}"
 > **Explanation:**
 > distro değişkenine değer(*Arch Linux*) atanırsa ekrana basar. Aksi taktirde distro değişkenine değer atanmasa *varsayılan değer olarak Ubuntu* ekrana basar. 
 
-###### Örnek 4: Karakter Dizi Maniplasyonu:
+###### 3.1 Değişkene değer verme, değer atma:
+```bash
+#!/usr/bin/bash
+
+# distro=Linux
+echo "${distro:=Pardus}"     # Çıktı: Pardus
+echo $distro                 # Çıktı: Pardus
+```
+> **Explanation:**
+> + `${distro:=Pardus}` işlemi; eğer *distro* adındaki değişkene değer atanmamışsa *distro* değişkenine *Pardus* değeri atanır.
+> + Eğer *distro* değişkenine *Linux* değerini verirsek distro'un tüm değerleri *Linux* olur.
+###### 3.2 `${variable:?hata}`:
+```bash
+#!/usr/bin/bash
+
+echo ${distro:?hata mesajı}
+```
+> **Explanation:**
+> + Eğer distro adlı değişkene değer atanmadıysa soru işaretinden sonra gelen mesaj ekran hata mesajı olarak yazılır ve bash script durur.
+
+###### 3.3 `${variable:+newValue}`: 
+```bash
+#!/usr/bin/bash
+
+distro=Pardus
+echo ${distro:+Debian}      # 1     # Çıktı: Debian
+echo $distro                # 2     # Çıktı: Pardus
+```
+> **Explanation:**
+> 1. `distro` değişkeni atanmış değer değil de `Debian` değerini ekran basar 
+> 2. ama tekrar değişkeni ekran basarsak kendi değeri yani `Pardus` basar.
+> 	+ **UYARI:** Öncesinde değişken tanımlanmışsa ekran çıktı vermez.
+
+###### 4. `${#variable}`:
+```bash
+#!/usr/bin/bash
+
+distro="Linux"
+echo "Karakter Sayısı: ${#distro}"         # Çıktı: Karakter Sayısı: 5
+```
+> **Explanation:**
+> + `distro` değişkenin kaç karakterden oluştuğunu ekrana çık verir.
+
+###### 5. Karakter Dizi Maniplasyonu:
 ```bash
 #!/usr/bin/env bash
 
@@ -144,20 +192,33 @@ echo ${string:6:5}                 # çıktı: is Aw
 > 3. **6:** start'a karşılık gelir, **5:** length'e karşılık gelir.
 > 4. **Özeti:** *string değişkeninin 6. karakterine gel ve 6. karakterden sonra 5 karakter al.*
 
-###### Örnek 5: Büyük harf -> Küçük harf
+###### 6. Büyük harf -> Küçük harf
 ```bash
 #!/usr/bin/bash
 
 text="LINUX IS AWESOME!"
-lower_case_text="${text,,}"
 
+lowerCaseText="${text,,}"
 echo "$lower_case_text"
 ```
 > **Explanation:**
-> Bash 4.0 ve üstü sürümlerde, bir değişkenin içeriğini küçük harfe çevirmek için `${var,,}` biçimini kullanabilirsiniz.
-> Süslü parantez özeliği ile değişken içeriğini *büyük -> küçük harfe* dönüştürdük.
+> + Bash 4.0 ve üstü sürümlerde, bir değişkenin içeriğini küçük harfe çevirmek için `${var,,}` biçimini kullanabilirsiniz.
+> + Süslü parantez özeliği ile değişken içeriğini *büyük -> küçük harfe* dönüştürdük.
+> + **Alternatif:** `echo "Linux" | tr [:upper:] [:lower:]`
 
-###### Örnek 6: Küçük harf -> Büyük harf
+###### 6.1. İlk Harfi Küçültme:
+```bash
+#!/usr/bin/bash
+
+text="LINUX IS AWESOME!"
+
+lowerCapitalText="${text,}"        # Çıktı: lINUX IS AWESOME!
+echo "$lowerCapitalText"
+```
+> **Explanation:**
+> + `text` adlı değişkenin içerisindeki metni ilk harfini küçük harfe çevirir.
+
+###### 6.2. Küçük harf -> Büyük harf
 ```bash
 #!/usr/bin/bash
 
@@ -170,12 +231,147 @@ echo "$upper_case_text"
 > Bash 4.0 ve üstü sürümlerde, bir değişkenin içeriğini büyük harfe çevirmek için `${var^^}` biçimini kullanabilirsiniz.
 > `"${text^^}"` ifadesi, `text` değişkenindeki tüm harfleri *büyük harfe dönüştürür.*
 
->[!INFO] Bilgi:
->Bash script'in yorum işaret kare'dir; `# bu bir yorumdur.` Yukarıda kullanıldığı gibi.
+###### 6.3. İlk Harfi Büyütme:
+```bash
+os=linux
+echo "${os^}"       # Çıktı: Linux
+```
 
+
+>[!INFO]
+> + Bash script'in yorum işaret kare'dir; `# bu bir yorumdur.` Yukarıda kullanıldığı gibi.
+
+###### 7. `${variable##/*/}`:
+
+```bash
+#!/usr/bin/bash
+
+path=/home/ottoman/bashDersleri/linux.sh
+
+fileName="${path##/*/}"            # 1   # Çıktı: linux.sh
+# fileName="${path##*/}"           # 2   # Çıktı: linux.sh
+echo "Dosya adı: $fileName"
+
+fileName1="${path#/*/}"            # 3   # Çıktı: ottoman/bashDersleri/linux.sh
+echo "Dosya adı 1: $fileName1"
+```
+> **Explanation:**
+> 1. `${path##/*/}` için;
+> 	+ `##`: En uzun eşleşmeyi ifade eder.
+> 	+ `/*/`: Dize içinde `/` ile başlayan ve `/` ile biten her şeyi ifade eder.
+> 2. `path` değişkeninde en uzun `/` ile başlayan ve biten kısmı
+> 3. `${path#/*/}` için;
+> 	+ `#` Sağdan `/` kadar olan en kısa kesme yapacak.
+> 	+ `/*/`: Dize içinde `/` ile başlayan ve `/` ile biten her şeyi ifade eder.
+
+###### 7.1 `${variable%%/*/}`:
+```bash
+#!/usr/bin/bash
+
+path=/home/ottoman/bashDersleri/linux.sh
+
+fileName="${path%%.sh}"      # 1  # Çıktı:/home/ottoman/bashDersleri/linux 
+echo "Dosya Yolu: $fileName"
+
+fileName1="${path%.sh}"      # 2  # Çıktı:/home/ottoman/bashDersleri/linux
+echo "Dosya Yolu 2: $fileName1"
+```
+> **Explanation:**
+> 1. Sağdan kesme yaptığı için sadece *sh* uzantısı kesildi. Ayrıca `%%` en uzun kesme işlemi yapar.
+> 2. Aynı çıktıyı verir ama `%` en kısa kesme işlemini yapar.
+
+> [!TIP]
+> + `${variable##/*/}` : soldan silme işlemini yapar.
+> + `${variable%%/*/}` : sağdan sime işlemini yapar. 
+
+###### 8. `${!variable}`:
+```bash
+#!/usr/bin/bash
+
+OS="Ubuntu"
+echo "OS değişken: ${OS}"         # Çıktı: Ubuntu   
+
+linux="OS"
+echo "linux değişken: ${linux}"   # Çıktı: linux
+
+echo "!linux değişken: ${!linux}" # Çıktı: Ubuntu   # 1
+```
+> **Explanation:**
+> 1. Normal olarak `linux` değişkenin değeri `OS` yazar ama `!` dolayı `linux` tutuğu değeri olan `Ubuntu` değerini yazar.
+
+###### 9. `${variable/old/new}`
+```bash
+#!/usr/bin/bash
+
+dir=/usr/local/bin
+newDir=${dir/usr/opt}             # 1
+
+echo "Eski dizin: $dir"
+echo "Yeni dizin: $newDir"
+```
+> **Explanation:**
+> 1. `dir` adlı değişkendeki `usr` kelimesini `opt` kelimesi ile değiştiriyoruz. 
+> 	+ **UYARI:** Sadece ilk kelimeyi değiştirir.
+
+###### 9.1. `${variable//old/new}`
+```bash
+#!/usr/bin/bash
+
+userLine=$(grep ottoman /etc/passwd)         # 1 
+echo "Eski Kullanıcı: $userLine"
+
+newUserLine=${userLine//ottoman/osmanli}         # 2
+echo "Yeni Kullanıcı: $newUser"
+```
+> **Explanation:**
+> 1. `/etc/passwd` dosyasında `grep` komut ile `ottoman` geçen satır veya satırları `userLine` adlı değişkene atıyoruz.
+> 2. `userLine` değişkenindeki `ottoman` kelimesini `osmanli` kelimesi ile değiştiriyoruz
+> 	+ **UYARI:** Tüm kelimeleri değiştirir.
+
+###### 9.2 `${variable/deleteWord}`:
+```bash
+#!/usr/bin/bash
+
+floatNum=123.456
+
+integer1=${floatNum/.}                          # 1
+echo "Nokta işaretini sil: $integer1"
+
+integer2=${floatNum/.*}                         # 2
+echo "Nokta işaretinden sonra sil: $integer2"
+```
+> **Explanation:**
+> 1. `floatNum` adındaki değişkeninde nokta`(.)` işaretini siler.
+> 2. `floatNum` adındaki değişkeninde yıldız`(*)` meta karakteri ile noktadan`(.)` sonra gelen tüm ifadeleri sil. 
+###### 9.3 `${variable/#new/old}`:
+```bash
+#!/usr/bin/bash
+
+fileName1=shScript.sh
+echo "Değişken adı: $fileName1"        # Çıktı: shScript.sh    
+
+fileName2="${fileName1/#sh/bash}"      # Çıktı: bashScript.sh  # 1
+echo "Yeni değişken adı: $fileName2"
+```
+> **Explanation:**
+> 1. değişken içerisinde  `sh` geçen harfleri `bash` harfleri ile değiştirmektedir. Ama  `#` işareti sadece sol taraftan eşleşen bir kere değişiklik yapılmasını sağlar. Eğer dikkat etiyseniz  sondaki `sh` da bir değişiklik olamadığıdır. 
+
+###### 9.3 `${variable/%new/old}`:
+```bash
+#!/usr/bin/bash
+
+fileName1=shScript.sh
+echo "Değişken adı: $fileName1"        # Çıktı: shScript.sh    
+
+fileName2="${fileName1/%sh/bash}"      # Çıktı: shScript.bash  # 1
+echo "Yeni değişken adı: $fileName2"
+
+```
+> **Explanation:**
+> 1. Yukarıdakinin aynısı ama değişiklik yapmaya sağdan başlar ve bir kez yapar.
 ### Read Kullanımı:
->[!INFO] Bilgi:
->`read komut` kullanıcıdan girdi almak için kullanılır
+>[!INFO]
+> + `read komut` kullanıcıdan girdi almak için kullanılır
 
 ###### Örnek 1: Read ile Girdi Alma
 ```bash
@@ -239,9 +435,9 @@ echo "Distro sırası: ${distros[0]}, ${distros[1]}, ${distros[2]}"
 
 
 ### Bash Script Argümanlar
-> Bash Script çalıştırılmadan verilen girdilerdir. Argümanların bir diğer adı **Pozisyonel parametreler** ve İngilizcesi: **Positional parameters** 
 
-###### Örnek 1: $1, $2, $3 ... 
++ Bash Script çalıştırılmadan verilen girdilerdir. Argümanların bir diğer adı **Pozisyonel parametreler** ve İngilizcesi: **Positional parameters** 
+###### Örnek 1: `$1, $2, $3 ...` 
 **Bash Script Dosyası: bash_argument**
 ```bash
 #!/usr/bin/env bash
@@ -286,7 +482,7 @@ $ ./bash_arguments Linux Mac
 > [!WARNING] Uyarı:
 > Eğer alınacak argüman sayısı belirli değilse yan bash script programınıza göre bazen 3 argüman alırken bazen 5 argüman alıyorsa `$@` bash script de özel olan bu değişkeni kullanabilirsiniz.
 
-###### Örnek 3: $@ de sıfırıncı indeks
+###### Örnek 3: `$@` de sıfırıncı indeks
 **Bash Script Dosyası: bash_arguments.sh**
 ```bash
 #!/usr/bin/env bash
@@ -309,7 +505,7 @@ $ ./bash_arguments Linux Mac Windows
 > `$0, $1, $2, $3, ...` girilen argümanlarda 0. indeks *dosyanın adı*
 > `$@` da girilen argümanlarda 0. indeks *ilk argüman* oluyor.
 
-###### Örnek 4: Tüm string argünmalar  $*
+###### Örnek 4: Tüm string argünmalar  `$*`
 **Bash Script Dosyası: bash_arguments.sh**
 ```bash
 echo $*              # Çıktı: Linux Mac Windows Solaris
@@ -323,7 +519,7 @@ $ ./bash_arguments.sh Linux Mac Windows Solaris
 > Tüm konumsal parametreleri tek bir kelime olarak birleştirir ve bu kelimeleri bir dize (string) olarak döndürür.
 > Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
-###### Örnek 5: $@ ile $* Arasındaki Fark
+###### Örnek 5: `$@` ile `$*` Arasındaki Fark
 
 **Bash Script Dosyası: bash_arguments.sh**
 ```bash
@@ -345,7 +541,7 @@ $ ./bash_arguments.sh Linux Mac Windows Solaris
 > diziStar değişkeni ekrana tüm argümanları yazar çünkü diziStar değişkeni tek bir değerde *string* olarak alır.
 > Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
-###### Örnek 6:  Argüman Sayısı $# 
+###### Örnek 6:  Argüman Sayısı `$#` 
 **Bash Script Dosyası: bash_argument_1**
 ```bash
 echo $@                          # çıktı: Linux Mac Windows Solaris
@@ -359,6 +555,12 @@ $ ./bash_arguments Linux Mac Windows Solaris
 > **Explanation:**
 >  `$#` veya `${#}` bash script özel değişkenleri, her ikiside aynı çıktıyı verir ve girilen(Linux Mac Windows Solaris) argüman saysını(4) verir.
 >  Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
+
+
+> [!TIP]
+> + `echo $$` komutu;
+> + Bash veya diğer POSIX uyumlu kabuklarda **mevcut shell (kabuk) oturumunun işlem kimliğini (PID)** ekrana yazdırmak için kullanılır.(PID: Process ID)
+> + Yani, bu komut çalıştırıldığında, o anki shell'in işlem kimliği olan bir sayı döndürülür.
 
 ### Shift Komutu:
 **Tanım:** Bash script'te `shift` komutu, pozisyonel parametreleri (komut satırı argümanlarını) sola kaydırarak yönetir. Pozisyonel parametreler, bir bash script'e geçirilen argümanları ifade eder ve `$1`, `$2`, `$3`, ... gibi sembollerle erişilir. `shift` komutu her kullanıldığında, pozisyonel parametreler bir kez sola kaydırılır ve ilk argüman (`$1`) devre dışı kalır.
@@ -405,7 +607,7 @@ echo "Shift'ten sonra 1.Argüman: $1" # linux
 $ ./apps.sh windows unix linux
 ```
 > **Explanation:**
-> Eğer bash script dosyanın adı `apps.sh` olursa ve girilen argümanlarda 2 adım kaydırdığımızda(*shift komutu*) sadece *linux* çıktısını verecektir
+>  + Eğer bash script dosyanın adı `apps.sh` olursa ve girilen argümanlarda 2 adım kaydırdığımızda(*shift komutu*) sadece *linux* çıktısını verecektir
 
 ### Mantık Komutları:
 #### test komutu:
@@ -477,16 +679,16 @@ $ [ -d /home/ottoman ]               # test -d /home/ottoman
 $ test 5 -eq 5                     # [ 5 -eq 5 ]
 ```
 > **Explanation:**
-> operand'lar tam sayı(5) olduğu için `-eq` kullanıldı ve *5 sayısı 5 sayısına eşit mi* sorar.
-> Ayrıca yorum(#) satırında alternatifi verilmiştir. Yine `echo $?` komut ile durum kontrolü yapılabilir.
+> + operand'lar tam sayı(5) olduğu için `-eq` kullanıldı ve *5 sayısı 5 sayısına eşit mi* sorar.
+> + Ayrıca yorum(#) satırında alternatifi verilmiştir. Yine `echo $?` komut ile durum kontrolü yapılabilir.
   
 ###### Örnek 2: -lt (küçüktür)
 ```shell
 $ [ 3 -lt 5 ]                      # test 3 -lt 5
 ```
 > **Explanation:**
-> operand'lar tamsayı olduğu için `-lt` kullanıldı ve  *3 sayısı 5'den küçük mü* sorar.
-> Ayrıca yorum(#) satırında alternatifi verilmiştir. Yine `echo $?` komut ile durum kontrolü yapılabilir.
+> + operand'lar tamsayı olduğu için `-lt` kullanıldı ve  *3 sayısı 5'den küçük mü* sorar.
+> + Ayrıca yorum(#) satırında alternatifi verilmiştir. Yine `echo $?` komut ile durum kontrolü yapılabilir.
 
 ##### 3.String Karşılaştırılması:
 1. `=` veya `==`  :  Karakterleri(Strings) eşittir.
@@ -504,7 +706,8 @@ $ test "linux" == "linux"           # [ "linux" == "linux" ]
 ```
 
 > **Explanation:**
-> Operand'ların string olduğu için sembol(=) kullanabiliyoruz. Ayrıca yorum satır(#) ile de alternatifi yazılmıştır.  `echo $?` kontrol edebiliriz. 0 => başarılı  1 => başarısız.
+> + Operand'ların string olduğu için sembol(=) kullanabiliyoruz. Ayrıca yorum satır(#) ile de alternatifi yazılmıştır.  
+> + `echo $?` kontrol edebiliriz. 0 => başarılı  1 => başarısız.
 
 ###### Örnek 2:  test -z
 
@@ -513,7 +716,8 @@ kardiz=""
 $ [ -z $kardiz ]                          # test -z $kardiz
 ```
 > **Explanation:**
-> kardiz adlı değişkenin boş olup olmadığını kontrol ediyoruz. Eğer `echo $?` komutu sıfır verirse kardiz boş karakterli ama bir verirse kardiz değişkeninde karakter dizini atanmıştır.
+> + kardiz adlı değişkenin boş olup olmadığını kontrol ediyoruz. 
+> + Eğer `echo $?` komutu sıfır verirse kardiz boş karakterli ama bir verirse kardiz değişkeninde karakter dizini atanmıştır.
 
 ###### Örnek 3: test -n
 ```shell
@@ -521,7 +725,8 @@ kardiz="not empty"
 $ [ -n $kardiz ]                          # test -n $kardiz
 ```
 > **Explanation:**
-> `test -z` komutun tam tersi çalışır. `echo $?` ile baktığımızda kardiz değişkenin içerisi boş değilse çıktı 0 boş ise 1 verir.
+> + `test -z` komutun tam tersi çalışır. 
+> + `echo $?` ile baktığımızda kardiz değişkenin içerisi boş değilse çıktı 0 boş ise 1 verir.
 
 ### Koşul İfadeleri: IF, ELIF and ELSE 
 
@@ -567,7 +772,7 @@ fi
 ```
 
 > [!INFO]
-> `[[ ... ]]`  ifadesi `test` komutunda göre daha güçlü ve daha esnektir. 
+> +  `[[ ... ]]`  ifadesi `test` komutunda göre daha güçlü ve daha esnektir. 
 
 
 ###### Örnek  1: if koşulu
@@ -581,8 +786,8 @@ if [ $sayi -eq 10 ]; then               # 1
 fi
 ```
 > **Explanation:**
-> Tam sayı karşılaştırılamsı yapıldığı için `-eq` kullanıldı.
-> 1 ile 2 arasında bir fark yok aynı sonuç verir. Eğer koşul doğru ise yani değişken değeri 10'a eşit ise ekran çıktıyı yazdırır.
+> + Tam sayı karşılaştırılamsı yapıldığı için `-eq` kullanıldı.
+> + 1 ile 2 arasında bir fark yok aynı sonuç verir. Eğer koşul doğru ise yani değişken değeri 10'a eşit ise ekran çıktıyı yazdırır.
 > 
 
 ###### Örnek 2: if çift parantez ile
@@ -595,7 +800,7 @@ if (( $sayi > 9 )); then
 fi
 ```
 > **Explanation:**
-> Örnek 1 ile aynı ama burada çift parantezler sayesinde simge(>) kullanabiliyoruz.
+> + Örnek 1 ile aynı ama burada çift parantezler sayesinde simge(>) kullanabiliyoruz.
 
 ###### Örnek 3: if elif else
 ```bash
@@ -611,7 +816,7 @@ else
 fi
 ```
 > **Explanation:**
-> sayi adlı değişkenimiz 9'a eşit olduğundan if ve elif bloklarına giriş yapmayacak ve en son seçenek olarak else kodu çalışacaktır.
+> + sayi adlı değişkenimiz 9'a eşit olduğundan if ve elif bloklarına giriş yapmayacak ve en son seçenek olarak else kodu çalışacaktır.
 
 ###### Örnek 4:  Harf karşılaştırma
 ```bash
@@ -629,7 +834,8 @@ else
 fi	
 ```
 > **Explanation:**
-> Harfler arasında da sıralama olup ve bu bağlı olarak karşılaştırma yapabiliriz tam sayılarda olduğu gibi. `[[ ... ]]` yerine *test* komutunda kullanabiliriz.
+> + Harfler arasında da sıralama olup ve bu bağlı olarak karşılaştırma yapabiliriz tam sayılarda olduğu gibi. 
+> + `[[ ... ]]` yerine *test* komutunda kullanabiliriz.
 
 ##### 3. Dosya Doğrulama Operatörleri:
 
@@ -664,8 +870,8 @@ else
 fi
 ```
 > **Explanation:**
-> Daha fazlası için [[Bash Script#1. Dosya ve Dizin Kontrolleri|Dosya ve Dizin Kontrolleri]] bakınız.
-> Eğer dosya veya istenen dizin mevcut(-f) ise `if` bloğu çalışır aksi taktirde `else` bloğu çalışır. 
+> +  Daha fazlası için [[Bash Script#1. Dosya ve Dizin Kontrolleri|Dosya ve Dizin Kontrolleri]] bakınız.
+> + Eğer dosya veya istenen dizin mevcut(-f) ise `if` bloğu çalışır aksi taktirde `else` bloğu çalışır. 
 
 ###### Örnek 3: Dosya var mı ve boyutu 0'dan büyük mü?
 ```bash
@@ -697,7 +903,8 @@ else
 fi
 ```
 > **Explanation:**
-> Yukarıdaki Örnek 3 ile aynı ama burada dosyanın yazılabilir mi kontrol ediyoruz. `ls -l` teyit edebiliriz, eğer *w* varsa  dosya yazılabilir demektir. `chmod -x dosya_adı` ile yazma haklarını alıp tekrar deneyerek script'inizi kontrol edebilirsiniz. 
+> + Yukarıdaki Örnek 3 ile aynı ama burada dosyanın yazılabilir mi kontrol ediyoruz. `ls -l` teyit edebiliriz, eğer *w* varsa  dosya yazılabilir demektir. 
+> + `chmod -x dosya_adı` ile yazma haklarını alıp tekrar deneyerek script'inizi kontrol edebilirsiniz. 
 
 ###### Örnek 5: İç içe if else ve dosyalar ile
 ```bash
@@ -1166,6 +1373,67 @@ echo -e "Tüm indeksleri\t\t: ${!OS[@]}"     # Çıkıt: 0 2
 >  `echo -e` de -e parametresi echo komutun backslach kaçış karakterlerin yorumlanmasına izin verecektir *(man echo)*. Böylelikle daha düzgün görünüm elde edeceğiz.
 >  ==UYARI:== Window'u sildik ve indeksi 1'di ve Eğer `$!OS[@]` komut ile bakarsak index 1 olmadığını görebiliriz.
 
+##### Dizilerde Dilimleme(Array Slice):
++ Array dilimleme, `${array[@]:başlangıç:uzunluk}` söz dizimi kullanılarak yapılır.
++ **başlangıç**: Dilimleme işleminin başlayacağı dizinin indeksi.
++ **uzunluk**: Dilimleme sonucunda kaç eleman alınacağını belirten sayı.
+
+###### 1. Temel Kullanım 
+```bash
+#!/usr/bin/bash
+
+progLang=("Javascript" "Python" "Java" "Bash" "Mojo" "Ruby" )   # 1
+
+slice=("${progLang[@]:1:3}")                                    # 2
+echo "Dilimlenmiş Dizi: ${slice[@]}"                            # 3
+```
+**Çıktı:**
+```shell
+$ Dilimlenmiş Dizi: Python Java Bash
+```
+
+> **Explanation:**
+> 1. `progLang` adında bir dizi(array) taımladık.
+> 2. Dilimleme(slice) işlemi yapıyoruz. İndeksi 1 olan yani `python` ile başlayıp indeksi 3 olan yani `bash` değerine kadar diziyi alıp bir değişkene atıyoruz.
+> 3. `slice` değişkenin tutuğu array'i `echo` ile ekran basıyoruz.
+> 	+ **UYARI:** 1 indeksi ve 3 indeksi dahil olmuştur.
+
+###### 2. Sadece Başlangıç:
+```bash
+#!/usr/bin/bash
+
+progLang=("Javascript" "Python" "Java" "Bash" "Mojo" "Ruby" )  
+
+slice=("${progLang[@]:3}")                                     # 1    
+echo "Dilimlenmiş Dizi: ${slice[@]}"
+```
+**Çıktı:**
+```shell
+$ Dilimlenmiş Dizi: Bash Mojo Ruby
+```
+> **Explanation:**
+> 1. Dizinin 3. indeksinden başlayarak geri kalan tüm elemanları alır.
+
+###### 3. Negatif İndislerle Dilimleme:
+```bash
+#!/usr/bin/bash
+
+progLang=("Javascript" "Python" "Java" "Bash" "Mojo" "Ruby" )  
+
+slice=("${progLang[@]: -3:3}")                                 # 1
+echo "Dilimlenmiş Dizi: ${slice[@]}"
+```
+**Çıktı:**
+```shell
+$ Dilimlenmiş Dizi: Bash Mojo Ruby
+```
+> **Explanation:**
+> 1. Dizilerde sondan indeksleme yapıldığında;
+> 	+ **-1**: Dizinin son elemanını ifade eder.
+> 	+ **-2**: Son elemandan bir önceki elemanı ifade eder.
+> 	+ Başlangıç: -3 ve uzunluk: 3 yani sondan -3 elemanına gel ve -3'den sonra 3 elaman al.
+
+
 ### Döngüler(Loops)
 #### While Döngüsü:
 ###### While Şablonu:
@@ -1514,6 +1782,137 @@ echo "Distro: $distro"                         # 2
 > 1. Burada `local` adında kullandığımız anahtar kelimesine dikkat edin. Bu değişkenin yerel olmasını sağlıyor yani fonksiyon bittiğinde değişkenin ömrü de bitiyor. 
 > 2. Eğer yukarıda `local` anahtarı kullanmazsak global değişken olacak ve burada da ekrana `Debian` çıktısı verecektir.
 > 	+ `local` anahtarı kaldırarak test ediniz.
+
+
+##### Return Alternatif:
+
+> [!WARNING]
+> + Programlama dillerinde `return` anahtar kelimesi değer döndürmek, kodu sonlandırmak ve durum kodu döndürmek için kullanılır.
+> + Ancak, Bash'te `return` anahtar kelimesi yalnızca **durum kodu** (exit status) döndürmek için kullanılır ve bu kod 0-255 arasında bir değer olabilir.
+
+###### `return` ve `exit` Arasındaki Farklar:
+
+| Özellik                     | `return`                                    | `exit`                                          |
+| --------------------------- | ------------------------------------------- | ----------------------------------------------- |
+| **Kullanım yeri**           | Sadece fonksiyon içinde kullanılır          | Tüm script içinde herhangi bir yerde kullanılır |
+| **Amaç**                    | Fonksiyondan çıkmak ve durum kodu döndürmek | Script'i sonlandırmak ve durum kodu döndürmek   |
+| **Kapsam**                  | Sadece fonksiyonlar için geçerli            | Tüm script'i durdurur                           |
+| **Durum kodu**              | 0-255 arası bir durum kodu                  | 0-255 arası bir durum kodu                      |
+| **Sonraki kodun çalışması** | Fonksiyon dışındaki kodlar çalışır          | `exit` sonrası script'in geri kalanı çalışmaz   |
+
+###### 1. Return Kullanımı:
+```bash
+#!/usr/bin/bash
+
+myFunction() {                            # 1
+	echo "Fonksiyon çalışıyor"
+	return 0    # başarılı                 # 2
+}
+
+myFunction
+echo "Durum kodu: $?"                     # 4
+```
+> **Explanation:** 
+> 1. `myFunction` adında bir fonksiyon tanımladık. 
+> 	+  **UYARI:** Eğer fark etiyseniz `function` anahtarını kullanmadan fonksiyon tanımladık.
+> 	+ Kodun okunaklığını artırmak için `function` anahtarını kullanabilirsinz.
+> 1. `return` anahtar ile **durum kodunu** geri dönüyoruz. `0` kodu başarılıdır.
+> 2. `$?` sistem değişkeni ile durum kodunu kontrol ediyoruz.
+
+
+> [!CAUTION]
+> + **`return`**: Sadece durum kodları döndürmek için kullanılır (0-255 arası değerler).
+
+
+###### 2. Değer Döndürmek İçin `echo` Kullanma:
+```bash
+#!/usr/bin/bash
+
+function myFunction() {                     # 1
+	local result="Hello, World"             # 2
+	echo $result                            # 3
+}
+output=$(myFunciton)                        # 4
+echo "Fonksiyondan dönen değer: $output"    # 5
+```
+> **Explanation:** 
+> 1. `myFunction` adında bir fonksiyon tanımladık.
+> 2. `local` anahtarı ile `result` adında değişken tanımlayıp, değerini veriyoruz.
+> 3. Fonksiyon çağrıldığında `echo` komut ile `result` değişkenini ekrana basıyoruz.
+> 4. Fonksiyonu ekran basmak yerine `output` adlı değişkene yönlendiriyoruz.
+> 5. `$output` değişkenini ekrana basıyoruz.
+
+
+
+###### 3. `return` ve `echo` kullanımı:
+```bash
+#!/usr/bin/bash
+
+myFunction() {
+	local num=$1
+	if (( num > 10 )); then
+		echo "$num 10'dan büyük"
+		return 0       # başarılı
+	else
+		echo "$num 10'dan küçük veya eşit."
+		return 1       # başarısız
+	fi
+}
+
+output=$(myFunction 5)
+echo "Fonksiyondan Dönen: $output"
+echo "Durum Kodu: $?"
+
+if [ $? -eq 0 ]; then
+	echo "Sistem başarılı bir şekilde çalıştı."
+else
+	echo "Sistem de sorun var"
+fi
+```
+> **Explanation:** 
+
+##### Fonksiyonlarda Array:
+
+###### Array(dizi) geri döndürme:
+```bash
+#!/usr/bin/bash
+
+function myFunction() {                           # 1
+	local myArray=( "ubuntu" "pardus" "debian" )  # 2
+	echo "${myArray[@]}"                          # 3
+}
+
+output=($(myFunction))                            # 4
+
+echo "Array Değerleri: ${output[@]}"              # 5
+```
+> **Explanation:** 
+> 1. `myFunction` adında bir fonksiyon tanımlıyoruz.
+> 2. `local` anahtarını kullanarak yerel `myArray` adında bir array(dizi) tanımladık.
+> 3. array tüm içeriğini `echo` ile standart çıktıya gönderiyoruz.
+> 4. Burada `echo`ile gelen standart çıktıyı alıyoruz.
+> 5. Final olarak tüm Array ekrana basıyoruz.
+###### Fonksiyon ile Array Dilimleme:
+```bash
+#!/usr/bin/bash
+
+sliceArray() {
+	local array=("${@}")                  # 1
+	echo "${array[@]:1:3}"                # 2
+}
+
+result=$(sliceArray "Mojo" "Python" "Javascript" "Java" "Ruby")     # 3
+echo "Dilimlenmiş Dizi: $result"
+```
+
+**Çıktı:**
+```shell
+$ Dilimlenmiş Dizi: Python Javascript Java
+```
+> **Explanation:**
+>  1. `${@}` ile array argümanlarını alıp `array` adlı değişkene atıyoruz. Ayrıca `local` anahtar ile değişkeni yerel yapıyoruz.
+>  2. `array` adlı diziyi 1 indeksinden başlayarak 3 indeksine kadar dilimliyoruz.
+>  3. `sliceArray` fonksiyona parametreleri giriyoruz.
 
 ### Meta Karakterler:
 ##### Tanım:
@@ -1937,8 +2336,150 @@ Sayı: 0
 > **Explanation:**
 > + `set -x` ile `set +x` arasında aldığımız yerleri hata ayıklama(debugging) yapacak ama diğer dışarda kalan kodları hata ayıklamaya girmeyecektir.
 
+### Hata Kodları
+
+| Hata Kodu | Anlamı                                                                                                         |
+| :-------: | -------------------------------------------------------------------------------------------------------------- |
+|   **0**   | Başarı durumu. Komut başarılı bir şekilde çalıştı ve sorunsuz tamamlandı.                                      |
+|   **1**   | Genel hata. Genellikle bir komut beklenmedik bir şekilde çalışmadığında döndürülür.                            |
+|   **2**   | Misuse of shell builtins. Shell built-in komutlarının yanlış kullanılması sonucunda döner.                     |
+|  **126**  | Komut çalıştırılabilir değil. Dosya mevcut, ancak çalıştırma yetkisi yok ya da çalıştırılamaz.                 |
+|  **127**  | Komut bulunamadı. Genellikle PATH değişkeninde olmayan veya yanlış yazılmış bir komut için döner.              |
+|  **128**  | Geçersiz çıkış durumu. Çıkış durumu olarak geçersiz bir sayı veya sinyal kullanıldığında oluşur.               |
+|  **130**  | Ctrl+C (SIGINT) sinyali ile iptal edildi. Komut kullanıcı tarafından durduruldu.                               |
+|  **137**  | SIGKILL sinyaliyle (kill -9) sonlandırıldı. Komut zorla kapatıldı.                                             |
+|  **139**  | Segmentasyon hatası (Segmentation fault). Program bellek adreslerine yanlış bir şekilde eriştiğinde döner.     |
+|  **143**  | SIGTERM sinyali ile sonlandırıldı. Komut `kill` komutuyla normal şekilde sonlandırıldı.                        |
+|  **255**  | Geçersiz çıkış durumu veya komut çalıştırılamadı. Komut başlatılamadı veya beklenmeyen bir hata meydana geldi. |
+
+
+### Sinyaler
+
++ Linux'te **sinyaller (signals)**, işlemler (processes) arasındaki iletişimi sağlayan, işlemlerin belirli olaylar karşısında nasıl davranacağını yönlendiren yazılım kesmeleridir.
++ Bir işlem, belirli bir sinyali aldığında, bu sinyal işlemin yürütülmesini keser ve işlemin o sinyale karşılık belirlenen davranışı sergilemesine neden olur.
++ Sinyaller genellikle işlemleri durdurmak, devam ettirmek veya sonlandırmak için kullanılır, ancak daha birçok işlevi olabilir. Her sinyalin bir numarası ve bir ismi vardır.
+
+| Sinyal        | Numara | Tanım                                                 | Varsayılan Davranış                                                                         |
+| ------------- | ------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **SIGHUP**    | 1      | Oturum sonlandırma (hangup)                           | Terminal oturumu kapandığında bir işlemi sonlandırmak veya yapılandırmayı yeniden yüklemek. |
+| **SIGINT**    | 2      | Kesme (interrupt)                                     | Kullanıcı tarafından **Ctrl+C** ile gönderilir. İşlemi keser (sonlandırır).                 |
+| **SIGQUIT**   | 3      | Çıkış (quit)                                          | `Ctrl+\` ile gönderilir. İşlemi sonlandırır ve çekirdek dökümü oluşturur.                   |
+| **SIGILL**    | 4      | Geçersiz komut (illegal instruction)                  | Çekirdek dökümü ve sonlandırma                                                              |
+| **SIGTRAP**   | 5      | İz tuzağı (trace trap)                                | Çekirdek dökümü ve sonlandırma                                                              |
+| **SIGABRT**   | 6      | İşlem abort (abnormal termination)                    | Çekirdek dökümü ve sonlandırma                                                              |
+| **SIGBUS**    | 7      | Bellek hatası (bus error)                             | Çekirdek dökümü ve sonlandırma                                                              |
+| **SIGFPE**    | 8      | Sayısal işlem hatası (floating point error)           | Çekirdek dökümü ve sonlandırma                                                              |
+| **SIGKILL**   | 9      | Zorla sonlandırma (kill)                              | İşlemi zorla sonlandırır. İşlem bu sinyali yakalayamaz veya engelleyemez.                   |
+| **SIGUSR1**   | 10     | Kullanıcı tanımlı sinyal 1                            | Kullanıcılar tarafından özelleştirilebilir.                                                 |
+| **SIGSEGV**   | 11     | Segmentasyon hatası (segmentation fault)              | Belleğe hatalı erişim nedeniyle oluşur. İşlem sonlandırılır.                                |
+| **SIGUSR2**   | 12     | Kullanıcı tanımlı sinyal 2                            | Kullanıcılar tarafından özelleştirilebilir.                                                 |
+| **SIGPIPE**   | 13     | Kırık boru (broken pipe)                              | Bir işlem, yazma işlemi için kapalı bir boruya (pipe) veri göndermeye çalıştığında oluşur.  |
+| **SIGALRM**   | 14     | Zamanlayıcı alarmı (alarm)                            | `alarm()` fonksiyonu tarafından belirlenen süre dolduğunda gönderilir.                      |
+| **SIGTERM**   | 15     | Sonlandırma (terminate)                               | İşlemi düzgün şekilde sonlandırır. İşlemlere kapatma zamanı verir.                          |
+| **SIGSTKFLT** | 16     | Yığın hatası (stack fault)                            | Sonlandırır                                                                                 |
+| **SIGCHLD**   | 17     | Çocuk süreç sonlandırıldı (child terminated)          | Bir alt işlem (child process) sona erdiğinde ebeveyn işleme (parent) gönderilir.            |
+| **SIGCONT**   | 18     | Devam etme (continue)                                 | Duraklatılmış bir işlemi devam ettirir. `fg` komut ile gönderilir.                          |
+| **SIGSTOP**   | 19     | Duraklatma (stop)                                     | İşlemi durdurur. İşlem bu sinyali yakalayamaz. Duraklatır (engellenemez)                    |
+| **SIGTSTP**   | 20     | Terminal duraklatma (terminal stop)                   | Bir işlemi terminal üzerinden geçici olarak duraklatır. `Ctrl+z` ile gönderilir.            |
+| **SIGTTIN**   | 21     | Arka plan işleminin giriş yapma isteği                | Duraklatır                                                                                  |
+| **SIGTTOU**   | 22     | Arka plan işleminin çıkış yapma isteği                | Duraklatır                                                                                  |
+| **SIGURG**    | 23     | Acil soket durumu (urgent condition on socket)        | Yoksayar                                                                                    |
+| **SIGXCPU**   | 24     | CPU zamanı sınırı aşıldı (cpu time limit exceeded)    | Çekirdek dökümü ve sonlandırma                                                              |
+| **SIGXFSZ**   | 25     | Dosya boyutu sınırı aşıldı (file size limit exceeded) | Çekirdek dökümü ve sonlandırma                                                              |
+| **SIGVTALRM** | 26     | Sanal zaman alarmı (virtual alarm)                    | Sonlandırır                                                                                 |
+| **SIGPROF**   | 27     | Profil zamanlayıcı alarmı (profiling timer expired)   | Sonlandırır                                                                                 |
+| **SIGWINCH**  | 28     | Pencere boyutu değişti (window resize)                | Yoksayar                                                                                    |
+| **SIGIO**     | 29     | G/Ç kullanılabilir (I/O now possible)                 | Yoksayar                                                                                    |
+| **SIGPWR**    | 30     | Güç arızası (power failure)                           | Sonlandırır                                                                                 |
+| **SIGSYS**    | 31     | Geçersiz sistem çağrısı (bad system call)             | Çekirdek dökümü ve sonlandırma                                                              |
+
+> [!TIP]
+>  + `kill -l $? komutu`;
+>  + 
 
 
 
+###### Örnek 1: SIGTSTP ve SIGCONT
+```bash
+#!/usr/bin/bash
+
+echo "PID: $$"                 # 1
+
+sayi=0
+while (( sayi < 10 )); do
+	sleep 10
+	((sayi++))
+	echo "Sayı: $sayi"
+done
+exit 0
+```
+
+**Sinyal Komutu:**
+```bash
+$ kill -TSTP PID_value           # 2
+```
+
+```bash
+$ kill -CONT PID_value           # 3
+```
+
+```shell
+$ kill -INT PID_value            # 4
+```
+
+```shell
+$ kill -KILL PID_value           # 5
+```
+> **Explanation:**
+>1.  Yukarıdaki bash script'i çalıştırıyoruz. Ekrana PID'sini basıyor ve 10 saniye aralıklarla sayı değerini ekrana veriyor.
+>2. **SIGTSTP** sinyali, **Terminal Stop Signal** anlamına gelir ve Linux/Unix sistemlerinde bir işlemi **geçici olarak duraklatmak** için kullanılır.
+>	+ Kullanıcılar bu sinyali terminalden genellikle **Ctrl + Z** tuş kombinasyonuna basarak gönderirler.
+>	+ Bu sinyal, bir işlemi arka plana almak ve işlem durdurulduğunda yeniden devam ettirebilmek için kullanılır.
+>	+ **Duraklatma**: İşlem durdurulur, ancak tamamen sonlandırılmaz. İşlem, sistemin belleğinde kalır ve işlem yeniden başlatılana kadar CPU kullanmaz.
+>	+ **Devam ettirme**: Bir işlem duraklatıldığında, **`fg`** (foreground) komutu kullanılarak yeniden çalışmaya devam edebilir ya da **`bg`** komutu ile arka planda çalıştırılabilir.
+>3. **SIGCONT** sinyali, Linux/Unix sistemlerinde bir işlemi **devam ettirmek** için kullanılan bir sinyaldir.
+>	+ **SIGCONT**, duraklatılmış bir işlemi (örneğin, **SIGSTOP** veya **SIGTSTP** ile durdurulmuş olan bir işlemi) yeniden çalışmaya başlatır.
+>4. **SIGINT** (Signal Interrupt), Linux/Unix sistemlerinde bir işlemi **klavye üzerinden kesmek** (genellikle sonlandırmak) için kullanılan bir sinyaldir.
+>	+ **Düzgün sonlandırma**: **SIGINT** sinyali, işlemin kendi temizlik işlemlerini yapmasına izin verir. Örneğin, bir dosya işleme uygulaması, sonlandırılmadan önce açık dosyalarını kapatabilir.
+>5. **SIGKILL** sinyali, bir işlemi **hemen ve zorla sonlandırmak** için kullanılan bir sinyaldir. Linux/Unix sistemlerinde **sinyal numarası 9** olan bu sinyal, işlem tarafından engellenemez veya yakalanamaz.
+>	+ **Engellenemez ve yakalanamaz**: İşlem, **SIGKILL** sinyalini işleyemez veya durduramaz. İşlem, sinyal gönderildiği anda sonlanır.
+
+##### Trap:
++ Linux'ta **`trap`** komutu, **bash** betiklerinde belirli sinyalleri yakalamak ve bu sinyaller alındığında özel bir işlem yapmak için kullanılır.
 
 
+> [!CAUTION]
+> + `KILL` sinyalini `trap` komut ile yakalayamazsınız.
+> + `trap 'echo "KILL ile çıkamazsınız!"' KILL`  ile bash script içerisinde kullandığınızda `trap` komutu `KILL` sinyalini tutamayacaktır. 
+
+###### Örnek 1:
+```bash
+#!/usr/bin/bash
+
+trap 'echo "Ctrl+C ile çıkamazsınız"' INT
+trap 'echo "Ctrl+Z ile çıkamazsınız"' TSTP
+
+echo "Çıkmak için yeter yazın!"
+
+while((1)); do
+	echo -n "Devam ediyorum..."
+	read str
+	if [ "${str,,}" = "yeter" ]; then
+		break
+	fi
+done
+echo "Çıkış sağlandı"
+```
+
+**Sinyal Komutu:**
+```bash
+$ kill -TSTP script_PID                    # 1
+```
+
+```shell
+$ kill -INT script_PID                     # 2
+```
+
+> **Explanation:**
+> 1. Eğer `TSTP` sinyalini komut veya bunun eşdeğeri olan `Ctrl+z` gönderdiğimiz zaman ekran `$ Ctrl+C ile çıkamazsınız`  mesajını ekrana verir.
+> 2. Eğer `INT`  sinyalini komut veya bunun eşdeğeri olan `Ctrl+c` gönderdiğimiz zaman ekran `$ Ctrl+Z ile çıkamazsınız`  mesajını ekrana verir.

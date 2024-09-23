@@ -110,5 +110,30 @@ $ trash-put [dosya_yolu]
 > genellikle dosyaları **`~/.local/share/Trash`** klasörüne taşır.
 
 
+### useradd
+###### 1. Temel Kullanımı:
+```shell
+$ useradd -m -d /home/linus -s /usr/bin/bash -c "Linus Torvalds" linus
+```
+> **Explanation:**
+> + `-m` veya `--create-home`**:** Eğer yok ise kullanıcın `home` dizini oluştur ve ayrıca eğer `-k` parametresinde kullanırsa `skeleton dizini` içerisindeki dosyalar ve klasörler oluşturulmuş olan ev dizinine kopyalanacaktır
+> + `-d` veya `--home-dir`**:**  Bu parametre ile istediğiniz dizini kullanıcı için ev dizini yapılır. Burada `/home/linus` dizini home dizin yapılıyor. Eğer bu dizin yok ise oluşturulur.
+> + `-s` veya `--shell`**:** Kullanıcın giriş kabuğun adı. Burada `bash` shell'in dizini verilmiş. Ayrıca eğer belirtilmez ise `/etc/default/useradd` dosyasında `SHELL` olarak verilmiş kabuk varsayılan olarak kabul edilecektir.
+> + `-c` veya `--comment` **:** Kullanıcının neden oluşturulduğuna dahil kısa bir açıklamayı içerir.
+> + `kullanıcı isimi` **:**  Oluşturulacak kullanıcı için bir isim veriyoruz. Buradaki `linus` oluyor.
+> + **UYARI:** Ubuntu işletim sisteminde yapılmıştır.
 
 
+
+> [!CAUTION]
+> + `useradd` komutu linux distro'lar göre farklı davranabilir.  
+
+### ps
++ Linux/Unix sistemlerinde çalışan süreçleri (process) listelemek için kullanılır.
+
+```bash
+$ ps -ef 
+```
+> **Explanation:**
+> 
+### top

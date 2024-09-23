@@ -51,7 +51,7 @@ $ ./apps.sh linux windows mac ...
 > + `shift` komut her döngüde `$1` argüman değerini kaydırıp bir sonraki argümanı `$1` vermektedir.
 > + Bu işlemleri `$@` ile de yapabiliriz.
 
-###### Uygullama 3: if - test - positional arg
+###### Uygulama 3: if - test - positional arg
 ```bash
 #!/usr/bin/bash
 
@@ -127,7 +127,7 @@ $ ./app4.sh 10 5
 > 5. `RegEx` ile birinci argümanın ve ikinci argümanın doğru girildiğini kontrol ediyoruz.
 > 6. `dort_islem` adındaki fonksiyonu çağırıp ve parametrelerini fonksiyon veriyoruz. 
 
-###### Uygullama 3: Faktöriyel Hesaplama
+###### Uygulama 3: Faktöriyel Hesaplama
 ```bash
 #!/usr/bin/bash
 
@@ -199,3 +199,163 @@ fi
 > 1. `$RANDOM` bir sistem değişkeni ve rastgele sayılar üretir ama bu sayılar genelde 3 ile 5 veya daha fazla olabilir bu yüzden `%` operatörü ve 100 ile kalanını alarak 0-99 arasında değerler üretmesini sağlıyoruz. +1 ile aralığı 1-100 arasına çekiyoruz.
 > 2. `let` ile değişken tanımlanmıştır. `let` komutu değişken tanımlama, aritmetik işleri hesaplama ve `if` de koşul durumları oluşturma gibi görevleri mevcuttur.
 > 	+ `(( ... ))` ile de aynı görevleri yapar.
+
+###### Uygulama 5: Kullanıcı Söz Dizimi Oluşturma
+```bash
+#!/usr/bin/bash
+
+function adSoyadFonk(){
+    local isim="$1"                    # 1
+    local digerIsim="$2"               # 1
+
+    if [ -z $isim ]; then              # 2
+        echo "İsim boş geçilemez!"
+        exit 1
+    else
+        local loginIsim=$(echo $isim | tr [:upper:] [:lower:])     # 3
+        # local loginIsim="${isim,,}"  # Alternatif                # 3
+
+        local tamIsim="$isim"
+        if [ ! -z $digerIsim ]; then
+            local tamIsim="$isim $digerIsim"
+        fi
+    fi
+    # Return Value
+    local varArray=( "$loginIsim" "$tamIsim")   # 4
+    echo "${varArray[@]}"                # 5
+}
+
+function selectShellFonk() {             # 6
+    local shell=$1
+    local selShell=""
+    if [ -z $shell ]; then
+        echo "Shell giriniz"; exit 1
+    else
+        case "$shell" in
+            ksh) selShell=/usr/bin/ksh;;
+            bash) selShell=/usr/bin/bash;;
+            *) echo "Sadece ksh veya bash girebilirsiniz"; exit 2
+        esac
+    fi
+    # reture value
+    echo $selShell
+}
+
+function createHomeFonk() {             # 7
+    local evetHayir=$1
+    local createHome=''
+    if [ -z $evetHayir ]; then
+        echo "Tercih yapmadınız!"; exit 1
+    else
+        case "$evetHayir" in
+            e ) createHome='-m';;
+            h ) createHome=;;
+            * ) echo "Sadece evet veya hayır girebilirsiniz"; exit 1
+        esac
+    fi
+    # reture value
+    echo $createHome
+}
+
+read -p "İsim Giriniz(isim diğerİsim): " isim digerIsim          # 8
+read -p "Soyisim Giriniz(soyisim diğerSoyisim): " soyisim digerSoyIsim
+
+loginAdVar=($(adSoyadFonk $isim $digerIsim))                # 9
+loginSoyVar=($(adSoyadFonk $soyisim $digerSoyIsim))
+
+loginVar=${loginAdVar[0]}.${loginSoyVar[0]}                  # 10
+
+echo -e "Shell seçiniz:\c"; read shell
+selShellVar=$(selectShellFonk $shell)
+
+echo "Home dizini oluşturulsun mu?"
+read -p "(evet için e, hayır için h)" evetHayir
+createHomeVar=$(createHomeFonk $evetHayir)
+
+comment1="${loginAdVar[@]:0:1} ${loginAdVar[@]:2:3}"          # 11
+comment2="${loginSoyVar[@]:0:1} ${loginSoyVar[@]:2:3}"        # 11
+echo "Girmeniz Gereken Komut:"
+echo "-----------------------"
+echo "sudo useradd $createHomeVar -d /home/$loginVar -s $selShellVar \
+-c \"$comment1 ${comment2^^}\" $loginVar"
+```
+> **Explanation:**
+> 1. `adSoyadFonk` adında fonksiyon tanımladık ve `local` anahtarını kullanarak 2 değişken tanımladık ve bu değişkenlere fonksiyonun argümanları yükledik.
+> 2. `test` komutun `-z` parametresi ile değişkenin boş olup olmadığını kontrol ettik.
+> 3. `$isim` adındaki değişkeni harfleri büyük -> küçük dönüştürdük. Bunu `tr` komutu ile veya `${...}` kullanarak yapabiliriz.
+> 4. `varArray` adında bir dizi tanımladık ve içerisine değişkenleri yükledik.
+> 5. Bash script de `return` programlama dillerindeki gibi çalışmamaktadır. Bu yüzden `echo` komut ile standart çıktıya gönderiyoruz.
+> 6. `selectShellFonk` adında bir fonksiyon tanımladık ve görevi hangi kabuğu(shell) seçmemiz noktasında bize yardımcı olmaktadır.
+> 7. `createHomeFonk` adında bir fonksiyon ve görevi home dizin altında kullanıcı dizini oluşturup oluşturma konusunda çalışmaktadır.
+> 8. `read` komutu ile kullanıcıdan girdi alıyoruz.
+> 9. `adSoyadFonk`'undan *geri dönen diziyi(array) bir değişkene nasıl yüklediğimize dikkat ediniz.*
+> 10.  `loginAdVar` ve `loginSoyVar` değişkenlerine array yüklemiştik fonksiyonlar ile ve bu array'in sıfırıncı indekslerini alıp birleştirip `loginVar` değişkenine atıyoruz.
+> 11. Array yüklü değişkenlerimizi dilimleme(slicing) yaparak array içindeki istediğimiz elemanları alıyoruz. 
+> 12. Video Kaynak: [Süleyman ŞEKER](https://youtube.com/watch?v=WEMl6t-yTFo&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=32)
+
+###### Uygulama 6: Dosyaları Yedekleme
+```bash
+#!/usr/bin/bash
+
+newFolder="$HOME/backup-$(date +%Y%m%d-%H%M%S)"       # 1
+
+if [ ! -d newFolder ]; then                           # 2
+	/usr/bin/mkdir $newFolder
+fi
+
+for file in $(ls); do                                 # 3
+	if [ -f $file ]; then
+		echo "$file kopyalanıyor..."
+		/usr/bin/cp -p $file $newFolder               # 4
+		sleep 1
+	fi
+done
+```
+> **Explanation:**
+> 1. `$HOME` sistem değişkenin kullanarak kullanıcı dizin altında `backup` adında ve `date` komut ile birlikte o günün tarih ve saatinde klasör yolunu `newFolder` değişkenine atıyoruz.
+> 2. Eğer oluşturulacak klasör dizin yolunda yok ise `newFolder` değişkeni ile klasör oluşturulur.
+> 3. `ls` komut ile dizin içeriğini `for` döngüsü ile `file` değişkenine gönderiyoruz.
+> 4. Eğer değişken dosya ise `newFolder` değişkenin tutuğu dizine kopyalama yapıyoruz.
+
+###### Uygulama 7:
+```bash
+#!/usr/bin/bash
+
+# Girilen Sayıların Kıyaslamasını Yapar:
+function biggerFonk() {
+	if [ $1 -gt $2 ]; then
+		echo "$1 daha büyük $2'den"
+	else
+		echo "$2 daha büyük $1"
+	fi
+}
+# Girilen Argümanların Doğrumu Girildiğini Kontrol eder:
+function inputControlFonk() {
+	if [ $# -lt 2 ]; then
+		echo "2 sayı girmeniz gerekmektedir!"
+		echo "Kullanım Şekli: $0 sayi1 sayi2"
+		exit 1
+	elif ! [[ "$sayi1" =~ ^[[:blank:]]*[0-9]+[[:blank:]]*$ ]]
+	then
+		echo "Hatalı Sayı: $sayi1"
+		exit 1
+	elif ! [[ "$sayi2" =~ ^[[:blank:]]*[0-9]+[[:blank:]]*$ ]]
+	then
+		echo "Hatalı Sayı: $sayi2"
+		exit 1
+		
+	fi
+}
+
+sayi1=$1
+sayi2=$2
+
+inputControlFonk $sayi1 $sayi2
+
+# biggerFonk fonksiyonda 'Return' yapısı kullanıldı:
+MAX=$(biggerFonk $sayi1 $sayi2)
+echo "En büyük olan sayı: $MAX"
+```
+> **Explanation:**
+> 
+

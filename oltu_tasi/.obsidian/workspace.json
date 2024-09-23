@@ -55,7 +55,7 @@
               "type": "markdown",
               "state": {
                 "file": "Programlama/Bash_Script/Bash Script.md",
-                "mode": "preview",
+                "mode": "source",
                 "source": false
               },
               "pinned": true
@@ -76,12 +76,12 @@
             }
           },
           {
-            "id": "a1591f60c17282b6",
+            "id": "f68d19708203f012",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Linux Command/SSH.md",
+                "file": "Linux Command/Linux komutları.md",
                 "mode": "source",
                 "source": false
               }
@@ -203,7 +203,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 299.5
+    "width": 293.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -217,21 +217,21 @@
   },
   "active": "5643c7f7e8e84561",
   "lastOpenFiles": [
-    "Linux Command/SSH.md",
     "Programlama/Bash_Script/Bash Script.md",
     "Git/Git Dersi.md",
-    "Programlama/Bash_Script/Bash Script Apps.md",
     "Linux Command/Linux komutları.md",
+    "Programlama/Bash_Script/Bash Script Apps.md",
+    "Docker/Docker Swarm.md",
+    "Linux Command/SSH.md",
+    "Linux Command/Vim.md",
     "2024-09-17.md",
     "Windows Commands/PowerShell.md",
     "Windows Commands/CMD.md",
     "Ansible/ansible.cfg.md",
     "Windows Commands/Winget Komutları.md",
-    "Docker/Docker Swarm.md",
     "Linux Command/tmux.md",
     "Ansible/Playbook Config.md",
     "Web Servers/Nginx/Nginx Config File.md",
-    "Linux Command/Vim.md",
     "Ansible/ad hoc commands.md",
     "Web Servers/Nginx/Kaynaklar.md",
     "Web Servers/Nginx/images/cache_control_no_store.png",
