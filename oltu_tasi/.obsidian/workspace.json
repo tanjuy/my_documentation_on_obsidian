@@ -88,7 +88,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -154,7 +154,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Git/Git Dersi.md",
+                "file": "Programlama/Bash_Script/Bash Script.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -171,7 +171,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Git/Git Dersi.md",
+                "file": "Programlama/Bash_Script/Bash Script.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -194,7 +194,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Git/Git Dersi.md"
+                "file": "Programlama/Bash_Script/Bash Script.md"
               }
             }
           }
@@ -215,10 +215,12 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "5643c7f7e8e84561",
+  "active": "f761e866d8ff2ac3",
   "lastOpenFiles": [
-    "Programlama/Bash_Script/Bash Script.md",
+    "Windows Commands/WSL2.md",
+    "To do.md",
     "Git/Git Dersi.md",
+    "Programlama/Bash_Script/Bash Script.md",
     "Linux Command/Linux komutları.md",
     "Programlama/Bash_Script/Bash Script Apps.md",
     "Docker/Docker Swarm.md",
@@ -244,8 +246,6 @@
     "Web Servers/HTTP.md",
     "DevOps/Jenkins/Jenkins Kurulumu.md",
     "DevOps/Jenkins/Jenkins Eklentilerim.md",
-    "DevOps/Jenkins/Jenkinsfile.md",
-    "Database/MySQL/Database işlemleri.md",
     "Database/MySQL",
     "Database/PostgreSQL/Pictures/if-modified-since.png",
     "Database/PostgreSQL/Pictures/Left_Join.png",

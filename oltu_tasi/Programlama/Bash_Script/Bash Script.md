@@ -453,12 +453,12 @@ echo "Üçüncü Argüman: $3"
 $ ./bash_argumants Linux Mac Windows              
 ```
 > **Explanation:**
-> Dosyamızı dikkat ederseniz bash script için özel değişkenleri verdik.
-> Dosyayı(Bash Script) çalıştırma aşmasında argüman olarak Linux($1), Mac($2) ve Windows($3) argümanlarını verdik ve her biri sırasıyla değişkenlere atandı.
->  Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
+>  + Dosyamızı dikkat ederseniz bash script için özel değişkenleri verdik.
+>  + Dosyayı(Bash Script) çalıştırma aşmasında argüman olarak Linux($1), Mac($2) ve Windows($3) argümanlarını verdik ve her biri sırasıyla değişkenlere atandı.
+>  + Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
 >[!CAUTION]
->$0 dosyanın isimine karşılık gelir yani $0 eşittir ./bash_arguments.sh
+> + $0 dosyanın isimine karşılık gelir yani $0 eşittir ./bash_arguments.sh
 
 ###### Örnek 2: Tüm Argümanlar `$@`
 ```bash
@@ -475,9 +475,9 @@ $ ./bash_arguments Linux Mac
 ```
 
 > **Explanation:**
-> Tüm değişkenlere karşılık gelmektedir. $@ eşittir `$1, $2, $3 ...` 
-> Değişkenlerde kullanılan süslü parantez de mevcuttur: `${@}` 
->  Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
+> + Tüm değişkenlere karşılık gelmektedir. $@ eşittir `$1, $2, $3 ...` 
+> + Değişkenlerde kullanılan süslü parantez de mevcuttur: `${@}` 
+> + Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
 > [!WARNING] Uyarı:
 > Eğer alınacak argüman sayısı belirli değilse yan bash script programınıza göre bazen 3 argüman alırken bazen 5 argüman alıyorsa `$@` bash script de özel olan bu değişkeni kullanabilirsiniz.
@@ -619,10 +619,10 @@ Veya
 [ <expression> ]
 ```
 > **Explanation:**
-> Yukarıda test komutun genel kullanımı verilmiştir.
-> `test` komutu, dosya ve dizinlerin durumunu kontrol etmek, karşılaştırmalar yapmak ve mantıksal ifadeleri değerlendirmek için kullanılır.
-> `test` komutu, bir ifadenin veya koşulun doğru olup olmadığını kontrol eder ve sonucuna göre `0` (başarı) veya `1` (başarısızlık) döndürür.
-> `test` komut koşullu ifadelerde sıklıkla kullanılır.
+> + Yukarıda test komutun genel kullanımı verilmiştir.
+> + `test` komutu, dosya ve dizinlerin durumunu kontrol etmek, karşılaştırmalar yapmak ve mantıksal ifadeleri değerlendirmek için kullanılır.
+> + `test` komutu, bir ifadenin veya koşulun doğru olup olmadığını kontrol eder ve sonucuna göre `0` (başarı) veya `1` (başarısızlık) döndürür.
+> + `test` komut koşullu ifadelerde sıklıkla kullanılır.
 
 ##### 1. Dosya ve Dizin Kontrolleri:
 1. ` -e <file>` :  Dosya veya Dizin var mı?
@@ -663,8 +663,8 @@ $ [ -f /etc/passwd ]                # test -f /etc/passwd
 $ [ -d /home/ottoman ]               # test -d /home/ottoman 
 ```
 > **Explanation:**
-> home dizini altında ottoman dizini var mı diye bakıyoruz. `ècho $?` komut başarılı ise 0 verir aksi taktirde 1 verir.
-> yorum(#) satırı ile alternatifi verilmiştir.
+> + home dizini altında ottoman dizini var mı diye bakıyoruz. `ècho $?` komut başarılı ise 0 verir aksi taktirde 1 verir.
+> + yorum(#) satırı ile alternatifi verilmiştir.
 
 ##### 2. Sayı Karşılaştırılması:
 1. `-eq` :  equal                -> eşittir.
@@ -748,12 +748,22 @@ fi
 
 ##### 1.Tam Sayı(INTEGER) Karşılaştırması:
 ```bash
+# Test Komutu
 -eq / eşit ise                / if [ "$a" -eq "$b" ] / (equal)
 -ne / eşit değil ise          / if [ "$a" -ne "$b" ] / (not equal)
 -gt / büyük ise               / if [ "$a" -gt "$b" ] / (greater than)
 -ge / büyük veya eşit ise     / if [ "$a" -ge "$b" ] / (greater than or equal)
 -lt / küçük ise               / if [ "$a" -lt "$b" ] / (less than)
 -le / küçük veya eşit ise     / if [ "$a" -le "$b" ] / (less than or equal)
+
+# [[ ... ]] komutu
+
+-eq / eşit ise                / if [[ "$a" -eq "$b" ]] / (equal)
+-ne / eşit değil ise          / if [[ "$a" -ne "$b" ]] / (not equal)
+-gt / büyük ise               / if [[ "$a" -gt "$b" ]] / (greater than)
+-ge / büyük veya eşit ise     / if [[ "$a" -ge "$b" ]] / (greater than or equal)
+-lt / küçük ise               / if [[ "$a" -lt "$b" ]] / (less than)
+-le / küçük veya eşit ise     / if [[ "$a" -le "$b" ]] / (less than or equal)
 
  <  / küçük                   / if (("$a" < "$b"))
  <= / küçük eşit              / if (("$a" <= "$b"))
@@ -774,7 +784,6 @@ fi
 > [!INFO]
 > +  `[[ ... ]]`  ifadesi `test` komutunda göre daha güçlü ve daha esnektir. 
 
-
 ###### Örnek  1: if koşulu
 ```bash
 #!/usr/bin/bash
@@ -788,9 +797,7 @@ fi
 > **Explanation:**
 > + Tam sayı karşılaştırılamsı yapıldığı için `-eq` kullanıldı.
 > + 1 ile 2 arasında bir fark yok aynı sonuç verir. Eğer koşul doğru ise yani değişken değeri 10'a eşit ise ekran çıktıyı yazdırır.
-> 
-
-###### Örnek 2: if çift parantez ile
+###### Örnek 2: if `((...))` ile
 ```bash
 #!/usr/bin/bash
 
@@ -800,7 +807,7 @@ if (( $sayi > 9 )); then
 fi
 ```
 > **Explanation:**
-> + Örnek 1 ile aynı ama burada çift parantezler sayesinde simge(>) kullanabiliyoruz.
+> + Örnek 1 ile aynı ama burada çift parantezler `((...))` sayesinde simge(>) kullanabiliyoruz.
 
 ###### Örnek 3: if elif else
 ```bash
@@ -955,11 +962,11 @@ fi
 ```bash
 #!/usr/bin/bash
 
-user="ottoman"
-if ! id "ottoman" &> /dev/null; then
-	echo "Kullanıcı mevcut değil."
+userName="ottoman"
+if ! id $userName &> /dev/null; then
+	echo "$userName adında kullanıcı mevcut değil."
 else
-	echo "Kullanıcı mevcıt"
+	echo "$userName adında kullanıcı mevcut."
 fi
 ```
 > **Explanation:**
@@ -969,7 +976,7 @@ fi
 
 ### AND ve OR operatörleri
 
-> [!INFO] Bilgi:
+> [!NOTE]
 > Bash script de
 > AND operatörün simgesi : `&&` veya `-a` 
 > OR operatörün simgesi : `||` veya `-o`
@@ -1033,7 +1040,7 @@ echo $((1+1))                            # Çıktı: 2
 >- **Karşılaştırmalar**: Sayısal değerlerin karşılaştırılması (eşitlik, büyüklük, küçüklük gibi).
 >- **Değişken Değerlerini Güncelleme**: Değişkenlerin değerini güncellemek ve arttırma/azaltma işlemleri yapmak. `((i++))`,  `((x=x+1)), ((x+=1))` gibi.
 
-> [!INFO]
+> [!NOTE]
 > 1. `$(( ... ))` Yapısı
 > 	- **Sonucu döndürür**: `echo` komutuyla veya bir değişkenle kullanılabilir.
 > 	- **Daha çok çıktı üretmek için kullanılır**.
@@ -1057,7 +1064,7 @@ b=3
 echo "a: $a"
 ```
 > **Explanation:**
-> `((a+=b))` aritmetik işlemi yapar ve değeri `a` değişkeni üzerinde ekler.
+> + `((a+=b))` aritmetik işlemi yapar ve değeri `a` değişkeni üzerinde ekler.
 ###### Örnek b: `$(( ... ))` Yapısı
 ```bash
 #!/usr/bin/bash
@@ -1068,7 +1075,7 @@ sonuc=$((a+b))
 echo "Sonuc: $sonuc"
 ```
 > **Explanation:**
-> `a` ve `b` toplama işlemini yapar ve `sonuc` adındaki değişkene atar.
+> +  `a` ve `b` toplama işlemini yapar ve `sonuc` adındaki değişkene atar.
 
 ###### Örnek 2: Değişkenler ile Toplama:
 ```bash
@@ -1084,7 +1091,7 @@ echo "Bölme  : $(( $sayi1/$sayi2 ))"               # Çıktı: 5
 echo "Kalan  : $(( $sayi1%$sayi2 ))"               # Çıktı: 0
 ```
 > **Explanation:**
-> Değişkenlere atanan değerler ile matematik işlemleri yapılıyor.
+> + Değişkenlere atanan değerler ile matematik işlemleri yapılıyor.
 
 ###### Örnek 3: expr komutu
 ```bash
@@ -1100,27 +1107,26 @@ echo "Bölme  : $(expr $sayi1 / $sayi2)"
 echo "Kalan  : $(expr $sayi1 % $sayi2)"
 ```
 > **Explanation:**
-> Örnek 2 yaptığımızın aynı işlemleri yaptık ama `expr` komutunu kullandık.
-> **Burada dikkat edilmesi gereken nokta** aritmetik operatörler arasına kesinlikle boşluk bırakmalıyız ve ayrıca çarpma işlemi de kullanılan yıldız işaret özel karakteri olmasını engellemek için ters slash(/) yıldız işaretin önüne koyuyoruz.
-
+> + Örnek 2 yaptığımızın aynı işlemleri yaptık ama `expr` komutunu kullandık.
+> + **Burada dikkat edilmesi gereken nokta** aritmetik operatörler arasına kesinlikle boşluk bırakmalıyız ve ayrıca çarpma işlemi de kullanılan yıldız işaret özel karakteri olmasını engellemek için ters slash(/) yıldız işaretin önüne koyuyoruz.
 
 
 > [!TIP] 
-> `((i++))` veya `i=$((i+1))` döngülerde `i` değişkenini her döngüde artırır.
-> `((i--))` veya `i=$((i-1))` döngülerde `i` değişkenini her döngüde azaltır.
+> + `((i++))` veya `i=$((i+1))` döngülerde `i` değişkenini her döngüde artırır.
+> + `((i--))` veya `i=$((i-1))` döngülerde `i` değişkenini her döngüde azaltır.
 
 #### 2. Ondalıklı(Float) Sayılar ile
 
-> [!INFO] Bilgi:
-> Ondalıklı sayılarla işlem yapabilmemiz için `bc` komutunu kullanıyoruz:
-> `bc` ifadelerin etkileşimli yürütülmesi ile [arbitrary precision numbers](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic#:~:text=In%20computer%20science%2C%20arbitrary%2Dprecision,memory%20of%20the%20host%20system.) destekleyen bir dildir. (man bc)
+> [!INFO]
+> +  Ondalıklı sayılarla işlem yapabilmemiz için `bc` komutunu kullanıyoruz:
+> + `bc` ifadelerin etkileşimli yürütülmesi ile [arbitrary precision numbers](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic#:~:text=In%20computer%20science%2C%20arbitrary%2Dprecision,memory%20of%20the%20host%20system.) destekleyen bir dildir. (man bc)
 
 ###### Örnek 1: Basit Gösterim
 ```bash
 echo "20.5+5" | bc                   # Çıktı: 25.5
 ```
 > **Explanation:**
-> `echo` komutun çıktısını `bc` komutuna yönlendiriyoruz ve `bc` komutun aldığı veriyi değerlendiriyor.
+> + `echo` komutun çıktısını `bc` komutuna yönlendiriyoruz ve `bc` komutun aldığı veriyi değerlendiriyor.
 
 ###### Örnek 2: bc komutu ile tüm işlemler
 ```bash
@@ -1149,8 +1155,8 @@ sayi2=5
 echo "scale=2;$sayi1/$sayi2" | bc
 ```
 > **Explanation:**
-> sayi1 ve sayi2 adlı değişken oluşturarak echo komut ile hem bc parametresi olan scale hem de değişken değerlerini bc komutunda yönlendirdik.
-> Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=w69wvsDzCJo&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=9)
+> + sayi1 ve sayi2 adlı değişken oluşturarak echo komut ile hem bc parametresi olan scale hem de değişken değerlerini bc komutunda yönlendirdik.
+> + Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=w69wvsDzCJo&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=9)
 
 ###### Örnek 4: bc matematik kütüphanesi kullanma
 ```bash
@@ -1164,6 +1170,10 @@ echo "scale=4; $sayi2^3" | bc -l           # Çıktı: 27            # 2
 > 2. Yine burada da `bc -l` komutundaki `-l` parametresi sayesinde sayi2 içerisindeki 3'ün küpünü alabildik.
 
 #### 3. Let Komutu:
+**Syntax -Söz Dizimi:**
+```shell
+$ let <arithmetic expression>
+```
 ###### Tanım:
 + Bash script'te **`let`** komutu, aritmetik işlemler yapmak için kullanılan eski ve basit bir yapıdır.
 + **`let`** komutu, değişkenlerin değerlerini güncellemek veya aritmetik hesaplamalar yapmak için kullanılır.
@@ -1174,11 +1184,25 @@ echo "scale=4; $sayi2^3" | bc -l           # Çıktı: 27            # 2
 ```bash
 #!/usr/bin/bash
 
-let "toplam = 5 + 4"
+let "toplam = 5 + 4"            # Alternatif: let toplam=5+4
 echo "Sonuc: $toplam"
 ```
 > **Explanation:**
 > + İki değeri toplar ve toplam değişkenine atar.
+
+```bash
+
+#!/usr/bin/bash
+
+sayi1=25
+sayi2=5
+
+let "toplam = $sayi1 + $sayi2"; echo "Toplama: $toplam"
+let "cikarma = $sayi1 - $sayi2"; echo "Çıkarma: $cikarma"
+let "carpma = $sayi1 * $sayi2"; echo "Çarpma: $carpma"
+let "bolme = $sayi1 / $sayi2"; echo "Bölme: $bolme"
+let "kalan = $sayi1 % $sayi2"; echo "Kalan: $kalan"
+```
 ###### Örnek 2: Değişkenin Değerini Artırma veya Azaltma
 ```bash
 #!/usr/bin/bash
@@ -1222,6 +1246,16 @@ fi
 > **Explanation:**
 > 1. `let` komut ile *değişken* tanımlayabiliyoruz.
 > 2. `if` bloklarında koşul kontrolleri içinde kullanabiliyoruz.
+
+###### Örnek 5: let ve Positional arg.
+```bash
+#!/usr/bin/bash
+
+let "a = $1 + 20"; echo "$1'in 20 fazlası: $a"
+```
+> **Explanation:**
+> + `$1` ile bash script'e bir argüman alıyoruz ve `let` anahtarı ile 20 ile toplayıp ekrana veriyoruz.
+
 ##### `let` ve `(( ... ))` Karşılaştırması
 - Bash'te modern kullanımda, **`(( ... ))`** yapısı, **`let`** komutuna göre daha yaygın ve esnek bir yöntemdir.
 - `(( ... ))` kullanımı, özellikle büyük ve karmaşık ifadelerde daha okunabilir kod yazmanızı sağlar.
@@ -1326,7 +1360,6 @@ esac
 > `dizi=("Linux" "Unix" "Mac" "Windows")     #  Yazımı Doğru` 
 > `dizi=("Linux", "Unix", "Mac", "Windows")   #  Yazımı Yanlış Virgül olmayacak`
 
-
 ###### Örnek 1:  Basit Kullanımı:
 ```bash
 #!/usr/bin/bash
@@ -1340,9 +1373,9 @@ echo "Tüm dizinin index sayısı: ${#OS[@]}"  # Çıktı: 3
 
 ```
 > **Explanation:**
-> Diziler(arrays) tüm programlama dillerinde olduğu gibi indeksi *0(sıfır)'dan* başlar.
-> Linux: 0, Windows: 1, Unix: 2 indeks de olacaktır.
-> Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=7GoukBA6tZc&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=13)
+> + Diziler(arrays) tüm programlama dillerinde olduğu gibi indeksi *0(sıfır)'dan* başlar.
+> + Linux: 0, Windows: 1, Unix: 2 indeks de olacaktır.
+> + Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=7GoukBA6tZc&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=13)
 
 ###### Örnek 2: Diziye eleman ekleme
 ```bash
@@ -1355,7 +1388,7 @@ OS[3]='Mac'
 echo "Tüm dizi tekrar: ${OS[@]}"
 ```
 > **Explanation:**
-> OS dizin en son indeksi 2 bu yüzden biz 'Mac' elmanı 3. indekse ekliyoruz. Aksi taktirde mevcut dizini değiştirecektir.
+> + OS dizin en son indeksi 2 bu yüzden biz 'Mac' elmanı 3. indekse ekliyoruz. Aksi taktirde mevcut dizini değiştirecektir.
 
 ###### Örnek 3: Diziden eleman silme
 ```bash
@@ -1369,9 +1402,9 @@ echo -e "Tüm dizi tekrar\t: ${OS[@]}"      # Çıktı: Linux, Unix
 echo -e "Tüm indeksleri\t\t: ${!OS[@]}"     # Çıkıt: 0 2
 ```
 > **Explanation:**
->  `unset` komut ile 1. dizin de olan windows dizinden silinecektir.
->  `echo -e` de -e parametresi echo komutun backslach kaçış karakterlerin yorumlanmasına izin verecektir *(man echo)*. Böylelikle daha düzgün görünüm elde edeceğiz.
->  ==UYARI:== Window'u sildik ve indeksi 1'di ve Eğer `$!OS[@]` komut ile bakarsak index 1 olmadığını görebiliriz.
+>  + `unset` komut ile 1. dizin de olan windows dizinden silinecektir.
+>  + `echo -e` de -e parametresi echo komutun backslach kaçış karakterlerin yorumlanmasına izin verecektir *(man echo)*. Böylelikle daha düzgün görünüm elde edeceğiz.
+>  + ==UYARI:== Window'u sildik ve indeksi 1'di ve Eğer `$!OS[@]` komut ile bakarsak index 1 olmadığını görebiliriz.
 
 ##### Dizilerde Dilimleme(Array Slice):
 + Array dilimleme, `${array[@]:başlangıç:uzunluk}` söz dizimi kullanılarak yapılır.
@@ -1444,7 +1477,7 @@ do
 done	
 ```
 
-###### Örnek 1: Basit Kullanım:
+###### 1. Basit Kullanım:
 ```bash
 #!/usr/bin/bash
 
@@ -1462,6 +1495,19 @@ done                                                        # 4
 > 	+ `$((i+1))` yerine `$((i++))` veya `$((++i))` kullanabiliriz.
 > 1. Kodu `done` ile bitirmemiz gerekir.
 
+###### 1.1 `[[ ... ]]` ile kullanımı:
+```bash
+#!/usr/bin/bash
+
+counter=1
+while [[ counter -lt 10 ]]; do
+	sleep 3
+	echo "Değer: $counter"
+	((counter++))
+done
+```
+> **Explanation:**
+> + Yukarıdaki kodun aynısı fakat  `test` komutun alternatifi olan  `[[ ... ]]` komutu `while` döngüsü ile kullanıyoruz.
 ###### Örnek 2:  while ile sleep komutu
 ```bash
 #!/usr/bin/env bash
@@ -1497,7 +1543,7 @@ do
 done
 ```
 > **Explanation:**
-> C temeli programlama diline benzer bir for döngüsü
+>+  C temeli programlama diline benzer bir for döngüsü
 
 ##### For Şablonu 2:
 ```bash
@@ -1516,9 +1562,9 @@ for i in 1 2 3 4 5; do
 done
 ```
 > **Explanation:** 
-> Python programlama diline benzer bir for döngüsü
+> + *Python programlama* diline benzer bir for döngüsü
 
-###### Örnek 2: for ile linux komutları
+###### Örnek 2: `for` ile linux komutları
 ```bash
 #!/usr/bin/bash
 
@@ -1532,6 +1578,17 @@ done                                     # 3
 > 2.  echo komutunda `\n` yorumlanması için `-e` parametresi kullanıldı.
 > 3. `for loop` bittiğini söylemek için `done` sona ekliyoruz.
 
+###### Örnek 2.1: `for` ile `ls` komutu:
+```bash
+#!/usr/bin/env bash
+
+for l in $( ls ); do                     # 1
+	echo $l                              # 2
+done
+```
+> **Explanation:** 
+> 1. `ls` komut bulunduğu dizindeki dosya veya dizinlerini `for loop` gönderir.
+> 2. `for loop` ise bu dosya veya dizinleri ekrana çıktı verir. Bu temelde daha gelişmiş kodlarda yazılabilir.
 ###### Örnek 3: brace expansion ile
 ```bash
 #!/usr/bin/bash
@@ -1554,7 +1611,7 @@ do
 done
 ```
 
-###### Örnek 1: Basit Kullanımı
+###### 1. Basit Kullanımı
 ```bash
 #!/usr/bin/bash
 
@@ -1567,7 +1624,7 @@ done
 > + Kullanıcının bir menüden seçim yapmasını sağlayan bir döngü yapısıdır.
 > + Verilen seçenekleri(`Ankara İzmir İstanbul`) numaralandırılmış bir menü olarak ekranda gösterir.
 
-###### Örnek 2: Select ile Dizi Kullanımı
+###### 2. Select ile Dizi Kullanımı
 ```bash
 #!/usr/bin/bash
 
@@ -1580,6 +1637,30 @@ done
 > **Explanation:** 
 > 1. [[Bash Script#Diziler(Arrays)|Dizler]] bakınız.
 > 2. Bu adımda diziyi(`${iller[@]}`) entegrasyonu yapıyoruz.
+
+###### 2.1 Select ve Prompt(`PS3`)
+```bash
+#!/usr/bin/bash
+
+langs='Bash Python C Java Quit'             # 1
+PS3='Seçim yapınız: '                       # 2
+
+select lang in $langs; do
+	if [[ $lang == 'Quit' ]]; then
+		break
+	fi
+	echo "$lang dersine hoş geldiniz."
+done
+```
+> **Explanation:** 
+> 1. `select loop` seçenekleri `string` olarak verdik ve boşluk karakterine göre dilimleme işlemini yaptı.
+> 2. `select` komutu bir dizi seçeneği ekrana yazdırır ve kullanıcıdan bir seçim yapmasını ister. Varsayılan olarak, kullanıcının seçim yapacağı sırada bir `#?` karakteri görünür. İşte burada **`PS3`** devreye girer ve bu istem mesajını özelleştirmenize olanak tanır.
+
+
+> [!TIP]
+> + Bash scriptlerinde **`PS3`**, kullanıcıya bir **seçenek menüsü** sunduğunuzda gösterilen özel bir değişkendir.
+> + Özellikle **`select`** komutuyla birlikte kullanılır. `select` komutu, kullanıcıdan bir seçim yapmasını sağlayan bir menü oluşturur ve **`PS3`** değişkeni, bu menüyü sunarken kullanıcının karşısına çıkacak istem (prompt) mesajını belirler.
+
 ###### Örnek 3: Select ile if Kullanımı:
 ```bash
 #!/usr/bin/env bash
@@ -1823,7 +1904,6 @@ echo "Durum kodu: $?"                     # 4
 > [!CAUTION]
 > + **`return`**: Sadece durum kodları döndürmek için kullanılır (0-255 arası değerler).
 
-
 ###### 2. Değer Döndürmek İçin `echo` Kullanma:
 ```bash
 #!/usr/bin/bash
@@ -1841,8 +1921,6 @@ echo "Fonksiyondan dönen değer: $output"    # 5
 > 3. Fonksiyon çağrıldığında `echo` komut ile `result` değişkenini ekrana basıyoruz.
 > 4. Fonksiyonu ekran basmak yerine `output` adlı değişkene yönlendiriyoruz.
 > 5. `$output` değişkenini ekrana basıyoruz.
-
-
 
 ###### 3. `return` ve `echo` kullanımı:
 ```bash
@@ -2110,7 +2188,6 @@ $ set +o noclobber
 > **Explanation:**
 > + Eğer üzerine yazma korumasını devre dışı bırakmak isterseniz
 > + `noclobber` seçeneğini devre dışı bırakır.
-
 
 ###### Örnek 2: Command `2>` file
 ```shell
@@ -2397,8 +2474,6 @@ Sayı: 0
 >  + `kill -l $? komutu`;
 >  + 
 
-
-
 ###### Örnek 1: SIGTSTP ve SIGCONT
 ```bash
 #!/usr/bin/bash
@@ -2483,3 +2558,14 @@ $ kill -INT script_PID                     # 2
 > **Explanation:**
 > 1. Eğer `TSTP` sinyalini komut veya bunun eşdeğeri olan `Ctrl+z` gönderdiğimiz zaman ekran `$ Ctrl+C ile çıkamazsınız`  mesajını ekrana verir.
 > 2. Eğer `INT`  sinyalini komut veya bunun eşdeğeri olan `Ctrl+c` gönderdiğimiz zaman ekran `$ Ctrl+Z ile çıkamazsınız`  mesajını ekrana verir.
+
+###### Örnek 2:
+```bash
+#!/bin/bash
+trap 'rm -f /tmp/gecici_dosya.txt; echo "Temizlik yapıldı!"' EXIT
+touch /tmp/gecici_dosya.txt
+echo "Betiği çalıştırıyorsunuz..."
+sleep 5
+```
+> **Explanation:**
+> 

@@ -118,6 +118,8 @@ $ git branch -M main
 $ git remote add origin git@github.com:tanjuy/git_test.git
 ```
 > **Explanation:**
+> + `origin` adı verdiğimiz ve genellikle bu isim verilir. Uzak depo adresini bu isime(origin) atarız.
+> + Artık `origin`, `git@github.com:tanjuy/git_test.git` adresini tutmaktadır. 
 
 ```bash
 $ git push -u origin main
@@ -265,19 +267,139 @@ print("Merhaba, Git")
 > 	2. `git add fileName` komut ile index(stage) area gönderin.
 > 	3. `git commit -m "short message` komut ile commit ediniz.
 
-#### Takım Çalışması (contributor):
-###### Temel Kullanımı:
+#### Branch Silme:
+
+###### Uzak Depodaki Branch'i Silme:
 ```shell
-git fetch
+$ git push origin --delete branchName
+```
+> **Explanation:**
+> + ilk adım olarak uzak depodaki(Remote Repo) `branch`'i silmek olacaktır. 
+
+###### Yerel Depodaki Branch'i Silme:
+```shell
+$ git branch -d branchName
+```
+> **Explanation:**
+> + İkinci adım olarak da yerel depodaki(Local Repo) `branch`'i silmek olacaktır.
+
+```shell
+error: The branch 'branchName' is not fully merged.
+If you are sure you want to delete it, run 'git branch -D branchName'.
+```
+> **Explanation:**
+> + Eğer böyle bir hata veriyorsa; hata içeresinde de bir bir ipucu vermektedir
+> + `git branch -D branchName` komut ile zorlama ile siliyoruz.
+> + `-D` parametresi: `--delete --force` birleşimidir.
+
+#### Pull Request:
+
+
+> [!CAUTION]
+> Terminal de kullandığımız `git pull origin main` komutu ile github'daki `Pull requests` karıştırmayınız.
+
+
+#### Takım Çalışması (Collaborators):
+##### Temel Kullanımı:
+```shell
+git fetch origin main
 ```
 > **Explanation:**
 >  + Eğer bir projede birden fazla gelişici var ise ve bu geliştiriciler belli aralıklar ile `git push` ile `repo`'ya kod gönderiyor ise, bundan dolayı çakışmalar olacaktır.
 >  + `git fetch` ile `repo`'dan kodlar çekilir ve  daha sonrasında `git merge` ile birleştirilir. Böylelikle çakışmaları manüel olarak düzenleyebiliriz.
 
+```shell
+$ git status
+```
+> `git fetch` komut ardından `git status` komutu yerel deponun uzak depodan ileri mi yoksa geri mi olduğunu görebiliriz.
+
+```shell
+On branch main
+Your branch is behind 'origin/main' by 2 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+
+nothing to commit, working tree clean
+```
+> + `git status` çıktısı bize `main` branch'in `origin/main` branch'inden 2 commit geride olduğumuzu söylüyor. Ayrıca Biz bazı ek ipuçları vermektedir. Örneğin; `local branch`'i güncellemek için `git pull` kullanın diyor.
+
+```shell
+$ git log origin/main
+```
+> + `git fetch` komutu `origin/main` günceller. *Bu komut* ile bu durumu kontrol edebiliriz. 
+> + Veya `git checkout origin/main` komut ile ilgili commit'e geçerek ve daha sonrasında `git log` komut ile aynı çıktıyı alabiliriz.
+
+```shell
+$ git pull origin main
+```
+> + `main` ile `origin/main` birleştirme işlemi yapar ardında `commit` işlemini de yapar.
+> + `git status` ile durum kontrolü yapınız.
+> + `git push origin main` komut ile yerel depoda değişiklikleri uzaktaki depoya gönderebiliriz.
+
 
 > [!CAUTION]
-> + **`git fetch`**: Sadece uzak depodaki değişiklikleri indirir, ancak mevcut çalışma dalınıza bu değişiklikleri birleştirmez.
-> + **`git pull`**: Hem uzak depodaki değişiklikleri indirir hem de bu değişiklikleri yerel dalınıza birleştirir (fetch + merge yapar).
+> + `git fetch`: Sadece uzak depodaki değişiklikleri indirir, ancak mevcut çalışma dalınıza bu değişiklikleri birleştirmez.
+> + `git pull`: Hem uzak depodaki değişiklikleri indirir hem de bu değişiklikleri yerel dalınıza birleştirir (fetch + merge yapar).
+> + `git checkout` komut ile `commit`, `origin/branchName` veya `branch` geçiş yaptığınızda kendilerine has dosya veya değişiklikleri görebiliriz.  
+
+##### Fork Yapma:
++ Uzak depodaki Tarayıcı ile yapılıyor.
+
+#### Commit'ler Arası Geçiş:
+
+###### Temel Kullanımı:
+```shell
+$ git checkout <commit-hash>
+```
+>**Explanation:**
+>+ `git log` veya `git log --oneline` komut ile commit'leri listeleyebiliriz ve bu commit'lerden `commit-hash` geçiş yapabiliriz.
+>+ İşlemi iptal etmek için yani branch durumuna geçmek için `git switch -` komutu kullanın.
+>+ **UYARI:** Commit hash'e geçtiğimiz zaman *detached HEAD* durumuna geçer. Bu durumu `git branch` komut ile teyit edebilirsiniz.
+
+###### `commit-hash`'den Yeni branch oluşturma:
+```shell
+$ git switch -c yeniBranchAdi
+```
+>**Explanation:**
+> + Geçmiş olduğumuz `commit-hash`'den yeni bir branch oluşturduk. *Bu branch geçiş yaptığımız `commit-hash`'den öncesi vardır sonrası yoktur.*
+> + **Alternatif:** `git branch yeniBranchAdi` komut ile branch oluşturduk ve `git switch yeniBranchAdi` branch'e geçiş yapıyoruz. Yukarıdaki komut ile Tek seferde 2 işlemi yapıyoruz.
+
+#### Commit'leri Silme:
+
+###### 1. `reset --mixed` kullanımı:
+```shell
+$ git reset <commit-hash>
+```
+>**Explanation:**
+> + `commit`'leri siler ama *sadece çalışma dizini bu durumdan etkilenmez.*
+> + `git reset --mixed <commit-hash>` ile eş değerdir. 
+
+###### 2. `reset --hard` kullanımı:
+```shell
+$ git reset --hard <commit-hash>
+```
+>**Explanation:**
+> + `Working Directory`, `Staged Area` ve `Local Repo` alanların tümünde geri alır.
+> + Tam sıfırlama yapar.
+
+#### Commit'leri Geri Alma:
+
+```shell
+$ git revert <commit-hash>
+```
+>**Explanation:**
+>+ Seçmiş olduğumuz  commit üzerinde  yaptığımız değişiklikleri geri alır.
+
+> [!TIP]
+> + `git revert HEAD` komut bir önceki komut tersine çevirecektir.
+
+#### Değişiklikleri Görme:
+
+##### git diff ile:
+```
+$ git diff
+```
+>**Explanation:**
+>+ Eğer bir dosyada değişiklik yapıldıysa bu komut silen veya eklen ifadeleri ekran basar.
 
 ## Yerel Depoda İşlemler(Local Repository)
 
@@ -351,6 +473,72 @@ $ git checkout c107365
 > + `c107365` hash'ine sahip commit'e geçiş yapar.
 > + Ancak bu, **"detached HEAD"** durumuna yol açar; yani şu an aktif olan HEAD bir *branch* üzerinde değil, belirli bir *commit* üzerindedir.
 #### Git diff:
++ Bu komut, **çalışma dizininde**, **staged (indexlenmiş) değişikliklerde** veya **iki commit arasındaki farkları** gösterebilir.
++ + Git'te iki farklı durum arasındaki değişiklikleri (farkları) karşılaştırmak için kullanılan bir komuttur.
++ **Commit öncesi kontrol**: Commit yapmadan önce, çalışma dizinindeki veya staged değişiklikleri gözden geçirmek için kullanılır.
++ **İki commit arasındaki farkları karşılaştırmak**: Geçmiş commit'lerdeki değişiklikleri incelemek ve geri almak istediğiniz commit'leri belirlemek için kullanılır.
+###### 1. Temel Kullanımı:
+```shell
+$ git diff
+```
+> **Explanation:**
+> + Bu, **çalışma dizininizde yapılan**, ancak henüz indexlenmemiş (stage edilmemiş) değişiklikleri gösterir. `$ git diff HEAD` aynı görevi görür.
+
+###### 2. Staged(index) Area: 
+```shell
+$ git diff --staged
+```
+> **Explanation:**
+> + Eğer bir dosyayı indekslenmişseniz (stage etmişseniz) ve bu dosyadaki değişiklikleri görmek istiyorsanız
+> + **Alternatif:** `git diff -cached`
+> 	+ Bu komut, staged (commit'e hazır) olan değişikliklerle son commit (HEAD) arasındaki farkları gösterir.
+
+###### 3. Belirli bir Commit:
+```shell
+$ git diff HEAD <commit-hash-1>
+```
+> **Explanation:**
+> + HEAD yani en son commit ile bizim seçmiş olduğumuz commit arasında bir kıyaslama yapar.
+> + `commit-hash` almak için `git log --oneline` komutunu kullanabiliriz.
+###### 3.1 İki Commit Arasında:
+```shell
+$ git diff <commit-hash-1> <commit-hash-2>
+```
+> **Explanation:**
+> + Seçmiş olduğumuz iki commit ile kıyaslama yapar.
+> + `git log --oneline` ile `commit-hash` görebiliriz.
+
+###### 4. İki Branch Arasında:
+```shell
+$ git diff main dev
+```
+> **Explanation:**
+> + `main` branch'i ile `dev` branch'i arasında karşılaştırma yapar.
+
+###### 5. Bir dosyadaki değişiklikleri görmek:
+```shell
+$ git diff dosyaAdi
+```
+> **Explanation:**
+> + Eğer working directory de `dosyaAdi` adlı dosyada bir değişiklik yaptıysanız. Bu değişiklikleri bu komut ile görebiliriz.
+###### diff Dosyası:
+```vim
+diff --git a/test.txt b/test.txt
+index 363a01d..61775f4 100644 
+--- a/test.txt +++ b/test.txt 
+@@ -7,3 +7,5 @@ Debian will be deleting
+bu bir conflict 
+commit 1 
++
++commit 2
+```
+
+1. **Başlık:**
+```shell
+$ diff --git a/test.txt b/test.txt
+```
+> **Explanation:**
+> + Bu satır, hangi dosya üzerinde değişikliklerin yapıldığını belirtir. Burada, **`a/test.txt`** dosyasının eski sürümü ile **`b/test.txt`** dosyasının yeni sürümü karşılaştırılıyor.
 
 
 #### Git rm
@@ -370,10 +558,18 @@ $ git rm -r --cached directoryName
 > + Eğer sadece bir dosya yerine bir dizin silmek istiyorsanız, **`-r`** parametresini eklemeniz gerekir. Aksi takdirde, `git rm` sadece tekil dosyalar üzerinde çalışır.
 > + `git rm --help` ile -r parametresi ne görevine bakabilirsiniz.
 
+#### Git rebase:
++ **`git rebase`**, Git'te iki branch arasındaki commit geçmişini birleştirirken (genellikle dalları düzenlerken) kullanılan bir komuttur.
++ Rebase işlemi, mevcut branch'inizin commit'lerini başka bir branch'in en son commit'ine "taşır" ve böylece daha temiz, doğrusal bir commit geçmişi oluşturur.
++ Bu, commit geçmişini temiz ve düzenli tutmak için özellikle kullanışlıdır.
+
+```shell
+$ git rebase main
+```
 
 #### Git config
 
-> [!TIP] İpucu:
+> [!TIP]
 > Git yapılandırma ayarları belirli bir öncelik sırasına sahiptir:
 > 1. **Yerel (Local) Düzey**: En yüksek önceliğe sahiptir ve diğer tüm düzeydeki ayarların üzerine yazar.
 > 2. **Kullanıcı (Global) Düzey**: Kullanıcı düzeyindeki ayarlar, sistem düzeyindeki ayarların üzerine yazar.
@@ -390,6 +586,10 @@ $ git config --list
 >	+ `git config --global --list`
 >	+ `git config --system --list`
 >	+ `git config --local --list`
+
+
+> [!TIP]
+> `git config user.email "username@gmail.com"`  komutu içerisindeki `email` ile github sizin kim olduğunu tanıyabilmektedir. Kullanıcılarını bu şekilde ayırt edebilmektedir.
 
 ###### Örnek 2:  --global
 ```shell
@@ -408,6 +608,10 @@ $ git config --local user.name "username@gmail.com"
 > **Explanation:**
 > Bu işlemi yapabilmemiz için `git init` ile oluşturduğumuz dizinde bulunmamız gerekir.
 > `--local` parametresini yazmasak da varsayılan parametredir.
+
+
+> [!TIP]
+> + `git --no-paper` komut ile git'in `less` komutunu açması durdurulabilir.
 
 ##### Git config Özelleştirme:
 **İngilizce:** [Basic Client Configuration](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration)
@@ -452,7 +656,7 @@ $ git config --local remote.origin.url "ssh url veya https url"
 > + Git repo'unuza giderek `<> Code` yeşil butonu tıklayarak, ssh url veya https url kopya alarak yeniden URL düzenleyebilirsiniz. 
 
 #### Git status:
-###### Örnek 1: Temel Kullanımı
+##### 1. Temel Kullanımı
 ```shell
 $ git status
 ```
@@ -461,7 +665,8 @@ $ git status
 > 2. Şu anda hangi dalda (branch) çalıştığınızı gösterir.
 > 3. **Untracked files (İzlenmeyen Dosyalar)**: Git tarafından henüz izlenmeyen dosyaları listeler. Bu dosyalar Git deposuna henüz eklenmemiştir. Bu dosyaları eklemek için `git add <dosya-adı>` komutunu kullanabilirsiniz.
 
-###### Örnek 2: -s parametresi
+
+##### 2. -s parametresi
 ```bash
 $ git status -s
 ```
@@ -471,8 +676,21 @@ $ git status -s
 > [!WARNING] Uyarı:
 > Eğer boş dosya oluştursanız ve `git status` yaparsanız, herhangi bir değişiklik olmayacaktır. Çünkü; Varsayılan olarak git boş bir dizini kopyalamaz veya size onu sürüm kontrolüne ekleme fırsatı vermez.
 
+##### 3. Git status çıktı:
+###### Yorum 1
+```shell
+On branch main
+Your branch and 'origin/main' have diverged,
+and have 1 and 2 different commits each, respectively.
+  (use "git pull" to merge the remote branch into yours)
+
+nothing to commit, working tree clean
+```
+> **Explanation:**
+> + `main` branch'i le `origin/main` arasında farklar olduğunu göstermektedir. `main` branch'inde 1 fark var iken `origin/main` de ise 2 fark olduğunu söylemektedir.
+> + `git pull` komut ile de `main` ve `origin/main` birleştirme yapılabileceğinin *ipucunu* vermektedir.
 #### Git branch
-###### Örnek 1: Temel Kullanımı
+###### 1. Temel Kullanımı
 ```shell
 $ git branch
 ```
@@ -480,7 +698,13 @@ $ git branch
 > + Tüm branch'leri listeler ve şu an hangi branch'te olduğunuzu gösterir.
 > + Aktif branch, `yıldız (*)` işareti ile belirtilir.
 
-###### Örnek 2: Uzak ve Yerel Branch listeleme
+###### 2. Sadece Uzak Branch'leri Listeleme:
+```shell
+$ git branch -r
+```
+> **Explanation:**
+> + `-r` parametresini `remote` olarak akılda tutulabilir.  `remote` Türkçe karşılığı uzak demektir.
+###### 2.1 Uzak ve Yerel Branch listeleme
 ```shell
 $ git branch -a
 ```
@@ -495,6 +719,13 @@ $ git branch prod
 > + alternatif olarak: [[Git Dersi#Git switch#Örnek 2: -c parametresi|git switch -c örnek 2]] bakınız.
 
 ###### Örnek 4: Branch Silme(local)
+
+
+> [!WARNING]
+> Eğer `branch` silme işlemi yapacaksanız;
+> 1. Adım olarak `git push origin --delete branchName` ile uzaktaki(Remote Repo) branch'i siliniz.
+> 2. Adım olarak  aşağıdaki komut uygulayınız yani taslak komut: `git branch -d branchName` ile yerel deponuzdaki(local Repo) branch'i siliniz.
+
 ```shell
 $ git branch -d prod
 ```
@@ -786,8 +1017,10 @@ $ git revert ff0bd9f
 > + Eğer git revert işlemi yapılmış bir commit tekrardan git revert işlemi yaparsak eksi haline geri gelir yani revert türkçe karşılığı tersini almak demek, böylelikle tersin tersi ilk hali olur. 
 
 #### Git reset
-**Tanım:** Git'te çalışma dizinini, index'i (staging area) ve commit geçmişini belirli bir commit'e geri almak için kullanılan güçlü bir komuttur. Bu komut, proje geçmişini ve çalışma durumunu geri döndürebilir, yani dosyalarınızı belirli bir commit'teki duruma sıfırlayabilir. 3 farklı modda kullanılabilir:
-##### soft modu:
+**Tanım:** 
++ Git'te çalışma dizinini, index'i (staging area) ve commit geçmişini belirli bir commit'e geri almak için kullanılan güçlü bir komuttur. 
++ Bu komut, proje geçmişini ve çalışma durumunu geri döndürebilir, yani dosyalarınızı belirli bir commit'teki duruma sıfırlayabilir. 3 farklı modda kullanılabilir:
+##### a. Soft modu:
 ###### Örnek 1: Basit Kullanımı
 ```shell
 $ git reset --soft 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125
@@ -797,7 +1030,7 @@ $ git reset --soft 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125
 > - **Index (Staging Area)**: Etkilenmez, tüm değişiklikler hâlâ sahneye alınmış olarak kalır.(-)
 > - **Çalışma dizini**: Dosyalar olduğu gibi kalır.(-)
 > - 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125 (commit hash).
-##### mixed modu:
+##### b. mixed modu:
 ###### Örnek 1: Basit Kullanımı:
 ```shell
 $ git reset --mixed 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125
@@ -806,15 +1039,15 @@ $ git reset --mixed 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125
 > - **Commit geçmişi**: Belirtilen commit'e geri döner yani commit geçmişini geriye alır.(+)
 > - **Index (Staging Area)**: staged değişiklikler geri alınır, dosyalar unstaged duruma getirilir.(+)
 > - **Çalışma dizini**: Dosyalar olduğu gibi kalır.(-)
-##### hard modu:
-###### Örnek 1: Basit Kullanımı:
+##### c. hard modu:
+###### Basit Kullanımı:
 ```shell
 $ git reset --hard 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125
 ```
 > **Explanation:**
 > - **Commit geçmişi**: Belirtilen commit'e geri döner yani commit geçmişini geriye alır.(+)
 > - **Index (Staging Area)**: staged değişiklikler geri alınır, dosyalar unstaged duruma getirilir.(+)
-> - **Çalışma dizini**: Dosyalar olduğu gibi kalır.(+)
+> - **Çalışma dizini**: Dosyalar veya klasörler üzerindeki değişikliklerde geri alınır.(+)
 ## Uzak Depoda İşlemler(Remote Repository)
 
 ##### Origin Nedir?
@@ -822,7 +1055,12 @@ $ git reset --hard 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125
 * Git, bir projeyi yerel bilgisayarınıza kopyalarken uzaktaki bir sunucuda veya GitHub, GitLab gibi servislerde barındırılan repository'ye bağlanır.
 * Bu uzaktaki repository'ye **remote** denir ve varsayılan ismi **`origin`** olarak atanır.
 
-
+#### Git clone:
+```shell
+$ git clone git@github.com:tanjuy/my_documentation_on_obsidian.git
+```
+> **Explanation:**
+> 
 #### Git fetch:
 ###### Temel Kullanımı:
 ```shell
@@ -841,9 +1079,59 @@ $ git fetch --prune
 > **Explanation:**
 > + Uzak depoda silinen dalları da yerel deponuzdan temizlemek için `--prune` seçeneği kullanılır.
 
-##### Git remote:
+#### Git remote:
 
-##### Git push:
+###### 1. Uzak Depoları Listeleme:
+```shell
+$ git remote
+```
+> **Explanation:**
+> + Uzak depoları görüntülemek için kullanılır.
+> + Bu komut, mevcut yerel Git deposuna bağlı tüm uzak depoları listeler. Eğer uzak depo eklenmişse, genellikle en yaygın kullanılan `origin` olarak adlandırılan uzak depo gösterilir.
+
+###### 2. Daha Fazla Bilgiyle Listeleme:
+```shell
+$ git remote -v
+```
+> **Explanation:**
+> + Uzak depolar hakkında daha detaylı bilgi almak için `-v` (verbose) parametresi kullanılır. Bu, uzak depo URL'lerini de görüntüler (fetch ve push işlemleri için).
+###### 3. add parametresi:
++  `git remote add`, mevcut Git deposuna yeni bir uzak depo (remote repository) eklemek için kullanılır. "Remote", Git projelerinin kopyalarının depolandığı yerlerdir ve genellikle internet üzerindeki bir sunucuda bulunur.
++ `origin`, eklenen uzak depoya verilen varsayılan isimdir. Bu ismi herhangi bir isimle değiştirebilirsiniz, ancak `origin` yaygın olarak kullanılır.
++ `<repository-url>`, GitHub, GitLab, ya da başka bir sunucu üzerindeki proje deposunun adresidir. `git remote add origin` komutu ile bu URL, `origin` adı altında depoya eklenmiş olur.
+
+```shell
+$ git remote add origin git@github.com:tanjuy/git_test.git
+```
+> **Explanation:**
+> + Uzak depo adresini (`git@github.com:tanjuy/git_test.git`) genellikle `origin` adı verdiğimiz bir isime atarız. Artık ne zaman origin kullandığımızda bu uzak depo adresi kullanılmış olur.
+
+###### 4. show parametresi:
+```shell
+$ git remote show origin
+```
+> **Explanation:**
+> + uzak depolar hakkında daha ayrıntılı bilgi verir.
+
+###### 5. prune parametresi:
+```shell
+$ git remote prune origin
+```
+> **Explanation:**
+> + 
+#### Git pull request
+```
+$ 
+```
+
+#### Git push:
+
+###### 1. Temel Kullanımı:
+```shell
+$ git push origin main
+```
+> **Explanation:**
+> + Yerel depodaki `main` branch'ideki değişiklikleri uzak depodaki `main` branch'indeki gönderme işlemi yapar
 ###### 1. origin de branch silme:
 ```shell
 $ git push origin --delete <branch-name>
@@ -857,6 +1145,102 @@ $ git push origin --delete <branch-name>
 ```bash
 $ git push -u origin main
 ```
+> **Explanation:**
+> + `-u` parametresinin uzun hali `--set-upstream` 
+
+```config
+[branch "main"]
+        remote = origin
+        merge = refs/heads/main
+```
+> + Eğer bu parametreler kullanılırsa `.git/config` dosyasında  böyle bir düzenleme yapılır.
+
+```shell
+$ git push
+```
+>+ `git push origin main` yazmadan direk olarak bu komutu kullanabiliriz.
+#### Git pull
+
+
+> [!TIP]
+> `git pull` eş değeri `git fetch` ve `git merge` ikisinin birleşimidir. 
+
+
+## Senaryolar
+
+#### Örnek 1: Dosyalarda Çakışma
+###### Yerel Bilgisayar(Local Repo):
+```bash
+#!/usr/bin/bash                   # 1
+read -p "Adınızı giriniz" name
+echo "Merhaba $name"
+```
+> **Explanation:**
+> 1. `#!/usr/bin/bash` ekledik veya düzenledik.
+> 	+ `$ git add myScript.sh`  ile indeksledik.
+> 	+ `$ git commit -m "shebang eklandi"` ile local repo'ya yolladık.
+
+###### Uzak Bilgisayar(Remote Repo):
+```bash
+#!/usr/bin/env bash               # 2
+read -p "Adınızı giriniz" name
+echo "Merhaba $name"
+```
+> **Explanation:**
+> 2. Git'in ara yüzünden değişiklik yapıp ve daha sonrasında `commit` attık.
+> 	+ **Not:** Bu işlemi takımdaki bir başkası da kendi yerel bilgisayarından da gönderebilirdi.
+
++ Eğer yerel bilgisayardaki yaptığı değişiklikler `git push origin main` komut ile Remote Repo'ya gönderdiğinde şuna benzer hata alaçaktı;
+
+```shell
+╰─$ git push origin prod
+To github.com:tanjuy/git_test.git
+ ! [rejected]        prod -> prod (non-fast-forward)
+error: failed to push some refs to 'github.com:tanjuy/git_test.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+```
+
++ Eğer `git pull origin main` komut ile uzak depodaki değişiklikleri çekmek isteseydi şuna benzer hata verecektir;
+
+```shell
+╭─ottoman@ottoman ~/gitDerleri ‹main›
+╰─$ git pull origin main                                                           
+From github.com:tanjuy/git_test
+ * branch            main       -> FETCH_HEAD
+hint: You have divergent branches and need to specify how to reconcile them.
+hint: You can do so by running one of the following commands sometime before
+hint: your next pull:
+hint:
+hint:   git config pull.rebase false  # merge (the default strategy)
+hint:   git config pull.rebase true   # rebase
+hint:   git config pull.ff only       # fast-forward only
+hint:
+hint: You can replace "git config" with "git config --global" to set a default
+hint: preference for all repositories. You can also pass --rebase, --no-rebase,
+hint: or --ff-only on the command line to override the configured default per
+hint: invocation.
+fatal: Need to specify how to reconcile divergent branches.   
+```
++ Bu çıktıda hem hatayı vermekte hem de `hint` ile ipucu vermektedir. Biz de bu ipucunu kullanacağız;
+
+```shell
+$ git config pull.rebase false
+```
+
++ Tekrardan `git pull origin main` komut ile uzak depodaki değişiklikleri çekiyoruz.  Bu işlem `merge CONFLICT` hatası verecektir. `merge CONFLICT` gidermek için dosyayı açıp bize uygun şekilde düzenleyip;
+```shell
+$ git add myScript.sh         # staged area(index) eklendi 
+```
+
+```shell
+$ git commit -m "#!/usr/bin/env bash selected!"
+```
+
+
+
 ### Kaynaklar
 + [Official Git Documantion](https://git-scm.com/book/en/v2)
 + [Resmi Git Belgesi](https://git-scm.com/book/tr/v2)
