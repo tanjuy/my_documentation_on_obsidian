@@ -22,66 +22,36 @@
             }
           },
           {
-            "id": "528874e776045cac",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/Javascript/javascript Dersleri.md",
-                "mode": "source",
-                "source": false
-              },
-              "pinned": true
-            }
-          },
-          {
-            "id": "954b538d6caa6c41",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Docker/Docker Swarm.md",
-                "mode": "preview",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "f761e866d8ff2ac3",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/Bash_Script/Bash Script.md",
-                "mode": "source",
-                "source": false
-              },
-              "pinned": true
-            }
-          },
-          {
             "id": "5643c7f7e8e84561",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Git/Git Dersi.md",
-                "mode": "preview",
-                "source": false
-              },
-              "pinned": true
-            }
-          },
-          {
-            "id": "f68d19708203f012",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
                 "file": "Linux Command/Linux komutları.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "26ee73dd9d36fd43",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Linux Command/Linux Paket Komutları.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "c5204e878cbdaded",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Docker/Docker Giriş.md",
                 "mode": "source",
                 "source": false
               }
@@ -154,7 +124,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Programlama/Bash_Script/Bash Script.md",
+                "file": "Docker/Docker Giriş.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -171,7 +141,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Programlama/Bash_Script/Bash Script.md",
+                "file": "Docker/Docker Giriş.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -194,7 +164,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Programlama/Bash_Script/Bash Script.md"
+                "file": "Docker/Docker Giriş.md"
               }
             }
           }
@@ -215,37 +185,41 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "f761e866d8ff2ac3",
+  "active": "c5204e878cbdaded",
   "lastOpenFiles": [
-    "Windows Commands/WSL2.md",
-    "To do.md",
-    "Git/Git Dersi.md",
-    "Programlama/Bash_Script/Bash Script.md",
-    "Linux Command/Linux komutları.md",
-    "Programlama/Bash_Script/Bash Script Apps.md",
-    "Docker/Docker Swarm.md",
-    "Linux Command/SSH.md",
-    "Linux Command/Vim.md",
-    "2024-09-17.md",
-    "Windows Commands/PowerShell.md",
-    "Windows Commands/CMD.md",
-    "Ansible/ansible.cfg.md",
-    "Windows Commands/Winget Komutları.md",
-    "Linux Command/tmux.md",
-    "Ansible/Playbook Config.md",
-    "Web Servers/Nginx/Nginx Config File.md",
-    "Ansible/ad hoc commands.md",
-    "Web Servers/Nginx/Kaynaklar.md",
-    "Web Servers/Nginx/images/cache_control_no_store.png",
-    "Web Servers/Nginx/Nginx Directives.md",
-    "Web Servers/Nginx/images",
     "Linux Command/Linux Paket Komutları.md",
-    "Programlama/Javascript/javascript Dersleri.md",
+    "README.md",
+    "Linux Command/Linux komutları.md",
+    "Web Servers/Nginx/Quick Start.md",
+    "Web Servers/Nginx/Nginx Config File.md",
+    "Linux Command/Firewall.md",
+    "Git/Git Dersi.md",
+    "Docker/Docker Apps.md",
+    "Docker/Hızlı Başlama(Quick Start).md",
     "Docker/Dockerfile.md",
+    "Programlama/Bash_Script/Bash Script.md",
+    "Programlama/Javascript/javascript Dersleri.md",
+    "Docker/Docker Giriş.md",
+    "Docker/Docker Swarm.md",
+    "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
+    "To do.md",
+    "Git/images/contributor.png",
+    "Git/images/contributor1.png",
+    "Database/PostgreSQL/GROUP BY Kullanımı.md",
+    "Database/PostgreSQL/Database Oluşturma.md",
+    "Database/PostgreSQL/AS kullanımı.md",
+    "Git/images",
+    "Git/Yeni klasör",
+    "Linux Command/SSH.md",
+    "Web Servers/Nginx/Nginx Komutları.md",
+    "Linux Command/Systemd.md",
+    "Programlama/Bash_Script/Bash Script Apps.md",
+    "Web Servers/Nginx/Kaynaklar.md",
+    "Windows Commands/WSL2.md",
+    "Web Servers/Nginx/Nginx location modifier.md",
+    "Web Servers/Nginx/images/cache_control_no_store.png",
+    "Web Servers/Nginx/images",
     "Git",
-    "Web Servers/HTTP.md",
-    "DevOps/Jenkins/Jenkins Kurulumu.md",
-    "DevOps/Jenkins/Jenkins Eklentilerim.md",
     "Database/MySQL",
     "Database/PostgreSQL/Pictures/if-modified-since.png",
     "Database/PostgreSQL/Pictures/Left_Join.png",
@@ -254,14 +228,11 @@
     "Programlama/Bash_Script",
     "Programlama/Javascript",
     "Programlama",
-    "Jenkins",
     "Pasted image 20240810145256.png",
-    "Linux Command/Processes",
     "Database/PostgreSQL/Pictures/inner_join.png",
     "Database/PostgreSQL/Pictures/employee_table.png",
     "Database/PostgreSQL/Pictures/department_table.png",
     "Database/PostgreSQL/Pictures/unknown.png",
-    "Database/PostgreSQL/unknown.png.png",
     "Untitled.canvas"
   ]
 }

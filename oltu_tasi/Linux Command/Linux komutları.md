@@ -137,3 +137,27 @@ $ ps -ef
 > **Explanation:**
 > 
 ### top
+
+### tree
+
+###### 1. Temel Kullanımı:
+```
+$ tree
+```
+> **Explanation:**
+> + Dosya sistemindeki dizin ve alt dizinlerin hiyerarşik bir yapıda görsel olarak gösterilmesini sağlar.
+> + `tree` komutu çalıştırdığınız dizinde hiyerarşik bir şekilde dosya ve dizinleri ekran yazdırır.
+
+###### 2. `-d` parametresi:
+```sh
+$ tree -d
+```
+> **Explanation:**
+> + Yanlızca dizinleri yani klasörleri listeler.
+
+###### 3. -L parametresi:
+```sh
+$ tree -L 2
+```
+> **Explanation:**
+> + 

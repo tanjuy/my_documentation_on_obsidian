@@ -62,7 +62,7 @@ Nginx ayrıca şunları da yapabilir;
 ###### 3. Performans:
 + **NGINX**: Yüksek sayıda eşzamanlı bağlantıda Nginx daha iyi performans gösterir.
 + Özellikle statik içeriklerin (HTML, CSS, JavaScript gibi) sunulmasında Nginx çok hızlıdır.
-+ 
+
 ---
 + **Apache**, saatte 1000 veya daha az istek gibi nispeten düşük trafik seviyelerine sahip siteleri barındırırken daha iyi performans gösterir.
 + Apache de düşük performansını nedeni `.htaccess` dosyasını giriş/çıkış(I/O) operasyonlarıdır. Ayrıca, apache tarafından oluşturulan tüm process'ler bu dosyayı(`.htaccess`) okur.
@@ -96,16 +96,524 @@ Nginx ayrıca şunları da yapabilir;
 > + istek(request) ---> nginx ---> 3. part process 
 
 
+### Nginx Kurulumu:
+
+##### A. Debian Temeli İşletim Sistemleri:
+```shell
+$ sudo apt install nginx
+```
+> **Explanation:**
+> + Ubuntu ve Debian işletim sistemlerinde *nginx* kurulumunu `apt` paket yöneticisi tarafından yapar.
+
++ Eğer apt paket yöneticisi ile kurulum yaparsanız, *nginx* ile birlikte kurulacak paketler;
+```shell
+fontconfig-config fonts-dejavu-core libdeflate0 libfontconfig1 libgd3 libjbig0 libjpeg-turbo8 libjpeg8 libnginx-mod-http-geoip2 libnginx-mod-http-image-filter libnginx-mod-http-xslt-filter libnginx-mod-mail libnginx-mod-stream libnginx-mod-stream-geoip2 libtiff5 libwebp7 libxpm4 nginx-common nginx-core
+```
+
+---
+##### B. REHL Temeli İşletim Sistemleri:
+
+```shell
+$ sudo yum install nginx
+```
+
++  Yüklediğimiz *nginx*'in çalıştığını veya çalışmadığını kontrol edelim;
+
+> [!WARNING]
+> + `yum` paket yöneticisi yüklediği paket veya uygulamaları varsayılan olarak çalıştırmaz. Çalıştırma işlemini kullanıcıya bırakır. 
+
+```shell
+$ ps aux | grep nginx
+```
+> **Explanation:**
+> + 
+
+```sh
+$ sudo systemctl enable --now nginx.service
+```
+> **Explanation:**
+> + `systemctl` aracı ile `nginx` sevisini hem aktif(`--now`) hem de sistem yeniden başladığında aktif(`enable`) olmasını sağlıyoruz. 
+
+```sh
+$ sudo systemctl status nginx
+```
+> **Explanation:**
+> + Tekrardan `systemctl` ile nginx servisini kontrol etiğimiz de  servisin  çalıştığını görebiliriz.
+
+```sh
+$ firewall-cmd --add-service=http --permanent
+```
+
+```sh
+$ firewall-cmd --add-service=https --permanent
+```
+
+> **Explanation:**
+> +  REHL temeli işletim sistemlerinde  `firewalld deamon` çalışır. nginx de `80 port` kullanır Bu yüzden `80 port`'una izin vermemiz gerekmektedir.
+> + Nginx https bağlantıları için 443 portu kullanır. Güvenlik duvarı tarafında bu porta izin vermemiz gerekmektedir.
+
+```sh
+$ firewall-cmd --reload
+```
+> **Explanation:**
+> + Firewalld deamond da yapılan değişikliklerin geçerli olabilmesi için bu komutu çalıştırıyoruz.
+
+---
+##### C. Kaynak Koddan Derleme:
+
++ nginx derleme işlemini yapabilmemiz için nginx source code indirmemiz gerekmektedir.
++ Kaynak kodu indirme  [link](https://nginx.org/en/download.html) gitmek için tıkayınız.
++ Derleme işlemini `Mainline version` ile sürdüreceğiz. `nginx-1.27.2` bağlantının adresini kopyalıyoruz.
+
+```sh
+$ wget https://nginx.org/download/nginx-1.27.2.tar.gz
+```
+
+
+> [!CAUTION]
+> + Eğer paket yöneticileri(`apt, yum...`) ile yüklediğimizde nginx'e modül(*3.part modül veya özel modül*) dahil edemiyoruz. Bu yüzden nginx kaynak koddan yüklemede modül yükleme imkanı vermektedir. 
+> + Kaynak kod üzerinde derleme işlemi işletim sisteminden bağımsız yapar. Yani ubuntu üzerinde yapılan işlemler almalinux üzerinde de aynı şekilde olur.
+
+```sh
+$ tar -zxvf nginx-1.27.2.tar.gz            # Çıktı: nginx-1.27.2
+```
+> **Explanation:**
+> + Hem arşivlenmiş(tar) hem de sıkıştırılmış(gz) dosya `tar`  ve parametreleri ile çıkarma işlemini yapıyoruz.
+
+```sh
+$ cd nginx-1.27.2; ls -l
+```
+
+**Çıktı:**
+```sh
+total 860
+-rw-r--r--. 1 ottoman ottoman 328790 Oct  2 18:30 CHANGES
+-rw-r--r--. 1 ottoman ottoman 503040 Oct  2 18:30 CHANGES.ru
+-rw-r--r--. 1 ottoman ottoman   5215 Oct  2 18:13 CODE_OF_CONDUCT.md
+-rw-r--r--. 1 ottoman ottoman   4049 Oct  2 18:13 CONTRIBUTING.md
+-rw-r--r--. 1 ottoman ottoman   1319 Oct  2 18:13 LICENSE
+-rw-r--r--. 1 ottoman ottoman  14220 Oct  2 18:13 README.md
+-rw-r--r--. 1 ottoman ottoman    787 Oct  2 18:13 SECURITY.md
+drwxr-xr-x. 6 ottoman ottoman   4096 Oct 11 02:28 auto
+drwxr-xr-x. 2 ottoman ottoman    168 Oct 11 02:28 conf
+-rwxr-xr-x. 1 ottoman ottoman   2611 Oct  2 18:13 configure
+drwxr-xr-x. 4 ottoman ottoman     72 Oct 11 02:28 contrib
+drwxr-xr-x. 2 ottoman ottoman     40 Oct 11 02:28 html
+drwxr-xr-x. 2 ottoman ottoman     21 Oct 11 02:28 man
+drwxr-xr-x. 9 ottoman ottoman     91 Oct  2 18:13 src
+```
+> **Explanation:**
+> + İndirdiğimiz nginx kaynak kodlarını ekran yazdırıyoruz.
+
+###### Debian Temeli OS:
+```sh
+$ sudo apt install build-essential
+```
+
+```sh
+$ sudo apt install libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev make
+```
+> **Explanation:**
+> + `PCRE library`, `build-essential` ile birlikte gelmemektedir.
+
+---
+###### REHL Temeli OS:
+```sh
+$ sudo yum install groupinstall "Development Tools"
+```
+> **Explanation:**
+> + Nginx'i kaynak koddan(`source code`) derleme(`compile`)  yapılabilmesi için işletim sistemlerine bağlı olarak bazı araçların yüklenmesi gerekmektedir.
+> + `PCRE library`, `Development Tools` içerisinde gelmektedir. 
+
+```sh
+$ sudo yum list installed pcre pcre-devel zlib zlib-devel openssl openssl-devel make
+```
+> **Explanation:**
+> + `list installed` komutu ile hangi kütüphanelerin yüklü olduğunu teyit edebilirsiniz.
+
+```sh
+$ sudo yum install pcre pcre-devel zlib zlib-devel openssl openssl-devel make
+```
+> **Explanation:**
+> + Bir çok kütüpahane `Development Tools` ile gelmektedir fakat Eğer eksik komut ile karşılaşırsanız bu kütüphaneleri yükleyebilirsiniz.
+
+---
+###### OS'dan Bağımsız İşlemler:
+
+> [!CAUTION]
+> + Aşağıdaki komutu indirmiş olduğunuz `nginx source code` içerisinde çalıştırınız.
+
+```sh
+$ sudo ./configure --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module
+```
+
+> **Explanation:**
+> + Nginx configure etme işlemini başlatabiliriz: `configure` komutun alacağı parametreler [link](https://nginx.org/en/docs/configure.html) de mevcuttur.
+> + `sudo ./configure --help` komut ile `configure` komutun alacağı parametreleri terminal üzerinde ekranda listeleyebiliriz.
+> + İşlem tamamlandığında `Makefile` dosyası oluşacaktır.
+
+```sh
+$ sudo make
+```
+
+> **Explanation:**
+> + Kodu derlemek için `make` komutunu çalıştırıyoruz.
+> + Eğer böyle bir çıktı görüyorsanız; `make[1]: Leaving directory '/home/ottoman/nginx-1.27.2'` işlem tamamlanmıştır.
+
+```sh
+$ sudo make install
+```
+
+> **Explanation:**
+> + Nginx yüklemesi yapmak için bu komutu çalıştırıyoruz.
+
+```sh
+$ nginx -v                 # Çıktı: nginx version: nginx/1.27.2
+```
+
+> **Explanation:**
+> + nginx versiyonunu veriyorsa nginx'niz hayırlı olsun kurulum başarılı.
+
+```sh
+$ sudo nginx 
+```
+
+> **Explanation:**
+> + Yüklemiş olduğumuz nginx uygulamasını başlatacaktır.
+
+```sh
+$ sudo ps aux | grep nginx
+```
+> **Explanation:**
+> + Nginx'in çalıştığını teyit etmek için ve çıktı bize bir master ve bir de worker process'leri ekrana verecektir.
+
+```sh
+$ curl -i http://192.168.1.132
+```
+> **Explanation:**
+> + `curl` komut ile `GET` isteği yaptığımızda bize nginx'in varsayılan web sitesi geri dönmesi gerekir.
+> + Bu `GET` isteğini her hangi bir tarayıcı ile de yapılabilir.
+
+
+### Nginx Modülleri:
+
+
+> [!NOTE]
+> + Modülleri nginx'i kaynak koddan derlerken kullanılır;
+> + Genel şeması: `configure --module1 --module2 --module3 ...`
+
+###### 1. --sbin-path modülü:
++ nginx yürütülebilir dosyasının adını ayarlar. Bu ad yalnızca kurulum sırasında kullanılır. Varsayılan olarak dosya `prefix /sbin/nginx` olarak adlandırılır.([nginx.com](https://nginx.org/en/docs/configure.html))
++ derleme ve kurulum sürecinde Nginx’in ikili (binary) dosyasının sistemde nereye yükleneceğini belirlemek için kullanılır.(chatgpt)
++ Bu seçenek, Nginx’in çalıştırılabilir dosyasının (genellikle `/usr/sbin/nginx`) tam yolunu tanımlamanıza olanak tanır.
+**Örnek Kullanım:**
+```sh
+$ ./configure --sbin-path=/usr/bin/nginx
+```
+###### 2. --conf-path modülü:
++ nginx.conf yapılandırma dosyasının adını ayarlar. Eğer gerek duyulur ise nginx farklı bir yapılanadırma dosyası ile başlatılabilir; `nginx -c configFile` ile bul işlem yapılabilir.([nginx.com](https://nginx.org/en/docs/configure.html))
++ Nginx'in ana yapılandırma dosyasının (configuration file) sistemde nerede bulunacağını belirtmek için kullanılır.
+**Örnek Kullanım:**
+```sh
+$ ./configure --conf-path=/etc/nginx/nginx.conf
+```
+
+###### 3. --error-log-path modülü:
++ Birincil derece hatanın, uyarıların ve tanılama dosyasının adını ve dizin yolunu ayarlar. Yükleme sonrasında `error_log` yönergesi(directive) ile `nginx.conf` dosyasında dosyanın adı ve dizin yolu değiştirilebilir.([nginx.com](https://nginx.org/en/docs/configure.html))
++ Nginx'in hata günlüklerinin (error log) nereye yazılacağını belirlemek için kullanılır.
++ **Amaç:** Sunucudaki hataların kolayca izlenebilmesi ve teşhis edilmesi için kullanılır.
+
+**Örnek Kullanım:**
+```sh
+$ ./configure --error-log-path=/var/log/nginx/error.log
+```
+
+###### 4. --http-log-path modülü:
++ HTTP sunucusunun birincil istek günlük dosyasının adını ve dizin yolunu ayarlar. Yükleme sonrasında `access_log` yönergesi(directive) ile `nginx.conf` dosyasında dosyanın adı ve dizin yolu değiştirilebilir. Varsayılan olarak dosya `prefix/logs/access.log` olarak adlandırılır. ([nginx.com](https://nginx.org/en/docs/configure.html))
++ HTTP isteklerinin günlüklerinin (access log) hangi dosyada tutulacağını belirlemek için kullanılır.
++ **Amaç:** Web sunucusuna yapılan HTTP isteklerinin kaydını tutmak, trafik analizleri ve hata ayıklama için önemlidir.
+
+**Örnek Kullanım:**
+```sh
+$ ./configure --http-log-path=/var/log/nginx/access.log
+```
+
+###### 5. --with-pcre module:
++ PCRE kütüphanesinin kullanımını zorlar.([nginx.com](https://nginx.org/en/docs/configure.html))
++ Perl Compatible Regular Expressions (PCRE) kütüphanesinin Nginx'e dahil edilmesini sağlar. 
++ PCRE, düzenli ifadeleri (regex) kullanarak metin eşleme ve işleme işlemleri yapar ve Nginx’in gelişmiş özelliklerinden bazıları için gereklidir.
+
+
+> [!CAUTION]
+> + Nginx'te kullanılan regex ifadeleri Perl regex ile yüksek oranda uyumludur. 
+> + Bu, Nginx kullanıcılarının Perl'deki regex özelliklerini büyük ölçüde kullanabilmelerini sağlar.
+> + PCRE, birçok programlama dili ve araç tarafından desteklenir çünkü Perl regex sözdizimi oldukça güçlü ve esnektir.
+> + Bu modülü kullanabilmek için; *REHL* işletim sistemlerinde `pcre pcre-devel` ve *debian* temeli işletim sistemlerinde `libpcre3 libpcre3-dev` kütüphanelerin kurulu olması gerekmektedir.
+
+
+**Örnek Kullanım:**
+```sh
+$ ./configure --with-pcre
+```
+
+**Kullanım Alanı:**
+```nginx
+location ~ ^/images/(.*)\.(jpg|jpeg|png)$ {
+    # İstek "/images/" ile başlayan ve ".jpg", ".jpeg", ".png" ile biten URL'ler için
+    # Yapılacak işlemler
+}
+
+```
+> **Explanation:**
+> + nginx `pcre` kütüphanesini eklenmesi ile yukarıda görülen nginx de  `regex` yapısını kullanabiliyoruz.
+###### 6. --pid-path modülü:
++ Ana process'in process ID depolayacak olan nginx.pid dosyasının adını ve dizin yolunu ayarlar. Nginx derleme sonrasında `pid` yönergesini(directive) kullanarak `nginx.conf` dosyasında dosya adı ve dizin yolu değiştirilebilir. ([nginx.com](https://nginx.org/en/docs/configure.html))
++ Nginx'in **Process ID (PID)** dosyasının nerede saklanacağını belirtmek için kullanılır.
++ PID dosyası, çalışan Nginx sürecinin kimliğini (process ID) içerir. Bu dosya, Nginx sürecini izlemek, yönetmek ve gerektiğinde yeniden başlatmak veya durdurmak için kullanılır.
++ **Amaç:** Nginx’i başlatmak, durdurmak veya yeniden başlatmak için PID dosyası kullanılır. Özellikle sistem yöneticileri, bu dosyayı kullanarak süreçlerin ID'sini bilip doğru işlemler yapabilir.(chatgpt)
+
+**Örnek Kullanım:**
+```sh
+$ ./configure --pid-path=/var/run/nginx.pid
+```
+###### 7. --with-http_ssl_module modülü:
++ HTTP sunucusuna [HTTPS protokol desteği](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) ekleyen bir modülün oluşturulmasını sağlar.Bu modül varsayılan olarak derlenmez. Bu modülü derlemek ve çalıştırmak için OpenSSL kütüphanesi gereklidir.([nginx.com](https://nginx.org/en/docs/configure.html))
++ Nginx'in **SSL/TLS** (Secure Sockets Layer / Transport Layer Security) desteğiyle derlenmesini sağlar. SSL/TLS, web trafiğini şifreleyerek güvenli iletişim kurmanıza olanak tanır ve HTTPS protokolünün temelini oluşturur.
+
+
+> [!CAUTION]
+> + `with-http_ssl_module` kullanabilmek için;
+> + REHL işletim sistemleri de `openssl openssl-devel` kütüphaneleri
+> + Debian temeli işletim sistemlerin de `libssl-dev` kütüphanesi kurulu olması gerekmektedir. 
+
+**Örnek Kullanım:**
+```sh
+$ ./configure --with-http_ssl_module
+```
+### Nginx Config Dosyası:
+
+
+> [!NOTE]
+> + Eğer debian temelli işletim sistemlerinde `apt` paket yöneticisini kullanarak nginx kurduysanız `nginx config` dosyası `/etc/nginx` dizinde mevcut olacaktır.
+
++ `nginx.conf`, NGINX'in çalışma şeklini belirleyen direktiflerin bulunduğu ana konfigürasyon dosyasıdır.
+##### `nginx.conf` Dosyasın Genel Yapısı:
++ NGINX yapılandırma dosyası, hiyerarşik bir yapıya sahiptir ve genellikle dört ana bloktan oluşur:
+1. **Main Context**
+2. **Event Context**
+3. **HTTP Context**
+4. **Server Context**
+5. **Location Context**
+###### `nginx.conf` Genel Şablonu:
+```nginx
+# Main Context
+...
+events {
+	# Event Context
+	...
+}
+http {
+	# Http Context
+	...
+    server {
+	    # Server Context
+	    ...
+        location / {
+	        # Location Context
+            ...
+        }
+    }
+}
+```
+
+
+> [!NOTE]
+> + `include` directive'i bir dosyayı bulunduğu dosyaya dahil eder. Kısacası bir dosya dahil etmek isteniyorsa `include` directive kullanılır.
+
+###### 1. Main Context:
++ **Konum:** `nginx.conf` dosyasının en üst düzeyinde bulunur.
++ **Amaç:** NGINX'in genel çalışma ayarlarını belirler. Bu ayarlar tüm `server` ve `location` blokları için geçerlidir.
+```nginx
+user www-data;                                   # 1
+worker_processes auto;                           # 2
+pid /run/nginx.pid;                              # 3
+include /etc/nginx/modules-enabled/*.conf;       # 4
+```
+> **Explanation:**
+> 1. NGINX süreçlerini çalıştıracak kullanıcı ve grup.
+> 2. NGINX'in çalıştıracağı worker process'lerin sayısını belirler.
+> 	+ **auto:** kaç işlemci var ise o kadar worker process oluşturur.
+> 3. nginx'in çalışmış olduğu process ID'yi verir.
+
+###### 2. Events Context:
++ **Konum**: Main context içinde yer alır.
++ **Amaç**: NGINX'in olay (event) modelini ve bağlantı yönetimini ayarlar.
+```nginx
+events {
+    worker_connections 768;                 # 1
+    # multi_accept on;
+}
+```
+> **Explanation:**
+> 1. `worker_connections`: Her `worker process` aynı anda açabileceği maksimum bağlantı sayısı.
+
+###### 3. Http Context:
++ **Konum**: Main context içinde yer alır.
++ **Amaç:** NGINX'in **HTTP protokolü** ile nasıl çalışacağını belirleyen ayarların yapıldığı bölümdür. Örneğin, **gzip sıkıştırma**, **keep-alive bağlantı süresi**, ve **log formatları** gibi genel HTTP özelliklerini yapılandırır.
+```nginx
+http {
+    # Basic Settings
+    sendfile on;                                 # 1
+
+    include /etc/nginx/mime.types;               # 2
+    default_type application/octet-stream;
+
+    # SSL Settings
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
+    ssl_prefer_server_ciphers on;
+
+    # Logging Settings
+    access_log /var/log/nginx/access.log;         # 3
+    error_log /var/log/nginx/error.log;           # 3
+
+    # Gzip Settings
+    gzip on;                                      # 4
+
+    # Virtual Host Configs
+    include /etc/nginx/conf.d/*.conf;             # 5
+    include /etc/nginx/sites-enabled/*;           # 5
+}
+```
+> **Explanation:**
+> 1. `sendfile`: Dosya gönderme optimizasyonunu etkinleştirir.
+> 2. `mime type` ile dosya tiplerini `nginx.conf` dahil edilir.
+> 3. `Log` dosyaların  nereye yazılacağını belirliyor.
+> 4. `gzip` ile dosya sıkıştırılıp gönderiliyor.
+> 5. `server context` tanımlanmış  dizinler `nginx.conf` dahil ediliyor.
+
+###### 4. Server Context:
++ **Konum**: HTTP context içinde yer alır.
++ **Amaç**: Belirli bir sunucu (domain) için ayarları tanımlar. Her `server` bloğu, farklı bir domain veya IP için yapılandırılabilir.
+
+```nginx
+server {
+    listen 80;                          # 1
+    listen [::]:80;                     # 2
+
+    server_name example.com;            # 3
+
+    root /var/www/example.com;          # 4
+    index index.html;                   # 5
+
+    location / {                        # 6
+        try_files $uri $uri/ =404;
+    }
+}
+```
+> **Explanation:**
+> 1. `listen directive`: Sunucunun dinleyeceği IP adresi ve port. Burada dinlenen port 80 dinleniyor. *IP versiyonu versiyon IP4 olmaktadır.*
+> 2. Yine `listen` directive kullanılmaktadır ama *IP versiyonu IP6 versiyonudur*.
+> 3. `server_name directive`: Sunucunun adını (domain) belirtir. 
+> 4. `root directive`: Web dosyalarının bulunduğu dizin.
+> 5. `index directive`: Varsayılan olarak sunulacak dosya.
+> 6. `location context`: URL yollarına göre istekleri yönlendirir.
+###### 5. Location Context:
++ **Konum**: Server context içinde yer alır.
++ **Amaç**: Belirli bir URL yoluna gelen isteklerin nasıl işleneceğini tanımlar. Örneğin, belirli dosya türleri için özel işlemler yapılabilir veya belirli dizinlere istekler yönlendirilebilir.
+
+```nginx
+server {
+    listen 80;                          # 1
+    listen [::]:80;                     # 2
+
+    server_name example.com;            # 3
+
+    root /var/www/example.com;          # 4
+    index index.html;                   # 5
+
+    location /linux {                   # 6
+		index linux.html;  
+        root /var/www/html;             # 7
+    }
+}
+```
+> **Explanation:**
+> 7. En basit `location` tanımı yapıyoruz. Konun anlaşılabilmesi için;
+- `vim /var/www/linux.html` komut ile basit bir html dosyası oluşturduk. 	
+- `curl -i http://192.168.1.129/linux/` komut veya tarayıcı ile `GET` isteği yaptığımızda nginx bize `/var/www/linux/linux.html` içreğini bize gönderecektir.
+- `index directive` :  nginx programının `/var/www/linux/` dizininde `linux.html` dosyasına bakmasını söylemektedir. 
+-  Yukarıdaki config dosyasında kullanılan `try_files` directive buradaki `location` context içeriği ile aynı işi yapar ama daha gelişmiş özelikleri mevcuttur.
+
+###### Final nginx.conf:
++ `/etc/nginx/nginx.conf` dosyasını en basit hali;
+
+```nginx
+# Main Context
+user www-data;                                   # 1
+worker_processes auto;                           # 2
+pid /run/nginx.pid;                              # 3
+include /etc/nginx/modules-enabled/*.conf;       # 4
+
+events {
+	# Event Context
+    worker_connections 768;                 # 1
+    # multi_accept on;
+}
+http {
+	# Http Context
+    # Basic Settings
+    sendfile on;                                 # 1
+
+    include /etc/nginx/mime.types;               # 2
+    default_type application/octet-stream;
+
+    # SSL Settings
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
+    ssl_prefer_server_ciphers on;
+
+    # Logging Settings
+    access_log /var/log/nginx/access.log;         # 3
+    error_log /var/log/nginx/error.log;           # 3
+
+    # Gzip Settings
+    gzip on;                                      # 4
+
+    # Virtual Host Configs
+    include /etc/nginx/conf.d/*.conf;             # 5
+    include /etc/nginx/sites-enabled/*;           # 5
+}
+```
+
++ `/etc/nginx/sites-enabled/default` dosyası;
++ `include /etc/nginx/sites-enabled/*` directive ile aşağıdaki config dosyası da dahil olacaktır.
+
+```nginx
+server {
+    listen 80;                          # 1
+    listen [::]:80;                     # 2
+
+    server_name example.com;            # 3
+
+    root /var/www/example.com;          # 4
+    index index.html;                   # 5
+
+    location /linux {                   # 6
+		index linux.html;  
+        root /var/www/html;             # 7
+    }
+}
+```
+
 
 ### Return
 
 ```nginx
 server {
-        listen 80 default_server;
-        location /ali {
-                add_header Content-Type text/plain;
-                return 200 "I publish 80 port";
-        }
+	listen 80 default_server;
+    location /ali {
+	    add_header Content-Type text/plain;
+        return 200 "I publish 80 port";
+    }
 }
 
 server {
@@ -117,6 +625,7 @@ server {
 }
 ```
 > **Explanation:**
+> 
 
 
 ### Allow and  Deny IP

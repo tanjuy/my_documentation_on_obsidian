@@ -6,6 +6,7 @@ tags:
 * Git, küçükten çok büyük projelere kadar her şeyi hızlı ve verimli bir şekilde ele almak için tasarlanmış, *ücretsiz ve açık kaynaklı, dağıtılmış bir sürüm kontrol* sistemidir.
 * En kısa tanımı ile bir *versiyon kontrol sistemi*dir.
 
+---
 ## Git Kurulumu
 ##### Linux
 ###### Dabian Temeli Dağıtımlar:
@@ -21,7 +22,9 @@ PS C:\Users\tanju> winget install --id Git.Git -e --source winget
 ```shell
 (base) ottoman@MacBook-Pro ~ % brew install git
 ```
-## Git Başlatma (Quick Start)
+
+---
+## Hızlı Başlama (Quick Start)
 ##### Proje Klasörü Oluştuma
 ```shell
 $ mkdir my_project
@@ -219,7 +222,7 @@ $ git merge dev
 > + **fast branch:**  -----------------------------------commit_1f-----commit_2f--------------------
 > + **Nihai Sonuc:** commit_1m----commit_2m-----commit_3m----commit_1f----commit_2f---
 > + main branch'deki dosyalar: html ve css  --- fast branch'deki dosyalar: javascript
-> + Eğer fark etiyseniz fast branch'inde hem dosya farklı hem de commit aralığı farklı yani main branch'inde yapılmayan commit fast branch'inde yapılmıştır.
+> + *Eğer fark etiyseniz fast branch'inde hem dosya farklı hem de commit aralığı farklı yani main branch'inde yapılmayan commit fast branch'inde yapılmıştır.*
 
 ###### Örnek: Fast-forward Çıktısına
 ```shell
@@ -401,6 +404,7 @@ $ git diff
 >**Explanation:**
 >+ Eğer bir dosyada değişiklik yapıldıysa bu komut silen veya eklen ifadeleri ekran basar.
 
+---
 ## Yerel Depoda İşlemler(Local Repository)
 
 #### Gitignore Dosyası
@@ -408,7 +412,7 @@ $ git diff
 $ touch .gitignore
 ```
 >**Explanation:**
->Linux komut olan `touch` ile gitingore dosyası oluşturuyoruz. Burada dikkat edilmesi gereken bu dosyanın gizli dosya olduğunu, çünkü bu dosya `notka(.)` ile başlamaktadır.
+>+ Linux komut olan `touch` ile gitingore dosyası oluşturuyoruz. Burada dikkat edilmesi gereken bu dosyanın gizli dosya olduğunu, çünkü bu dosya `notka(.)` ile başlamaktadır.
 
 ```vim
 # Düzenleyici: vim .gitignore
@@ -434,12 +438,13 @@ directory/
 > 	+ git'in takibinde çıkarmak için: `git rm --cached <file_name>` veya 
 > 	+ tüm dosyaları çıkarmak için: `git rm -r --cached` .
 
+---
 #### Git HEAD:
 * Git'te **HEAD**, çalışma dizininde hangi commit'in aktif olduğunu belirten bir referanstır.
 * Yani, HEAD, *Git'te şu anda hangi dalda çalıştığınızı ve bu dalın en son commit'ini işaret eder.* Genellikle bir dalın en son commit'ini gösterir
 * **Normal durumda**: HEAD genellikle bir dalı işaret eder, yani `HEAD` bir dal adıyla eşleştirilir, ve o dalın en son commit'ini gösterir.
 * **Detached HEAD (kopuk HEAD) durumu**: Eğer doğrudan bir commit'e (hash'e) checkout yaparsanız, HEAD artık bir dala değil, doğrudan o commit'e işaret eder. - Bu durumda HEAD kopuktur ve bu şekilde yapılan değişiklikler bir dala bağlı olmadığı için dikkatli olunması gerekir.
-
+---
 #### Git checkout:
 + Git'te **branch**, **commit**'ler, dosyalar veya dizinler arasında geçiş yapmanızı sağlayan bir komuttur.
 + Farklı bir dal veya commit'e geçmek, belirli bir dosyanın daha eski bir versiyonuna dönmek veya yeni bir dal oluşturmak gibi işlemler için kullanılır.
@@ -472,6 +477,8 @@ $ git checkout c107365
 > + Belirli bir commit'in içeriklerine bakmak veya o commit'e geçiş yapmak için commit hash'i ile `checkout` yapılabilir.
 > + `c107365` hash'ine sahip commit'e geçiş yapar.
 > + Ancak bu, **"detached HEAD"** durumuna yol açar; yani şu an aktif olan HEAD bir *branch* üzerinde değil, belirli bir *commit* üzerindedir.
+
+---
 #### Git diff:
 + Bu komut, **çalışma dizininde**, **staged (indexlenmiş) değişikliklerde** veya **iki commit arasındaki farkları** gösterebilir.
 + + Git'te iki farklı durum arasındaki değişiklikleri (farkları) karşılaştırmak için kullanılan bir komuttur.
@@ -540,7 +547,7 @@ $ diff --git a/test.txt b/test.txt
 > **Explanation:**
 > + Bu satır, hangi dosya üzerinde değişikliklerin yapıldığını belirtir. Burada, **`a/test.txt`** dosyasının eski sürümü ile **`b/test.txt`** dosyasının yeni sürümü karşılaştırılıyor.
 
-
+---
 #### Git rm
 ###### Örnek 1: Temel Kullanımı:
 ```shell
@@ -558,6 +565,7 @@ $ git rm -r --cached directoryName
 > + Eğer sadece bir dosya yerine bir dizin silmek istiyorsanız, **`-r`** parametresini eklemeniz gerekir. Aksi takdirde, `git rm` sadece tekil dosyalar üzerinde çalışır.
 > + `git rm --help` ile -r parametresi ne görevine bakabilirsiniz.
 
+---
 #### Git rebase:
 + **`git rebase`**, Git'te iki branch arasındaki commit geçmişini birleştirirken (genellikle dalları düzenlerken) kullanılan bir komuttur.
 + Rebase işlemi, mevcut branch'inizin commit'lerini başka bir branch'in en son commit'ine "taşır" ve böylece daha temiz, doğrusal bir commit geçmişi oluşturur.
@@ -567,6 +575,25 @@ $ git rm -r --cached directoryName
 $ git rebase main
 ```
 
+---
+#### Git fast-forward:
++ Git'te **fast-forward** merge yöntemi, bir dalın başka bir dalın en son noktasına (commit’ine) "hızlıca" ilerletilmesi anlamına gelir.
++ Bu durumda Git, iki dalı birleştirirken yeni bir "merge commit" oluşturmaz; bunun yerine hedef dalı, diğer dalın son commit'ine kadar ileri sarar.
++ `main` dalı üzerinde yeni commit'ler yapılmamışsa ve `feature` dalı doğrudan onun son commit'inden devam ediyorsa, Git bu durumu "fast-forward" olarak değerlendirir.
+**1. Durum:**
+```SCSS
+main (A) --- (B) --- (C)
+                 \
+                 feature (D)
+```
+
++ Bu durumda `main` dalı B commit’inde, `feature` dalı ise D commit'inde. Eğer `main` dalına yeni bir commit yapılmamışsa ve `feature` dalını `main`e birleştirirsek, Git fast-forward yapabilir.
+**2. Fast-Forward Merge Sonrası**
+```SCSS
+main (A) --- (B) --- (C) --- (D)
+```
+
++ `main` dalı, `feature` dalındaki commit'e (D) kadar "ileri sarılır". Bu işlemde yeni bir birleştirme commit’i oluşturulmaz.
 #### Git config
 
 > [!TIP]
@@ -655,6 +682,7 @@ $ git config --local remote.origin.url "ssh url veya https url"
 > **Explanation:**
 > + Git repo'unuza giderek `<> Code` yeşil butonu tıklayarak, ssh url veya https url kopya alarak yeniden URL düzenleyebilirsiniz. 
 
+---
 #### Git status:
 ##### 1. Temel Kullanımı
 ```shell
@@ -689,6 +717,8 @@ nothing to commit, working tree clean
 > **Explanation:**
 > + `main` branch'i le `origin/main` arasında farklar olduğunu göstermektedir. `main` branch'inde 1 fark var iken `origin/main` de ise 2 fark olduğunu söylemektedir.
 > + `git pull` komut ile de `main` ve `origin/main` birleştirme yapılabileceğinin *ipucunu* vermektedir.
+
+---
 #### Git branch
 ###### 1. Temel Kullanımı
 ```shell
@@ -734,6 +764,7 @@ $ git branch -d prod
 > + Bu işlem yerel depoda gerçekleşecektir ama 
 > + eğer uzak depolarda(remote repository) için [[Git Dersi#Uzak Depoda İşlemler(Remote Repository)#Örnek 1 origin de branch silme|Uzak Depoda Branch Silme]] bakınız.
 
+---
 #### Git stash:
 + Git'te **stash**, üzerinde çalıştığınız, henüz commit'lenmemiş değişiklikleri geçici olarak kaydederek (yani "stash"leyerek), çalışma dizininizi temizlemenize ve başka bir dala veya göreve geçiş yapmanıza olanak tanıyan bir özelliktir.
 + Örneğin, bir dosya üzerinde değişiklik yapıyorsunuz ve bu değişiklikleri henüz commit'lemek istemiyorsunuz, ama acilen başka bir dalda çalışmanız gerekiyor.
@@ -787,6 +818,8 @@ $ git stash clear
 ```
 > **Explanation:**
 > + Tüm stash'leri temizler yani siller.
+
+---
 #### Git log:
 
 > [!TIP] 
@@ -851,6 +884,7 @@ $ git log --since=10minutes
 > 	+ `--since=3days` : 3 günden beri olan tüm commit'ler
 > 	+ `--since=3months` : 3 aydan beri olan tüm commit'ler
 
+---
 #### Git show:
 ###### Örnek 1: 
 ```bash
@@ -866,11 +900,14 @@ $ git show <commit-hash>
 > **Explanation:**
 > + Burada `<commit-hash>`, görüntülemek istediğiniz commit'in hash değeri veya referansıdır.
 > + Böylelikle istediğimiz `commit` ayrıntılarını inceleyebiliriz.
+
+---
 #### Git diff:
 ```shell
 $ git diff site.yaml
 ```
 
+---
 #### Git Yapısı ve Çalışması
 
 > [!INFO]
@@ -879,6 +916,8 @@ $ git diff site.yaml
 >  Working Directory  **<--------->** Staging(Index) Area **<---------------->**  Local Repo
 > *Remote(Uzak Makine)* :
 >  Github veya Gitlab
+
+---
 #### Git add:
 ###### Örnek 1: Çalışma dizinden geçiş alanına(index)
 ```shell
@@ -906,6 +945,8 @@ $ git add -A
 ```
 > **Explanation:**
 > `-A` parametresi ile tüm dosyaları indeks ekliyoruz.
+
+---
 #### Git restore:
 ###### Örnek 1:
 ```shell
@@ -924,6 +965,7 @@ $ git restore nginx.conf
 > 2. Eğer bu komut kullanırsak çalışma dizinde nginx.conf'daki değişikleri iptal edecektir.
 > 3. `git status` komutunu kullandığımızda da yukarıdaki komut önermektedir(DİKKAT).
 
+---
 #### Git checkout
 ###### Örnek 1: 
 ```shell
@@ -946,6 +988,8 @@ $ git checkout -b yeni_branch_adı <commit-hash>
 
 > [!WARNING] 
 > `git checkout <commit hash>` komutu, depo çalışma dizinini belirli bir commit'e geri döndürmek için kullanılır. Bu, projenizin önceki durumlarını incelemek, testler yapmak veya hata ayıklamak için kullanışlıdır. Ancak bu işlem sırasında "detached HEAD" durumuna dikkat etmeniz önemlidir, çünkü yaptığınız değişiklikleri kaybetmemek için yeni bir dal oluşturmanız gerekebilir.
+
+---
 #### Git switch:
 ###### Örnek 1: Basit kullanımı
 ```shell
@@ -969,6 +1013,7 @@ $ git switch -c prod
 > + `git checkout` komutu, dallar arasında geçiş yapmak, dosyaları geri almak gibi farklı görevler için de kullanıldığı için kafa karıştırıcı olabilir.
 > + Bu nedenle, `git switch` ve `git restore` gibi daha spesifik komutlar Git'in yeni sürümlerinde tanıtılmıştır.
 
+---
 #### Git commit:
 ###### Örnek 1: Yaygın kullanımı
 ```shell
@@ -996,7 +1041,7 @@ $ git commit -am "short explanation about commit"
 > 2. `-m "message"`: Commit mesajını doğrudan komut satırında belirtmenizi sağlar.
 > 3. Özetlemek gerekirse; hem `git add .` hem de `git commit -m "message"` aynı anda yapar. 
 
-
+---
 #### Git revert:
 ###### Örnek 1: Basit Kullanımı
 ```shell
@@ -1016,6 +1061,7 @@ $ git revert ff0bd9f
 > + commit hash'i `ff0bd9f` olan ve daha önce revert edilmiş commit'i tekrardan revert işlemi yapıyoruz.
 > + Eğer git revert işlemi yapılmış bir commit tekrardan git revert işlemi yaparsak eksi haline geri gelir yani revert türkçe karşılığı tersini almak demek, böylelikle tersin tersi ilk hali olur. 
 
+---
 #### Git reset
 **Tanım:** 
 + Git'te çalışma dizinini, index'i (staging area) ve commit geçmişini belirli bir commit'e geri almak için kullanılan güçlü bir komuttur. 
@@ -1055,12 +1101,15 @@ $ git reset --hard 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125
 * Git, bir projeyi yerel bilgisayarınıza kopyalarken uzaktaki bir sunucuda veya GitHub, GitLab gibi servislerde barındırılan repository'ye bağlanır.
 * Bu uzaktaki repository'ye **remote** denir ve varsayılan ismi **`origin`** olarak atanır.
 
+---
 #### Git clone:
 ```shell
 $ git clone git@github.com:tanjuy/my_documentation_on_obsidian.git
 ```
 > **Explanation:**
 > 
+
+---
 #### Git fetch:
 ###### Temel Kullanımı:
 ```shell
@@ -1079,6 +1128,7 @@ $ git fetch --prune
 > **Explanation:**
 > + Uzak depoda silinen dalları da yerel deponuzdan temizlemek için `--prune` seçeneği kullanılır.
 
+---
 #### Git remote:
 
 ###### 1. Uzak Depoları Listeleme:
@@ -1119,11 +1169,14 @@ $ git remote prune origin
 ```
 > **Explanation:**
 > + 
+
+---
 #### Git pull request
 ```
 $ 
 ```
 
+---
 #### Git push:
 
 ###### 1. Temel Kullanımı:
@@ -1159,12 +1212,26 @@ $ git push -u origin main
 $ git push
 ```
 >+ `git push origin main` yazmadan direk olarak bu komutu kullanabiliriz.
-#### Git pull
 
+---
+#### Git pull
 
 > [!TIP]
 > `git pull` eş değeri `git fetch` ve `git merge` ikisinin birleşimidir. 
 
+## Github GUI
+
+###### 1. Contributors Ekleme:
++ Repositories --> git_test(Proje) --> Settings --> Collaborators --> Add people
+
+![Contributor Ekleme](images/contributor.png)
+
+###### 2. Contirbutors Görme:
++ Insights --> Contirbutors
+
+## Github ile Web Yayınlama
++ Repository oluşutma : `username / username.github.io`
++ Repositories --> username.github.io(Proje) --> Settings --> Pages --> Source --> Github Actions --> Static HTML(configure)
 
 ## Senaryolar
 
