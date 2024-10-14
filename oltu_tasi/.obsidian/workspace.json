@@ -56,9 +56,21 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "089bcccfbeae9696",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Web Servers/Nginx/Nginx Config File.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -124,7 +136,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Docker/Docker Giriş.md",
+                "file": "Web Servers/Nginx/Nginx Config File.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -141,7 +153,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Docker/Docker Giriş.md",
+                "file": "Web Servers/Nginx/Nginx Config File.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -164,7 +176,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Docker/Docker Giriş.md"
+                "file": "Web Servers/Nginx/Nginx Config File.md"
               }
             }
           }
@@ -185,8 +197,9 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "c5204e878cbdaded",
+  "active": "089bcccfbeae9696",
   "lastOpenFiles": [
+    "Docker/Docker Giriş.md",
     "Linux Command/Linux Paket Komutları.md",
     "README.md",
     "Linux Command/Linux komutları.md",
@@ -199,7 +212,6 @@
     "Docker/Dockerfile.md",
     "Programlama/Bash_Script/Bash Script.md",
     "Programlama/Javascript/javascript Dersleri.md",
-    "Docker/Docker Giriş.md",
     "Docker/Docker Swarm.md",
     "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
     "To do.md",
