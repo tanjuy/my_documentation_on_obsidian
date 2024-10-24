@@ -1,23 +1,23 @@
 #linux_commands
-### curl
+### 1. curl
 ```bash
 $ curl -I http://192.168.1.125/assets/images/clients/c3.png
 ```
 > **Explanation:**
 
-### update-alternative
+### 2. update-alternative
 ```shell
 $ sudo update-alternative --config python
 ```
 > **Explanation:**  ==ubuntu==, ==rocky linux==
 > python versiyon arasında geçiş yapmamıza izin veriyor.
 
-### openssl
+### 3. openssl
 ```shell
 $ openssl rand -base64 10
 ```
 
-### shutdown
+### 4. shutdown
 ###### Örnek 1: +dakika
 ```shell
 $ shutdown +10 "10 dakika sonra makine kapanacak"
@@ -39,13 +39,13 @@ $ shutdown -k 22:30:25
 > **Explanation:**
 > Yukarıdaki komut gibi çalışır ama burada belirlen zaman verilmiştir. Uyarı mesajı tüm terminaller 22:30:24 sadece kapanacağı uyarısı verir.
 
-### echo
+### 5. echo
 ```shell
 $ echo "Linux is Awesome"
 ```
 > **Explanation:**
 
-### find
+### 6. find
 ###### Örnek 1: Temel Kullanımı
 ```shell
 $ find /usr -name words
@@ -53,7 +53,7 @@ $ find /usr -name words
 > **Explanation:**
 
 
-### grep
+### 7. grep
 ###### Örnek 1: 
 ```shell
 $ cat /usr/share/dict/words | grep "Ankara"
@@ -82,7 +82,7 @@ $ grep -v "ankara" /usr/share/dict/words
 $ grep -n "Istanbul" /usr/share/dict/words
 ```
 
-### who
+### 8. who
 ```
 $ who
 ```
@@ -90,13 +90,13 @@ $ who
 > + Sistemde oturum açmış kullanıcılar hakkında bilgi almak için kullanılır.
 > + Komut, hangi kullanıcıların sistemde aktif olduğunu, hangi terminal oturumlarında bulunduklarını ve oturum açma zamanlarını gösterir.
 > +  Kullanıcı adı  - Terminal - Oturum açma zamanı - Kullanıcının bağlı olduğu IP adresi
-### tty
+### 9. tty
 ```bash
 $ tty
 ```
 > **Explanation:**
 
-### trash-cli
+### 10. trash-cli
 ###### Komutun Yüklenmesi
 ```bash
 $ sudo apt install trash-cli
@@ -110,7 +110,7 @@ $ trash-put [dosya_yolu]
 > genellikle dosyaları **`~/.local/share/Trash`** klasörüne taşır.
 
 
-### useradd
+### 11. useradd
 ###### 1. Temel Kullanımı:
 ```shell
 $ useradd -m -d /home/linus -s /usr/bin/bash -c "Linus Torvalds" linus
@@ -128,7 +128,7 @@ $ useradd -m -d /home/linus -s /usr/bin/bash -c "Linus Torvalds" linus
 > [!CAUTION]
 > + `useradd` komutu linux distro'lar göre farklı davranabilir.  
 
-### ps
+### 12. ps
 + Linux/Unix sistemlerinde çalışan süreçleri (process) listelemek için kullanılır.
 
 ```bash
@@ -136,9 +136,9 @@ $ ps -ef
 ```
 > **Explanation:**
 > 
-### top
+### 13.ctop
 
-### tree
+### 14. tree
 
 ###### 1. Temel Kullanımı:
 ```
@@ -161,3 +161,24 @@ $ tree -L 2
 ```
 > **Explanation:**
 > + 
+
+### 15. rsync:
+
+```sh
+$ rsync -av --delete ~/Dropbox/oltu_tasi ~/Documents/my_documantion_on_obsidian
+```
+
+###### --dry-run parametresi:
+```sh
+$ rsync -av --delete --dry-run ~/Dropbox/oltu_tasi \
+ ~/Documents/my_documantion_on_obsidian
+```
+
+### id:
+```shell
+$ id
+```
+
+
+
+

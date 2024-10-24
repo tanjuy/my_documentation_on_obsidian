@@ -18,35 +18,13 @@
                 "mode": "source",
                 "source": false
               },
-              "pinned": true
+              "pinned": true,
+              "icon": "lucide-file",
+              "title": "Dockerfile"
             }
           },
           {
-            "id": "5643c7f7e8e84561",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Linux Command/Linux komutları.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "26ee73dd9d36fd43",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Linux Command/Linux Paket Komutları.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "c5204e878cbdaded",
+            "id": "44d500f5488e8a93",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -54,11 +32,13 @@
                 "file": "Docker/Docker Giriş.md",
                 "mode": "source",
                 "source": false
-              }
+              },
+              "icon": "lucide-file",
+              "title": "Docker Giriş"
             }
           },
           {
-            "id": "089bcccfbeae9696",
+            "id": "f60e1e359002d190",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -66,11 +46,27 @@
                 "file": "Web Servers/Nginx/Nginx Config File.md",
                 "mode": "source",
                 "source": false
-              }
+              },
+              "icon": "lucide-file",
+              "title": "Nginx Config File"
+            }
+          },
+          {
+            "id": "7922f37c94bc6181",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Network/Network Giriş.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Network Giriş"
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -90,7 +86,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical"
-              }
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
             }
           },
           {
@@ -105,7 +103,9 @@
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical"
-              }
+              },
+              "icon": "lucide-search",
+              "title": "Search"
             }
           },
           {
@@ -113,7 +113,9 @@
             "type": "leaf",
             "state": {
               "type": "bookmarks",
-              "state": {}
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
             }
           }
         ]
@@ -144,7 +146,9 @@
                 "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
-              }
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Nginx Config File"
             }
           },
           {
@@ -156,7 +160,9 @@
                 "file": "Web Servers/Nginx/Nginx Config File.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
-              }
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Nginx Config File"
             }
           },
           {
@@ -167,7 +173,9 @@
               "state": {
                 "sortOrder": "frequency",
                 "useHierarchy": true
-              }
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
             }
           },
           {
@@ -176,8 +184,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Web Servers/Nginx/Nginx Config File.md"
-              }
+                "file": "Network/Network Giriş.md"
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Network Giriş"
             }
           }
         ],
@@ -197,38 +207,41 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "089bcccfbeae9696",
+  "active": "f36ea74e416a148d",
   "lastOpenFiles": [
-    "Docker/Docker Giriş.md",
-    "Linux Command/Linux Paket Komutları.md",
-    "README.md",
+    "Network",
+    "Linux Command/Güvenlik/libpam-pwquality.md",
+    "Network/Network Giriş.md",
+    "Linux Command/Güvenlik/sudo.md",
     "Linux Command/Linux komutları.md",
-    "Web Servers/Nginx/Quick Start.md",
     "Web Servers/Nginx/Nginx Config File.md",
-    "Linux Command/Firewall.md",
-    "Git/Git Dersi.md",
-    "Docker/Docker Apps.md",
+    "Docker/Docker Giriş.md",
     "Docker/Hızlı Başlama(Quick Start).md",
     "Docker/Dockerfile.md",
-    "Programlama/Bash_Script/Bash Script.md",
-    "Programlama/Javascript/javascript Dersleri.md",
-    "Docker/Docker Swarm.md",
-    "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
-    "To do.md",
-    "Git/images/contributor.png",
-    "Git/images/contributor1.png",
-    "Database/PostgreSQL/GROUP BY Kullanımı.md",
-    "Database/PostgreSQL/Database Oluşturma.md",
-    "Database/PostgreSQL/AS kullanımı.md",
-    "Git/images",
-    "Git/Yeni klasör",
-    "Linux Command/SSH.md",
+    "Database/NoSQL/MongoDB.md",
+    "Database/NoSQL",
+    "Linux Command/Kullanıcı Oluşturma.md",
     "Web Servers/Nginx/Nginx Komutları.md",
     "Linux Command/Systemd.md",
-    "Programlama/Bash_Script/Bash Script Apps.md",
-    "Web Servers/Nginx/Kaynaklar.md",
-    "Windows Commands/WSL2.md",
-    "Web Servers/Nginx/Nginx location modifier.md",
+    "To do.md",
+    "Programlama/Bash_Script/Bash Script.md",
+    "Linux Command/Process İşlemleri.md",
+    "Linux Command/Network/ss command.md",
+    "Diskler/Btrfs.md",
+    "Diskler",
+    "Linux Command/tmux.md",
+    "Linux Command/Güvenlik/Firewall.md",
+    "Linux Command/Güvenlik",
+    "Linux Command/Linux Paket Komutları.md",
+    "Git/Git Dersi.md",
+    "README.md",
+    "Web Servers/Nginx/Quick Start.md",
+    "Docker/Docker Apps.md",
+    "Programlama/Javascript/javascript Dersleri.md",
+    "Git/images/contributor.png",
+    "Git/images/contributor1.png",
+    "Git/images",
+    "Git/Yeni klasör",
     "Web Servers/Nginx/images/cache_control_no_store.png",
     "Web Servers/Nginx/images",
     "Git",
@@ -237,9 +250,6 @@
     "Database/PostgreSQL/Pictures/Left_Join.png",
     "Programlama/Golang",
     "Ansible",
-    "Programlama/Bash_Script",
-    "Programlama/Javascript",
-    "Programlama",
     "Pasted image 20240810145256.png",
     "Database/PostgreSQL/Pictures/inner_join.png",
     "Database/PostgreSQL/Pictures/employee_table.png",

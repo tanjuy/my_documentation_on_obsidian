@@ -1,4 +1,12 @@
 #docker 
+
+
+> [!CAUTION]
+> + Docker da işlemler yapılırken çoğunlukla docker bağlanarak işlemler hale edilmez. Yani Docker işlerimizi yapmamız için gerek komutların çoğunu sağlamıştır.
+> + Basit bir örnek vermek gerekirse nginx servisini yeniden başlatmak için 
+> + `docker exec -it web_server bash` ile bağlanıp `nginx -s reload` yapmak yerine
+> + `docker exec web_server nginx -s reload` yapmanız yeterlidir.
+
 ## Kernel Namespace:
 
 + Linux çekirdeğindeki **namespace** özelliği, Docker gibi konteyner teknolojilerinin temelini oluşturur.
@@ -122,6 +130,7 @@ sudo apt-get update
 	+ Docker ağlarını ve volumes yönetir.
 
 ## Container
+
 ### version:
 ```shell
 $ docker version
@@ -202,7 +211,157 @@ $ docker run --name tarih ubuntu date
 ```
 > **Explanation:**
 > + `ubuntu` imajından oluşturulan `tarih` adındaki container `date` komutunu çalıştıracaktır.
-> + Bunun nasıl çalıştığını daha iyi anlamak için; [[Dockerfile]] bölümün bakınız..
+> + Bunun nasıl çalıştığını daha iyi anlamak için; [[Dockerfile]] bölümün bakınız.
+
+---
+##### 5. Kaynak Sınırlama:
+###### A. run --memory:
+```shell
+$ docker run --name web_limit_memory -d --memory=256m nginx
+```
+> **Explanation:**
+> + Bu komutta `--memory`  parametresine odaklanacağız. nginx imajından oluşturulacak olan container'ı `256 Megabyte` RAM'e kısıtlıyoruz.
+> + `256M` ile `256m` arasında hiç bir fark yoktur.(**incase-sensitive**)
+> + `--memory=1G` : 1 gigabyte sınırlaması getirir.
+> + `docker inspect web_limit_memory` komutu içerisinde `HostConfig.Memory: 268435456` değerine baktığımız da kaç RAM ile sınırlandığını görebiliriz ve ayrıca `byte` türünden verilmiştir.
+
+---
+###### B. run --memory-swap:
+
+> [!CAUTION]
+> + `--memory-swap` parametresini kullanabilmek için `--memory` parametresinide kullanmanız gerekmektedir.
+> + Eğer `--memory` olmadan kullanırsanız; 
+> + `docker: Error response from daemon: You should always set the Memory limit when using Memoryswap limit, see usage.` hata verecaktir.
+
+```shell
+$ docker run --name web_limit_memory-swap -d --memory=512M --memory-swap=1G
+```
+> **Explanation:**
+> + bir konteynerin maksimum 512 MB bellek ve **1 GB toplam bellek+swap** kullanmasına izin verir.
+> + `docker inspect web_limti_memory-swap` komut ile `HostConfig.MemorySwap:1073741824` veya sadece ilgili alanı vermek için aşağıdaki komut kullanınız.
+
+```shell
+$ docker inspect --format='{{.HostConfig.MemorySwap}}' web_limit_memory-swap
+```
+
+> [!NOTE]
+> + **Varsayılan Değer:** Eğer `--memory-swap` seçeneği belirtilmezse, Docker konteyneri için bellek limitinin iki katına kadar swap alanı otomatik olarak ayrılır.
+> + Yani, `--memory` 512 MB ise, toplamda 1 GB (512 MB RAM + 512 MB swap) kullanılabilir.
+
+----
+###### C. run --cpus:
+
+```shell
+$ docker run --name web_limit_cpu -d --cpus=2 nginx
+```
+> **Explanation:**
+> + `--cpus=2` parametresi ile oluşturulan `web_limit_cpu` container'ın en fazla 2 cpu kullanabileceğin  söylüyoruz.
+> + `docker inspect web_limit_cpu` komutu içerisinde `HostConfig.NanoCpus:2000000000` değerinde bakarak kaç cpu ile sınırlandığını görebiliriz. Burada 2 cpu değeri ile sınırlandırılmış.
+> + Burada dikkat edilmesi gereken nokta her hangi 2 cpu kullanması yani 10 cpu olan host da rastgele 2 cpu değeri işgal etmesi.
+> + `--cpus="1,3"` : Sadece 1. ve 3. çekirdekleri kullanır.
+
+```shell
+$ docker inspect --format='{{.HostConfig.NanoCpus}}' web_limit_cpu
+```
+> **Explanation:**
+> + `docker inspect` ile tüm içeriği ekrana vermek yerine `--format` parametresi ile ilgli json parçası alınabilir.
+
+---
+###### D. run --cpuset-cpus:
+
++ Bir Docker konteynerini başlatırken konteynerin hangi CPU çekirdeklerini (CPU cores) kullanabileceğini belirlemenizi sağlayan bir bayraktır.
++ Bu özellik, konteynerin yalnızca belirli CPU çekirdekleri üzerinde çalışmasını sağlayarak kaynak yönetimini ve performans optimizasyonunu artırmanıza yardımcı olur.
++ Özellikle çok çekirdekli sistemlerde, belirli uygulamaların belirli çekirdeklerde çalıştırılması gerektiğinde veya kaynak izolasyonu sağlanmak istendiğinde kullanışlıdır.
+
+```shell
+$ docker run --name web_limit_cpuset-cpus -d --cpuset-cpus=1 nginx
+```
+> **Explanation:**
+> + `--cpuset-cpus=1` parametresi işlemci(core) de sadece 1. çekirdeği kullanmaktadır.
+> + `--cpuset-cpus="0,1"` : işlemci(core) de sadece 0. ve 1. çekirdeklerin kullanılmasını sağlamaktadır.
+> + `--cpuset-cpus="0-3` : konteynerin 0, 1, 2 ve 3 numaralı CPU çekirdeklerini kullanmasını sağlar.
+> + **UYARI:** CPU sıralaması 0'dan başlamaktadır.
+
+```shell
+$ docker inspect --format='{{.HostConfig.CpusetCpus}}' web_limit_cpus-cpus
+```
+
+---
+##### E. Ortam Değişkenleri:
++ Ortam değişkenleri(environment variables), konteyner içinde çalışan uygulamalar için yapılandırma bilgileri sağlamak, gizli anahtarları saklamak veya uygulamaların davranışını kontrol etmek gibi çeşitli amaçlarla kullanılabilir.
++ Ortam değişkenleri *bash script* de değişkenler olarak geçmektedir!
+###### I. --env KEY=Value:
+
+**Syntax:**
+```shell
+$ docker run --env <KEY>=<VALUE> <image>
+```
+
+**Temel Kullanımı:**
+```shell
+$ docker run --name env_test --env distro=ubuntu --env=database_server=linux.com \
+-e passwd='linux' ubuntu printenv
+```
+> **Explanation:**
+> + Docker konteyneri oluşturulurken ortam değişkenlerini (environment variables) ayarlamak için kullanılır.
+> + `--env` ve kısa yazımı `-e` 3 farklı kullanımı mevcuttur ve aynı hedefe hizmet eder.
+> + Komut çalıştırdığımızda `printenv` komutu `env_test` container'ın içerisindeki değişkenler bir diğer adı olan ortam değişkenlerini verecektir.
+> + `docker exec -it env_test bash` komut ile içerisine girersek ve `echo $distro` komutu verirsek ubuntu çıktısı verecektir.
+
+```shell
+$ docker inspect --format '{{.Config.Env}}' env_test
+```
+
+###### II. --env-file dosya:
+
+```shell
+$ docker run --name env_file_test --env-file=./env.list ubuntu printenv
+```
+
+**env.list**
+```text
+OS=Linux
+distro='Arch Linux'
+language=Python
+packageManager=pacman
+```
+
+> **Explanation:**
+> + `--env` parametresi ile tek tek yazmak yerine key=value değerlerini bir dosyaya yazdığımızda `--env-file` parametresi ile container içerisine aktarabiliriz.
+> + `printenv` komut ile bu ortam değişkenlerin ekran yazdırabiliriz.
+> + Aşağıdaki komut ile container değişkenlerin görebiliriz.
+
+```shell
+$ docker inspect --format '{{.Config.Env}}' env_file_test
+```
+
+##### F. Port Açma:
+###### -p parametresi:
+```shell
+$ docker run --name port_publish -d -p 8081:80 nginx
+```
+> **Explanation:**
+> + `-p` parametresi port yayınlamada kullanılır.
+> + nginx imajından oluşturulmuş olan `port_publish` container içerisindeki nginx uygulaması 80 port ile docker engine göndermektedir ve docker enginx de 80'den gelen 8081 port'una aktarmaktadır.
+> + `$ curl 192.168.1.134:8081` komut ile GET isteği atığımızda container içinde çalışan nginx'e ulaşacaktır. Tabi aynı işlemi tarayıcı ile de yapabilirsiniz.
+
+
+> [!CAUTION]
+> + `-p 8081:80` parametresinde;
+> + `8081` : Dış dünyaya açılan port  ---> `80` : container içerisindeki port yayını 
+> + `curl 192.168.1.134:8081` 
+
+```shell
+$ docker inspect --format='{{.NetworkSettings.Ports}}' port_publish
+```
+
+```shell
+$ docker inspect --format='{{.HostConfig.PortBindings}}' port_publish
+```
+> **Explanation:**
+> 
+
+
 
 ---
 ### exec:
@@ -238,9 +397,84 @@ $ docker
 + **Karşılığı:** `[OPTIONS] => -f`, `CONTAINER => containerName`
 ###### 1. Temel Kullanımı:
 ```shell
-$ docker logs merhaba
+$ docker logs web-server
+```
+> **Explanation:**
+> + `nginx` imajından oluşturmuş olduğumuz `web-server` container'ın `stdout` ve `stderror` çıktılarını bu komut ekrana yazdıracaktır.
+> + Çünkü docker engine,  docker da container'ın içerisinde çalışan process(uygulama)  `stdout` ve `stderror` çıktılarını `docker logs` komuta yönlendirmiştir.
+###### 2. -n veya --tail parametresi:
+```shell
+$ docker logs -t 5 web-server
+```
+> **Explanation:**
+> + nginx imajından oluşturulmuş `web-server` container'ın logs çıktısının sondan 5 satırını ekrana basar.
+> + `-n` parametresini uzun yazılışı `--tail` halidir.
+
+###### 3. -f parametresi:
+```sh
+$ docker logs -f c1a29857d22c
+```
+> **Explanation:**
+> + nginx imajında oluşturulmuş `web-server` container da NAME yerine ID kullanarak container'ın canlı log takibini yapıyoruz.
+> + container NAME: `web-server` - container ID: `c1a29857d22c`
+
+---
+### top:
++ **Amaç:** Docker konteynerinde çalışan süreçleri (process) görüntülemek için kullanılır. Bu komut, bir konteynerin içinde hangi işlemlerin çalıştığını ve bu işlemlerin ayrıntılarını hızlıca görmenizi sağlar. 
+###### Syntax:
++ **Usage:** `docker top CONTAINER [ps OPTIONS]`
++ **Örnek:**  `docker top containerName aux`
++ **Karşılığı:** `[OPTIONS] => aux, `CONTAINER => containerName`
+###### 1. Temel Kullanımı:
+```shell
+$ docker top ps_command 
+```
+> **Explanation:**
+> + ubuntu imajından oluşturulmuş olan `ps_command` container içersinde çalışan tüm süreçleri(processes) ekrana listeler.
+
+###### 2. ps parametreleri:
+```shell
+$ docker top ps_command -u                # 1
 ```
 
+```shell
+$ docker exec -it ps_command bash         # 2
+```
+
+```sh
+root@a70184c89e21:/# ps -u                # 3
+```
+> **Explanation:**
+> 1. `docker top` komut ile `ps_command` adındaki container'ın tüm kullanıcılarını `USER`, `PID` gibi işlemleri ekrana yazdırır.
+> 2. `docker exec` komut ile `ps_command` adlı container'ın shell açmamıza izin verir.
+> 3. `ps_command` adlı container'ın shell de `ps -u` komutu çalıştırsak aynı çıktıyı verecekdir.
+> 4. Özetle: `docker top` komutu container'ların içerilerine girmeden `ps` çıktılarını almamızı sağlar ve ayrıca bazı imajlarda veya container'larda  içlerinde `ps`komut bulunmayabilir. Bu rağmen `docker ps` her container da çalışır.
+
+
+---
+### stats:
+
++ **Amaç:** Docker konteynerlerinizin gerçek zamanlı kaynak kullanımını (CPU, bellek, ağ, disk I/O vb.) izlemenizi sağlayan güçlü bir araçtır. konteynerlerinizin performansını gerçek zamanlı olarak izlemenizi sağlar. Bu, uygulamalarınızın aşırı kaynak tüketip tüketmediğini, bellek sızıntıları olup olmadığını veya beklenmedik CPU kullanımı gibi sorunları hızlıca tespit etmenize yardımcı olur.
+###### Syntax:
++ **Usage:** `docker stats [OPTIONS] [CONTAINER...]`
++ **Örnek:**  `docker stats -a containerName`
++ **Karşılığı:** `[OPTIONS] => -a`, `CONTAINER => containerName`
+
+###### 1. Temel Kullanımı:
+
+```shell
+$ docker stats
+```
+> **Explanation:**
+> + Her bir konteyner için CPU kullanımı, bellek kullanımı, bellek limiti, ağ I/O ve disk I/O gibi bilgileri canlı olarak gösterir
+
+###### 2. --all Kullanımı:
+
+```shell
+$ docker stats --all
+```
+> **Explanation:**
+> + Tüm konteynerleri, hatta durdurulmuş olanları bile görüntüler.
 
 ---
 ### rm:
@@ -344,6 +578,128 @@ $ docker image rm
 
 ---
 ## Volume
++ Docker'da **volume** (hacim), konteynerlerin verilerini kalıcı olarak saklamak ve paylaşmak için kullanılan bir depolama mekanizmasıdır.
++ Konteynerler genellikle geçici yapılar olduğundan, konteynerler silindiğinde içinde bulunan veriler de kaybolur
++ **Docker volume**, bu sorunu çözerek verileri konteyner yaşam döngüsünden bağımsız hale getirir.
+
+
+### 1. Temel Kullanımı:
+
+```shell
+$ docker volume create ottoman_volume
+```
+> **Explanation:**
+> + `first_volume` adında volume oluşturduk.
+
+```shell
+$ docker volume ls
+```
+> **Explanation:**
+> + Oluşturulmuş volume'leri listeler.
+
+```shell
+$ docker volume inspect ottoman_volume
+```
+> **Explanation:**
+> + `first_volume` volume hakkında detaylı bilgiyi ekrana basar.
+
+```json
+[
+    {
+        "CreatedAt": "2024-10-19T15:40:03+03:00",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/ottoman_volume/_data",
+        "Name": "first_volume",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+```
+
+```shell
+$ docker run --name ottoman_container -it -v ottoman_volume:/app alpine sh
+```
+> **Explanation:**
+> + Yukarıda `docker volume` oluşturduğumuz `ottoman_volume`, alpine container'ın içerisinde `/app` dizinine bağlıyoruz.
+> + `/app` dizinini yoksa oluşturulur eğer var ise direk bağlanır. 
+
+**Container:**
+```shell
+/app # touch file.txt
+```
+
+**Host:**
+```shell
+/var/lib/docker/volumes/first_volume/_data# ls  # output: file.txt
+```
+> **Explanation:**
+> + ottoman_container içerisnde `touch` komut ile *file.txt* dosyası oluşturduğumuzda gördüğünüz gibi belirtilen dizinde `ls` komut ile kontrol edildiğinde aynı dosyayı görebiliriz.
+
+
+> [!NOTE]
+> + `ottoman_container` container'ın içerisindeki `/app` klasöründe yapılan tüm işlemler  `/var/lib/docker/volumes/ottoman_volume/_data` dizininde etkili olacaktır.
+> + Eğer `ottoman_container` silinse bile veriler `/var/lib/docker/volumes/ottoman_volume/_data` olduğu için veri kaybına neden olmayacaktır. Hata bu volume tekrardan başka container'a da bağlanabilir.
+
+```shell
+$ docker run --name ottoman_container2 -it -v ottoman_volume:/app2 alpine sh
+```
+> **Explanation:**
+> + Daha önce oluşturmuş olduğumuz `ottoman_volume` volume'e yeni oluşturmuş olduğumuz `ottoman_container2` adında container bağlıyoruz.
+> + Sonuç olarak `ottoman_volume` iki container bağlanmış oluyor. Hata bu iki container'ı da silip tekrardan yeni container oluşturduğumuzda `ottoman_volume`'deki verileri alırız.
+
+### volume create:
+
+###### Syntax:
++ **Usage:** `docker volume create [OPTIONS] [VOLUME]`
++ **Örnek:**  `docker volume create containerName`
++ **Karşılığı:** `[OPTIONS] => -v`, `CONTAINER => containerName`
+
+```shell
+$ docker 
+```
+### volume rm:
+###### Syntax:
++ **Usage:** `docker volume rm [OPTIONS] VOLUME [VOLUME...]`
++ **Örnek:** `docker volume rm -f volumeName`
++ **Karşılığı:** `[OPTIONS] => -f`, `VOLUME => volumeName`
+
+```shell
+$ docker volume rm ottoman_volume
+```
+> **Explanation:**
+> + 
+
+### Bind Mount:
+
+```shell
+$ docker run --name ottoman -it -v ~/apps:/apps alpine sh
+```
+> **Explanation:**
+> + HOST:  Yerel makinede `/apps` adında bir dizin oluşturuyoruz.
+> + CONTAINER: container içerisinde  `/app` adında dizin oluşturmazsınız *Docker Engine* kendi oluşturacak.
+> + Sonuç olarak yerel makinede(HOST) oluşturulan  ve container içerisinde oluşturulan dizineler arasında veri alış verişi gerçekleştirebiliyoruz.
+
+|Özellik|Docker Volume|Bind Mount|
+|---|---|---|
+|**Yönetim**|Docker tarafından yönetilir|Host dosya sistemi tarafından yönetilir|
+|**Depolama Konumu**|Docker'ın belirlediği bir konumda (örneğin `/var/lib/docker/volumes/`)|Host'taki belirli bir dizin veya dosya|
+|**Kapsam**|Docker ortamına özel, konteyner yaşam döngüsünden bağımsız|Host dosya sistemiyle doğrudan bağlantılı|
+|**Performans**|Docker tarafından optimize edilmiş|Platforma göre değişebilir, daha az optimize olabilir|
+|**Paylaşılabilirlik**|Kolayca paylaşılabilir|Aynı dizin paylaştırılabilir, ancak dikkatli olunmalıdır|
+|**Taşınabilirlik**|Taşınması kolay, Docker volume yedeklenebilir|Host dizinlerine bağlı olduğu için taşıması zor olabilir|
+|**Güvenlik**|Daha güvenli, çünkü Docker Engine tarafından kontrol edilir|Host dosya sistemiyle doğrudan bağlı olduğundan daha riskli olabilir|
+##### Hangi Durumda Hangi Yöntem Tercih Edilmeli?
+- **Volume** kullanımı, konteynerlerinizi farklı platformlarda çalıştırmayı veya taşımayı planlıyorsanız daha iyi bir seçenektir. Ayrıca, veri güvenliği, kalıcılığı ve performans gereksinimleri için de uygundur.
+- **Bind Mount** ise belirli bir host dosya sistemi ile sıkı entegrasyon gerektiğinde (örneğin, belirli bir dizindeki dosyalarla çalışmak) kullanışlıdır. Ancak güvenlik ve taşınabilirlik açısından dikkat edilmelidir.
+## Plugins
+
+```shell
+$ docker info --format "{{json Plugins}}"
+```
+> **Explanation:**
+> + docker engine ile birlikte gelen eklentileri(plugins) listeler.
+
 
 #### Kaynak:
 [Ayti Tech](https://www.youtube.com/watch?v=ACr92yZF0bg)

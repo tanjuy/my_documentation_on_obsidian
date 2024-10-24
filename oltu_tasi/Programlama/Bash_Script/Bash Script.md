@@ -1791,7 +1791,7 @@ function function_name() {
 function_name "Ahmet Hasan..."           # Fonksiyon parametesi alması Ahmet
 ```
 
-###### Örnek 1: Basit Kullanımı
+###### 1: Basit Kullanımı
 ```bash
 #!/usr/bin/env bash
 
@@ -1812,7 +1812,7 @@ cikis                                    # 4
 > 3. `exit` komut ile de bash script çalışmasını durduruyor.
 > 4. Fonksiyonların çalışabilmesi için onları çağrılması gerekir. Burada da fonksiyon çağrılıyor.
 
-###### Örnek 2:  Bir sayın karesini alma
+###### 2:  Bir sayın karesini alma
 ```bash
 #!/usr/bin/env bash
 
@@ -1829,7 +1829,7 @@ karesiYap                                          # 3
 > 2. Burada karsiYap adında fonksiyon tanımlıyoruz.
 > 3. Fonksiyonun çalışması için çağırıyoruz.
 
-###### Örnek 3: Fonksiyon argüman ve parametre alması
+###### 3: Fonksiyon argüman ve parametre alması
 ```bash
 #!/usr/bin/env bash
 
@@ -1844,10 +1844,25 @@ distros "Ubuntu" "Arch Linux" "Debian"           # 3
 > 2. 3 tane argüman(`$1 $2 $3`) girişi tanımlıyoruz istenirse daha fazlası tanımlanabilir.
 > 3. Ve yukarıda tanımlanan 3 argümana karşılık olarak 3 tane parametre(`"Ubuntu" "Arch Linux" "Debian"`) veriyoruz.
 
-##### Global & Local Değişken
+###### 4. Fonksiyon ile Command:
++ Bu komut, başka komutların çalıştırılmasını kontrol etmek ve belirli durumlarda alias'ları, fonksiyonları veya dahili komutları atlayarak orijinal komutları çalıştırmak için kullanılır.
+```bash
+#!/usr/bin/env bash
+
+function ls() {
+	command ls -al
+}
+
+ls
+```
+> **Explanation:** 
+> + Bash script içerisinde farklı bir amaç için kullanılmıştır. `ls` fonksiyonu çağrıldığında sıfırdan bizim düzenlediğimiz komut yapısı çalışacaktır.
+
+
+##### I. Global & Local Değişken
 **Global Değişken:** Her yerden ulaşılabilen değişkenlere denir.
 **Local Değişken:** Sadece tanımlandığı fonksiyon içinde geçerli olan değişkendir. Bir fonksiyon içinde `local` anahtar kelimesi ile tanımlanan bir değişken, sadece o fonksiyonun içinde kullanılabilir.
-###### Örnek 1:
+###### 1. Variable Scope:
 ```bash
 #!/usr/bin/env bash
 
@@ -1865,7 +1880,7 @@ echo "Distro: $distro"                         # 2
 > 	+ `local` anahtarı kaldırarak test ediniz.
 
 
-##### Return Alternatif:
+##### II. Return Alternatif:
 
 > [!WARNING]
 > + Programlama dillerinde `return` anahtar kelimesi değer döndürmek, kodu sonlandırmak ve durum kodu döndürmek için kullanılır.
@@ -1949,9 +1964,9 @@ fi
 ```
 > **Explanation:** 
 
-##### Fonksiyonlarda Array:
+##### III. Fonksiyonlarda Array:
 
-###### Array(dizi) geri döndürme:
+###### A. Array(dizi) geri döndürme:
 ```bash
 #!/usr/bin/bash
 
@@ -1970,7 +1985,7 @@ echo "Array Değerleri: ${output[@]}"              # 5
 > 3. array tüm içeriğini `echo` ile standart çıktıya gönderiyoruz.
 > 4. Burada `echo`ile gelen standart çıktıyı alıyoruz.
 > 5. Final olarak tüm Array ekrana basıyoruz.
-###### Fonksiyon ile Array Dilimleme:
+###### B. Fonksiyon ile Array Dilimleme:
 ```bash
 #!/usr/bin/bash
 

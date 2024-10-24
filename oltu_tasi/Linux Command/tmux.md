@@ -11,6 +11,9 @@ $
 ### Windows
 ### Panes
 
+### Commands:
+
+
 ### Kaynaklar
 + [tmuxcheatsheet](https://tmuxcheatsheet.com/)
 + 

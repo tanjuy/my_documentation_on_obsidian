@@ -98,7 +98,7 @@ Nginx ayrıca şunları da yapabilir;
 
 ### Nginx Kurulumu:
 
-##### A. Debian Temeli İşletim Sistemleri:
+#### A. Debian Temeli İşletim Sistemleri:
 ```shell
 $ sudo apt install nginx
 ```
@@ -111,7 +111,7 @@ fontconfig-config fonts-dejavu-core libdeflate0 libfontconfig1 libgd3 libjbig0 l
 ```
 
 ---
-##### B. REHL Temeli İşletim Sistemleri:
+#### B. REHL Temeli İşletim Sistemleri:
 
 ```shell
 $ sudo yum install nginx
@@ -159,7 +159,7 @@ $ firewall-cmd --reload
 > + Firewalld deamond da yapılan değişikliklerin geçerli olabilmesi için bu komutu çalıştırıyoruz.
 
 ---
-##### C. Kaynak Koddan Derleme:
+#### C. Kaynak Koddan Derleme:
 
 + nginx derleme işlemini yapabilmemiz için nginx source code indirmemiz gerekmektedir.
 + Kaynak kodu indirme  [link](https://nginx.org/en/download.html) gitmek için tıkayınız.
@@ -180,12 +180,12 @@ $ tar -zxvf nginx-1.27.2.tar.gz            # Çıktı: nginx-1.27.2
 > **Explanation:**
 > + Hem arşivlenmiş(tar) hem de sıkıştırılmış(gz) dosya `tar`  ve parametreleri ile çıkarma işlemini yapıyoruz.
 
-```sh
+```shell
 $ cd nginx-1.27.2; ls -l
 ```
 
 **Çıktı:**
-```sh
+```shell
 total 860
 -rw-r--r--. 1 ottoman ottoman 328790 Oct  2 18:30 CHANGES
 -rw-r--r--. 1 ottoman ottoman 503040 Oct  2 18:30 CHANGES.ru
@@ -205,7 +205,7 @@ drwxr-xr-x. 9 ottoman ottoman     91 Oct  2 18:13 src
 > **Explanation:**
 > + İndirdiğimiz nginx kaynak kodlarını ekran yazdırıyoruz.
 
-###### Debian Temeli OS:
+##### C.1. Debian Temeli OS:
 ```sh
 $ sudo apt install build-essential
 ```
@@ -217,7 +217,7 @@ $ sudo apt install libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev make
 > + `PCRE library`, `build-essential` ile birlikte gelmemektedir.
 
 ---
-###### REHL Temeli OS:
+##### C.2. REHL Temeli OS:
 ```sh
 $ sudo yum install groupinstall "Development Tools"
 ```
@@ -238,8 +238,9 @@ $ sudo yum install pcre pcre-devel zlib zlib-devel openssl openssl-devel make
 > + Bir çok kütüpahane `Development Tools` ile gelmektedir fakat Eğer eksik komut ile karşılaşırsanız bu kütüphaneleri yükleyebilirsiniz.
 
 ---
-###### OS'dan Bağımsız İşlemler:
+##### C.3. OS'dan Bağımsız İşlemler:
 
+###### C.3.1 Configure İşlemi:
 > [!CAUTION]
 > + Aşağıdaki komutu indirmiş olduğunuz `nginx source code` içerisinde çalıştırınız.
 
@@ -252,7 +253,8 @@ $ sudo ./configure --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf 
 > + `sudo ./configure --help` komut ile `configure` komutun alacağı parametreleri terminal üzerinde ekranda listeleyebiliriz.
 > + İşlem tamamlandığında `Makefile` dosyası oluşacaktır.
 
-```sh
+###### C.3.2. Make işlemi:
+```shell
 $ sudo make
 ```
 
@@ -260,21 +262,22 @@ $ sudo make
 > + Kodu derlemek için `make` komutunu çalıştırıyoruz.
 > + Eğer böyle bir çıktı görüyorsanız; `make[1]: Leaving directory '/home/ottoman/nginx-1.27.2'` işlem tamamlanmıştır.
 
-```sh
+```shell
 $ sudo make install
 ```
 
 > **Explanation:**
 > + Nginx yüklemesi yapmak için bu komutu çalıştırıyoruz.
 
-```sh
+```shell
 $ nginx -v                 # Çıktı: nginx version: nginx/1.27.2
 ```
 
 > **Explanation:**
 > + nginx versiyonunu veriyorsa nginx'niz hayırlı olsun kurulum başarılı.
 
-```sh
+###### C.3.3 Nginx Çalıştırma:
+```shell
 $ sudo nginx 
 ```
 
@@ -287,6 +290,21 @@ $ sudo ps aux | grep nginx
 > **Explanation:**
 > + Nginx'in çalıştığını teyit etmek için ve çıktı bize bir master ve bir de worker process'leri ekrana verecektir.
 
+**Nginx yeniden başlatma:**
+```shell
+$ sudo nginx -s reload                                # 1
+```
+
+```shell
+$ sudo /usr/bin/kill -s HUB <nginxProcessID>          # 2
+```
+> **Explanation:**
+> 1. `nginx` programı `-s` parametresi ile kendi process'ini yeniden başlatma sinyali gönderiyoruz.
+> 2. Linux'ta "HUP" sinyali, "Hang Up" anlamına gelir. "Hang Up" türkçe anlamı telefonu kapatmak anlamına gelir. Sinyal numarası olarak 1 (SIGHUP) ile temsil edilir.
+> 	+ **Bir terminal kapandığında**: Bir kullanıcı SSH üzerinden bağlanıp terminalden çıkış yaparsa, bağlı işlemlere SIGHUP sinyali gönderilir. Bu sinyal, işlemin terminalle bağlantısının kesildiğini belirtir.
+> 	+ **Yeniden başlatma (reload)**: Bazı daemon veya servisler için SIGHUP sinyali, yapılandırma dosyalarının yeniden yüklenmesi (reload) anlamına gelir. Örneğin, Nginx veya Apache gibi web sunucuları yapılandırma değişikliklerinden sonra bu sinyalle yeniden başlatılabilir, böylece tam anlamıyla durdurulup yeniden başlatılmadan değişiklikler uygulanır.
+
+
 ```sh
 $ curl -i http://192.168.1.132
 ```
@@ -294,6 +312,52 @@ $ curl -i http://192.168.1.132
 > + `curl` komut ile `GET` isteği yaptığımızda bize nginx'in varsayılan web sitesi geri dönmesi gerekir.
 > + Bu `GET` isteğini her hangi bir tarayıcı ile de yapılabilir.
 
+##### C.4. Nginx Servis Oluşturma:
+
+> [!IMPORTANT]
+> + Servis oluşturma işletim sistemlerinde bağımsızdır fakat hangi servis yöneticisini kullanmasına bağlıdır.
+> + Burada kullanılan servis yöneticisi **systemd** olacaktır. Bundan dolayı hem debian hem de REHL temeli OS de aynıdır.
+
+###### nginx.service dosyası:
+```shell
+$ vim /lib/systemd/system/nginx.service
+```
+
+```systemd
+[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/nginx.pid
+ExecStartPre=/usr/bin/nginx -t
+ExecStart=/usr/bin/nginx
+# ExecReload=/usr/bin/nginx -s reload
+ExecReload=/usr/bin/kill -s HUP $MAINPID
+ExecStop=/usr/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=mutli-user.target
+```
+> **Explanation:**
+> 1. **Description:** servis bağlatıldığında log dosyalarına() söyle bir çıktı veriyor;
+> 	+ Starting The NGINX HTTP and reverse proxy server...
+> 	+ Started The NGINX HTTP and reverse proxy server...
+> 2. 
+
+```shell
+$ sudo systemctl daemon-reload
+```
+> **Explanation:**
+> + systemd manager configuration yeniden yükleyecektir.
+> + Yeni bir systemd servis dosyası eklediğinizde ya da mevcut bir servis dosyasında değişiklik yaptığınızda, `systemctl daemon-reload` çalıştırarak systemd'nin bu değişiklikleri okumasını sağlamanız gerekir.
+
+```shell
+$ sudo systemctl enable --now nginx.service
+```
+> **Explanation:**
 
 ### Nginx Modülleri:
 
@@ -307,14 +371,14 @@ $ curl -i http://192.168.1.132
 + derleme ve kurulum sürecinde Nginx’in ikili (binary) dosyasının sistemde nereye yükleneceğini belirlemek için kullanılır.(chatgpt)
 + Bu seçenek, Nginx’in çalıştırılabilir dosyasının (genellikle `/usr/sbin/nginx`) tam yolunu tanımlamanıza olanak tanır.
 **Örnek Kullanım:**
-```sh
+```shell
 $ ./configure --sbin-path=/usr/bin/nginx
 ```
 ###### 2. --conf-path modülü:
 + nginx.conf yapılandırma dosyasının adını ayarlar. Eğer gerek duyulur ise nginx farklı bir yapılanadırma dosyası ile başlatılabilir; `nginx -c configFile` ile bul işlem yapılabilir.([nginx.com](https://nginx.org/en/docs/configure.html))
 + Nginx'in ana yapılandırma dosyasının (configuration file) sistemde nerede bulunacağını belirtmek için kullanılır.
 **Örnek Kullanım:**
-```sh
+```shell
 $ ./configure --conf-path=/etc/nginx/nginx.conf
 ```
 
@@ -324,7 +388,7 @@ $ ./configure --conf-path=/etc/nginx/nginx.conf
 + **Amaç:** Sunucudaki hataların kolayca izlenebilmesi ve teşhis edilmesi için kullanılır.
 
 **Örnek Kullanım:**
-```sh
+```shell
 $ ./configure --error-log-path=/var/log/nginx/error.log
 ```
 
@@ -334,7 +398,7 @@ $ ./configure --error-log-path=/var/log/nginx/error.log
 + **Amaç:** Web sunucusuna yapılan HTTP isteklerinin kaydını tutmak, trafik analizleri ve hata ayıklama için önemlidir.
 
 **Örnek Kullanım:**
-```sh
+```shell
 $ ./configure --http-log-path=/var/log/nginx/access.log
 ```
 
@@ -352,7 +416,7 @@ $ ./configure --http-log-path=/var/log/nginx/access.log
 
 
 **Örnek Kullanım:**
-```sh
+```shell
 $ ./configure --with-pcre
 ```
 

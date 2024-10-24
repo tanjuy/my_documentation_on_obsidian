@@ -1,3 +1,6 @@
 - [ ]  Nextcloud Sunucu Kurulumu 
 - [ ]  Docker'ın Kurulumunu yazılacak ve [Resmi sitesi](https://docs.docker.com/engine/install/ubuntu/) kullanılacaktır.
 - [ ] HTML - CSS - JAVASCRIPT ile yazılmış web sitesini github üzerinde yayınlanması
+- [ ] Yerel Depolama - [OpenMediaVault](https://www.youtube.com/watch?v=W7Hyq7gDghs)
+- [ ] Btrs Depolma - [Emin CAN](https://www.youtube.com/watch?v=jhuWWDo7yYo)
+- [ ] 
