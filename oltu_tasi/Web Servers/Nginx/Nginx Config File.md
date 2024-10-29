@@ -1,6 +1,6 @@
 #nginx
 ### Nginx Giriş
-##### Tanım:
+#### A. Tanım:
 + Nginx, çok yönlü bir web sunucusu olarak kullanılır ve birçok farklı amaç için konfigüre edilebilir. İşte Nginx'in başlıca kullanım alanları:
 	1. **Web Sunucusu**: Nginx, statik içerik (HTML, CSS, JS dosyaları) sunmak için kullanılır. HTTP ve HTTPS isteklerini işleyerek web sitelerinin temel sunucu rolünü üstlenir.
 	2. **Ters Proxy (Reverse Proxy)**: Nginx, istemci isteklerini arka plandaki başka sunuculara yönlendirmek için ters proxy olarak yapılandırılabilir. Bu, yük dengelemesi (load balancing) ve güvenlik (örneğin, gizleme ve IP adreslerini maskeleme) için yaygındır.
@@ -11,7 +11,7 @@
 + Nginx, Rus geliştirici **Igor Sysoev** tarafından geliştirildi.
 + Nginx açık kaynak olarak 2004 de bırakıldı yani duyruldu.
 
-##### 10K Problemi:
+#### B. 10K Problemi:
 + Web sunucularında "10K problemi" (10,000 connections problem), bir web sunucusunun aynı anda çok sayıda (örneğin, 10.000) istemci bağlantısını idare etmesi sırasında karşılaşılan performans ve verimlilik sorunlarına verilen isimdir.
 + Geleneksel web sunucuları, her bir istemci bağlantısı için ayrı bir işlem veya iş parçacığı (thread) oluşturur.
 + Bu yöntem düşük sayıda bağlantı için etkili olsa da, bağlantı sayısı arttıkça aşağıdaki sorunlara yol açar:
@@ -21,7 +21,7 @@
 ###### 2. CPU Yükü:
 - Her işlem veya iş parçacığı için işlemci zamanı ayrılması gerekir.
 - 10.000 veya daha fazla bağlantı olduğunda, işlemci bu iş parçacıklarının yönetimiyle meşgul olur, bu da sunucunun performansını düşürür ve yanıt sürelerini uzatır.
-##### Nginx ve 10K Problemi:
+#### C. Nginx ve 10K Problemi:
 - Nginx gibi modern web sunucuları bu problemi çözmek için **asenkron, olay tabanlı bir mimari** kullanır.
 - Bu mimaride, her bir bağlantı için yeni bir iş parçacığı ya da işlem oluşturulmaz. Bunun yerine, bir olay döngüsü içerisinde I/O (girdi/çıktı) işlemleri yönetilir.
 - Bu sayede aynı anda on binlerce bağlantı etkin bir şekilde işlenebilir. Böylece, kaynak kullanımı optimize edilir ve **10K problemi** ortadan kaldırılır.
@@ -30,13 +30,13 @@
 	- **Daha İyi Performans**: İşlemci kaynakları verimli kullanılır, çünkü I/O işlemleri non-blocking şekilde (engellenmeyen) gerçekleşir.
 	- **Daha Yüksek Bağlantı Kapasitesi**: On binlerce hatta yüz binlerce eşzamanlı bağlantı yönetilebilir.
 
-##### HTTP Sunucu Yeteneği Olarak:
+#### D. HTTP Sunucu Yeteneği Olarak:
 Nginx ayrıca şunları da yapabilir;
 + Proxy sunucu email için(IMAP, POP3, ve SMTP)
 + Reverse proxy
 + Load Balancer HTTP, TCP ve UDP sunucuları için
 
-##### Nginx vs Apache:
+#### E. Nginx vs Apache:
 
 > [!CAUTION]
 > + Nginx, HTTP sunucusu olmasının yanı sıra **mail proxy** yeteneği de sunar. SMTP, IMAP ve POP3 protokollerini destekler ve bu sayede e-posta sunucuları için bir ters proxy (reverse proxy) olarak kullanılabilir.
@@ -89,6 +89,174 @@ Nginx ayrıca şunları da yapabilir;
 
 > [!IMPORTANT]
 > + Aynı tür yapılandırmaya sahip makinede Apache ve Nginx'i çalıştırdığınızı ve Apache üzerinde 5000 istek ve Nginx üzerinde de aynı anda 5000 istek olduğunu varsayalım; o zaman Nginx'in Apache ile karşılaştırıldığında sadece %15 Kaynak kullandığını göreceksiniz.
+
+#### F. Statik ve Dinamik İçerik:
+###### 1.Statik İçerik:
+###### 2.Dinamik İçerik:
+
+#### G. HTTP Requests:
+
+
+> [!NOTE]
+> + **Genel Şablonu:** `http://<host URL><resource URL>`
+> + **Örnek:** `https://jsonplaceholder.typicode.com/posts/1/comments` 
+> + **Açıklama:** `https://jsonplaceholder.typicode.com` host URL karşılık gelir ve `/posts/1/comments` resouce URL karşılık gelir. 
+
+##### G.1. Request Formatı:
+###### G.1.1 Request-line:
++ HTTP protokolünde `Request-Line`, bir HTTP isteğinin ilk satırında yer alır ve istemcinin sunucuya ilettiği isteğin türünü, hedef URL'yi ve HTTP protokol sürümünü içerir.
++ Bu satır, sunucunun ne tür bir işlem yapması gerektiğini anlamasını sağlar ve istemci tarafından gönderilen isteğin amacını özetler.
+
+```http
+<HTTP Yöntemi> <URI> <HTTP Sürümü>
+```
+
+```http
+GET /products HTTP/1.1
+```
+> **Explanation:**
+> 1. **HTTP metodu:** İsteğin türünü belirtir (GET, POST, PUT, DELETE gibi).
+> 2. **Request URI:** Kaynağın konumunu belirten URL’yi içerir ve sunucunun hangi kaynağa ulaşması gerektiğini belirtir. (/products veya /api/v1/users)
+> 3. **HTTP Sürümü:** Hangi HTTP protokol sürümünün kullanıldığını belirtir (genellikle `HTTP/1.1` veya `HTTP/2`)
+
+###### G.1.2 Zero or More Header:
++ HTTP’de `header` (başlık), istemci ve sunucu arasında veri alışverişi yaparken ek bilgi sağlayan anahtar-değer çiftlerinden oluşan bir bölümüdür.
++ Header, hem HTTP isteklerinde (request) hem de yanıtlarında (response) bulunur ve veri alışverişinin nasıl yapılacağına dair önemli bilgiler içerir.
++ Bu bilgiler, içeriğin türü, yetkilendirme bilgileri, içerik uzunluğu gibi çeşitli detayları kapsar ve HTTP iletişiminin temelini oluşturur.
+1. **Genel Header’lar (General Headers)**:  Hem isteklerde hem de yanıtlarda kullanılabilen, genel bağlantı ve aktarım özelliklerini tanımlar. Örnek: `Cache-Control` (önbellekleme ayarlarını belirler), `Connection` (bağlantının açık kalıp kalmaması gerektiğini belirtir).
+2. **Request Header:** İstemci tarafından sunucuya gönderilen istekle ilgili bilgileri içerir. Örnek: `Host`: Sunucunun hangi domain için çalıştığını belirtir, `Accept`: İstemcinin kabul ettiği içerik türlerini belirtir (örneğin `application/json`, `text/html`).
+3. **Response Header**:  Sunucu tarafından istemciye döndürülen yanıtla ilgili bilgileri içerir. Örnek: `Content-Type`: Yanıtın içeriğinin türünü belirtir (örneğin `text/html`, `application/json`), `Content-Length`: Yanıtın boyutunu belirtir.
+4. **Entity Header:** İletinin kendisine, yani içeriğe (örneğin dosya veya belge) dair bilgileri tanımlar. Örnek: `Content-Encoding`: İçeriğin hangi formatta sıkıştırıldığını belirtir (örneğin `gzip`), `Content-Language`: İçeriğin dilini belirtir (örneğin `en` veya `tr`).
+
+**Request Header:**
+```http
+GET /index.html HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+Accept: text/html
+```
+
+**Response Header:**
+```http
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+Content-Length: 1024
+Set-Cookie: sessionId=abc123; HttpOnly
+```
+
+###### G.1.3. Empty-line:
++ HTTP protokolünde önemli bir yapısal rol oynar. İstemci veya sunucu, başlıklar ve gövde arasında bir ayrım yapabilmek için bu satırı kullanır.
++ Bu satır olmazsa, protokol başlıkların sonunu ve gövdenin başlangıcını doğru bir şekilde ayıramaz, bu da iletişimin bozulmasına veya yanlış yorumlanmasına yol açabilir.
+###### G.1.4. body:
++ Bir HTTP isteği veya yanıtının asıl içeriğini, yani başlıklarda (header) belirtilen veri türüne göre istemciye veya sunucuya gönderilmesi amaçlanan veriyi barındıran bölümdür.
+
+> [!TIP]
+> + Her HTTP isteğinin bir gövdesi olmak zorunda değildir.
+> + Örneğin, `GET` isteğinde genellikle gövde bulunmaz, çünkü `GET` yalnızca sunucudan veri almak için kullanılır.
+> + Gövde içeren istekler genellikle `POST`, `PUT`, veya `PATCH` gibi sunucuya veri göndermeyi veya güncellemeyi amaçlayan isteklerde bulunur.
+
+##### G.2. GET Request: 
+ + **GET** metodu, HTTP protokolünde bir kaynağı (genellikle bir web sayfası veya API verisi) sunucudan istemek için kullanılan en yaygın HTTP yöntemidir.
+ + GET isteği, sunucudan veri almak amacıyla kullanılır ve veriyi yalnızca okunur olarak elde etmeyi amaçlar; yani, sunucuya veri göndermek veya sunucu üzerinde bir değişiklik yapmak amacıyla kullanılmaz.
+
+
+> [!TIP]
+> + **İstek Gövdesi (Request Body) Yoktur**
+> + GET istekleri genellikle bir gövde içermez. Tüm gerekli veriler, URL yoluna veya sorgu parametrelerine (query string) eklenir.
+
+###### GET Request Atma:
+```shell
+$ curl -i -X GET www.example.com
+```
+> **Explanation:**
+> + `curl` komut ile `www.example.com` sitesine bir `GET` isteği atmış bulunuyoruz.
+> + `-X` parametresi ile istek türünü belirleyebiliriz. 
+> + Ayrıca `-X` parametresin uzun yazılışı: `--request`
+
+##### G.3. POST Request:
++ **POST** isteği, HTTP protokolünde sunucuya veri göndermek veya sunucu üzerinde bir işlem yapmak için kullanılan bir HTTP metodudur.
++ POST istekleri, genellikle yeni bir kaynak oluşturmak veya sunucu üzerinde bir değişiklik yapmak amacıyla kullanılır.
++ Örneğin, bir kullanıcı kayıt formunu göndermek veya yeni bir ürün eklemek için POST isteği yapılır.
+
+
+> [!TIP]
+> + **Gövde (Request Body) vardır**
+> + POST isteğinde veri, HTTP başlıklarının ardından gelen gövde (body) kısmında yer alır. Gövdeye eklenen veri, form verisi, JSON, XML veya diğer formatlarda olabilir.
+
+```shell
+$ curl -X POST https://jsonplaceholder.typicode.com/todos \
+-H "Content-Type: application/json" \
+-d '{"userId": 1, "title": "linux is awesome", "id": 2}'
+```
+> **Explanation:**
+> + `https://jsonplaceholder.typicode.com` test amaçlı **POST** isteği atabileceğiniz ücretsiz sitedir.
+> + `-H` parametresi ile `Content-Type: application/json` header'ı ekliyoruz
+> + `-d` parametresi ile de siteye veri yani data gönderiyoruz.
+
+##### G.4. PUT Request:
++ **PUT** isteği, belirli bir kaynağı **oluşturmak** veya **güncellemek** için kullanılır.
++ PUT, gönderilen veriyi sunucuda tanımlı bir kaynağın **üzerine yazmak** için kullanılır.
++ Örneğin, bir kullanıcının bilgilerini güncellemek için PUT isteği gönderildiğinde, o kullanıcının tüm mevcut bilgileri gelen verilerle değiştirilir.
+
+```shell
+$ curl -X PUT https://jsonplaceholder.typicode.com/posts/1 \
+-H "Content-Type: application/json" \
+-d '{"userId": 1, "id": 3, "title": "linux is awesome", "body": "ubuntu"}'
+```
+> **Explanation:**
+> + `https://jsonplaceholder.typicode.com` test amaçlı **PUT** isteği atabileceğiniz ücretsiz sitedir.
+> + `-H` ve `-d` parametreleri yukarıda açıklanmıştır.
+
+| Özellik             | PUT                                             | POST                                               |
+| ------------------- | ----------------------------------------------- | -------------------------------------------------- |
+| **Amaç**            | Kaynak oluşturma veya güncelleme                | Yeni kaynak oluşturma veya veri gönderme           |
+| **Idempotent**      | Evet (aynı veri tekrar gönderilirse sonuç aynı) | Hayır (aynı veri tekrar gönderilirse farklı sonuç) |
+| **Kaynak**          | Var olan kaynağı tamamen günceller              | Yeni kaynak yaratır veya mevcut kaynağa veri ekler |
+| **Kullanım Örneği** | Mevcut kullanıcı bilgilerini güncelleme         | Yeni kullanıcı kaydı oluşturma                     |
+
+> [!TIP]
+> + **PUT**, genellikle belirli bir kaynağın güncellenmesi için tercih edilirken, **POST** yeni bir kaynak oluşturma durumunda daha uygun bir seçimdir.
+
+##### G.5. DELETE Request:
++ **DELETE** isteği, sunucudaki belirli bir kaynağı **silmek** için kullanılan bir HTTP metodudur.
++ Bu istekle sunucuya gönderilen kaynağın kimliği veya konumu belirtilir ve sunucu, bu kaynağı sistemden kaldırır. Örneğin, bir kullanıcıyı, kaydı veya dosyayı silmek için kullanılabilir.
+
+
+> [!NOTE]
+> + **DELETE Request’in Özellikleri**
+> + **Silme İşlemi:** DELETE isteği genellikle bir veri kaynağını, örneğin bir kullanıcı veya ürün kaydını, veritabanından veya sunucudan kaldırır.
+> + **Yanıt Kodu:** Başarılı bir silme işlemi sonrası sunucu genellikle 200 (OK) veya 204 (No Content) yanıt kodu döner. Eğer kaynak bulunamazsa 404 (Not Found) yanıtı dönebilir.
+
+```shell
+$  curl -X DELETE https://jsonplaceholder.typicode.com/posts/1
+```
+
+#### H. HTTP Response Kodları:
++ HTTP'de **Response Code** (Yanıt Kodu), bir istemcinin (örneğin, tarayıcı veya başka bir istemci uygulaması) sunucuya yaptığı isteğe sunucunun verdiği yanıtın durumunu bildiren üç haneli sayısal bir koddur.
++ Bu kodlar, istemcinin isteğinin başarılı olup olmadığını, bir hata meydana gelip gelmediğini veya başka bir işlem yapılması gerekip gerekmediğini belirtir.
++ Üç haneli tam sayıdan oluşmaktadır ve ilk hanesi kodun sınıfını tanımlar.
+##### 1xx(info) - Bilgilendirme Yanıtı:
++ *İstek alındı ve işlem sürüyor*. Genellikle çok yaygın kullanılmaz.
++ **100 Continue:** İstemci, isteğe devam edebilir.
+##### 2xx(success) - Başarılı Yanıtlar:
++ İstek başarıyla tamamlanmıştır.
++ **200 OK:** İstek başarıyla işleme alındı ve yanıt verildi.
++ **201 Created:** İstek başarılı ve yeni bir kaynak oluşturuldu (genellikle POST isteğinde).
+##### 3xx(redirection) - Yönlendirme Yanıtları:
++ İstemcinin isteği başka bir kaynağa yönlendirilmelidir.
++ **301 Moved Permanently:** İstenen kaynak kalıcı olarak başka bir konuma taşındı.
++ **302 Found:** İstenen kaynak geçici olarak başka bir konuma taşındı.
++ **304 Not Modified:** Kaynakta herhangi bir değişiklik yok, bu nedenle yeniden indirilmesine gerek yok (genellikle önbellekleme için kullanılır).
+##### 4xx(Client Error) - İstemci Hataları:
++ İstemcinin yaptığı istekte hata vardır.
++ **400 Bad Request:** Geçersiz istek, sunucu isteği işleyemiyor.
++ **401 Unauthorized:** Yetkilendirme gerekiyor, ancak sağlanmamış.
++ **403 Forbidden:** İstemcinin kaynağa erişim izni yok.
++ **404 Not Found:** İstenen kaynak sunucuda bulunamadı.
+##### 5xx(Server Error) - Sunucu Hataları:
++ *Sunucu isteği işleyemediği durumlarda oluşur.*
++ **500 Internal Server Error:** Sunucuda beklenmeyen bir hata oluştu.
++ **502 Bad Gateway:** Sunucu, başka bir sunucudan geçersiz bir yanıt aldı.
 ### Reverse Proxy
 
 > [!NOTE]
@@ -339,7 +507,7 @@ ExecStop=/usr/bin/kill -s QUIT $MAINPID
 PrivateTmp=true
 
 [Install]
-WantedBy=mutli-user.target
+WantedBy=multi-user.target
 ```
 > **Explanation:**
 > 1. **Description:** servis bağlatıldığında log dosyalarına() söyle bir çıktı veriyor;

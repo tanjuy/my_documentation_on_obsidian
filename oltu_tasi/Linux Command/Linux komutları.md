@@ -1,7 +1,14 @@
 #linux_commands
 ### 1. curl
+###### 1.1`-I` parametresi:
 ```bash
 $ curl -I http://192.168.1.125/assets/images/clients/c3.png
+```
+> **Explanation:**
+
+###### 1.2. `-X` parametresi:
+```shell
+$ curl -X GET www.example.com
 ```
 > **Explanation:**
 

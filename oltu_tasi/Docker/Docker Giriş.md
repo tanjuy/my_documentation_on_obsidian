@@ -148,6 +148,33 @@ $ docker info
 > + **Docker Swarm:** Docker da swarm aktif olup olmadığını buradan kontrol edebiliriz.
 
 ---
+### attach:
+
++ Mevcut bir Docker konteynerine bağlanmak (attach) ve o konteynerin standart çıktısını, hatalarını ve girdisini görüntülemek için kullanılır.
++ `docker attach`, konteynerdeki hem standart çıktı (stdout) hem de standart hata (stderr) ile etkileşime geçmenizi sağlar.
+##### Syntax:
++ **Usage:**  `docker attach [OPTIONS] CONTAINER`
+
+##### Örnek 1
+
+```shell
+$ docker run --name webserver -d -it -p 80:80 nginx
+```
+> **Explanation:**
+> + `webserver` container'ın `-d` parametresi ile arka planda çalışmasını sağlıyoruz.
+> + `-it` parametresi ile de `ctrl+p` ve `ctrl+q` komutların aktif olması sağlıyoruz.
+
+```shell
+docker attach webserver
+```
+> **Explanation:**
+> + Arka planda çalışan `webserver` container'ın bu komut ile tekrardan terminal ekrana gelmesini sağlıyoruz.
+> + Tekrardan `deattach` moda çalışmasını sağlamak için `ctrl+p` ardından `ctrl+q` basmamız yeterlidir.
+
+> [!IMPORTANT]
+> + `docker run`  parametresine `-it` verirsek bize etkileşimli bir `tty` verecektir. Bu parametre sayesinde `ctrl+p` ardından `ctrl+q` verdiğimizde container deattach moda geçecektir.
+
+---
 ### inspect:
 
 ###### Syntax:
@@ -510,6 +537,21 @@ $ docker rm -f web-server
 > + `-f` veya `--force` parametresi, *zorla(force)* kaldırma anlamında kullanılır.
 
 ---
+
+### prune:
++ Durdurulmuş (çalışmayan) tüm konteynerleri siler
+###### Syntax:
++ **Usage:**  `docker container prune [OPTIONS]`
++ **Örnek:** `docker container prune -f`
++ **Karşılığı:** `[OPTIONS] => -f`
+
+###### 1.Temel Kullanımı:
+```shell
+$ docker container prune 
+```
+> **Expalanation:**
+> + Durdurulmuş (çalışmayan) tüm konteynerleri kaldırır.
+
 ### ps:
 + **Amaç:** Docker da container silme işlemini yapar. Diğer bir tanımla Durdurulmuş (stopped) konteynerleri Docker ortamından kaldırmak.
 ###### Syntax:
@@ -539,6 +581,30 @@ $ docker ps -a --no-trunc
 > + Bu komut, standart `docker ps -a` çıktısının tüm bilgilerini kesintisiz olarak gösterir.
 
 ---
+### publish:
++ Bir Docker konteynerini çalıştırırken konteynerin içindeki belirli bir portu ana makineye (host) yönlendirmek için kullanılır.
++ Bu komut sayesinde, konteynerin(container) içindeki bir uygulamaya, ana makineden(host) veya dış ağlardan erişim sağlanabilir.
+##### Syntax:
++ **Usage:** `docker run -p hostPort:contaierPort`
+
+##### Örnek 1:
+
+```shell
+$ docker run --name web_engress -p 5000:80 -dit nginx
+```
+> **Explanation:**
+> + `5000 port` : ana makinenin port'una açılmaktadır.
+> + `80 port` : container'ın port'una açılmaktadır. ve içerisinde nginx 80 portundan yayın yapmaktadır.
+> + `-it`: parametresi ile interactive tty oluşturduk. Bağlandığımızda(`docker attach web_engress`), `ctrl+p` ardından `ctrl+q` ile deattach moda düşebiliriz.
+> + `-p` parametresini uzun yazılışı: `--publish`
+
+```shell
+$ curl -i http://192.168.1.134:5000
+```
+> **Explanation:**
+> + Bu komut ile ana makinenin 5000 port'u ile container nginx sunucusuna ulaştığımızı kanıtlar. Bu GET istek atma işlemini tarayıcı ile de yapabiliriz.
+
+---
 ## Image
 
 ### Union File System Nedir?
@@ -557,6 +623,29 @@ $ docker ps -a --no-trunc
 + Docker container’ı çalıştığında, imajın üzerine bir yazılabilir katman eklenir.
 + Container’da yapılan değişiklikler (örneğin, yeni dosyaların eklenmesi, dosyaların düzenlenmesi veya silinmesi) sadece bu yazılabilir katmanda saklanır.
 + 
+
+### Image isimlendirme:
++ Docker’da bir imaj (image) isimlendirme yapısı, imajların daha düzenli bir şekilde tanımlanmasını ve sürüm kontrolünü kolaylaştırmak için kullanılır.
++ İmaj isimlendirme yapısı, Docker Hub gibi bir kaynağa (registry) yüklenecek imajları ve farklı sürümleri belirlemede özellikle önemlidir.
+##### Syntax:
+```plaintext
+<dockerhub_user>/<image_name>:<tag>
+```
+> + **Explanation:**
+> + **dockerhub_user:**  *Bir organizasyon veya kişiyi göstermektedir.*
+> + **image_name**: İmajın adı veya tanımlayıcısıdır. Bu isim, imajı diğerlerinden ayıran benzersiz bir tanımlayıcıdır.
+> + **tag**: İmajın sürümünü belirtir. Sürüm takibi ve farklı sürümlerin yönetimi için kullanılır. Sıkça kullanılan sürüm isimleri arasında `latest`, `1.0`, `v2.1.3` gibi ifadeler bulunur. `:tag` kısmı belirtilmezse, Docker varsayılan olarak `latest` etiketini kullanır.
+
+##### Resmi olan:
+```shell
+nginx:latest
+```
+
+##### Özel Repository ve Etiket:
+```shell
+chuanwen/cowsay:latest
+```
+
 
 ### ls(images):
 ```shell
@@ -668,7 +757,7 @@ $ docker
 $ docker volume rm ottoman_volume
 ```
 > **Explanation:**
-> + 
+> + `ottoman_volume` adındaki volume'ü siliyoruz.
 
 ### Bind Mount:
 
@@ -692,6 +781,200 @@ $ docker run --name ottoman -it -v ~/apps:/apps alpine sh
 ##### Hangi Durumda Hangi Yöntem Tercih Edilmeli?
 - **Volume** kullanımı, konteynerlerinizi farklı platformlarda çalıştırmayı veya taşımayı planlıyorsanız daha iyi bir seçenektir. Ayrıca, veri güvenliği, kalıcılığı ve performans gereksinimleri için de uygundur.
 - **Bind Mount** ise belirli bir host dosya sistemi ile sıkı entegrasyon gerektiğinde (örneğin, belirli bir dizindeki dosyalarla çalışmak) kullanışlıdır. Ancak güvenlik ve taşınabilirlik açısından dikkat edilmelidir.
+
+## Network:
++ Docker'da **network** (ağ), konteynerlerin birbirleriyle ve dış dünya ile nasıl iletişim kuracağını belirleyen bir yapıdır.
++ Docker, her konteyneri izole bir ortamda çalıştırırken, konteynerler arası iletişimi sağlamak için ağ mekanizmaları kullanır.
++ Docker ağları, konteynerler arasında veri alışverişini yönetir ve dış dünyadan gelen trafiği düzenler.
++ Docker, farklı senaryolar için önceden yapılandırılmış birkaç ağ sürücüsü (network driver) sunar. Her sürücü, konteynerlerin nasıl bağlanacağını ve iletişim kuracağını belirler.
+### Docker Network Türleri:
+
+#### 1.Bridge Network:
++ *Varsayılan ağ türüdür. Eğer bir container oluşturulduğu zaman varsayılan olarak Bridge Network bağlanacaktır.*
+
+> [!CAUTION]
+> + Eğer varsayılan `bridge` oluşturduğunda container'lar birbirlerini çözümleyemiyorlar fakat
+> + Eğer kullanıcı tarafından oluşturulmuş `bridge` container'ların birbirlerini çözülemesine izin veriyor. 
+
+##### Varsayılan Ağ:
+```shell
+$ docker run --name default_network -it alpine sh
+```
+> **Explanation:**
+> + Eğer `--network` parametresi yazılmazsa docker engine varsayılan olarak gelen `bridge` ağına bağlanacaktır.
+> + `docker network ls` komut ile tüm docker ağını listeleyebilirsiniz.
+> + Eğer container içerisinde `ip addr` veya `ifconfig` komutunu çalıştırsak container'ın IP'sini görebiliriz. 
+
+```shell
+$ docker network inspect -f '{{json .Containers}}' bridge | jq
+```
+> **Explanation:**
+> + `-f` parametresi ile sadece *Containers* json verisini alıp `jq` komutuna yönlendiriyoruz.
+> + Çıktıdan gördüğümüz üzere `default_network` adındaki container'ın IP'sini görebiliriz.
+> + `js` paket kurulumu: `sudo apt install jq`
+
+#### 2.Host Network:
++ Konteynerin(container) Docker ana bilgisayarıyla(Host) **aynı ağ yapısını** kullanmasını sağlar.
++ Bu durumda, konteyner ana bilgisayarın ağ arayüzünü kullanır ve kendi özel IP adresine sahip olmaz.
++ Performans açısından avantajlı olabilir, çünkü ağ katmanını atlayarak doğrudan ana bilgisayarın ağı kullanılır.
++ **Kapsamlı izolasyona gerek olmayan** durumlarda tercih edilir.
+
+##### Örnek 1:
+```shell
+$ docker run --name host_network --network host nginx
+```
+> **Explanation:**
+> + `--network host` parametresi ile ana makinenin(host) ara yüzünü(interface) kullanılması istenmektedir. Yani *docker engine* linux kernel'dan network namespace kullanımına izin vermeyecektir.
+> + Docker’da `host` ağı, konteynerlerin doğrudan ana makinenin (host) ağına bağlanmasını sağlar. Bu sayede konteyner, ana makineyle aynı IP adresine sahip olur ve ağa doğrudan erişebilir.
+> + `curl -X GET 192.168.1.134` veya tarayıcıda 192.168.1.134 ile GET isteği atığımızda direk nginx varsayılan ekranı gelecektir. Sanki docker container'ın içinde değil de ana makinede çalışıyor. 
+
+
+```shell
+$ docker network inspect host --format '{{json .Containers}}' | jq
+```
+> **Explanation:**
+> + Bu komut ile host alanındaki contianer'ları teyit edebiliriz. `host_network` container'ı da orada göreceğiz. 
+> + IP adresi yok çünkü ana makinenin ara yüzünü kullanıyor.
+
+
+
+#### 3.Overlay Network:
++ **Küme (Swarm) modunda** birden fazla Docker daemon ana bilgisayarı (host) arasında iletişim sağlamak için kullanılır.
++ Docker Swarm veya Kubernetes gibi dağıtılmış sistemlerde, konteynerlerin farklı fiziksel sunucularda (node'larda) çalışsa bile aynı sanal ağdaymış gibi iletişim kurmasına olanak tanır.
+
+#### 4.None Network:
++ Konteynerin(container) **herhangi bir ağa bağlanmamasını** sağlar.
++ Bu ağ türü, konteynerin izole bir şekilde çalışmasını ve diğer konteynerlerle veya dış dünya ile iletişim kurmamasını sağlar.
+
+```shell
+$ docker run -it --name none_network --network none alpine sh
+```
+> **Explanation:**
+> + `none_network` adındaki container'ı `--network` parametresi ile `none` driver'ına bağlıyoruz.
+> + Artık none_network container'ı ağ üzerinden dışarı ulaşamaz.
+> + Açılan shell de `ip a` veya `ifconfig` komut ile baktığımızda sadece `lo` ara yüzü görünecektir.
+
+```shell
+$ docker network inspect none -f '{{json .Containers}}' | jq
+```
+> **Explanation:**
+> + Bu komut ile hangi container'ların `none` sürücüsüne(driver) bağlı olduğunu görebiliriz.
+
+#### 5.Macvlan Network:
+
+### Docker network komutları:
+#### 1.Network ls:
++ **Usage:** `docker network ls [OPTIONS]`
+```shell
+$ docker network ls
+```
+> **Explanation:**
+> + Docker üzerinde mevcut olan ağları listelemek için kullanılır.
+> + Bu komutu çalıştırdığınızda Docker'ın varsayılan ağları ve sizin oluşturduğunuz özel ağlar gösterilir.
+> + Çıktıda her ağ için `NETWORK ID`, `NAME`, `DRIVER` ve `SCOPE` gibi bilgiler yer alır.
+#### 2.Network inspect:
+
+#### 3.Network create:
++ Docker’da özel bir ağ oluşturmak için kullanılan komuttur.
++ Bu komut sayesinde konteynerler arasında izole bir ağ ortamı yaratabilir, konteynerlerin güvenli bir şekilde birbiriyle iletişim kurmasını sağlayabilirsiniz.
+##### Syntax:
++ **Usage:**  `docker network create [OPTIONS] NETWORK`
+
+##### Örnek 1:
+```bash
+$ docker network create first_network
+```
+> **Explanation:**
+> + `first_network` adında bir `bridge` ağ oluşturduk.
+> + Eğer dikkat ederseniz `--driver` parametresini kullanmazsak *docker engine*  varsayılan olarak `bridge driver` kullanır.
+> + `docker network ls` ile `first_network` ağın oluşturulup oluşturulmadığına bakabilirsiniz.
+
+```shell
+$ docker run --name web --hostname web --network first_network -it alpine sh
+```
+
+```shell
+$ docker run --name database --hostname database --network first_network \
+-it busybox sh
+```
+> **Explanation:**
+> + 2 tane container oluşturduk ve her ikisi de aynı oluşturmuş olduğumuz ağı paylaşmaktadır.
+> + Eğer dikkat ederseniz `--hostname` parametresi ile container'lar hostname'lerini belirli bir isim verdik.
+> + Eğer web container'ın kabuğundan(shell) `ping database` ve database container'ın kabuğundan(shell) `ping web`  ile komutlarını çalıştırdığımızda ping atacaktır. Böylelikle iki container aynı ağda konuştuğunu görebiliriz.
+
+
+```shell
+$ docker network inspect first_network | jq
+```
+> **Explanation:**
+> + Oluşturmuş olduğumuz `first_network` ağını yukarıdaki komut ile detaylarını inceleyebiliriz.
+> + `jq` komut ile daha güzel çıktı veriyor.
+
+
+> [!CAUTION]
+> - `first_network` kendimiz oluşturduğumuz ve 2 container bağladığımız için bu iki contianer birbirlerini hostname'leri çözümleyebilecektir.
+> - Docker engine ile varsayılan olarak gelen  brigde `hostname` çözümleme yoktur.
+
+#### 4. Network connect:
+##### Syntax:
++ **Usage:**  `docker network connect [OPTIONS] NETWORK CONTAINER`
+
+##### Örnek 1:
+```shell
+$ docker run --name webserver --hostname webserver -itd alpine sh
+```
+> **Explnation:**
+> + `--network` parametresini tanımlamadığımız için varsayılan olarak *docker engine* bridge adındaki ağı(network) verecektir
+
+```shell
+$ docker network create web_net
+```
+> **Explnation:**
+> + `web_net` adında bir ağ(network) oluşturuyoruz. Tabi `--driver` parametresi kullanılmadığı için `web_net` sürücüsü(driver) `bride` olacaktır.
+
+```shell
+$ docker network connect web_net webserver
+```
+> **Explnation:**
+> + Oluşturmuş olduğumuz `web_net` ağını(network) `webserver` adındaki container'a bağlıyoruz.
+
+```shell
+$ docker inspect webserver -f '{{json .NetworkSettings.Network}}'
+```
+> **Explnation:**
+> + container'ın `inspect` komut ve `-f` parametresi ile süzersek 2 tane ara yüzün(interface) `webserver` container'ına bağlı olduğunu görebilirsiniz.
+
+```shell
+$ docker exec webserver ip addr
+```
+> **Explnation:**
+> + Yine `exec` komut ile 2 tane ara yüzün(interface) bağlı olduğunu görebiliriz.
+
+#### 5.Network disconnect:
+##### Syntax:
++ **Usage:**  `docker network disconnect [OPTIONS] NETWORK CONTAINER`
+
+##### Örnek 1:
++ Aşağıdaki işlemler **4.Network connect** devamı niteliğindedir.
+```shell
+$ docker network disconnect bridge webserver
+```
+> **Explnation:**
+> + Yukarıda da gördüğün üzeri 2 tane ara yüzün(interface) webserver container'a bağlı olduğunu görebilirsiniz.
+> + Bu komut ile `bridge` adındaki ağı(network) kaldırıyoruz.
+
+```shell
+$ docker inspect webserver -f '{{json .NetworkSettings.Network}}'
+```
+> **Explnation:**
+> + Bu komut ile `bridge` adındaki ağın kaldırıldığını ve web_net kaldığını teyit edebiliriz.
+
+```shell
+$ docker exec webserver ip addr
+```
+> **Explnation:**
+> + Yine bu komut ile de 1 tane ara yüzün(interface) kaldığını görebiliriz.
+
 ## Plugins
 
 ```shell
@@ -701,5 +984,6 @@ $ docker info --format "{{json Plugins}}"
 > + docker engine ile birlikte gelen eklentileri(plugins) listeler.
 
 
-#### Kaynak:
+## Kaynak:
 [Ayti Tech](https://www.youtube.com/watch?v=ACr92yZF0bg)
+[Hızlandırılmış Docker Eğitimi - Part 2/2](https://www.youtube.com/watch?v=ty3s47TDjo4)

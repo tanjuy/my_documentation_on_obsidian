@@ -1,4 +1,4 @@
-#Bash_Script 
+#Bash_Script  #programlama 
 
 >[!INFO]
 > Bash açılımı:  *Bourne Again Shell*

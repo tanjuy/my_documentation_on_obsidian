@@ -68,9 +68,11 @@
 + Bu veri, bir HTML sayfası, bir resim, bir video, bir ses dosyası veya başka bir format olabilir.
 ###### Media Independent Olmasın Anlamı:
 1. **Veri Türünden Bağımsızdır:** HTTP, taşınan verinin formatını veya yapısını anlamaz. İstemci bir istek yapar, sunucu bu isteğe uygun yanıtı hazırlar ve HTTP sadece bu yanıtı taşır. Bu veri bir resim, video, ses dosyası, metin ya da herhangi bir formatta olabilir.
-2. **MINE Türleri ile Tanımlama:** HTTP istek ve yanıtlarında medya türleri, **MIME (Multipurpose Internet Mail Extensions)** türleri ile tanımlanır. 
-+ Örneğin, bir web tarayıcısı sunucudan bir web sayfası istediğinde, sunucu yanıtında MIME türünü belirtir (örneğin, `text/html`), böylece tarayıcı gelen veriyi nasıl işleyeceğini bilir. Örnek: `text/html` — Bir HTML dosyası, `image/jpeg` — Bir JPEG resmi ve  `video/mp4` — Bir MP4 video dosyası
+2. **MINE Türleri ile Tanımlama:** HTTP istek ve yanıtlarında medya türleri, **MIME (Multipurpose Internet Mail Extensions)** türleri ile tanımlanır.  Örneğin, bir web tarayıcısı sunucudan bir web sayfası istediğinde, sunucu yanıtında MIME türünü belirtir (örneğin, `text/html`), böylece tarayıcı gelen veriyi nasıl işleyeceğini bilir. Örnek: `text/html` — Bir HTML dosyası, `image/jpeg` — Bir JPEG resmi ve  `video/mp4` — Bir MP4 video dosyası
 3. **Her Türlü İçeriği Taşıyabilir:** HTTP, herhangi bir medya türünü veya veriyi taşıyabilir. Bir resim, video, ses dosyası ya da dosya türü fark etmeksizin, HTTP üzerinden iletilebilir. Bu yüzden, metin tabanlı HTML'den yüksek kaliteli video dosyalarına kadar geniş bir yelpazede içerik taşımak için kullanılabilir.
+##### 3. Stateless:
++ HTTP'nin **stateless** (durumsuz) olması, her bir isteğin bağımsız olması ve sunucunun, önceki istekler hakkında herhangi bir bilgi saklamaması anlamına gelir.
++ Sunucu, her gelen isteği sanki ilk kez gelmiş gibi değerlendirir, önceki isteklerin bağlamını veya durumunu hatırlamaz.
 
 ##### 7.2 POP:
 + POP'un açılımı *Post Office Protocol* 
