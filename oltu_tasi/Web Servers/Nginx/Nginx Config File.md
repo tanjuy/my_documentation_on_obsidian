@@ -624,12 +624,48 @@ $ ./configure --with-http_ssl_module
 ```
 ### Nginx Config Dosyası:
 
++ **nginx configuration file is the heart of nginx web server**
 
 > [!NOTE]
 > + Eğer debian temelli işletim sistemlerinde `apt` paket yöneticisini kullanarak nginx kurduysanız `nginx config` dosyası `/etc/nginx` dizinde mevcut olacaktır.
 
 + `nginx.conf`, NGINX'in çalışma şeklini belirleyen direktiflerin bulunduğu ana konfigürasyon dosyasıdır.
-##### `nginx.conf` Dosyasın Genel Yapısı:
+
+#### A.Simple ve Block Directive:
+##### A.1.Simple Directive:
++  Bir modülün isimi boşlukla ayrılmış parametre sonu noktalı virgüle(`;`) bitiyorsa buna **simple directive** denir.
++ Simple directive anahtar-değer çifti formunda tanımlanan her hangi birşey.
+###### Örnek:
+```nginx
+worker_processes auto;
+```
+> **Explanation:**
+> + `worker_processes` modülün isimi ardından bir boşluk daha sonrasında `auto` parametresi en son olarak da noktalı virgül(`;`) gelmektir. Fakat parametre kullanılmıştır.
+> + İşte bu yapıdaki directive'ler *simple directive* diyoruz.
+##### A.2.Block Directive:
++ Simple directive ile aynı ama nginx'in alacağı komutları süslü parantez(`{...}`) ile çevreler.
++ Eğer Block Directive içerisine her hangi bir directive alırsa artık bu yapıya **context** denir.
+###### Örnek:
+```nginx
+http {                          # 1
+    server {                    # 2 
+        listen 80;
+        server_name example.com;
+
+        location / {           # 3
+            root /var/www/html;
+            index index.html;
+        }
+    }
+}
+```
+> **Explanation:**
+> 1. `http` bir block directive ama içerisinde hem simple directive hem de block directive içerdiği için block directive yerine **context** deyiceğiz.
+> 2. `server` bir context diyoruz çünkü içerisinde directive'ler bulunmaktadır.
+> 3. `location` da yukarıdaki tanım uygun olarak bir context'dir.
+> 4. Kaynak: [Configuration File’s Structure](https://nginx.org/en/docs/beginners_guide.html)
+
+#### B.`nginx.conf` Dosyasın Genel Yapısı:
 + NGINX yapılandırma dosyası, hiyerarşik bir yapıya sahiptir ve genellikle dört ana bloktan oluşur:
 1. **Main Context**
 2. **Event Context**
@@ -646,6 +682,9 @@ events {
 }
 http {
 	# Http Context
+	upstream backend_server {
+		# Upstream Context
+	}
 	...
     server {
 	    # Server Context
@@ -665,6 +704,9 @@ http {
 ###### 1. Main Context:
 + **Konum:** `nginx.conf` dosyasının en üst düzeyinde bulunur.
 + **Amaç:** NGINX'in genel çalışma ayarlarını belirler. Bu ayarlar tüm `server` ve `location` blokları için geçerlidir.
++ main context'in bir diğer adı da *global context* denir. Ayırca küme parantezi`{...}` içermeyen tek context'dir.
++ *Temel düzeyde tüm uygulamayı etkileyen detayları yapılandırmak(config etmek) için kullanılır.*
+
 ```nginx
 user www-data;                                   # 1
 worker_processes auto;                           # 2
@@ -676,6 +718,13 @@ include /etc/nginx/modules-enabled/*.conf;       # 4
 > 2. NGINX'in çalıştıracağı worker process'lerin sayısını belirler.
 > 	+ **auto:** kaç işlemci var ise o kadar worker process oluşturur.
 > 3. nginx'in çalışmış olduğu process ID'yi verir.
+
+
+> [!CAUTION]
+> + Bazı directive'ler main context'inde ayarlanması gerekmektedir Örneğin;
+> + `user www-data`: worker process'leri çalıştıracak kullanıcı(user) ve grup(group)
+> + `worker_processes 4`: çalıtırılacak olan worker sayısı
+> + `pid /run/nginx.pid`: ana process'in PID'yi kayıt edecek dosya ve konumu
 
 ###### 2. Events Context:
 + **Konum**: Main context içinde yer alır.
@@ -692,6 +741,9 @@ events {
 ###### 3. Http Context:
 + **Konum**: Main context içinde yer alır.
 + **Amaç:** NGINX'in **HTTP protokolü** ile nasıl çalışacağını belirleyen ayarların yapıldığı bölümdür. Örneğin, **gzip sıkıştırma**, **keep-alive bağlantı süresi**, ve **log formatları** gibi genel HTTP özelliklerini yapılandırır.
++ Http context, programın HTTP veya HTTPS bağlantılarını nasıl işleyeceğini tanımlamak için gerekli tüm yönergeleri ve diğer bağlamları içerecektir.
++ nginx config dosyasında en uzun context `http context`'dir.
+
 ```nginx
 http {
     # Basic Settings
@@ -749,9 +801,43 @@ server {
 > 4. `root directive`: Web dosyalarının bulunduğu dizin.
 > 5. `index directive`: Varsayılan olarak sunulacak dosya.
 > 6. `location context`: URL yollarına göre istekleri yönlendirir.
+
+
+> [!IMPORTANT]
+> + Nginx’te **virtual host (sanal ana bilgisayar)**,
+> + aynı sunucuda birden çok web sitesinin veya alan adının barındırılmasını sağlayan bir yapılandırma tekniğidir.
+> + Her bir virtual host, `server` blokları kullanılarak yapılandırılır ve her blok, belirli bir alan adına veya bağlantı noktasına göre ayrılır.
+> + Böylece, Nginx gelen istekleri doğru siteye yönlendirir ve her bir alan adı için farklı ayarlar yapılabilir.
+> + Bu özellik, paylaşımlı sunucularda veya farklı siteler için gereklidir.
+
+###### Virtual Host Örnek:
+```nginx
+http {
+    server {
+        listen 80;
+        server_name example.com;
+        root /var/www/example;
+        index index.html;
+    }
+
+    server {
+        listen 80;
+        server_name example.org;
+        root /var/www/example_org;
+        index index.html;
+    }
+}
+```
+> **Explanation:**
+> + `example.com` ve `example.org` alan adları aynı Nginx sunucusunda barındırılır.
+> + Her `server` bloğu, kendi kök dizinini (`root`) ve ayarlarını içerir. Böylece, gelen istekler belirtilen alan adına göre ilgili dizine yönlendirilir.
+> + Sonuç olarak 2 tane `virtual host` mevcuttur.
+
+
 ###### 5. Location Context:
 + **Konum**: Server context içinde yer alır.
 + **Amaç**: Belirli bir URL yoluna gelen isteklerin nasıl işleneceğini tanımlar. Örneğin, belirli dosya türleri için özel işlemler yapılabilir veya belirli dizinlere istekler yönlendirilebilir.
++ `location context` içerinde bir veya birden fazla `location context` tanımlayabiliriz.
 
 ```nginx
 server {
@@ -775,6 +861,37 @@ server {
 - `curl -i http://192.168.1.129/linux/` komut veya tarayıcı ile `GET` isteği yaptığımızda nginx bize `/var/www/linux/linux.html` içreğini bize gönderecektir.
 - `index directive` :  nginx programının `/var/www/linux/` dizininde `linux.html` dosyasına bakmasını söylemektedir. 
 -  Yukarıdaki config dosyasında kullanılan `try_files` directive buradaki `location` context içeriği ile aynı işi yapar ama daha gelişmiş özelikleri mevcuttur.
+
+###### 6. Upstream Context:
++ Nginx'te **upstream context**, birden fazla sunucunun yük dengelemesi (load balancing) için ayarlandığı bir context'dır.
++ upstream context bir veya birden fazla server IP'ler veya domain'ler bulunur.(Upstream Sunucular)
++ Genellikle, `proxy_pass` direktifiyle birlikte kullanılarak gelen isteklerin belirli bir sunucu grubuna yönlendirilmesi sağlanır.
++ Yük dengeleme yapılırken, istekler sunucular arasında dağıtılır.
+
+###### Örnek:
+```nginx
+upstream backend_servers {
+    server server1.example.com;
+    server server2.example.com;
+}
+
+server {
+    location / {
+        proxy_pass http://backend_servers;
+    }
+}
+```
+> **Explanation:**
+> + `proxy_pass` komutu ile gelen istekleri `backend_servers` upstream'ında bulunan sunucular gönderiyoruz.
+> + Temel olarak `load balancing` yani yük dengeleme işlemi yapıyoruz. Yük dengeleme olarak denmek isten mevcut sunucuya gelen isteklerin belirli bir algoritma ile `upstream`'daki sunuculara dağıtmaktır.
+> + nginx varsayılan olarak `load balancing` de `round-robin` kullanmaktadır.
+> + `Load Balancing` konusunda daha detaylı anlatılacaktır.
+
+> [!WARNING]
+> + Upstream context, http context içerisine yerleştirilmelidir. Server context'in de dış kısmında bulunmalıdır.
+
+###### 7.Mail Context:
++ Mail context main context yani global context içerisinde tanımlanır.
 
 ###### Final nginx.conf:
 + `/etc/nginx/nginx.conf` dosyasını en basit hali;

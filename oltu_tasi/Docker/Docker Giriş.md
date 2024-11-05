@@ -629,24 +629,72 @@ $ curl -i http://192.168.1.134:5000
 + İmaj isimlendirme yapısı, Docker Hub gibi bir kaynağa (registry) yüklenecek imajları ve farklı sürümleri belirlemede özellikle önemlidir.
 ##### Syntax:
 ```plaintext
-<dockerhub_user>/<image_name>:<tag>
+<Registry URL>/<Repository>:<tag>
 ```
 > + **Explanation:**
-> + **dockerhub_user:**  *Bir organizasyon veya kişiyi göstermektedir.*
-> + **image_name**: İmajın adı veya tanımlayıcısıdır. Bu isim, imajı diğerlerinden ayıran benzersiz bir tanımlayıcıdır.
+> + **Registry URL:** majın kaydedildiği kayıt deposunu belirtir. Örneğin, Docker Hub, AWS ECR veya Google Container Registry gibi kaynaklar kullanılabilir. Eğer özel bir repository belirtilmemişse, Docker Hub varsayılan olarak alınır.
+> + **Repositroy:**: İmajın adı veya tanımlayıcısıdır. Bu isim, imajı diğerlerinden ayıran benzersiz bir tanımlayıcıdır. *Bir organizasyon veya kişiyi göstermektedir.*
 > + **tag**: İmajın sürümünü belirtir. Sürüm takibi ve farklı sürümlerin yönetimi için kullanılır. Sıkça kullanılan sürüm isimleri arasında `latest`, `1.0`, `v2.1.3` gibi ifadeler bulunur. `:tag` kısmı belirtilmezse, Docker varsayılan olarak `latest` etiketini kullanır.
 
-##### Resmi olan:
+
+> [!CAUTION]
+> + `latest` etiketi(tag) imajın son sürümünü belirtmez.
+> + İmaj geliştiricileri bu etiketi en güncel sürümle işaretlemediği sürece eski bir sürüm de olabilir.
+> + Sonuç olarak; imaj geliştiricisi kendi sistemine bağlı olarak imajın hangi versiyonu `latest` işaretlediyse o imaj versiyonu `latest` olacaktır.
+> + Örnek: `docker tag myapp:1.0 myapp:latest`
+
+
+##### Örnek:
 ```shell
-nginx:latest
+docker.io/chuanwen/cowsay:latest
+```
+> **Explanation:**
+> + `docker.io` : İmajın kaydedildiği özel registry URL.
+> + `chuanwen/cowsay` :  docker.io adlı depodaki kullanıcı(Repositroy)
+> + `latest`: cowsay adlı imajın versiyonu ayrıca son sürümü belirtmektedir.
+
+
+> [!TIP]
+> + Docker engine varsayılan ayarlar ile yüklediyseniz registry URL olarak `docker.io` (docker hub registry) gelecektir.
+> + Eğer imajı ana makinenize indirmek istediğiniz: Varsayılan olarak `docker pull chuanwen/cowsay` yazmanız yeterlidir. Yani *repository* adı üzerinde çekebiliriz.
+> + `docker.io` tarafından resmi olarak tanıtılan imajların sadece adını yazmanız yeterlidir. Örneğin; `docker pull nginx`
+> + `docker pull <image name>` komut ile imajı çektiğimizde en alt kısımda hangi registry'den, hangi kullanıcı tarafından, hangi imajı ve en son olarak da imajını sürümünü vermektedir.
+
++ Lütfen çıktının en alt kısmına dikkat ediniz!
+
+```shell
+$ docker pull postgres
+Using default tag: latest
+latest: Pulling from library/postgres
+a480a496ba95: Pull complete
+f5ece9c40e2b: Pull complete
+241e5725184f: Pull complete
+6832ae83547e: Pull complete
+4db87ef10d0d: Pull complete
+979fa3114f7b: Pull complete
+f2bc6009bf64: Pull complete
+c9097748b1df: Pull complete
+9d5c934890a8: Pull complete
+d14a7815879e: Pull complete
+442a42d0b75a: Pull complete
+82020414c082: Pull complete
+b6ce4c941ce7: Pull complete
+42e63a35cca7: Pull complete
+Digest: sha256:8d3be35b184e70d81e54cbcbd3df3c0b47f37d06482c0dd1c140db5dbcc6a808
+Status: Downloaded newer image for postgres:latest
+docker.io/library/postgres:latest
+```
+---
+### build:
+
+###### Syntax:
+```shell
+$ docker image build -t <image_reposiytoy>:<tag> .
 ```
 
-##### Özel Repository ve Etiket:
-```shell
-chuanwen/cowsay:latest
-```
 
 
+---
 ### ls(images):
 ```shell
 $ docker image ls
@@ -666,6 +714,73 @@ $ docker image rm
 ```
 
 ---
+### pull:
+###### Syntax:
++ **Usage:** `docker pull [OPTIONS] NAME[:TAG|@DIGEST]`
++ **Örnek:**  
++ **Karşılığı:** 
+
+```shell
+$ docker pull nginx
+```
+
+---
+### push:
+
+###### Syntax:
++ **Usage**:  `docker push [OPTIONS] NAME[:TAG]`
+
+```shell
+$ docker push 
+```
+
+---
+### tag:
++ **Amaç:** Docker image tag, bir Docker imajı (image) tanımlamak için kullanılan bir etikettir.
++ Her Docker imajı, birden fazla etiketle ilişkilendirilebilir, bu da aynı imajın farklı sürümlerini veya konfigürasyonlarını temsil eder.
+###### Syntax:
++ **Usage:** `docker image tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]`
+
+###### Tag formatı:
+```shell
+$ repository:tag
+```
+> **Explanation:**
+> + **repositroy:** docker_hub_username/image_name şeklinde yapıdan oluşmaktadır.
+> + **tag**: İmajın versiyonunu veya durumu belirtir (örneğin, `latest`, `1.0`, `beta`, vb.).
+###### 1.Yeniden Tag Yapma:
+```shell
+$ docker tag ubuntu:latest app:dark
+```
+> **Explanation:**
+> + `ubuntu:latest` imajımızı, `tag` komut ile yeniden `app:dark` olarak etiketliyoruz.
+> + `docker image ls` komut ile durumu teyit edebiliriz. Eğer aşağıdaki çıktıyı incelersek `ID`'lerin aynı olduğunu görebiliriz;
+
+```shell
+alpine                   latest    1d34ffeaf190   5 months ago    7.79MB
+test                     dark      1d34ffeaf190   5 months ago    7.79MB
+```
+
+###### 2.Docker Hub Göre:
+```shell
+$ docker tag nginx:latest tanjuu/nginx_ty:1.1
+```
+> **Explanation:**
+> + `nginx:latest` :  Ana makinemize indirmiş olduğumuz nginx imajı
+> + `tanjuu` :  Docker hub'daki username yani kullanıcı adımız
+> + `nginx_ty` :  imajı tanımlayıcı bir ek isim
+> + `tanjuy/nginx_ty`: indirilecek imajın tam ismi oluyor.
+
+```shell
+$ docker push tanjuu/nginx_ty:1.1
+```
+> **Explanation:**
+> + Oluşturmuş olduğumuz imajı(`tanjuu/nginx_ty:1.1`) docker hub registry'ye gönderiyoruz.
+> + *Docker hub* da `tanjuu` adında kullanıcı var bu yüzden her imajım `tanjuu` ile başlamak zorundadır.
+> + Eğer dikkat ederseniz `tag` değerini 1.1 verilmiştir.
+
+---
+
 ## Volume
 + Docker'da **volume** (hacim), konteynerlerin verilerini kalıcı olarak saklamak ve paylaşmak için kullanılan bir depolama mekanizmasıdır.
 + Konteynerler genellikle geçici yapılar olduğundan, konteynerler silindiğinde içinde bulunan veriler de kaybolur

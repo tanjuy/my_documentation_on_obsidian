@@ -1,8 +1,8 @@
 #programlama
 
 # Giriş:
-
-## print fonksiyonu:
+## Fonksiyonlar
+### print fonksiyonu:
 ```python
 #!/usr/bin/python3
 
@@ -24,6 +24,37 @@ print("Python", end="")
 print("Javascript", end="")
 print("Java", end="")
 ```
+
+### Type Fonksiyonu:
+
+## Sınıflar:
+### str:
++ Python'da `str` sınıfı, string (dize) veri tipini temsil eden bir sınıftır ve Python'da metinleri işlemek için kullanılır.
++ Bu sınıf, stringlerin nasıl saklanacağını ve bu stringlerle nasıl işlem yapılacağını belirler.
+#### 1.Değiştirilemezlik (Immutable):
++ `str` sınıfının bir örneği(instance) oluşturulduktan sonra değiştirilemez.
++ Yani bir stringin içindeki karakterler doğrudan değiştirilemez. Yeni bir string elde etmek için, bir dönüşüm yapılması gerektiğinde yeni bir string yaratılır.
+###### Örnek 1:
+```python
+lang = "Python"
+lang[0] = "C"
+```
+> + Eğer `lang` değişkenindeki `P` harfini yani 0.indeksi `C` harfi ile değiştirmeye istersek hata verecektir. Çünkü string veri türleri bir kez belleğe yazıldıktan sonra değiştirilemez.
+
+```python
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: 'str' object does not support item assignment
+```
+
+---
+
+#### 2. Veri Türü Dönüştirme:
++ Diğer veri tiplerini string veri tipine dönüştürmek için kullanılır.
+
+#### 3. String Metotları:
++ 
+
 
 ## Temel Veri Türleri:
 
@@ -100,10 +131,21 @@ fruitBasket = {'elma', 'armut', 'kiraz', 'çilek'}
 ```
 
 # String Veri Tipi:
-+ String veri tipi ilkel bir tiptir ancak Python’da sınıf olarak tanımlandığı için metotlara sahiptir.
++ Python'da _string_ (dize) verisi, bir metni veya karakterler dizisini temsil eder ve genellikle metinsel veri depolamak için kullanılır.
++ Stringler, tırnak işaretleri (tek `'...'` veya çift `"... "`) içinde tanımlanır.
++ Python’da stringler değiştirilemez (immutable) veri tiplerindendir; yani, bir kez oluşturulduktan sonra içindeki karakterler değiştirilemez.
 
-## String Dilimleme:
-### Syntax:
+#### 1.İndeksleme:
+
+```python
+#!/usr/bin/python3
+message = "Linux is AWESOME"
+print("1.index:", message[0])         # Çıktı: 'L'
+print("2.index:", message[1])         # Çıktı: 'i'
+```
+
+#### 2.String Dilimleme:
+##### Syntax:
 ```python
 variable[index start: end of index: step]
 ```
@@ -111,17 +153,16 @@ variable[index start: end of index: step]
 > + `index start`:  Dilimleme işleminin nereden başlayacağını gösterir.
 > + `end of index`: Dilimleme işleminin nerede sonlanacağını gösterir.
 > + `step`: Her adımda ne kadar ilerleyeceği
-
-### 1.Tek index ile:
+##### Temel Kullanım:
 ```python
 #!/usr/bin/python3
 message = "Linux is AWESOME"
-print("1.index:", message[0])
-print("2.index:", message[1])
+print("index 0 ile 5 arasındaki:", message[0:5])
 ```
+> **Explanation:**
+> + 
 
-
-## Tip Dönüşümü:
+#### 3.Tip Dönüşümü:
 + Bazı verileri string veri tipine dönüştürme işlemi yapabiliriz.
 
 ```python
@@ -135,6 +176,7 @@ print('Son Karakter:', strDate[-1])
 
 
 ## String Metodlerı:
++ String veri tipi ilkel bir tiptir ancak Python’da sınıf olarak tanımlandığı için metotlara sahiptir.
 
 ### title metodu:
 ```python

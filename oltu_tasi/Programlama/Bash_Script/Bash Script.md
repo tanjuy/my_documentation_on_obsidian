@@ -121,7 +121,7 @@ OS_distro="${prefix}_${suffix}"
 echo OS_distro
 ```
 > **Explanation:**
-> Süslü parantezler ile yeni bir değişken oluşturduk.
+> + Süslü parantezler ile yeni bir değişken oluşturduk.
 
 ###### 3. Değişkenin Varsayılan Değeri:
 ```bash
@@ -131,7 +131,7 @@ distro="Arch Linux"
 echo "${distro:-Ubuntu}"
 ```
 > **Explanation:**
-> distro değişkenine değer(*Arch Linux*) atanırsa ekrana basar. Aksi taktirde distro değişkenine değer atanmasa *varsayılan değer olarak Ubuntu* ekrana basar. 
+> + distro değişkenine değer(*Arch Linux*) atanırsa ekrana basar. Aksi taktirde distro değişkenine değer atanmasa *varsayılan değer olarak Ubuntu* ekrana basar. 
 
 ###### 3.1 Değişkene değer verme, değer atma:
 ```bash
@@ -228,8 +228,8 @@ upper_case_text="${text^^}"
 echo "$upper_case_text"
 ```
 > **Explanation:**
-> Bash 4.0 ve üstü sürümlerde, bir değişkenin içeriğini büyük harfe çevirmek için `${var^^}` biçimini kullanabilirsiniz.
-> `"${text^^}"` ifadesi, `text` değişkenindeki tüm harfleri *büyük harfe dönüştürür.*
+> + Bash 4.0 ve üstü sürümlerde, bir değişkenin içeriğini büyük harfe çevirmek için `${var^^}` biçimini kullanabilirsiniz.
+> + `"${text^^}"` ifadesi, `text` değişkenindeki tüm harfleri *büyük harfe dönüştürür.*
 
 ###### 6.3. İlk Harfi Büyütme:
 ```bash
@@ -430,9 +430,8 @@ read -a distros
 echo "Distro sırası: ${distros[0]}, ${distros[1]}, ${distros[2]}"
 ```
 > **Explanation:**
-> `read -a distros` komutu okunan veya alınan değerleri array dizi değişkenin(distros) sıralı indeksine atıyoruz. Script çalıştırıldığında girdi şu şekilde oluyor: 
-> `Enter 3 Linux Distros: Arch Ubuntu Debian` girdi vermeliyiz veya her değer girdiğimizde *Enter* tuşuna basmalıyız.
-
+> + `read -a distros` komutu okunan veya alınan değerleri array dizi değişkenin(distros) sıralı indeksine atıyoruz. Script çalıştırıldığında girdi şu şekilde oluyor: 
+> + `Enter 3 Linux Distros: Arch Ubuntu Debian` girdi vermeliyiz veya her değer girdiğimizde *Enter* tuşuna basmalıyız.
 
 ### Bash Script Argümanlar
 
@@ -516,8 +515,8 @@ echo $*              # Çıktı: Linux Mac Windows Solaris
 $ ./bash_arguments.sh Linux Mac Windows Solaris 
 ```
 > **Explanation:**
-> Tüm konumsal parametreleri tek bir kelime olarak birleştirir ve bu kelimeleri bir dize (string) olarak döndürür.
-> Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
+> + Tüm konumsal parametreleri tek bir kelime olarak birleştirir ve bu kelimeleri bir dize (string) olarak döndürür.
+> + Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
 ###### Örnek 5: `$@` ile `$*` Arasındaki Fark
 
@@ -537,9 +536,9 @@ $ ./bash_arguments.sh Linux Mac Windows Solaris
 ```
 
 > **Explanation:**
-> diziAt değişkeni ekrana indeksi 0 olanı verir yani *Linux* yazar
-> diziStar değişkeni ekrana tüm argümanları yazar çünkü diziStar değişkeni tek bir değerde *string* olarak alır.
-> Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
+> + diziAt değişkeni ekrana indeksi 0 olanı verir yani *Linux* yazar
+> + diziStar değişkeni ekrana tüm argümanları yazar çünkü diziStar değişkeni tek bir değerde *string* olarak alır.
+> + Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
 ###### Örnek 6:  Argüman Sayısı `$#` 
 **Bash Script Dosyası: bash_argument_1**
@@ -553,8 +552,8 @@ echo $#                          # çıktı: 4
 $ ./bash_arguments Linux Mac Windows Solaris   
 ```
 > **Explanation:**
->  `$#` veya `${#}` bash script özel değişkenleri, her ikiside aynı çıktıyı verir ve girilen(Linux Mac Windows Solaris) argüman saysını(4) verir.
->  Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
+>  + `$#` veya `${#}` bash script özel değişkenleri, her ikiside aynı çıktıyı verir ve girilen(Linux Mac Windows Solaris) argüman saysını(4) verir.
+>  + Video: [Süleyman ŞEKER](https://www.youtube.com/watch?v=Nm8v__0iui0&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=5)
 
 
 > [!TIP]
