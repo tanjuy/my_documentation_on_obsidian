@@ -124,7 +124,7 @@ CMD [ "node", "server.js" ]
     "dependencies": {
       "express": "^4.16.1"
     }
-  }
+}
 ```
 > **Explanation:**
 
