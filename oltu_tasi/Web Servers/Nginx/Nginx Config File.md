@@ -1229,7 +1229,7 @@ http {
 ```
 > **Explanation:**
 >  + [[Nginx Directives#Cache-Control|Cache-Control]]  başlığında açıklanmış
->  + [[Nginx location modifier#Örnek 1| location_1]] 
+>  + [[Nginx location#Örnek 1| location_1]] 
 
 ![Cache-Control no-store](images/cache_control_no_store.png)
 ## HTTP If-Modified-Since:
@@ -1362,7 +1362,7 @@ http {
 }
 ```
 > **Explanation:**
-> 1. .png uzantlı dosyaları kapsamaktadır. Ayrıca  tilda(~): küçük büyük harf duyarlığı vardır. Bakınız: [[Nginx location modifier#Regex Case Sensitive Eşleşme|Regex Case Sensitive Eşleşme]] 
+> 1. .png uzantlı dosyaları kapsamaktadır. Ayrıca  tilda(~): küçük büyük harf duyarlığı vardır. Bakınız: [[Nginx location#Regex Case Sensitive Eşleşme|Regex Case Sensitive Eşleşme]] 
 > 2. location context alanına bakarsak allow directive 192.168.1.104'lu IP'ye izin verirken deny directive tüm diğer IP'lere engellemektedir.
 > Eğer 192.168.1.125'li IP'den giriş yaparsak, log dosyası bunu gösterir:
  `192.168.1.103 - - [22/Aug/2024:14:56:47 +0300] "GET /assets/images/clients/c5.png HTTP/1.1" 403 153 "http://192.168.1.125/" "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"`
