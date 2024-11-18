@@ -145,7 +145,47 @@ $ ps -ef
 > 
 ### 13.ctop
 
-### 14. tree
+### 14. scp
++ **Amaç:** `scp` (Secure Copy Protocol), Linux ve diğer Unix tabanlı sistemlerde dosyaları güvenli bir şekilde bir bilgisayardan diğerine kopyalamak için kullanılan bir komuttur.
++ SSH protokolünü kullanarak veri aktarımı yapar, bu da verilerin şifrelenmiş bir şekilde iletilmesini sağlar.
++ Bu sayede dosyaların başka bir cihaza güvenli bir şekilde aktarılması mümkün olur.
+
+##### Syntax:
+```shell
+$ scp [options] source ... target
+```
+
+#### host `->` server:
+
+```shell
+$ scp file_name username@target_IP:/target/folder/
+```
+###### Örnek 1:
+```shell
+$ scp nginx-course-files.zip  ottoman@192.168.1.132:/home/ottoman
+```
+> **Explanation:**
+> + Ana makinemizde(host) mevcut olan nginx-course-files.zip dosyasını uzak sunucuda olan `192.168.1.132` IP'li ve ottoman kullanıcısın ev dizine gönderiyoruz.
+
+#### server `->` host:
+```shell
+$ scp username@source_IP:/source/folder/file_name /target/folder/
+```
+
+> [!NOTE]
+> + Eğer scp komutunu linux veya unix(mac) gibi işletim sistemleri üzerinde kullanıyorsanız ve host makine ile server makine aynı kullanıcıyı kullanıyorsa sadece IP adresini yazmamız yeterli olacaktır.
+> + Örneğin; linux'un kullanıcısı `ottoman` ve sunucun kullanıcısı `ottoman` olursa komut; 
+> + `scp file_name ottoman@192.168.1.134` yerine `scp file_name 192.168.1.134` yazabiliriz. 
+
+#### scp parametreleri:
+###### `-r` parametresi:
+
+###### `-C` parametresi:
+
+###### `-P` parametresi:
+
+
+### 15. tree
 
 ###### 1. Temel Kullanımı:
 ```
@@ -169,7 +209,7 @@ $ tree -L 2
 > **Explanation:**
 > + 
 
-### 15. rsync:
+### 16. rsync:
 
 ```sh
 $ rsync -av --delete ~/Dropbox/oltu_tasi ~/Documents/my_documantion_on_obsidian

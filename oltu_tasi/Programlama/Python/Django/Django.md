@@ -2,7 +2,25 @@
 > [!CAUTION]
 > + Burada yapılan tüm işlemler `Ubuntu 22.04` üzerinde gerçekleştirilmektedir.
 
-#### Python Sanal Ortam Oluşturma:
+
+> [!IMPORTANT]
+> + Django, **hızlı geliştirmeyi** ve **temiz**, **pragmatik tasarımı** teşvik eden üst düzey bir Python web *framework*'üdür
+
+
+> [!NOTE]
+> + **Web framework nedir?**
+> + Web framework, web uygulamaları ve web siteleri geliştirmek için kullanılan yazılım altyapılarıdır.
+> + Web framework'leri, temel yapı taşlarını ve çeşitli araçları sağlayarak geliştiricilerin projeleri daha hızlı ve verimli bir şekilde oluşturmasına yardımcı olur.
+> + Bu framework'ler, birçok yaygın işlevi ve bileşeni standartlaştırarak geliştiricilerin tekrarlayan kod yazmasını azaltır ve güvenli, sürdürülebilir, ölçeklenebilir web uygulamaları oluşturmayı kolaylaştırır.
+
+#### Django nedir? 
+
++ Django, **battaries included** felsefesini takip etmektedir.
++ Django’nun "batteries included" (pil dahil) felsefesi, Django framework'ünün, bir web uygulaması geliştirmek için gerekli olan temel araçların ve özelliklerin çoğunu kendi bünyesinde sunması anlamına gelir
++ Django, geliştiricilerin ek eklenti veya üçüncü taraf modüllere ihtiyaç duymadan hızlı ve eksiksiz projeler oluşturmasını sağlamak amacıyla kapsamlı bir standart kütüphane içerir.
++ **Kimler Django kullanıyor** soruna cevap olarak; Youtube, Spotify, Instagram ve Mozilla
+
+#### Django Yükleme:
 
 ```shell
 $ python -m venv .venv
@@ -21,19 +39,24 @@ $ source .venv/bin/activate
 > + Sanal ortamı aktif etikten sonra `pip list` veya `python -m pip list` komutuna baktığımızda yalnızca iki kütüphane mevcut olduğunu göreceğiz.
 
 ```shell
-$ pip install Django
+$(.venv) pip install Django
 ```
 > **Explanation:**
 > + Bu komut ile `Django framework` sanal ortama indirmiş yani kurulumunu gerçekleştirmiş bulunuyoruz.
 > + `pip list` komut ile kurulumu teyit edebilirsiniz.
 
+```shell
+$(.venv) django-admin
+```
+> **Explanation:**
+> + Django'un yüklü olup olmadığını gösterir. Bu komut `django-admin` yardım sayfasını ekrana basar.
 #### Bir Proje Oluşturma:
 ```shell
-$ django-admin startproject myblog
+$(.venv) django-admin startproject blog
 ```
 > **Explanation:**
 > + *Django'da yeni bir proje başlatmak için kullanılır.* Bu komut, Django'nun temel yapılarını içeren bir klasör yapısı oluşturur.
-> + Özellikle, `myblog` adında yeni bir proje klasörü oluşturur ve içine aşağıdaki dosya ve klasörleri yerleştirir:
+> + Özellikle, `blog` adında yeni bir proje klasörü oluşturur ve içine aşağıdaki dosya ve klasörleri yerleştirir:
 > 1. **manager.py:** Proje yönetim komutlarını çalıştırmak için kullanılan bir betiktir. Bu komutla sunucuyu başlatabilir, veritabanı işlemleri yapabilir ve diğer Django komutlarını çalıştırabilirsiniz.
 > 2. **myblog** (proje ana dizini):
 > 	+ `__init__.py` : Python'a bu dizinin bir Python paketi olarak değerlendirilmesi gerektiğini söyleyen boş bir dosya.
@@ -43,6 +66,22 @@ $ django-admin startproject myblog
 > 	+ `asgi.py`: Django'nun ASGI uyumlu sunucularda çalışabilmesi için bir yapılandırma sağlar (genellikle gerçek zamanlı uygulamalar için kullanılır).
 > 	+ Daha fazla bilgi için [Resmi sitesi](https://docs.djangoproject.com/en/5.1/intro/tutorial01/#creating-a-project) bakınız.
 
+
+```shell
+.
+└── blog                               # 1
+    ├── blog                           # 2
+    │   ├── asgi.py
+    │   ├── __init__.py
+    │   ├── settings.py
+    │   ├── urls.py
+    │   └── wsgi.py
+    └── manage.py
+```
+> **Explanation:**
+> 0. `tree` komutunu ile `django-admin startproject blog` ile hangi dosyalar ve dizinler oluşturduğumuzu hiyerarşik olarak görebiliyoruz.
+> 1. Proje oluşturma komutunda(`django-admin startproject blog`) verdiğimiz isim de klasör oluşturuluyor.
+> 2. Bir alt dizinde de komut adındaki ile aynı isimde klasör oluşturuluyor.
 #### Geliştirme Sunucusu:
 ```shell
 $ python3 manage.py runserver

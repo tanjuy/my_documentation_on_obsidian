@@ -810,7 +810,7 @@ server {
 > + Böylece, Nginx gelen istekleri doğru siteye yönlendirir ve her bir alan adı için farklı ayarlar yapılabilir.
 > + Bu özellik, paylaşımlı sunucularda veya farklı siteler için gereklidir.
 
-###### Virtual Host Örnek:
+**Virtual Host Örnek:**
 ```nginx
 http {
     server {
@@ -832,7 +832,6 @@ http {
 > + `example.com` ve `example.org` alan adları aynı Nginx sunucusunda barındırılır.
 > + Her `server` bloğu, kendi kök dizinini (`root`) ve ayarlarını içerir. Böylece, gelen istekler belirtilen alan adına göre ilgili dizine yönlendirilir.
 > + Sonuç olarak 2 tane `virtual host` mevcuttur.
-
 
 ###### 5. Location Context:
 + **Konum**: Server context içinde yer alır.
@@ -868,7 +867,7 @@ server {
 + Genellikle, `proxy_pass` direktifiyle birlikte kullanılarak gelen isteklerin belirli bir sunucu grubuna yönlendirilmesi sağlanır.
 + Yük dengeleme yapılırken, istekler sunucular arasında dağıtılır.
 
-###### Örnek:
+**Örnek:**
 ```nginx
 upstream backend_servers {
     server server1.example.com;
@@ -954,7 +953,191 @@ server {
 ```
 
 
-### Return
+
+### Nginx Directives:
+#### Listen directive:
++ **Amaçı:** IP için `adres` ve `port` veya UNIX-domain soket için `path` istekleri hangi sunucuların kabul edeceğini ayarlar.
+###### 1.İsim tabanlı sanal sunucular:
++ nginx ilk olarak isteğin hangi sunucuda işleneceğine karar verir. Bütün üç sanal sunucunun `*:80` portunu dinlediği basit bir yapılandırmayla başlayalım:
+
+```nginx
+server {
+    listen      80;
+    server_name example.org www.example.org;
+    ...
+}
+
+server {
+    listen      80;
+    server_name example.net www.example.net;
+    ...
+}
+
+server {
+    listen      80;
+    server_name example.com www.example.com;
+    ...
+}
+```
+
++ bu nginx yapılandırma(config) da nginx, isteğin hangi sunucuya yönlendirileceğini belirlemek için yalnızca isteğin başlık alanı olan “Host”u test eder.
++ Eğer değeri herhangi bir sunucu adıyla uyuşmuyorsa veya istek bu başlık alanını hiç içermiyorsa, nginx isteği bu port için varsayılan sunucuya yönlendirecektir.
++ Varsayılan sunucu ilk sunucudur — bu nginx'in standart varsayılan davranışıdır.
++ Hangi sunucunun varsayılan olacağını, listen yönergesindeki default_server parametresiyle açıkça belirleyebilirsiniz:
+
+```nginx
+server {
+    listen      80 default_server;
+    server_name example.net www.example.net;
+    ...
+}
+```
+
+
+> [!WARNING]
+> + `default_server` parametresi 0.8.21 sürümünden beri mevcuttur. Daha önceki sürümlerde `default` parametrenin kullanılması gerekirdi.
+> + Varsayılan sunucunun, sunucu adının değil, *dinleme portunun* bir özelliği olduğunu unutmayın. 
+
+**Kaynak:**
+1. [nginx.org](https://nginx.org/en/docs/http/ngx_http_core_module.html#listen)
+2. [How nginx processes a request](https://nginx.org/en/docs/http/request_processing.html)
+
+#### Root Directive:
+
+#### Server_name Directive:
+
+
+> [!IMPORTANT]
+> 1. nginx, client'dan aldığı istekleri önce dinlenen port(`listen`) numarasına ve daha sonra `server_name` ile tanımlanmış `virtual server` alana iletir. 
+> 2. nginx, tarayıcıdan gelen `Host header` bakar  ve daha sonra `server_name` ile aynı olan `virtual server` bölgesine yönlendirir.
+
+
+##### 1.Server_name:
+##### 2.Server_name ve Host header:
++ NGINX'te `server_name` direktifi ile **HTTP Host header** arasında doğrudan bir ilişki vardır.
++ Bu ilişki, NGINX'in birden fazla sanal sunucuyu (virtual server) nasıl yönettiğini ve doğru sunucu bloklarını (server blocks) nasıl eşlediğini belirler.
+###### Temel İlişki:
++ `server_name` directive, gelen istekteki *Host header*'a dayanarak belirli bir *server block* seçmek için kullanılır.
++ HTTP protokolünde, istemciler (örn. tarayıcılar), isteğin hedef domain adını *Host header* içinde sunucuya gönderir.
++ NGINX, gelen isteği işlerken Host header'daki değerle `server_name` direktifini karşılaştırır ve eşleşen bir *server block* bulmaya çalışır.
+---
+###### Nasıl Çalışır?
+ **1.İstemciden Gelen İstek:**
+```http
+GET / HTTP/1.1
+Host: www.example.com
+```
+> **Explanation:**
+> + İstemci(Client) bir domain'e HTTP isteği gönderir.
+
+**2.Nginx Yapılandırması:**
+```nginx
+server {
+    server_name www.example.com;
+    root /var/www/example;
+}
+
+server {
+    server_name www.another.com;
+    root /var/www/another;
+}
+```
+> **Explanation:**
+> + NGINX, konfigürasyondaki `server_name` direktifleriyle *Host header*'daki değeri eşleştirir.
+
+**Eşleşme:**
++ Host header `www.example.com` ise, NGINX bu istek için ilk `server` bloğunu seçer.
+---
+###### Detaylı Eşleşme Kuralları:
++ NGINX, gelen istek için doğru `server block`u seçerken belirli bir sırayla kontrol yapar:
+
+**1.Direk Eşleşme:**
+```nginx
+server {
+	listen 80;
+    server_name www.example.com;
+}
+```
+> **Explanation:**
+> + Host header'daki değer, `server_name` direktifindeki herhangi bir değerle tam eşleşirse, o `server block` seçilir.
+> + Host header: `www.example.com` → Bu blok seçilir.
+
+---
+**2.Joker Karakter Eşleşmesi(Wildcard Matching):**
+```nginx
+server {
+	listen 80;
+    server_name *.example.com;
+}
+```
+> **Explanation:**
+> + `server_name`'de joker karakterler (`*`) kullanılabilir:
+> + `*.example.com`: `foo.example.com`, `bar.example.com` gibi alt alan adlarını eşleştirir.
+> + `example.*`: `example.com`, `example.org` gibi son ekleri eşleştirir.
+> + Host header: `sub.example.com` → Bu blok seçilir.
+
+---
+**3.Düzenli İfade Eşleşmesi(Regex Matching):**
+```nginx
+server {
+	listen 80;
+    server_name ~^www\.(.+)\.com$;
+}
+```
+> **Explanation:**
+> + `server_name`'de düzenli ifadeler kullanılabilir.
+> + Host header: `www.example.com` → Bu blok seçilir.
+> + *Uyarı:* Eğer dikkat  regex kullanabilmemiz için domain başına `~^` işareti koymamız gerekmektedir.
+
+---
+**4.Varsayılan Server Block(Default Server):**
+```nginx
+server {
+    listen 80 default_server;
+    server_name _;
+}
+```
+> **Explanation:**
+> + Hiçbir `server_name` eşleşmiyorsa, **varsayılan server block** kullanılır.
+> + Bir server block, `default_server` olarak işaretlenebilir.
+> + Bu blok, Host header eşleşmese bile çalışır.
+
+---
+###### Host Header ile server_name Örneği:
+```nginx
+server {
+	listen 80;
+    server_name www.example.com;
+    root /var/www/example;
+}
+
+server {
+	listen 80;
+    server_name www.test.com *.test.com;
+    root /var/www/test;
+}
+
+server {
+    listen 80 default_server;
+    server_name _;
+    root /var/www/default;
+}
+```
+> **Explanation:**
+> + `Host: www.example.com` => ilk blok seçilir(exact name)
+> + `Host: api.test.com` => İkinci blok seçilir(Wildcard name)
+> + `Host: unknown.com`  => Üçüncü blok seçilir. (Varsayılan server block)
+
+> [!IMPORTANT]
+> + `server_name` ile Host header, doğru `server block`u seçmek için birbiriyle ilişkilidir.
+> + Eşleşme sırası:
+> 	1. Tam Eşleşme(exact name)
+> 	2. Wildcard Eşleşme (Wildcard name)
+> 	3. Regex Eşleşme
+> 	4. Varsaylan Server Block(`default_server`)
+
+**Ek Kaynak:** [Resmi Sitesi](https://nginx.org/en/docs/http/server_names.html)
+#### Return directive:
 
 ```nginx
 server {
@@ -977,7 +1160,7 @@ server {
 > 
 
 
-### Allow and  Deny IP
+#### Allow and  Deny IP
 
 ```nginx
         location /secure {
@@ -993,6 +1176,29 @@ server {
 > **Explanation:**
 > + Bu sayfaya sadece 192.168.1.4’den gelen isteklere izin ver (allow 192.168.1.4) tüm diğer ip’den gelen istekleri reddet (deny all ). 
 
+
+
+### Nginx Contexts:
+
+#### Types Context:
+
+#### Location Context:
++ NGINX'te **`location` context**, gelen bir HTTP isteğinin **URL yolu** (path) temelinde nasıl işleneceğini tanımlayan bir context'dir.
++ **`server` context** içinde yer alır ve gelen isteklere göre farklı davranışlar sergilemek için kullanılır.
++ Örneğin, bir URL'nin hangi dosyayı sunacağını, hangi proxy sunucusuna yönlendirileceğini veya hangi kuralın uygulanacağını belirtmek için kullanılır.
++ Location Block'lar Server Block'ların (veya diğer konum blokları) içerisinde yaşar ve istek URI'sinin nasıl işleneceğine karar vermek için kullanılır.
++ Location Context içerinde Location Context oluşturabiliyoruz ve buna `nested Location context` denir
+##### Syntax:
+```nginx
+location [optional_modifier] [URI] {
+	...
+}
+```
+> **Explanation:**
+> + 
+
+
+**Kaynak:** [Best Tutorial - 2:32](https://www.youtube.com/watch?v=NwijBVfiK_o)
 ## HTTP Cache Control header
 ``` nginx
 user www-data;
@@ -1049,7 +1255,7 @@ http {
 
 #### 1. İstemci ve Caching Sunucu Arasında İletişim
 1. **İlk İstek:**
-```
+```http
 GET /resim.jpg HTTP/1.1
 Host: example.com
 ```
@@ -1057,7 +1263,7 @@ Host: example.com
 > İstemci, belirli bir kaynağı (örneğin, bir web sayfası veya resim dosyası) almak için caching sunucusuna bir istek gönderir. Bu istekte `If-Modified-Since` başlığı genellikle yer almaz, çünkü istemci kaynağı henüz önbelleğe almadı.
 
 2. **Caching Sunucunun Yanıtı:**
-```
+```http
 HTTP/1.1 200 OK
 Last-Modified: Wed, 21 Oct 2023 07:28:00 GMT
 Content-Type: image/jpeg
@@ -1070,7 +1276,7 @@ Content-Length: 12345
 > + Caching sunucusu, bu yanıtı alır ve hem istemciye iletir hem de yanıtı önbelleğe kaydeder.
 
 3. **Sonraki İstekler:**
-```
+```http
 GET /resim.jpg HTTP/1.1
 Host: example.com
 If-Modified-Since: Wed, 21 Oct 2023 07:28:00 GMT
@@ -1080,7 +1286,7 @@ If-Modified-Since: Wed, 21 Oct 2023 07:28:00 GMT
 
 #### 2. Caching Sunucu ve Orijinal Sunucu Arasında İletişim
 1. **Caching Sunucusunun Öncelikli Yanıtı:**
-```
+```http
 HTTP/1.1 200 OK
 Content-Type: image/jpeg
 Content-Length: 12345
@@ -1091,7 +1297,7 @@ Content-Length: 12345
 > Caching sunucusu, istemciden gelen isteği aldığında, önbelleğinde bulunan verinin `Last-Modified` tarihini kontrol eder. Eğer istemcinin `If-Modified-Since` tarihinden daha yeni bir veri varsa, caching sunucusu doğrudan istemciye `200 OK` yanıtıyla birlikte önbellekteki veriyi döner.
 
 2. **Orijinal Sunucuya İstek Gönderme:**
-```
+```http
 GET /resim.jpg HTTP/1.1
 Host: example.com
 If-Modified-Since: Wed, 21 Oct 2023 07:28:00 GMT
@@ -1101,13 +1307,13 @@ If-Modified-Since: Wed, 21 Oct 2023 07:28:00 GMT
 > + Eğer caching sunucusu, istemciden gelen `If-Modified-Since` başlığının tarihinden daha eski bir veri bulursa veya ilgili kaynak önbellekte mevcut değilse, caching sunucusu bu başlıkla birlikte orijinal sunucuya bir istek gönderir.
 > + Orijinal sunucu, istekte belirtilen tarihten itibaren kaynağın değişip değişmediğini kontrol eder.
 
-```
+```http
 HTTP/1.1 304 Not Modified
 ```
 > **Explanation:**
 >  Eğer kaynak belirtilen tarihten sonra değişmemişse, orijinal sunucu `304 Not Modified` yanıtı döner. Bu durumda caching sunucusu, önbelleğindeki veriyi yeniden kullanarak istemciye bir yanıt gönderir.
 
-```
+```http
 HTTP/1.1 200 OK
 Last-Modified: Wed, 22 Oct 2023 10:12:00 GMT
 Content-Type: image/jpeg
