@@ -8,20 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "d9109e55b35c1fa3",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "K8s/K8s giriş.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "K8s giriş"
-            }
-          },
-          {
             "id": "f60e1e359002d190",
             "type": "leaf",
             "pinned": true,
@@ -52,55 +38,35 @@
             }
           },
           {
-            "id": "05697a8d93e55206",
+            "id": "2c2963bc7970353a",
             "type": "leaf",
-            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Web Servers/Nginx/Nginx Config File.md",
+                "file": "K8s/K8s Yükleme.md",
                 "mode": "source",
                 "source": false
               },
-              "pinned": true,
               "icon": "lucide-file",
-              "title": "Nginx Config File"
+              "title": "K8s Yükleme"
             }
           },
           {
-            "id": "5f02a1696847cc1c",
+            "id": "11bcfa4832e5d5a9",
             "type": "leaf",
-            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Web Servers/Nginx/Nginx location.md",
+                "file": "K8s/K8s giriş.md",
                 "mode": "source",
                 "source": false
               },
-              "pinned": true,
               "icon": "lucide-file",
-              "title": "Nginx location"
-            }
-          },
-          {
-            "id": "b3acd2f7d6285f59",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Web Servers/Nginx/Quick Start.md",
-                "mode": "source",
-                "source": false
-              },
-              "pinned": true,
-              "icon": "lucide-file",
-              "title": "Quick Start"
+              "title": "K8s giriş"
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -218,10 +184,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Web Servers/Nginx/Nginx location.md"
+                "file": "K8s/K8s Yükleme.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of Nginx location"
+              "title": "Outline of K8s Yükleme"
             }
           }
         ],
@@ -229,7 +195,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 293.5
+    "width": 283.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -241,21 +207,25 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "5f02a1696847cc1c",
+  "active": "2c2963bc7970353a",
   "lastOpenFiles": [
-    "Web Servers/Nginx/Nginx Config File.md",
-    "Web Servers/Nginx/Nginx location.md",
     "K8s/K8s giriş.md",
-    "Docker/Dockerfile.md",
-    "Web Servers/Nginx/Quick Start.md",
+    "K8s/K8s Yükleme.md",
     "Programlama/Python/Django/Django türkçe.md",
     "Programlama/Python/Django/Django.md",
+    "Web Servers/Nginx/Nginx location.md",
+    "Web Servers/Nginx/Nginx Config File.md",
+    "Web Servers/Nginx/Quick Start.md",
+    "Linux Command/Linux komutları.md",
+    "Windows Commands/WSL2.md",
+    "Linux Command/Systemd.md",
+    "Web Servers/Nginx/Nginx Directives.md",
+    "Web Servers/Nginx/Nginx Komutları.md",
+    "Docker/Dockerfile.md",
     "Programlama/Python/Python Giriş.md",
     "K8s",
-    "Web Servers/Nginx/Nginx Komutları.md",
     "Windows Commands/Çalıştır.md",
     "To do.md",
-    "Linux Command/Linux komutları.md",
     "Kısayollar/windows shortcut.md",
     "Docker/Docker Giriş.md",
     "Kısayollar",
@@ -263,7 +233,6 @@
     "Windows Commands/Winget Komutları.md",
     "Programlama/Python/Django",
     "Programlama/Bash_Script/Bash Script.md",
-    "Web Servers/Nginx/Nginx Directives.md",
     "Git/Git Dersi.md",
     "Web Servers/HTTP.md",
     "Programlama/Python",
@@ -271,10 +240,7 @@
     "Network",
     "Linux Command/Güvenlik/libpam-pwquality.md",
     "Linux Command/Güvenlik/sudo.md",
-    "Docker/Hızlı Başlama(Quick Start).md",
-    "Database/NoSQL/MongoDB.md",
     "Database/NoSQL",
-    "Linux Command/Kullanıcı Oluşturma.md",
     "Diskler",
     "Linux Command/Güvenlik",
     "Git/images/contributor.png",

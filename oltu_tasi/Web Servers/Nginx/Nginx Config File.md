@@ -526,6 +526,7 @@ $ sudo systemctl daemon-reload
 $ sudo systemctl enable --now nginx.service
 ```
 > **Explanation:**
+> + /etc/systemd/system/multi-user.target.wants/nginx.service.
 
 ### Nginx Modülleri:
 
@@ -951,6 +952,8 @@ server {
     }
 }
 ```
+
+### Nginx Variables:
 
 
 

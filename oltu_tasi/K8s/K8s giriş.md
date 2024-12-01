@@ -1,3 +1,4 @@
+#docker #k8s 
 ### Kubernetes Nedir?
 + Kubernetes, konteynerleştirilmiş uygulamaların dağıtımını, ölçeklenmesini ve yönetimini otomatikleştirmek için kullanılan açık kaynaklı bir konteyner orkestrasyon motorudur.
 + Açık kaynaklı proje, Cloud Native Computing Foundation (CNCF) tarafından barındırılıyor.
@@ -231,11 +232,9 @@
 + **Mimari**: LXC/LXD, konteynerleri daha çok VM gibi çalıştırır ve belirli sistem kaynaklarına izole erişim sağlar
 + **Kullanım Alanları**: Daha çok tam işletim sistemi simülasyonları için; özellikle sistem seviyesinde izole bir ortam gerektiğinde.
 
-## K8s Yükleme:
-### 1.Production Ortamında:
-#### Container Runtimes:
-**Kaynak:** [Resmi Sitesi](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
-#### Kubeadm Yüklme:
-**Kaynak:** [Resmi Sitesi](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+
 ### 2.Geliştrme Ortamında:
 **Kaynak:** [Resmi Sitesi](https://kubernetes.io/docs/tasks/tools/)
+
+### Kaynaklar:
+1.Kubernetes Resmi [Sitesi](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)

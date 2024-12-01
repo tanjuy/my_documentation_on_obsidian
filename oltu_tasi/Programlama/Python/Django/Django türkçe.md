@@ -95,4 +95,99 @@ Quit the server with CONTROL-C.
 
 + Artık sunucumuz çalışıyor, web tarayıcınız ile http://127.0.0.1:8000/ adresini ziyaret edin.
 + Bir roketin havalandığı "Tebrikler!" sayfasını göreceksiniz. Çalıştı.
-+ Tamamen Python ile yazılmış hafif bir web sunucusu olan Django geliştirme sunucusunu başlattınız.
++ Tamamen Python ile yazılmış hafif bir web sunucusu olan Django geliştirme sunucusunu(*development server*) başlattınız.
++ Bunu(*development server*) Django'ya ekledik, böylece *Production ortamı* hazır olana kadar Apache gibi bir *production* sunucusunu yapılandırmakla uğraşmanıza gerek kalmadan, hızla geliştirme yapabilirsiniz.
+
+
+> [!CAUTION]
+> + *Şimdi not almak için iyi bir zaman:* Bu sunucuyu *Production ortamına* benzeyen hiçbir yerde kullanmayın.
+> + Sadece geliştirme sırasında kullanılması amaçlanmıştır. (Biz web framework üretme işindeyiz, web sunucuları üretme işinde değiliz.)
+> + (Siteyi farklı bir portta sunmak için  [`runserver`](https://docs.djangoproject.com/en/5.1/ref/django-admin/#django-admin-runserver) referansına bakın.)
+
+
+
+> [!IMPORTANT]
+> + **[Runserver](https://docs.djangoproject.com/en/5.1/ref/django-admin/#django-admin-runserver)'ın otomatik olarak yeniden yüklenmesi:**
+> + Geliştirme sunucusu, gerek duyulduğunda her istek için Python kodunu otomatik olarak yeniden yükler.
+> + Kod değişikliklerinin etkili olması için sunucuyu yeniden başlatmanıza gerek yok.
+> + Ancak dosya ekleme gibi bazı eylemler yeniden başlatmayı tetiklemez, bu nedenle bu durumlarda sunucuyu yeniden başlatmanız gerekir.
+
+## Anketler uygulamasını oluşturma:
+
++ Artık ortamınız - bir "proje"- kurulduğuna göre, çalışmaya başlamaya hazırsınız.
++ Django'da yazdığınız her uygulama, belirli bir düzene uyan bir Python paketi olarak oluşturulur.
++ Django, bir uygulamanın temel dizin yapısını otomatik olarak oluşturan bir araç ile birlikte gelir, böylece dizinler oluşturmak yerine kod yazmaya odaklanabilirsiniz.
+
+
+> [!NOTE]
+> + **Projeler vs uygulamalar:**
+> + Proje ile uygulama arasındaki fark nedir?
+> + **Bir uygulama**, belirli bir işlevi yerine getiren bir web uygulamasıdır – örneğin, bir blog sistemi, kamu kayıtları veritabanı veya küçük bir anket uygulaması.
+> + **Proje**, belirli bir web sitesi için yapılandırma ve uygulamaların bir toplamıdır.
+> + Bir **proje** birden fazla uygulama içerebilir. Bir **uygulama** birden fazla projede olabilir.
+
++ Uygulamalarınız Python yolunuzun( [Python path](https://docs.python.org/3/tutorial/modules.html#tut-searchpath "(in Python v3.13)")) herhangi bir yerinde yaşayabilir. Bu eğitimde poll(anket) uygulamamızı **djangotutorial** klasörü içerisinde oluşturacağız.
++ Uygulamanızı oluşturmak için *manage.py* ile aynı dizinde olduğunuzdan emin olun ve şu komutu yazın:
+
+```shell
+$ python manage.py startapp polls
+```
+
++ Bu, aşağıdaki şekilde düzenlenmiş bir **polls** dizini oluşturacaktır:
+
+```shell
+polls/
+    __init__.py
+    admin.py
+    apps.py
+    migrations/
+        __init__.py
+    models.py
+    tests.py
+    views.py
+```
+
++ Bu dizin yapısı poll uygulamasını barındıracaktır.
+
+## İlk view'ınızı yazınız:
+
++ İlk view'i yazalım. polls/views.py dosyasını açın ve içine aşağıdaki Python kodunu yazın:
+
+```python
+from django.http import HttpResponse
+
+
+def index(request):
+    return HttpResponse("Hello, world. You're at the polls index.")
+```
+
++ Bu, Django'da mümkün olan en temel view'dir.
++ Bir tarayıcıda buna erişmek için onu bir URL'ye eşlememiz gerekir - ve bunun için bir URL yapılandırması veya kısaca "URLconf" tanımlamamız gerekir.
++ Bu URL yapılandırmaları her Django uygulamasının içinde tanımlanmıştır ve urls.py adlı Python dosyalarıdır.
++ polls uygulaması için bir `URLconf` tanımlamak üzere, aşağıdaki içeriğe sahip `polls/urls.py` adlı bir dosya oluşturun:
+
+```python
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("", views.index, name="index"),
+]
+```
+
++ Bir sonraki adım, mysite projesindeki global `URLconf` dosyasını, `polls.urls` içinde tanımlanan `URLconf`'u dahil edecek şekilde yapılandırmaktır.
++ Bunu yapmak için `mysite/urls.py`'ye `django.urls.include` için import ekleyin ve `urlpatterns` listesine bir `include()` ekleyin, böylece şu şekilde olmalıdır::
+
+```python
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("polls/", include("polls.urls")),
+    path("admin/", admin.site.urls),
+]
+```
+
++ `path()` fonksiyonu en az iki argüman bekler: `route` ve `view`.
++ `include()` fonksiyonu diğer `URLconf`'lara referans vermeyi sağlar.

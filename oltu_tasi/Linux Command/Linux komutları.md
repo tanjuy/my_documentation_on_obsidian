@@ -221,11 +221,29 @@ $ rsync -av --delete --dry-run ~/Dropbox/oltu_tasi \
  ~/Documents/my_documantion_on_obsidian
 ```
 
-### id:
+### 17. id:
 ```shell
 $ id
 ```
 
+### 18. Journalctl:
 
+#### `-u` parametresi:
++ `-u` paramtresi ile belirtilen bir hizmetin (unit) **systemd günlüklerini** görmek için kullanılır.
++ Bu günlükler(logs), hizmetin çalışmaya başladığı andan itibaren kaydedilen önemli olaylar, hatalar ve uyarılar gibi bilgileri içerir.
+
+```shell
+$ sudo journalctl -u <unit_name>
+```
+> **Explanation:**
+> + `<unit_name>`: Birimin adını belirtir. Örneğin, `nginx`, `sshd`, `apache2` gibi.
+
+
+> [!TIP]
+> + `-u` parametresi servis birimleri(`service unit`) ile anlatılmıştır ama diğer `systemd` birimleri ile kullanılabilir.
+
+##### Ne İşe Yarar?
+1. **Unit Log'larını görmek:** Bir unit'ün neden çalışmadığını veya hata verildiğini anlamanıza yardımcı olur.
+2. **Hata Analizi:** Hizmet başlatıldığında oluşan hataların detaylarını gösterir.
 
 

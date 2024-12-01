@@ -50,18 +50,18 @@ $(.venv) django-admin
 ```
 > **Explanation:**
 > + Django'un yüklü olup olmadığını gösterir. Bu komut `django-admin` yardım sayfasını ekrana basar.
-#### Bir Proje Oluşturma:
+#### Bir Proje Başlatma:
 ```shell
 $(.venv) django-admin startproject blog
 ```
 > **Explanation:**
 > + *Django'da yeni bir proje başlatmak için kullanılır.* Bu komut, Django'nun temel yapılarını içeren bir klasör yapısı oluşturur.
 > + Özellikle, `blog` adında yeni bir proje klasörü oluşturur ve içine aşağıdaki dosya ve klasörleri yerleştirir:
-> 1. **manager.py:** Proje yönetim komutlarını çalıştırmak için kullanılan bir betiktir. Bu komutla sunucuyu başlatabilir, veritabanı işlemleri yapabilir ve diğer Django komutlarını çalıştırabilirsiniz.
-> 2. **myblog** (proje ana dizini):
+> 1. **manager.py:** Proje yönetim komutlarını çalıştırmak için kullanılan bir betiktir. Bu komutla *sunucuyu başlatabilir*, *veritabanı işlemleri yapabilir* ve diğer Django komutlarını çalıştırabilirsiniz.
+> 2. **blog** (proje ana dizini):
 > 	+ `__init__.py` : Python'a bu dizinin bir Python paketi olarak değerlendirilmesi gerektiğini söyleyen boş bir dosya.
 > 	+ `settings.py`: Projenin tüm ayarlarını içerir (veritabanı ayarları, uygulama yapılandırmaları, dil seçenekleri vb.).
-> 	+ `urls.py`: URL yönlendirmeleri için kullanılan ana dosyadır.
+> 	+ `urls.py`: URL yönlendirmeleri için kullanılan ana dosyadır. urls.py dosyası django projesi ile ilgili tüm URL'i içerir.
 > 	+ `wsgi.py` : Projenize hizmet verecek WSGI uyumlu web sunucularına yönelik bir giriş noktası. Yani, Django uygulamasını bir WSGI uyumlu web sunucusunda çalıştırmak için kullanılır.
 > 	+ `asgi.py`: Django'nun ASGI uyumlu sunucularda çalışabilmesi için bir yapılandırma sağlar (genellikle gerçek zamanlı uygulamalar için kullanılır).
 > 	+ Daha fazla bilgi için [Resmi sitesi](https://docs.djangoproject.com/en/5.1/intro/tutorial01/#creating-a-project) bakınız.
@@ -82,22 +82,43 @@ $(.venv) django-admin startproject blog
 > 0. `tree` komutunu ile `django-admin startproject blog` ile hangi dosyalar ve dizinler oluşturduğumuzu hiyerarşik olarak görebiliyoruz.
 > 1. Proje oluşturma komutunda(`django-admin startproject blog`) verdiğimiz isim de klasör oluşturuluyor.
 > 2. Bir alt dizinde de komut adındaki ile aynı isimde klasör oluşturuluyor.
-#### Geliştirme Sunucusu:
+#### Geliştirme Sunucusu Çalıştırma:
 ```shell
 $ python3 manage.py runserver
 ```
 > **Explanation:**
-> + Yukarıdaki komut çalıştırmak için `cd myblog` komutu ile `myblog` dizinine giriş yapmamız gerekmektedir. Çünkü `manage.py` bu dizin içerisindedir.
+> + Yukarıdaki komut çalıştırmak için `cd myblog` komutu ile `blog` dizinine giriş yapmamız gerekmektedir. Çünkü `manage.py` bu dizin içerisindedir.
+
+**Port Numarasını Değiştirme:**
+```shell
+$ python3 manager.py runserver 8080
+```
+> **Explanation:**
+> + `runserver` parametresi varsayılan olarak 8000 port'u üzerinde yayın yapar.
+> + Eğer 8000 port'u dışında farklı bir port'dan yayın yapmak isterseniz port numarasını `runserver` parametresinden sonra belirtmek zorundayız.
 
 #### blog app Oluşturma:
++ Django'da bir **app** (uygulama), projenin belirli bir işlevselliğini ya da özelliğini sağlayan, modüler bir kod birimidir.
++ Bir Django projesi genellikle birden fazla uygulamadan oluşur ve bu uygulamalar, bağımsız bir şekilde geliştirilebilir ve tekrar kullanılabilir.
 ```shell
 $ python3 manage.py startapp blog
 ```
 > **Explanation:**
 > + 
 
-> [!NOTE] Title
-> Contents
+> [!NOTE]
+>  + **Modülerlik ve Yeniden Kullanılabilirlik:**
+>  + Bir uygulama, belirli bir işlevselliği kapsar. Bu sayede, bir uygulamayı başka projelere kolayca taşıyabilirsiniz.
+>  + Örneğin, bir "kullanıcı doğrulama" uygulaması farklı projelerde yeniden kullanılabilir.
+>  + **Proje Yönetimini Kolaylaştırma:**
+>  + Büyük projelerde farklı özellikler farklı uygulamalar olarak ayrılır. Örneğin:
+>  + **blog**: Blog gönderilerini yönetir.
+>  + **e-commerce**: Ürünler ve siparişleri yönetir.
+>  + **authentication**: Kullanıcı oturumlarını ve kayıt işlemlerini yönetir.
+>  + **Django'nun MVC (Model-View-Controller) Yapısını Destekleme**:
+>  + Uygulamalar, Django’nun MVT (Model-View-Template) mimarisini takip ederek projeyi daha düzenli ve okunabilir kılar.
+ 
+
 ##### MVC Yapısı:
 + Python’da MVC (Model-View-Controller), uygulamaların kod yapısını organize etmek için kullanılan bir tasarım desenidir.
 + Bu yapı, uygulamanın farklı bileşenlerini ayırarak daha modüler, okunabilir ve yönetilebilir hale getirir.
