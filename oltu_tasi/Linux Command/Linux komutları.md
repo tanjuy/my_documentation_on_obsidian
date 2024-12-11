@@ -12,6 +12,15 @@ $ curl -X GET www.example.com
 ```
 > **Explanation:**
 
+###### 1.3. ISO indir
+
+```shell
+$  curl https://mirror.pseudoform.org/iso/2024.12.01/archlinux-2024.12.01-x86_64.iso -o archlinux-2024.12.01-x86_64.iso
+```
+> **Explanation:**
+> + `https://mirror.pseudoform.org/iso/2024.12.01/archlinux-2024.12.01-x86_64.iso` sitesinden `-o` parametresi ile `archlinux-2024.12.01-x86_64.iso` adında indiriyoruz.
+> + `-o` parametresini uzun yazılışı: `--output` 
+
 ### 2. update-alternative
 ```shell
 $ sudo update-alternative --config python

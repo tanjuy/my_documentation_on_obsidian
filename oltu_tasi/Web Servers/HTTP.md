@@ -37,10 +37,22 @@
 > 13. Client ------------ Encrypted Data -----------> Server
 > 14. Client <----------- Encrypted Data ------------ Server
 
-### HTTP 1.1
+# HTTP 1.1
 > http 1.1 kalıcı bağlantıları tanıttı. Bağlantılar kapatılamadıkça açık kalır. Böylelikle çok fazla TCP handshake yapmaya gerek kalmıyordu.  *Bir bağlantı üzerinden çok fazla istek sağlanabiliyordu(buna pipelining denir).* Cevap için beklemek zorunda değiller idi.
 
 Kaynak: [ByteByteGo](https://www.youtube.com/watch?v=UMwQjFzTQXw)
 Kaynak: [Vertical Moustache Academy](https://www.youtube.com/watch?v=CkEQ0sJ6uJw)
 
+
+# HTTP Kodları:
+## 3xx Serisi:
++ HTTP yönlendirme kodları, bir istemcinin (genellikle bir web tarayıcısının) bir URL'yi başka bir URL'ye yönlendirilmesi gerektiğini belirten durum kodlarıdır.
+### 301 - Moved Permanently:
++ **Tanım:** Belirtilen kaynak kalıcı olarak başka bir URL'ye taşınmıştır. Eski bir web sayfasını veya domaini yeni bir URL'ye taşırken.
++ Tarayıcılar bu yönlendirmeyi genellikle önbelleğe alır.
++ SEO açısından arama motorlarına, eski URL'nin yeni URL'ye taşındığını bildirir.
+### 302 - Found:
++ Kaynağın geçici olarak başka bir URL'ye taşındığını gösterir.
++ Tarayıcılar bu yönlendirmeyi genellikle önbelleğe almaz.
++ SEO açısından kalıcı yönlendirme olmadığı için 301 kadar etkili değildir.
 

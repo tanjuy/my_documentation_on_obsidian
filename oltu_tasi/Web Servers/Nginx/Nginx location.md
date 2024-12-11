@@ -11,15 +11,13 @@ location [modifier] [URI] {
 + Location Context, nginx'in istek URI'sini neye göre kontrol etmesi gerektiğini tanımlar.
 
 
-
 | Search-Order | Modifier | Description                                                  |     Match-Type     | Stops-search-on-match |
 | :----------: | :------: | ------------------------------------------------------------ | :----------------: | :-------------------: |
 |     1st      |    =     | The URI must match the specified pattern exactly             |   Simple-string    |          Yes          |
 |     2nd      |    ^~    | The URI must begin with the specified pattern                |   Simple-string    |          Yes          |
-|     3rd      |  (None)  | The URI must begin with the specified pattern                |   Simple-string    |          No           |
-|     4th      |    ~     | The URI must be a case-sensitive match to the specified Rx   | Perl-Compatible-Rx |   Yes (first match)   |
-|     4th      |    ~*    | The URI must be a case-insensitive match to the specified Rx | Perl-Compatible-Rx |   Yes (first match)   |
-|     N/A      |    @     | Defines a named location block.                              |   Simple-string    |          Yes          |
+|     3th      |    ~*    | The URI must be a case-insensitive match to the specified Rx | Perl-Compatible-Rx |   Yes (first match)   |
+|     3th      |    ~     | The URI must be a case-sensitive match to the specified Rx   | Perl-Compatible-Rx |   Yes (first match)   |
+|     4rd      |  (None)  | The URI must begin with the specified pattern                |   Simple-string    |          No           |
 
 ### Location Context nedir?
 

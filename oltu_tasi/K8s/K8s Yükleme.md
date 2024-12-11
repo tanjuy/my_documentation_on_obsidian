@@ -1,11 +1,11 @@
 #docker #k8s 
 
 # K8s Yükleme:
-## 1.Production Ortamında: 
+## 1.Production Ortamında:
 
 ### Kubeadm Kurulumu:
 + Bu sayfa kubeadm toolbox'ın nasıl kurulacağını göstermektedir.
-+ Bu kurulum sürecini bir kez tamamladığınızda *kubeadm* ile küme oluşturma hakkında bilgi için, *kubeadm* ile küme oluşturma sayfasına bakın.
++ Bu kurulum sürecini bir kez tamamladığınızda [ *kubeadm* ile Cluster oluşturma](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/) hakkında bilgi için, *kubeadm* ile küme oluşturma sayfasına bakın.
 + Bu kurulum kılavuzu Kubernetes v1.31 içindir. Farklı bir Kubernetes sürümü kullanmak istiyorsanız lütfen aşağıdaki sayfalara bakın:
 
 
@@ -137,13 +137,21 @@ $ nc 127.0.0.1 6443 -v
 #### Takas(Swap) yapılandırması
 + Bir kubelet'in varsayılan davranışı, bir düğümde takas belleği(*swap memory*) algılanırsa başlatma işlemini başarısızlığa uğratmaktır.
 + Bu, takas(swap) işleminin `kubelet` tarafından **devre dışı bırakılması** veya **tolere edilmesi** gerektiği anlamına gelir.
-+ **Tolere edilmesi;**
+###### Tolere edilmesi;
 + Takasa izin vermek için `failSwapOn: false`'u kubelet yapılandırmasına veya komut satırı argümanı olarak ekleyin.  Not: `failSwapOn: false` sağlansa bile, iş yüklerinin varsayılan olarak takas(swap) erişimi olmaz. Bu, yine kubelet yapılandırma dosyasında bir swapBehavior ayarlanarak değiştirilebilir.
 + Swap'ı kullanmak için varsayılan NoSwap ayarından farklı bir swapBehavior ayarlayın.
 + Daha fazla ayrıntı için  [Swap bellek yönetimine](https://kubernetes.io/docs/concepts/architecture/nodes/#swap-memory)  bakın.
-+ **Devre dışı bırakılması:**
+###### Devre dışı bırakılması:
 + Takas işlemini devre dışı bırakmak için `sudo swapoff -a` komutu kullanılarak takas işlemi geçici olarak devre dışı bırakılabilir.
 + Bu değişikliğin yeniden başlatması geçişlerinde kalıcı olmasını sağlamak için, sisteminizde nasıl yapılandırıldığına bağlı olarak `/etc/fstab`, `systemd.swap` gibi yapılandırma dosyalarında takasın devre dışı bırakıldığından emin olun.
+
+
+> [!NOTE]
+> + `sudo swapon --show` : tanımlı bir tabloda özentini ekrana basar.
+> + 
+
+
+
 #### Container Runtime Yükleme:
 + Kubernetes, Pod'larda konteyner çalıştırmak için bir [container runtime](https://kubernetes.io/docs/setup/production-environment/container-runtimes) kullanır.
 + Varsayılan olarak, Kubernetes, seçtiğiniz container runtime ile iletişim kurmak için **Container Runtime Interface (CRI)**'yi kullanır.

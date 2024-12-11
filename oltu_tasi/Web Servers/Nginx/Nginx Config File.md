@@ -1,5 +1,5 @@
 #nginx
-### Nginx Giriş
+## Nginx Giriş
 #### A. Tanım:
 + Nginx, çok yönlü bir web sunucusu olarak kullanılır ve birçok farklı amaç için konfigüre edilebilir. İşte Nginx'in başlıca kullanım alanları:
 	1. **Web Sunucusu**: Nginx, statik içerik (HTML, CSS, JS dosyaları) sunmak için kullanılır. HTTP ve HTTPS isteklerini işleyerek web sitelerinin temel sunucu rolünü üstlenir.
@@ -257,14 +257,14 @@ $  curl -X DELETE https://jsonplaceholder.typicode.com/posts/1
 + *Sunucu isteği işleyemediği durumlarda oluşur.*
 + **500 Internal Server Error:** Sunucuda beklenmeyen bir hata oluştu.
 + **502 Bad Gateway:** Sunucu, başka bir sunucudan geçersiz bir yanıt aldı.
-### Reverse Proxy
+## Reverse Proxy
 
 > [!NOTE]
 > + Nginx de tek işlem(process) çalışır.
 > + istek(request) ---> nginx ---> 3. part process 
 
 
-### Nginx Kurulumu:
+## Nginx Kurulumu:
 
 #### A. Debian Temeli İşletim Sistemleri:
 ```shell
@@ -528,7 +528,7 @@ $ sudo systemctl enable --now nginx.service
 > **Explanation:**
 > + /etc/systemd/system/multi-user.target.wants/nginx.service.
 
-### Nginx Modülleri:
+## Nginx Modülleri:
 
 
 > [!NOTE]
@@ -623,7 +623,7 @@ $ ./configure --pid-path=/var/run/nginx.pid
 ```sh
 $ ./configure --with-http_ssl_module
 ```
-### Nginx Config Dosyası:
+## Nginx Config Dosyası:
 
 + **nginx configuration file is the heart of nginx web server**
 
@@ -953,12 +953,693 @@ server {
 }
 ```
 
-### Nginx Variables:
+## Nginx Variables:
+
++ Değişken, bir programlama veya yapılandırma ortamında *bir değer saklamak için kullanılan bir isim veya sembol*'dür.
++ Nginx'de değişkenler, sunucunun yapılandırması sırasında *isteğe bağlı bilgileri depolamak veya yönlendirme ve yanıtları dinamik hale getirmek için kullanılan yerleşik (built-in) veya kullanıcı tanımlı* isimlerdir.
+
+
+> [!NOTE]
+> + Nginx, varsayılan olarak değişkenleri `string` değerde saklamaktadır.
+> + Nginx değişkenleri basit değişkenlerdir.
+
++ *Nginx de `set directive` değişkene değer atamada kullanılır. Örneğin;*
+
+```nginx
+set $a "Hello World";
+```
+
+#### Built-in Değişkenler:
++ Nginx'in kendi içerisinde tanımladığı ve otomatik olarak değer atadığı değişkenlerdir. Yerleşik değişkenler genellikle istek, istemci, sunucu ve bağlantı hakkında bilgi sağlar.
+
+| **Değişken**       | **Açıklama**                                                                      |
+| ------------------ | --------------------------------------------------------------------------------- |
+| `$host`            | HTTP isteğindeki **Host** başlığının değerini içerir.                             |
+| `$uri`             | İstenen kaynak URI'sini temsil eder (örneğin, `/index.html`).                     |
+| `$args`            | Sorgu dizesi parametrelerini içerir (örneğin, `?key=value`).                      |
+| `$request_uri`     | Tüm URI'yi sorgu dizesiyle birlikte içerir (örneğin, `/index.html?key=value`).    |
+| `$remote_addr`     | İstek gönderen istemcinin IP adresini içerir.                                     |
+| `$remote_port`     | İstemcinin kullandığı bağlantı portunu içerir.                                    |
+| `$server_addr`     | Sunucunun IP adresini içerir.                                                     |
+| `$server_name`     | Sunucunun adını içerir.                                                           |
+| `$request_method`  | HTTP yöntemi (örneğin, `GET`, `POST`).                                            |
+| `$status`          | HTTP yanıt durum kodunu içerir (örneğin, `200`, `404`).                           |
+| `$http_user_agent` | İstemcinin gönderdiği `User-Agent` başlığının değerini içerir.                    |
+| `$scheme`          | Kullanılan protokolü belirtir (`http` veya `https`).                              |
+| `$document_root`   | İstenen URI'ye karşılık gelen sunucu kök dizinini içerir.                         |
+| `$time_iso8601`    | Geçerli zamanı ISO 8601 formatında içerir (örneğin, `2024-11-30T10:00:00+00:00`). |
+| `$query_string`    | Sorgu parametrelerini içerir (aynı `$args` ile).                                  |
+##### 1.args değişkeni:
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        location /argument {
+            return 200 "New variable2 is $args";
+        }
+
+    }
+}
+```
+
+**GET isteği:**
+```shell
+$ curl -X GET -i http://192.168.1.132/argument?key=value
+```
+
+**curl çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Mon, 02 Dec 2024 14:17:50 GMT
+Content-Type: text/plain
+Content-Length: 28
+Connection: keep-alive
+
+Args variable value is deger=value
+```
+
+> **Explanation:**
+> + `location context` içerisinde verilen `$args` değişkeni URI de soru işaretinden(?) sonra gelen argümanları almaktadır.
+
+##### 2.body_bytes_sent değişkeni:
+
++ *Yanıt Gövdesi Boyutunu Hesaplar:* Yalnızca gövde kısmının boyutunu içerir; HTTP başlıkları veya diğer meta bilgiler bu hesaba dahil edilmez.
++ *Dinamik Değişken:* Her HTTP isteği için yeniden hesaplanır.
++ *Loglarda Kullanılır:* Genellikle Nginx erişim loglarında yanıt boyutunu göstermek için kullanılır.
+
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+
+    log_format specialLog 'body_bytes_sent değeri: $body_bytes_sent';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+
+        access_log /var/log/nginx/access-special.log specialLog;
+
+        set $var $body_bytes_sent;
+
+        location /variable {
+            return 200 "Body value is written to log file";
+        }
+    }
+}
+```
+
+> **Explanation:**
+> + `$body_bytes_sent` değişkeni nasıl çalıştığını daha iyi anlamak için `log_format directive` ile  kullanıyoruz çünkü bu değişkenin içerisine istemciye istek gönderildikten sonra yazılır.
+> + `return directive`'in istemciye `Body value is written to log file` 33 karakterden veya 33 byte'dan oluşmaktadır. Bu 33 byte değeri nginx tarafından bu(`$body_bytes_sent`) değişkene yazılacaktır.
+
+
+**GET isteği:**
+```shell
+$ curl -X GET -i http://192.168.1.132/variable
+```
+
+**curl çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Mon, 02 Dec 2024 18:06:02 GMT
+Content-Type: text/plain
+Content-Length: 33
+Connection: keep-alive
+
+Body value is written to log file
+```
+> **Explanation:**
+> + Eğer dikkat ederseniz `Content-Length` başlığının da yine isteğin body boyutunu vermektedir.
+
+
+**Log Dosyası:**
+```log
+==> /var/log/nginx/access-special.log <==
+body_bytes_sent değeri: 33
+```
+
+> **Explanation:**
+> + `$body_bytes_sent` değişkenini genel de log dosyaların formatı belirlendiğin de kullanılır. Bundan dolayı basit veya sadece bu değişkeni kullanarak nasıl çalıştığını göstermiş bulunuyoruz.
+> + Burada 33, `$body_bytes_sent` değişkenine karşılık gelir ve istemciye 33 baytlık bir yanıt gönderildiğini gösterir.
+
+##### 3.bytes_received değişkeni:
+
+1. Hangi verileri ölçer?
+	+ HTTP isteği ile gelen *Başlıklar(Headers)* ve *İstek Gövdersi(Body)*
+	+ Toplam Byte miktarını hesaplar.
+2. Değişkenin Özelikleri:
+	+ Sayısal  bir değeri temsil eder ancak aslında bir *string* olarak saklanır.
+3. Kapsadığı veriler:
+	+ GET, POST, PUT, DELETE gib tüm HTTP istek türlerinde istemciden alınan toplam veri miktarını içerir.
+	+ Büyük yüklemelerde (Örneğin dosya upload işlemleri), bu değişken özellikle faydalıdır.
+
+##### 4.connection_requests değişkeni:
+
+1. Ne Yapar?
+	+ Bir TCP bağlantısı boyunca yapılan toplam HTTP isteği sayısını tutar.
+	+ Eğer istemci aynı bağlantıyı yeniden kullanıyorsa (örneğin, HTTP Keep-Alive), bu sayı artar.
+2.  Bağlantıya Özeldir:
+	+ Her yeni TCP bağlantısı için sıfırdan başlar.
+	+ Yeni bir bağlantı açıldığında yeniden saymaya başlar.
+3. Yalnızca HTTP/1.1 veya Üzeri için kullanışlıdır:
+	+ HTTP/1.1 ile gelen Keep-Alive özelliği sayesinde bağlantı yeniden kullanılabilir.
+	+ HTTP/2 veya HTTP/3'te de bağlantı tekrar kullanımına uygundur.
+
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+
+    log_format specialLog '$remote_addr - [$time_local] '
+                          'body_bytes_sent değeri: $body_bytes_sent'
+                          ' -> $connection_requests';
+
+    keepalive_timeout 30;
+    keepalive_requests 20;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+        location /variable {
+            return 200 "You have made $connection_requests requests in this connection.\n";
+        }
+    }
+}
+```
+
+> **Explanation:**
+> +  Belirli directive'ler(`keepalive_timeout` ve `keepalive_requests`) koşulu ile `connection_requests` değişkeni bir tarayıcının kaç kez istek yaptığını tutar.
+> + `$connection_requests` genellikle log dosyaları için kullanılır. Bu nedenle `log_format directive` içerisine yazmış bulunuyoruz ve daha açıklayıcı olsun diye de `return directive` ile de client tarafına da gönderiyoruz.
+> + `keepalive_timeout 30` : 30 saniye boyunca sunucu ile tarayıcı arasında bağlı kalacak.
+> + `keepalive_requests 20` : 20 istek üzerine çıkıldığında tarayıcı ile sunucu arasındaki bağlantı kopacaktır. Fakat tekrar GET isteğinde yeniden bağlanacaktır. 
+
+
+**GET isteği:**
+```shell
+curl -X GET -i -H "Connection: keep-alive" http://192.168.1.132/variable
+```
+> **Explanation:**
+> + `curl` ile belirli bir zaman aralığında bağlantı devamlılığını sağlayamıyoruz bundan dolayı log dosyasında her curl ile istek yaptığımızda bir değerini vermektedir.
+> + Ama Taraycılar(browser) ile herGET isteği atığımızda `$conncetion_requests` değişken değeri artmaktadır. 
+
+**Curl Çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Tue, 03 Dec 2024 17:40:11 GMT
+Content-Type: text/plain
+Content-Length: 39
+Connection: keep-alive
+```
+
+**Log Dosyası:**
+```log
+==> /var/log/nginx/access-special.log <==
+192.168.1.106 - [03/Dec/2024:19:55:14 +0300] body_bytes_sent değeri: 45 -> 4
+
+==> /var/log/nginx/access.log <==
+192.168.1.106 - - [03/Dec/2024:19:55:14 +0300] "GET /variable HTTP/1.1" 200 45 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+```
+> **Explanation:**
+> + `access-special.log` dosyasının çıktısını incelersek, ok(`->`) işaretinin gösterdiği değerin 4 olduğun yani  30 saniye de 20 isteğin altında art arda 4 GET isteği gönderilmiştir.
+> + `access.log` dosyası nginx varsayılan olarak gelen log dosyasıdır ama `access-special.log` dosyası bizim öğrenme amacı ile oluşturulmuştur.
+
+##### 5.date_local değişkeni:
++ Sunucunun yerel saat dilimine göre geçerli tarihi ve saati gösterir.
++ Bu değişken, tarih ve saat bilgisi gerektiğinde çeşitli yerlerde kullanılabilir, örneğin log formatlarında veya HTTP yanıtlarında.
+
+**Syntax:**
+```
+Day/MONTH/Year:Hour:Minute:Second TimeZone
+```
+
+```
+03/Dec/2024:20:40:13 +0300
+```
+
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+    include mime.types;
+
+    log_format specialLog '$remote_addr -> [$date_local] '
+                          'body_bytes_sent değeri: $body_bytes_sent'
+                          ' - $connection_requests';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+        location /variable {
+            add_header X-Current-Time $date_local;
+            return 200 "The current time is: $date_local\n";
+        }
+    }
+}
+```
+> **Explanation:**
+> + `$date_local` değişkenini `log_format` içerisinde kullandık. Böylelikle Her istek alındığında o zaman dilimi log dosyasına(`access-special.log`) yazılacaktır.
+> + Ayrıca `location Context` içerisinde yazarak hem başlık(header) hem de body ile istemciye o anki tarihi gönderiyoruz.
+> + `X-Current-Time` başlığı hakkında daha fazla bilgi için [[Nginx Directives#1.2. X-Current-Time|bakınız]].
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/variable
+```
+
+**Curl Çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Wed, 04 Dec 2024 12:30:47 GMT
+Content-Type: text/plain
+Content-Length: 57
+Connection: keep-alive
+X-Current-Time: Wednesday, 04-Dec-2024 15:30:47 +03
+
+The current time is: Wednesday, 04-Dec-2024 15:30:47 +03
+```
+> **Explanation:**
+> + `date_local` değişkenini hem `log_format` de hem de `request body`de kullandık ve `X-Current-Time` başlığında da bu değişkenden yararlandık. 
+> + `X-Current-Time` ve `request body` çıktılarını `GET` isteği ile görebiliyoruz.
+
+**Log Çıktısı:**
+```log
+==> /var/log/nginx/access-special.log <==
+192.168.1.106 -> [04/Dec/2024:15:30:47 +0300] body_bytes_sent değeri: 57 - 1
+```
+> **Explanation:**
+> + `[04/Dec/2024:15:30:47 +0300]` değeri `$date_local` değişkeninden gelmektedir.
+
+##### 6.time_local değişkeni:
++ `$time_local` değişkeni `$date_local` değişkeni ile kullanım amaçları aynı ama ekrana verdiği format yapısı biraz farklı
+
+```nginx
+}
+
+http {
+
+    include mime.types;
+
+    log_format specialLog '$remote_addr -> [$time_local] '
+                          'body_bytes_sent değeri: $body_bytes_sent'
+                          ' - $connection_requests';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+        location /time {
+            return 200 "The current time is: $time_local\n";
+        }
+
+        location /date {
+            return 200 "The current date is: $date_local\n";
+        }
+    }
+}
+```
+> **Explanation:**
+> + Biz burada `$time` değişkeni ile `$date` değişkeni arasındaki farkı `location context` içerisinde ve ona uygun kaynak URI ile `GET` isteği çıktısında görebiliriz. 
+
+**Curl isteği:** date
+```shell
+curl -X GET -i http://192.168.1.132/date
+```
+
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Wed, 04 Dec 2024 14:20:31 GMT
+Content-Type: text/plain
+Content-Length: 57
+Connection: keep-alive
+
+The current date is: Wednesday, 04-Dec-2024 17:20:31 +03
+```
+
+**Curl isteği:** time
+```shell
+curl -X GET -i http://192.168.1.132/time
+```
+
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Wed, 04 Dec 2024 14:20:39 GMT
+Content-Type: text/plain
+Content-Length: 48
+Connection: keep-alive
+
+The current time is: 04/Dec/2024:17:20:39 +0300
+```
+
+> **Explanation:**
+> + Lütfen `curl` çıktılarını inceleyiz.
+
+
+> [!IMPORTANT]
+> + `$time_local` değişkeni;
+> + Daha yaygın olarak kullanılır.
+> + Loglama ve zaman bilgisi gereken işlemler için standarttır.
+> + `$date_local` değişkeni;
+> + Daha az kullanılan veya bazı sürümlerde desteklenmeyen bir değişkendir.
+> + Ekstra bir avantaj sağlamaz.
+
+##### 7.hostname değişkeni:
++ Nginx'teki **`$hostname`** değişkeni, Nginx sunucusunun çalıştığı makinenin ana bilgisayar adını (**hostname**) döndüren yerleşik bir değişkendir.
++ Bu değişken, sunucunun ağda tanımlandığı adı veya DNS'de kayıtlı olan adını ifade eder.
++ Linux sistemlerinde `hostname` veya `cat /etc/hostname` komutları ile de teyit edebiliriz.
+
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+
+    include mime.types;
+
+    log_format specialLog '$remote_addr - [$time_local] '
+                          '$body_bytes_sent' ' - $connection_requests'
+                          ' -> $hostname';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+        location /hostname {
+            return 200 "The current time is: $hostname\n";
+        }
+
+    }
+}
+```
+> **Explanation:**
+> + `$hostname` değişkenini, `log_format`'ında ve `body request` içerisinde kullanılmıştır.
+> + Nginx'in çalıştığı makinenin `hostname`'ini verecektir.
+
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/hostname
+```
+
+**Log Dosyası:**
+```log
+==> /var/log/nginx/access-special.log <==
+192.168.1.106 - [04/Dec/2024:18:39:48 +0300] 37 - 1 -> nginx-tutorial3
+```
+
+> [!TIP]
+> + `$hostname` genellikle **erişim loglarında** kullanılır. Eğer birden fazla Nginx sunucusu aynı log dosyasını kullanıyorsa, hangi log kaydının hangi sunucudan geldiğini anlamak için faydalıdır.
+
+> [!TIP]
+> + **Reverse Proxy**
+> + Birden fazla `backend` sunucusu olan yapılandırmalarda, hangi `backend`'in hangi Nginx sunucusu tarafından çağrıldığını anlamak için `$hostname` kullanılabilir.
+
+##### 8.nginx_version değişkeni:
+
++ Nginx'teki **`$nginx_version`** değişkeni, kullanılan Nginx'in sürüm numarasını temsil eder.
+
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    log_format specialLog '$remote_addr - [$time_local] '
+                          '$body_bytes_sent' ' - $connection_requests'
+                          ' - $hostname' ' -> $nginx_version';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+
+        location /version {
+            return 200 "Nginx version is $nginx_version\n";
+        }
+    }
+}
+```
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/version
+```
+
+**Curl Çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Thu, 05 Dec 2024 12:40:49 GMT
+Content-Type: text/plain
+Content-Length: 22
+Connection: keep-alive
+
+Nginx version is 1.27.2
+```
+
+
+> [!CAUTION]
+> + **Güvenlik Açısından Dikkat Edilmesi Gerekenler:**
+> + **Sürüm Bilgisi Açıklanabilir:** `$nginx_version` değişkenini bir istemciye açık şekilde göndermek, potansiyel güvenlik açıklarını artırabilir. İstemciler, Nginx sürümünü öğrenerek bilinen güvenlik açıklarından yararlanabilir.
+> + **Güvenlik Önlemi:** Eğer istemcilere sürüm bilgisini göndermek istemiyorsanız, bu tür bir yapılandırmadan kaçının veya `$nginx_version` değişkenini başlıklarda kullanmayın.
+
+##### 9.arg_name değişkeni:
++ Nginx'te **`arg_name`** değişkeni, **sorgu parametrelerini** (query string) almak için kullanılan bir yerleşik değişkendir.
++ Bir HTTP isteğinin URL'sinde yer alan belirli bir sorgu parametresinin değerini döndürür.
+
+###### `arg_name` değişken yapısı:
++ `arg_` **ön eki**, sorgu parametrelerini ifade eder.
++ `name` **kısmı**, sorgu parametresinin adını temsil eder.
+
+> [!IMPORTANT]
+> + Eğer bir URL şu şekildeyse: `http://example.com/page?user=John&age=30`
+> + **`$arg_user`**: `user` parametresinin değerini döndürür (`John`).
+> + **`$arg_age`**: `age` parametresinin değerini döndürür (`30`).
+
+
+> [!TIP]
+> + `arg_name` ile birlikte `if statement` yapısı da kullanılmıştır.
+
+
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    log_format specialLog '$remote_addr - [$time_local] '
+                          '$body_bytes_sent' ' - $connection_requests'
+                          ' - $hostname' ' -> user=$arg_user';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+
+        # if ( $arg_names = 'linux' ) {
+        #   return 200 "Linux is awesome";
+        # }
+
+        location /sorgu {
+            if ( $arg_user = "tanju" ) {
+                return 200 "Welcome, Admin $arg_user\n";
+            }
+            return 200 "Welcome, Guest $arg_user!\n";
+        }
+    }
+}
+```
+> **Explanation:**
+> + `http://192.168.1.132/sorgu?user=tanju` => Welcome, Admin tanju
+> + `http://192.168.1.132/sorgu?user=linus` =>  Welcome, Guest linus
+> + `log_format directive` de kullanarak hangi  kullanıcıların `GET` isteği yaptığını log dosyasında izleyebiliriz.  
+
+**GET isteği:** tanju
+```shell
+curl -X GET -i http://192.168.1.132/sorgu?user=tanju
+```
+
+**Curl çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Thu, 05 Dec 2024 15:48:22 GMT
+Content-Type: text/plain
+Content-Length: 21
+Connection: keep-alive
+
+Welcome, Admin tanju
+```
+
+**Log dosyası:** tanju
+```log
+==> /var/log/nginx/access-special.log <==
+192.168.1.106 - [05/Dec/2024:18:48:22 +0300] 21 - 1 - nginx-tutorial3 -> user=tanju
+```
+
+**GET isteği:** linus
+```shell
+curl -X GET -i http://192.168.1.132/sorgu?user=linus
+```
+
+
+**Curl Çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Thu, 05 Dec 2024 15:53:43 GMT
+Content-Type: text/plain
+Content-Length: 22
+Connection: keep-alive
+
+Welcome, Guest linus!
+```
+
+**Log dosyası:** linus
+```log
+==> /var/log/nginx/access-special.log <==
+192.168.1.106 - [05/Dec/2024:18:53:43 +0300] 22 - 1 - nginx-tutorial3 -> user=linus
+```
+
+
+> [!TIP]
+> 1. **Sorgu Parametresinin Olmaması Durumu:** Eğer belirtilen sorgu parametresi mevcut değilse, ilgili değişkenin değeri **boş (empty)** olur. Örneğin; `$arg_missing_param = ""`
 
 
 
-### Nginx Directives:
-#### Listen directive:
+#### User Değişkenler:
+
+**nginx.conf dosyası:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        set $var "Linux";
+
+        location /variable {
+            return 200 "New variable is $var";
+        }
+
+    }
+}
+```
+
+**GET İsteği:**
+```shell
+$ http://192.168.1.132/variable
+```
+
+**curl Çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Mon, 02 Dec 2024 12:52:52 GMT
+Content-Type: text/plain
+Content-Length: 21
+Connection: keep-alive
+
+New variable is Linux%
+```
+
+> **Explanation:**
+> +  `nginx.conf` dosyasında `$var` değişkenine `Linux` değerini atadık ve curl komut ile `GET` isteği yaptığımızda `200` başarılı kodu döndüğünü görüyoruz ve `Linux` değerinin verildiğini ve ekrana yazmaktadır.
+> + Eğer `location Context` ile bilginiz yok ise [[Nginx location]] bölümünü kontrol ediniz.
+
+
+
+## Nginx Directives:
+### Listen directive:
 + **Amaçı:** IP için `adres` ve `port` veya UNIX-domain soket için `path` istekleri hangi sunucuların kabul edeceğini ayarlar.
 ###### 1.İsim tabanlı sanal sunucular:
 + nginx ilk olarak isteğin hangi sunucuda işleneceğine karar verir. Bütün üç sanal sunucunun `*:80` portunu dinlediği basit bir yapılandırmayla başlayalım:
@@ -1005,9 +1686,9 @@ server {
 1. [nginx.org](https://nginx.org/en/docs/http/ngx_http_core_module.html#listen)
 2. [How nginx processes a request](https://nginx.org/en/docs/http/request_processing.html)
 
-#### Root Directive:
+### Root Directive:
 
-#### Server_name Directive:
+### Server_name Directive:
 
 
 > [!IMPORTANT]
@@ -1140,30 +1821,586 @@ server {
 > 	4. Varsaylan Server Block(`default_server`)
 
 **Ek Kaynak:** [Resmi Sitesi](https://nginx.org/en/docs/http/server_names.html)
-#### Return directive:
 
+### Return & Rewrite Directive:
++ *Her ikisi iki amaç için kullanılır;*
++ İlk olarak, eğer URL değiştirilmek istendiğinde
++ İkinci olarak, nginx içerisinde istekleri kontrol etmek için
++ `return` ve `rewrite` arasında temel bir fark var, her iki yönergenin(`directive`) de temel amacı aynı olsa da işlevlerinde(function) bir fark var.
+#### Return directive:
++ `Return directive`, NGINX `Rewrite directive`'e kıyasla kullanımı daha basit bir direktiftir.
++ `Return directive`'in kaynak tüketimi `Rewrite directive` ile karşılaştırıldığında düşüktür.
+
+> [!TIP]
+> + `Return directive`, `server context` veya `location context` içersine yazılmalıdır.
+
+##### Syntax:
 ```nginx
-server {
-	listen 80 default_server;
-    location /ali {
-	    add_header Content-Type text/plain;
-        return 200 "I publish 80 port";
-    }
+return <status> [text | URL];
+```
++ **`<status>`:** HTTP durum kodu (örneğin: 200, 301, 302, 404, 500).
++ **`text | URL`** (isteğe bağlı): Geri döndürülecek metin veya yönlendirme yapılacak URL.
+
+##### Temel Kullanımı:
+**nginx.conf**
+```nginx
+events {
 }
 
-server {
-        listen 8080 default_server;
-        location /ali {
-                add_header Content-Type text/plain;
-                return 200 "I publish 8080 port";
-        }
+http {
+
+    include mime.types;
+
+    log_format specialLog '$remote_addr - [$time_local] '
+                          '$body_bytes_sent' ' - $connection_requests'
+                          ' - $hostname' ' -> $scheme';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+        location /text {
+            add_header Content-Type text/plain;
+            return 200 "Linux is Awesome :)";
+        }
+
+    }
 }
 ```
 > **Explanation:**
-> 
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/text
+```
+
+**Curl çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Fri, 06 Dec 2024 16:56:51 GMT
+Content-Type: text/plain
+Content-Length: 19
+Connection: keep-alive
+Content-Type: text/plain
+
+Linux is Awesome :)
+```
+
+##### Yönlendirme(dışarıda):
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    log_format specialLog '$remote_addr - [$time_local] '
+                          '$body_bytes_sent' ' - $connection_requests'
+                          ' - $hostname' ' -> $scheme';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+        return 301 "$scheme://httpforever.com";
+    }
+}
+```
+> **Explanation:**
+> + `http://192.168.1.132` adresine `GET` isteği atığımızda `return directive`'i `301` kodu ile `$scheme://httpforever.com` yönlendirecektir.
+> + Burada `http://httpforver.com` seçmemizin nedeni `https` yerine `http` kullanması ve böylelikle `$scheme` değişkenini daha iyi anlamak.
 
 
-#### Allow and  Deny IP
+> [!NOTE]
+> + Eğer `server context` de `ssl` yok ise yani `listen directive` 80 port'u ile açılmış ise `$scheme` değişkeni http değerini alır.
+> + Eğer `server context` de `ssl` var ise yani `listen directive` 443 port'u ile açlımış ise
+> + `$scheme` değişkeni https değerini alır.
+
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132
+```
+
+**Curl çıktısı:**
+```http
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.2
+Date: Sat, 07 Dec 2024 14:19:38 GMT
+Content-Type: text/html
+Content-Length: 169
+Connection: keep-alive
+Location: http://httpforever.com/
+
+<html>
+<head><title>301 Moved Permanently</title></head>
+<body>
+<center><h1>301 Moved Permanently</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+```
+> **Explanation:**
+> + `Curl` komut ile GET istek atığımızda yönlendirmeyi takip etmeyecektir ama `-L` parametresi ile yönlendirmeyi takip edebiliriz yani yeni komut; 
+> + `curl -X GET -i -L http://192.168.1.132` 
+> + Bu komut sadece HTTP başlıklarını döndürür ve `Location` başlığı altında yönlendirme adresini görebilirsiniz.
+
+##### Yönlendirme(içeride):
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    log_format specialLog '$remote_addr - [$time_local] '
+                          '$body_bytes_sent' ' - $connection_requests'
+                          ' - $hostname' ' -> $scheme';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+        location /welcome {
+            return 301 /assets/images/about/welcome-banner.jpg;
+        }
+    }
+}
+```
+> **Explanation:**
+> +  Statik Web sistemiz `root directive`'in de göstermiş olduğu dizin `/var/www/html/bloggingtemplate/` konumunda bulunmaktadır.
+> + `/welcome` kaynak URI istek yapıldığında `root` ile gösterilen sitesi içerisindeki belirli yola yönlendiriyoruz.
+> + Statik Web sitesi adresi: [link](https://www.100utils.com/download/course-files-for-youtube-course-complete-nginx-training/)
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/welcome
+```
+
+```http
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 13:01:53 GMT
+Content-Type: text/html
+Content-Length: 169
+Location: http://192.168.1.132/assets/images/about/welcome-banner.jpg
+Connection: keep-alive
+
+<html>
+<head><title>301 Moved Permanently</title></head>
+<body>
+<center><h1>301 Moved Permanently</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+```
+
+**GET isteği:** `-L` parametresi
+```shell
+curl -X GET -i -L http://192.168.1.132/welcome
+```
+
+```http
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 13:01:58 GMT
+Content-Type: text/html
+Content-Length: 169
+Location: http://192.168.1.132/assets/images/about/welcome-banner.jpg
+Connection: keep-alive
+
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 13:01:58 GMT
+Content-Type: image/jpeg
+Content-Length: 84907
+Last-Modified: Wed, 06 Nov 2024 14:05:18 GMT
+Connection: keep-alive
+ETag: "672b779e-14bab"
+Accept-Ranges: bytes
+
+Warning: Binary output can mess up your terminal. Use "--output -" to tell curl to output it to your terminal anyway, or consider "--output <FILE>" to
+Warning: save to a file.
+```
+> **Explanation:**
+> + `-L` parametresi yönlendirilmiş URL kaynağını takip ediyoruz ve ekran çıktı veriyoruz.
+
+**Log dosyası:**
+```log
+==> /var/log/nginx/access.log <==
+192.168.1.106 - - [08/Dec/2024:16:01:58 +0300] "GET /welcome HTTP/1.1" 301 169 "-" "curl/8.10.1"
+```
+> **Explanation:**
+> + Eğer client(istemci) tarafına `301` kodu gönderiliyor. yani tarayıcı `301` kodunu gördüğünde tarayıcıya gönderilen(`/assets/images/about/welcome-banner.jpg`) yolu okuması gerektiğini anlıyor.
+
+
+#### Rewrite directive:
++ URL'yi yeniden yazabilmek için bu `directive`'in bir `location` veya `server` bloğunda olması gerekiyor.
++ Nginx'in `rewrite` direktifi, URL'yi istemciye bildirmeden sunucu tarafında değiştirebilir. Bu durumda, istemci yönlendirmeyi fark etmez ve değişiklik yalnızca sunucu içinde yapılır.
++ Ancak, `rewrite` direktifine `redirect` gibi belirli bir durum kodu eklenirse (örneğin, `301` veya `302`), istemci yönlendirmeden haberdar edilir.
+
+##### Syntax:
+
+```nginx
+rewrite regex URL [flag];
+```
+
+##### 1.Internal Rewrite:
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    log_format specialLog '$remote_addr - [$time_local] '
+                          '$body_bytes_sent' ' - $connection_requests'
+                          ' - $hostname' ' -> $scheme';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+        rewrite /old_site /new_site;
+
+        location /new_site {
+            return 200 "Hello, Linux";
+        }
+    }
+}
+```
+> **Explanation:**
+> + URL, istemciye herhangi bir bilgi verilmeden sunucu tarafında değiştirilir.
+> + Bu durumda istemci hâlâ `/old_site` URL'sini kullanır, ancak Nginx içeride `/new_site` üzerinden işlemleri yürütür.
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/old_site
+```
+
+**Curl Çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 08:44:47 GMT
+Content-Type: text/plain
+Content-Length: 12
+Connection: keep-alive
+
+Hello, Linux
+```
+> **Explanation:**
+> + `curl` ile `/old_site` kaynak URI'e istek yapmamıza rağmen `/new_site` URI kaynak içeriği gelmiştir. Çünkü `rewrite directive` ile URI kaynağı yönlendirme yapılmıştır.
+
+##### 2.permanent parametresi:
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    log_format specialLog '$remote_addr - [$time_local] '
+                          '$body_bytes_sent' ' - $connection_requests'
+                          ' - $hostname' ' -> $scheme';
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access-special.log specialLog;
+        access_log /var/log/nginx/access.log;
+
+        rewrite /old_site /new_site permanent;
+
+        location /new_site {
+            return 200 "Hello, Linux";
+        }
+    }
+}
+```
+> **Explanation:**
+> + URL değişikliği istemciye bildirilir ve istemcinin yeni URL'ye yönlendirilmesi sağlanır.
+> + Bu, istemciye `301 Moved Permanently` yanıtı gönderir ve tarayıcıyı `/new_site` URL'sine yönlendirir.
+
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/old_site
+```
+
+```http
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 10:37:23 GMT
+Content-Type: text/html
+Content-Length: 169
+Location: http://192.168.1.132/new_site
+Connection: keep-alive
+
+<html>
+<head><title>301 Moved Permanently</title></head>
+<body>
+<center><h1>301 Moved Permanently</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+```
+
+**GET isteği:** `-L` parametresi
+```shell
+curl -X GET -i -L http://192.168.1.132/old_site
+```
+
+```http
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 12:20:08 GMT
+Content-Type: text/html
+Content-Length: 169
+Location: http://192.168.1.132/new_site
+Connection: keep-alive
+
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 12:20:08 GMT
+Content-Type: text/plain
+Content-Length: 12
+Connection: keep-alive
+
+Hello, Linux
+```
+> **Explanation:**
+> + `-L` parametresi ile yönlendirmeyi takip ediyoruz. 
+> + Ayrıca `-L` parametresinin uzun yazılışı `--location` olmaktadır.
+
+##### 3.regex ile:
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access.log;
+
+        rewrite ^/guest/\w+ /welcome;
+
+        location /welcome {
+            return 301 /assets/images/about/welcome-banner.jpg;
+        }
+    }
+}
+```
+> **Explanation:**
+> + `rewrite directive` ilk parametresi regex yapısı ile URL kontrol etmektedir ve eşleştiği durumda `/welcome` kaynak URI yönlendirmektedir.
+> + `^/guest/\w+` regex yorumu: `/guest/` ile başlayan(`^`), her hangi bir harf ile devam eden(`\w`)  ve en az bir harf olma şartı(`+`) ile her hangi kelime gelebilir.
+
+
+**GET isteği:**
+```shell
+curl.exe -X GET -i http://192.168.1.132/guest/tanju
+```
+
+```shell
+curl.exe -X GET -i http://192.168.1.132/guest/linus
+```
+
+```http
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 17:36:44 GMT
+Content-Type: text/html
+Content-Length: 169
+Location: http://192.168.1.132/assets/images/about/welcome-banner.jpg
+Connection: keep-alive
+
+<html>
+<head><title>301 Moved Permanently</title></head>
+<body>
+<center><h1>301 Moved Permanently</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+```
+> **Explanation:**
+> + `/guest/` kelimesinden sonra `regex` yapısına eşleşme olduğu taktirde `/welcome` location context  çalışacaktır.
+
+**GET isteği:** `-L` parametresi
+```shell
+curl.exe -X GET -i -L http://192.168.1.132/guest/tanju
+```
+
+```shell
+curl.exe -X GET -i -L http://192.168.1.132/guest/linus
+```
+
+```http
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 17:53:44 GMT
+Content-Type: text/html
+Content-Length: 169
+Location: http://192.168.1.132/assets/images/about/welcome-banner.jpg
+Connection: keep-alive
+
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sun, 08 Dec 2024 17:53:44 GMT
+Content-Type: image/jpeg
+Content-Length: 84907
+Last-Modified: Wed, 06 Nov 2024 14:05:18 GMT
+Connection: keep-alive
+ETag: "672b779e-14bab"
+Accept-Ranges: bytes
+
+Warning: Binary output can mess up your terminal. Use "--output -" to tell curl to output it to your terminal anyway, or consider "--output <FILE>" to
+Warning: save to a file.
+```
+
+##### 4.`$1` parametresi ile:
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access.log;
+
+        rewrite ^/guest/(\w+) /welcome/$1;
+
+        location /welcome/linus {
+            return 200 "Best OS is ubuntu";
+        }
+
+        location /welcome/tanju {
+            return 200 "Best system administrator is tanju";
+        }
+    }
+}
+```
+> **Explanation:**
+> + **`^`**: ifadesi `/guest/` ile başlaması gerektiğini söylemektedir.
+> + **`(\w+)`**: Parantezler bir grubu temsil eder. `\w+`, bir veya daha fazla harf, rakam veya alt çizgi karakterinden oluşan bir diziyi ifade eder. (Regex'te `\w` harf, rakam veya `_` anlamına gelir.)
+> + Bu grup, `/guest/`'den sonra gelen metni yakalamak için kullanılır.
+> + `/welcome/$1` : Bu, eşleşme başarılı olduğunda URL'nin yeniden yazılacağı hedefi belirtir. **`$1`**: Regex ifadesindeki ilk grubu (`(\w+)`) temsil eder. Yani, `/guest/`'den sonra yakalanan metni buraya yerleştirir.
+> + `/guest/linus` kaynak URI'ın da `$1` değeri `linus` olacaktır. `/guest/tanju` kaynak URI'ın da `$1` değeri tanju olacaktır.
+
+
+> [!TIP]
+> + `rewrite directive` ile admin, users ve guest sayfalarını farklı bağlantılara yönlendirebiliriz.
+> + `rewrite ^/intro/(\w+) /welcome/$1` bu yapıya uygun olarak location context'leri hazırlayabiliriz;
+> + `location /welcome/admin`, `location /welcome/users` ve `/welcome` olmak üzeri üç farklı giriş sayfasını yönetebiliriz.
+
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/guest/linus
+```
+
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Mon, 09 Dec 2024 15:45:01 GMT
+Content-Type: text/plain
+Content-Length: 17
+Connection: keep-alive
+
+Best OS is ubuntu
+```
+
+**Log Dosyası:**
+```log
+==> /var/log/nginx/access.log <==
+192.168.1.106 - - [09/Dec/2024:18:54:06 +0300] "GET /welcome/linus HTTP/1.1" 200 17 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+```
+> **Explanation:**
+> + `"GET /welcome/linus HTTP/1.1"` istek yapıldığına dikkat ediniz.
+
+**GET request:**
+```shell
+curl -X GET -i http://192.168.1.132/guest/tanju
+```
+
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Mon, 09 Dec 2024 15:47:13 GMT
+Content-Type: text/plain
+Content-Length: 34
+Connection: keep-alive
+
+Best system administrator is tanju
+```
+
+**Log Dosyası:**
+```log
+==> /var/log/nginx/access.log <==
+192.168.1.106 - - [09/Dec/2024:18:54:13 +0300] "GET /welcome/tanju HTTP/1.1" 200 34 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+```
+> **Explanation:**
+> + `"GET /welcome/tanju HTTP/1.1"` istek yapıldığına dikkat ediniz.
+
+### try_files:
+
+
+
+### Allow and  Deny IP
 
 ```nginx
         location /secure {
@@ -1181,7 +2418,7 @@ server {
 
 
 
-### Nginx Contexts:
+## Nginx Contexts:
 
 #### Types Context:
 

@@ -4,69 +4,69 @@
     "type": "split",
     "children": [
       {
-        "id": "5da7305be5a2fed0",
+        "id": "58802d5729583f18",
         "type": "tabs",
         "children": [
           {
-            "id": "f60e1e359002d190",
+            "id": "bd5bc0310840e570",
             "type": "leaf",
             "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Programlama/Python/Django/Django.md",
+                "file": "Web Servers/Nginx/Nginx Config File.md",
                 "mode": "source",
                 "source": false
               },
               "pinned": true,
               "icon": "lucide-file",
-              "title": "Django"
+              "title": "Nginx Config File"
             }
           },
           {
-            "id": "d6ab3952622c6a9c",
+            "id": "6733437a34c8f5f4",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Programlama/Python/Django/Django türkçe.md",
+                "file": "Web Servers/HTTP.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Django türkçe"
+              "title": "HTTP"
             }
           },
           {
-            "id": "2c2963bc7970353a",
+            "id": "88534d81dd447147",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "K8s/K8s Yükleme.md",
+                "file": "Linux Command/Linux komutları.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "K8s Yükleme"
+              "title": "Linux komutları"
             }
           },
           {
-            "id": "11bcfa4832e5d5a9",
+            "id": "964e9d0e108f0766",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "K8s/K8s giriş.md",
+                "file": "Archlinux/Archlinux Kurulum.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "K8s giriş"
+              "title": "Archlinux Kurulum"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -184,10 +184,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "K8s/K8s Yükleme.md"
+                "file": "Archlinux/Archlinux Kurulum.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of K8s Yükleme"
+              "title": "Outline of Archlinux Kurulum"
             }
           }
         ],
@@ -207,19 +207,23 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "2c2963bc7970353a",
+  "active": "964e9d0e108f0766",
   "lastOpenFiles": [
-    "K8s/K8s giriş.md",
-    "K8s/K8s Yükleme.md",
-    "Programlama/Python/Django/Django türkçe.md",
-    "Programlama/Python/Django/Django.md",
-    "Web Servers/Nginx/Nginx location.md",
-    "Web Servers/Nginx/Nginx Config File.md",
-    "Web Servers/Nginx/Quick Start.md",
+    "Windows Commands/PowerShell.md",
+    "Archlinux/Archlinux Kurulum.md",
+    "Archlinux",
     "Linux Command/Linux komutları.md",
+    "Web Servers/Nginx/Nginx Config File.md",
+    "Web Servers/HTTP.md",
+    "Web Servers/Nginx/Nginx Directives.md",
+    "Web Servers/Nginx/Nginx location.md",
+    "Programlama/Python/Django/Django türkçe.md",
+    "K8s/K8s Yükleme.md",
+    "K8s/K8s giriş.md",
+    "Programlama/Python/Django/Django.md",
+    "Web Servers/Nginx/Quick Start.md",
     "Windows Commands/WSL2.md",
     "Linux Command/Systemd.md",
-    "Web Servers/Nginx/Nginx Directives.md",
     "Web Servers/Nginx/Nginx Komutları.md",
     "Docker/Dockerfile.md",
     "Programlama/Python/Python Giriş.md",
@@ -234,19 +238,15 @@
     "Programlama/Python/Django",
     "Programlama/Bash_Script/Bash Script.md",
     "Git/Git Dersi.md",
-    "Web Servers/HTTP.md",
     "Programlama/Python",
     "Linux Command/Network/ip.md",
     "Network",
-    "Linux Command/Güvenlik/libpam-pwquality.md",
-    "Linux Command/Güvenlik/sudo.md",
     "Database/NoSQL",
     "Diskler",
     "Linux Command/Güvenlik",
     "Git/images/contributor.png",
     "Git/images/contributor1.png",
     "Git/images",
-    "Git/Yeni klasör",
     "Web Servers/Nginx/images/cache_control_no_store.png",
     "Database/PostgreSQL/Pictures/if-modified-since.png",
     "Database/PostgreSQL/Pictures/Left_Join.png",
