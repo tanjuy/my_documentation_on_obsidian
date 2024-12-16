@@ -11,3 +11,9 @@ $ sudo useradd ottoman
 
 ## REHL  Temeli:
 
+
+## Arch Linux Temeli:
+
+```shell
+useradd -m -G wheel -s /bin/bash ottoman
+```

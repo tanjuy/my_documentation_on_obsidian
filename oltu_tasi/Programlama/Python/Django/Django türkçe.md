@@ -2,7 +2,7 @@
 > [!NOTE]
 > Django'un [Resmi Site](https://docs.djangoproject.com/en/5.1/intro/tutorial01/)sinden Türkçeye  çevrilmiştir.
 
-## İlk Django uygulamanızı yazma, 1. bölüm:
+# İlk Django uygulamanızı yazma, 1. bölüm:
 + Örnekler ile öğrenelim
 + Bu eğitim boyunca, temel bir anket uygulamasının nasıl oluşturulacağı konusunda size yol göstereceğiz.
 + İki bölümden oluşacak:
@@ -189,5 +189,34 @@ urlpatterns = [
 ]
 ```
 
-+ `path()` fonksiyonu en az iki argüman bekler: `route` ve `view`.
-+ `include()` fonksiyonu diğer `URLconf`'lara referans vermeyi sağlar.
++ [`path()`](https://docs.djangoproject.com/en/5.1/ref/urls/#django.urls.path) fonksiyonu en az iki argüman bekler: `route` ve `view`.
++ [`include()`](https://docs.djangoproject.com/en/5.1/ref/urls/#django.urls.include) fonksiyonu diğer `URLconf`'lara referans vermeyi sağlar.
++ Django `include()` ile karşılaştığında, o noktaya kadar eşleşen URL kısmını keser ve kalan dizeyi daha ileri işleme için dahil edilen URLconf'a gönderir.
++ include()'un arkasındaki fikir, URL'lerin *tak-çalıştır özelliğini* (`plug-and-play URLs`) kolaylaştırmaktır.
++ Poll kendi `URLconf`'larında (polls/urls.py) olduğundan, `/polls/` altına veya `/fun_polls/` altına veya `/content/polls/` altına veya başka herhangi bir kök yola(`root path`) yerleştirilebilir ve uygulama yine de çalışacaktır.
+
+
+> [!TIP]
+> + `include()` ne zaman kullanılır?
+> + Diğer URL desenlerini dahil ederken her zaman `include()` kullanmalısınız.
+> + Tek istisna, Django'nun varsayılan yönetici sitesi için sağladığı önceden oluşturulmuş bir URLconf olan admin.site.urls'dir.
+
++ Şuan URLconf içerisine `index view`'i bağladınız. Aşağıdaki komutla çalıştığını doğrulayın:
+
+```shell
+$ python manage.py runserver
+```
+
++ Tarayıcınızda [http://localhost:8000/polls/]( http://localhost:8000/polls/) adresine gidin, ve `index view` de tanımlamış olduğunuz “Hello, world. You’re at the polls index.” yazısını görmelisiniz.
+
+
+> [!WARNING]
+> + Sayfa bulunamadı?
+> + Burada bir hata sayfası alırsanız [http://localhost:8000/polls/](http://localhost:8000/polls/) adresine gittiğinizden ve [http://localhost:8000/](http://localhost:8000/) adresine gitmediğinizden emin olun.
+
++ Temel istek ve yanıt akışını anladığınızda, veritabanı ile çalışmaya başlamak için bu eğitimin 2. bölümünü okuyun.
+
+# İlk Django uygulamanızı yazma, 2. bölüm
++ Bu eğitim, Eğitim 1'in kaldığı yerden başlıyor.
+
+[Devam Link](https://docs.djangoproject.com/en/5.1/intro/tutorial02/)

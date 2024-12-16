@@ -491,7 +491,7 @@ sudo systemctl enable --now kubelet
 **Kaynak:** [Resmi Sitesi](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
 
 ---
-Note: Chatgpt düzenlenecek! 
+## Chatgpt düzenlenecek! 
 
 ---
 

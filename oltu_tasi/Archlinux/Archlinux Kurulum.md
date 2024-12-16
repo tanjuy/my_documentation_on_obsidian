@@ -1,5 +1,6 @@
 #archlinux
 
+# Manual Kurulum:
 ## Temel Kurulum:
 
 ## BIOS
@@ -51,18 +52,87 @@ blid /dev/sda1
 ```shell
 lsblk -o NAME,MAJ:MIN,SIZE,RO,TYPE,MOUNTPOINT,LABEL
 ```
+> **Explanation:**
+
+
+```shell
+mkfs.ext4 -L ROOT /dev/sda3
+```
 
 ### 3.Dosya Sistemlerine Bağlanma:
 
+
+```shell
+mount /dev/sda3 /mnt
 ```
+> **Explanation:**
+> + 
+
+###### Boot oluşturma:
+```shell
+mount --mkdir /dev/sda2 /mnt/boot
 ```
 
+veya
+
+```shell
+mkdir /mnt/boot; mount /dev/sda2 /mnt/boot
+```
+> **Explanation:**
+> + 
+
+### 4.Temel Paketleri Yükleme:
+
+```shell
+pacstrap -i /mnt base base-devel linux linux-headers linux-firmware vim grub fish
+```
+> **Explanation:**
+
+
+> [!IMPORTANT]
+> + `fish shell` yüklemek, komut satırı yazmanızı kolaylaştıracaktır.  
+
+### 5.Fstab'e yazma:
+
+```shell
+genfstab -p -L /mnt >> /mnt/etc/fstab
+```
+> **Explanation:**
+
+### 6.chroot:
+
+```shell
+arch-chroot /mnt
+```
+
+###### Kullanıcı oluşturma:
+
+```shell
+useradd -m -G wheel -s /bin/bash ottoman
+```
+
+> [!NOTE]
+ > + 
+
+
+```shell
+grub-install --recheck /dev/sda
+```
+
+```shell
+grub-mkconfig -o /boot/grub/grub.cfg
+```
 ## UEFI
 
 ```shell
 parted /dev/sda mklabel gpt
 ```
 
+
 ## Kaynak:
 1. [Resmi Sitesi](https://wiki.archlinux.org/title/Installation_guide_(T%C3%BCrk%C3%A7e))
-2. 
+2. [GnuChanOS](https://www.youtube.com/watch?v=TZ-D_HE3Mlo) Devam ediyor....
+3. 
+# Script Kurulum:
+
+
