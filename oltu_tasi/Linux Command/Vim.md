@@ -24,4 +24,11 @@
 > 	- `:set paste` komutunu kullanarak, bu otomatik işlemleri devre dışı bırakarak, yapıştırdığınız metnin orijinal biçimini korumasını sağlayabilirsiniz.
 
 
+#### set cursorline:
+
+```vim
+:set cursorline
+```
+> **Explanation:**
+> + 
 

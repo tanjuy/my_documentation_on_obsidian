@@ -1586,7 +1586,15 @@ Welcome, Guest linus!
 > 1. **Sorgu Parametresinin Olmaması Durumu:** Eğer belirtilen sorgu parametresi mevcut değilse, ilgili değişkenin değeri **boş (empty)** olur. Örneğin; `$arg_missing_param = ""`
 
 
+##### 10.uri değişkeni:
+**nginx.conf:**
+```nginx
 
+```
+
+```shell
+curl -X GET 
+```
 #### User Değişkenler:
 
 **nginx.conf dosyası:**
@@ -2398,23 +2406,341 @@ Best system administrator is tanju
 
 ### try_files:
 
++ `try_files` direktifi, belirtilen dosya veya dizin yollarını sırasıyla kontrol eder ve uygun bir dosya veya dizin bulunduğunda onu sunar.
++ Eğer hiçbir dosya bulunmazsa, belirtilen `fallback` (genellikle bir hata sayfası veya proxy geçişi) kullanılır.
 
+
+> [!TIP]
+> + `try_files directive` genelde `server context` veya `location context` içerisinde tanımlanır.
+
+#### try_files yönlendirme:
+**nginx.conf**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        try_files /testObject /video;
+        # try_files $uri /video;
+
+        location /video {
+            return 200 "Enjoy the movie!!!!";
+        }
+    }
+}
+```
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/testObject
+```
+
+```shell
+curl -X GET -i http://192.168.1.132/video
+```
+
+```shell
+curl -X GET -i http://192.168.1.132/anything
+```
+
+**Curl çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Tue, 24 Dec 2024 11:50:33 GMT
+Content-Type: text/plain
+Content-Length: 19
+Connection: keep-alive
+
+Enjoy the movie!!!!
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `try_files directive`'den dolayı yapılan tüm url istekleri `location video context`'e yönlendirecektir.
+> + Çünkü `try_files`'ın parametreleri sıra ile kontrol edilir eğer hiç biri uymaz ise en sondaki parametre çalıştırılır ve burada son parametre `video` olmaktadır.
+> + `try_files $url /video` kullanımı da aynı sonucu verecektir. 
+
+#### try_file ve statik dosya:
+
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+        access_log /var/log/nginx/access.log;
+
+        try_files /assets/images/about/welcome-banner.jpg /video;
+
+        location /video {
+            return 200 "Enjoy the movie!!!!";
+        }
+    }
+}
+```
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/testObject
+```
+
+```shell
+curl -X GET -i http://192.168.1.132/anything
+```
+
+**Curl çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Tue, 24 Dec 2024 15:52:40 GMT
+Content-Type: image/jpeg
+Content-Length: 84907
+Last-Modified: Wed, 06 Nov 2024 14:05:18 GMT
+Connection: keep-alive
+ETag: "672b779e-14bab"
+Accept-Ranges: bytes
+
+Warning: Binary output can mess up your terminal. Use "--output -" to tell curl to output it to your terminal anyway, or consider "--output <FILE>" to
+Warning: save to a file.
+```
+
+> **Explanation:**
+> + Hem `/testObject` hem de `/anything` `try_files` da eşleşme olmayacağı için `/assets/images/about/welcome-banner.jpg` dizinindeki resim dosyası gönderilecektir.
+
+
+```shell
+curl -X GET -i http://192.168.1.132/video
+```
+
+**Curl Çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Tue, 24 Dec 2024 15:58:42 GMT
+Content-Type: text/plain
+Content-Length: 19
+Connection: keep-alive
+
+Enjoy the movie!!!!
+```
+
+> **Explanation:**
+> + Fakat `try_files` da mevcut olan `location` istenildiğinde `video location context` blok çalıştırılacak.
+
+#### try_files ve `$url`:
+**nginx.conf:**
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access.log;
+        try_files $uri /assets/images/about/welcome-banner.jpg /video;
+
+        location /video {
+            return 200 "Enjoy the movie!!!!";
+        }
+    }
+}
+```
+
+> **Explanation:**
+> + `root directive`'den de anlaşılacağı üzeri [web sitemizi](https://www.100utils.com/download/course-files-for-youtube-course-complete-nginx-training/) `/var/www/html` dizinine indiriyoruz.
+> + `$uri` değişkeni, kaynak URI tutmaktadır. Örneğin;  `http://192.168.1.132/linux.txt` ise `$uri` değişken değeri `/linux.txt` olur. Veya `http://192.168.1.132/linux/ubuntu.txt` ise `$uri` değişken değeri `/linux/ubuntu.txt` olur. 
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/index.html
+```
+
+> **Explanation:**
+> + `$uri` değişkeni değeri `/index.html` olur. Bundan dolayı `try_files /index.html  /assets/images/about/welcome-banner.jpg /video;` şeklinde olacaktır. Eğer `root directive`'in içerisinde `index.html` dosyası varsa bu dosya istemciye gönderilir.
+> + Aksi taktirde `try_files` bir sonraki parametresi olan `/assets/images/about/welcome-banner.jpg` istemciye(client) gönderilecektir.
+
+#### try_files ve 404 sayfası:
+
+#####  try_files  ve `/404`:
+
++ `=404`, bir dosya veya dizin bulunamazsa **Nginx'in doğrudan bir 404 HTTP hata kodu** döndürmesini sağlar.
++ Bu yaklaşımda, hiçbir ek işlem yapılmaz, sadece istemciye bir **404 Not Found** hatası gönderilir.
+
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access.log;
+
+        try_files $uri /assets/images/about/profile_image.jpg /video /404;
+
+        location /video {
+            return 200 "Enjoy the movie!!!!";
+        }
+
+        location /404 {
+            return 404 "Sorry, this resource doesn't exit";
+        }
+    }
+}
+```
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/index.html
+```
+> **Explanation:**
+> + Kaynak URI `/index.html` olursa 
+> + `try_files /index.html /assets/images/about/profile_image.jpg /video /404;` şeklinde olur. Eğer `/index.html` dosyası `root /var/www/html/bloggingtemplate/;` içerisinde mevcut ise `index.html` içeriği istemciye(client) gönderilir. Aksi taktirde `try_files`'ın diğer parametrelerinde kontrol edilecektir.
+> + **Dikkat:** `$uri` değişkeni değeri: `/index.html` olur.
+
+```shell
+curl -X GET -i http://192.168.1.132/assets/images/about/profile_image.jpg
+```
+> **Explanation:**
+> + `try_files`, `/assets/images/about/profile_image.jpg` kaynak URI'ını `root /var/www/html/bloggingtemplate/;` içerisinde bulursa istemciye gönderecek aksi takdirde bir sonraki parametrelere bakacaktır.
+
+```shell
+curl -X GET -i http://192.168.1.132/video
+```
+> **Explanation:**
+> + `try_files`, video kaynak URI için `video location`'ına bakacaktır. `video location` istemciye(client) 200 koduyla `Enjoy the movie!!!!` mesajını gönderecektir.
+
+```shell
+curl -X GET -i http://192.168.1.132/tanju
+```
+> **Explanation:**
+> + `/assets/images/about/profile_image.jpg` dosyasını `/assets/images/about/resim.jpg` olarak değiştirip daha sonrasında yukarıdaki isteği gönderiniz. Çünkü bu kaynak URI `root` içerisinde bulunduğu için hem kendisi hem de yanlış isteklerde de çalışacaktır.
+> + `try_files`,  `/tanju` olan kaynak URI'yı hiç bir yere de bulamadığı taktirde `try_files`'ın son parametresi olan `/404` çalıştırılacaktır.
+> + `/404` parametresi için `/404 location` çalıştırılacaktır.
+
+##### try_files ve `=404`:
+
+| Özellik              | `=404`                               | `/404`                                    |
+| -------------------- | ------------------------------------ | ----------------------------------------- |
+| **Dönen Durum Kodu** | 404 (sabit hata kodu)                | 200 veya 404 (hata sayfasına bağlı)       |
+| **İşlem**            | Hemen hata kodu döner.               | URI yeniden yazılır/yönlendirilir.        |
+| **Performans**       | Daha hızlıdır, çünkü işlem basittir. | Ek bir yönlendirme gerektirir.            |
+| **Hata Sayfası**     | Özel bir hata sayfası yoktur.        | Genellikle özel bir hata sayfası sunulur. |
+
+```nginx
+events {
+}
+
+http {
+
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/access.log;
+
+        try_files $uri  /video =404;
+
+        location /video {
+            return 200 "Enjoy the movie!!!!";
+        }
+
+        location /404 {
+            return 404 "Sorry, this resource doesn't exit";
+        }
+    }
+}
+```
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/tanju
+```
+
+**Curl çıktısı:**
+```http
+HTTP/1.1 404 Not Found
+Server: nginx/1.27.2
+Date: Fri, 27 Dec 2024 14:04:43 GMT
+Content-Type: text/html
+Content-Length: 153
+Connection: keep-alive
+
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+```
+
+> **Explanation:**
+> + `/tanju` kaynağı `try_files` parametresine eşleşmeyecektir. Bu yüzden `try_files`'ın `=404` parametresi çalıştırılacaktır.
+> + Eğer dikkat ederseniz her hangi bir `=404` adına location context mevcut değildir. `=` değeri nginx'in varsayılan hata kodunu kullnacaktır. 
+
+##### Best Practice:
+
+```nginx
+
+```
 
 ### Allow and  Deny IP
 
 ```nginx
-        location /secure {
-
-                try_files $uri /secure.html;
-
-                allow 192.168.1.4;
-
-                deny all;
-
-        }
+location /secure {
+	try_files $uri /secure.html;
+	allow 192.168.1.4;
+	deny all;
+}
 ```
 > **Explanation:**
 > + Bu sayfaya sadece 192.168.1.4’den gelen isteklere izin ver (allow 192.168.1.4) tüm diğer ip’den gelen istekleri reddet (deny all ). 
+
+## Nginx Log Dosyaları:
+
+
+> [!CAUTION]
+> + Eğer nginx de `404` durum konunda bakacaksanız, `error.log` dosyasında değil de `access.log` dosyasında aramanız gerekmektedir.
 
 
 

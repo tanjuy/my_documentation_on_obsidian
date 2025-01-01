@@ -3,6 +3,108 @@
 # K8s Yükleme:
 ## 1.Production Ortamında:
 
+### Container Runtimes:
+
++ **Container Runtime (Konteyner Çalışma Zamanı)**, konteynerlerin oluşturulması, çalıştırılması ve yönetilmesi gibi işlemleri gerçekleştiren bir yazılım veya araçtır.
++ Kubernetes, konteynerleri doğrudan çalıştırmaz; bunun yerine bir `Container Runtime` kullanır. **Container Runtime Interface (CRI)** aracılığıyla bu `Container Runtime` ile iletişim kurar ve konteynerlerin yaşam döngüsünü yönetir.
+
+
+> [!NOTE]
+> + Dockershim(1), 1.24 sürümü itibarıyla Kubernetes projesinden kaldırıldı. Daha fazla bilgi için [Dockershim Kaldırma SSS](https://kubernetes.io/blog/2022/02/17/dockershim-faq/)'sini okuyun.
+
+```mermaid
+flowchart LR;
+	kublet --> CRI;
+	CRI --> highLevelCRI;
+	highLevelCRI --> lowLevelCRI;
+	lowLevelCRI --> linuxKernel;
+	linuxKernel --> container;
+```
+
+
+1.**Cümle Açıklaması:**
+	+ **`dockershim`**, Kubernetes’in eski bir bileşeni olup, Kubernetes'in Docker'ı bir **container runtime** olarak kullanmasını sağlayan bir aracı katmandır.
+	+ Kubernetes, **Container Runtime Interface (CRI)** adlı bir API aracılığıyla container runtime'larla iletişim kurar.
+	+ Ancak Docker, bu API’yi doğal olarak desteklemediği için Kubernetes, Docker ile çalışabilmek için **dockershim** adında bir uyumluluk katmanı geliştirmiştir.
+	+ *Dockershim’in Görevi:*
+	+ Docker, Kubernetes’in varsayılan container runtime’ı olarak yıllarca kullanıldı. Ancak Docker, Kubernetes’in kullandığı CRI standardını desteklemediği için Kubernetes’in Docker ile iletişim kurması doğrudan mümkün değildi.
+	+ **Dockershim**, Docker ve Kubernetes arasında bir köprü görevi görerek Kubernetes’in Docker’ı bir container runtime olarak kullanmasını sağladı.
+	+ **Dockershim**, Docker ve Kubernetes arasında bir köprü görevi görerek Kubernetes’in Docker’ı bir container runtime olarak kullanmasını sağladı.
+	+ Dockershim’in kaldırılmasının nedenleri:
+	+ **Bakım Yükü**: Dockershim, Kubernetes ekibi için ek bir bakım yükü oluşturuyordu.
+	+ **CRI Standardına Uygunluk**: Kubernetes, diğer CRI uyumlu runtime’larla doğrudan iletişim kurmayı tercih etti (örneğin: **containerd**, **CRI-O**).
+	+ **Modülerlik ve Performans**: Docker, yalnızca bir container runtime değil, aynı zamanda kendi ekosistemini barındıran bir platformdur. Bu, Kubernetes için fazla karmaşıklık oluşturuyordu.
+
++ Pod'ların kümedeki her düğümde çalışabilmesi için bir `container runtime` yüklemeniz gerekir.
++ Bu sayfa, düğümleri kurmak için nelerin gerekli olduğunu ve ilgili görevleri açıklar.
++ Kubernetes 1.32, Container Runtime Interface (CRI) ile uyumlu bir Container Runtime kullanmanızı gerektirir.
++ Daha fazla bilgi için CRI sürüm desteğine bakın.
++ Bu sayfa, Kubernetes ile birkaç yaygın `Container Runtimes` zamanının nasıl kullanılacağına dair bir taslak sunmaktadır.
+	1. containerd
+	2. CRI-O
+	3. Docker Engine
+	4. Mirantis Container Runtime
+
+
+
+> [!NOTE]
+> + Kubernetes'in v1.24 öncesi sürümleri, `dockershim` adlı bir bileşen kullanılarak Docker Engine ile doğrudan entegrasyon içeriyordu.
+> + Bu özel doğrudan entegrasyon artık Kubernetes'in bir parçası değil (kaldırma işlemini v1.20 versiyonunda [duyurulmuştu](https://kubernetes.io/blog/2020/12/08/kubernetes-1-20-release-announcement/#dockershim-deprecation).)
+> + Kubernetes ekibi, daha esnek ve CRI ile doğal olarak uyumlu diğer container runtime’larını desteklemek için **dockershim**’i resmi olarak Kubernetes v1.20 sürümünde kullanımdan kaldırmaya karar verdi ve Kubernetes v1.24 sürümünde tamamen kaldırıldı.(chatGPT).
+> + Dockershim kaldırma işleminin sizi nasıl etkileyebileceğini anlamak için [Dockershim kaldırma işleminin sizi etkileyip etkilemediğini kontrol edin](https://kubernetes.io/docs/tasks/administer-cluster/migrating-from-dockershim/check-if-dockershim-removal-affects-you/) başlıklı yazıyı okuyabilirsiniz.
+> + Dockershim'i kullanarak geçiş hakkında bilgi edinmek için [Dockershim'den geçiş konusuna](https://kubernetes.io/docs/tasks/administer-cluster/migrating-from-dockershim/) bakın.
+> + v1.32 dışında bir Kubernetes sürümü kullanıyorsanız, o sürümün belgelerini kontrol edin.
+
+#### Önkoşulları Yükleme ve Yapılandırma:
+##### Network Configuration:
++ Varsayılan olarak, Linux çekirdeği IPv4 paketlerinin arayüzler(`interfaces`) arasında yönlendirilmesine(`routing`) izin vermez.
+	+ **eth0** arayüzü: `192.168.1.0/24` ağı ile **eth1** arayüzü: `192.168.2.0/24` ağı birbirleri ile konuşabilir hale gelebilir olacaktır.
++ Çoğu Kubernetes küme ağ uygulaması bu ayarı değiştirir (gerekirse), ancak bazıları bunu yöneticinin(`administrator`) onlar adına yapmasını bekleyebilir. 
++ (Bazıları ayrıca diğer sysctl parametrelerinin ayarlanmasını, çekirdek modüllerinin yüklenmesini, vb. bekleyebilir; kendi ağ uygulamanızın özel belgelerine bakın.)
+
+##### IPv4 paket yönlendirmeyi etkinleştirme:
++ IPv4 paket yönlendirmeyi manuel olarak etkinleştirmek için:
+
+```bash
+# sysctl params required by setup, params persist across reboots
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.ipv4.ip_forward = 1
+EOF
+
+# Apply sysctl params without reboot
+sudo sysctl --system
+```
+
++ net.ipv4.ip_forward'ın 1 olarak ayarlandığını şu şekilde doğrulayın:
+
+```bash
+sysctl net.ipv4.ip_forward
+```
+
+#### cgroup drivers:
+
++ Linux'ta  [control groups](https://kubernetes.io/docs/reference/glossary/?all=true#term-cgroup), işlemlere tahsis edilen kaynakları kısıtlamak için kullanılır.
++ Hem `kubelet`'in hem de altta yatan `container runtime`'ının, [`pod`'lar ve container'lar için kaynak yönetimini](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) zorunlu kılmak ve CPU/bellek istekleri ve sınırları gibi kaynakları ayarlamak için `control group`'ları ile etkileşime girmesi gerekir.
++ `cgroup group`'ları ile etkileşim kurmak için, `kubelet` ve `container runtime` bir `cgroup driver` kullanması gerekir.**(1)**
++ `Kubelet` ve `container runtime` aynı cgroup sürücüsünü(`cgroup driver`) kullanması ve aynı şekilde yapılandırılması kritik öneme sahiptir.
++ İki adet cgroup sürücüsü mevcuttur:
+	1. cgroupfs
+	2. systemd
+
+###### 1.Cümle Açıklaması:
++ **Control Groups veya cgroups Nedir?**
++ **cgroups**, Linux çekirdeğinin bir özelliğidir ve sistem kaynaklarını (CPU, bellek, disk I/O, ağ gibi) yönetmek için kullanılır.
++ Konteynerler, birden fazla uygulamanın aynı makinada izole bir şekilde çalışabilmesini sağlar. **cgroups**, bu izole ortamda her bir konteynerin ne kadar kaynak kullanacağını kontrol eder.
++ **Cgroup Driver Nedir?**
++ **cgroup driver**, cgroups ile Kubernetes bileşenleri (kubelet ve container runtime) arasında bir etkileşimi(to interface) sağlar.
++ **Özet:**
++ Kubelet ve container runtime, kontrol grupları (cgroups) ile iletişim kurabilmek için bir **cgroup driver** kullanmalıdır.
++ (`kubelet + container runtime <-- cgroup driver --> cgroup(kernel)`)
+
+**Kaynak:** [Resmi Sitesi](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
+
+----
+
 ### Kubeadm Kurulumu:
 + Bu sayfa kubeadm toolbox'ın nasıl kurulacağını göstermektedir.
 + Bu kurulum sürecini bir kez tamamladığınızda [ *kubeadm* ile Cluster oluşturma](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/) hakkında bilgi için, *kubeadm* ile küme oluşturma sayfasına bakın.
@@ -149,8 +251,6 @@ $ nc 127.0.0.1 6443 -v
 > [!NOTE]
 > + `sudo swapon --show` : tanımlı bir tabloda özentini ekrana basar.
 > + 
-
-
 
 #### Container Runtime Yükleme:
 + Kubernetes, Pod'larda konteyner çalıştırmak için bir [container runtime](https://kubernetes.io/docs/setup/production-environment/container-runtimes) kullanır.
@@ -429,7 +529,7 @@ sudo systemctl enable --now kubelet
 
 + Kubelet artık her birkaç saniyede bir yeniden başlıyor, çünkü kubeadm'in ona ne yapması gerektiğini söylemesini beklerken bir `crashloop` da bekliyor.(1)
 
-6. **Cümle Açıklaması:** `Crashloop`
+1. **Cümle Açıklaması:** `Crashloop`
 	+ *Crashloop*, bir programın başarısız olup sürekli yeniden başlatıldığı bir durumdur.
 	+ Bu durumda, kubelet bir sorunla karşılaşır ve kendi içinde yeniden başlatılır, çünkü görevini yerine getirmek için gereken yapılandırma veya talimatlar eksiktir.
 	+ *Kubelet'in Kubeadm'den Talimat Beklemesi:*
@@ -480,26 +580,24 @@ sudo systemctl enable --now kubelet
 #### Sorun giderme:
 + Eğer kubeadm ile ilgili sorun yaşıyorsanız lütfen sorun  [giderme dokümanlarımıza](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/troubleshooting-kubeadm/). başvurun.
 
-### Script ile Kurulum:
+#### Script ile Kurulum:
 
 ```shell
 
 ```
 
 
-### Container Runtimes:
-**Kaynak:** [Resmi Sitesi](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+
+
+
 
 ---
-## Chatgpt düzenlenecek! 
+### Chatgpt düzenlenecek! 
 
 ---
 
 ##### **Container Runtime Nedir?**
 
-**Container Runtime (Konteyner Çalışma Zamanı)**, konteynerlerin oluşturulması, çalıştırılması ve yönetilmesi gibi işlemleri gerçekleştiren bir yazılım veya araçtır. Kubernetes gibi konteyner tabanlı sistemlerde, konteynerlerin çalıştırılmasını sağlayan temel bileşenlerden biridir.
-
----
 
 ###### **Konteyner Çalışma Zamanının Görevleri**
 
@@ -514,11 +612,10 @@ sudo systemctl enable --now kubelet
 5. **Konteyner Yönetimi:**
     - Çalışan konteynerlerin başlatılması, durdurulması ve silinmesi gibi işlemleri gerçekleştirir.
 
----
 
 ##### **Kubernetes ile İlişkisi**
 
-Kubernetes, konteynerleri doğrudan çalıştırmaz; bunun yerine bir **Container Runtime** kullanır. **Container Runtime Interface (CRI)** aracılığıyla bu çalışma zamanı ile iletişim kurar ve konteynerlerin yaşam döngüsünü yönetir. Kubernetes'in kullandığı popüler çalışma zamanları şunlardır:
+ Kubernetes'in kullandığı popüler çalışma zamanları şunlardır:
 
 ---
 

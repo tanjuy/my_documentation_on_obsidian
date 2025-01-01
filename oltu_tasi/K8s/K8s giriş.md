@@ -3,18 +3,16 @@
 + Kubernetes, konteynerleştirilmiş uygulamaların dağıtımını, ölçeklenmesini ve yönetimini otomatikleştirmek için kullanılan açık kaynaklı bir konteyner orkestrasyon motorudur.
 + Açık kaynaklı proje, Cloud Native Computing Foundation (CNCF) tarafından barındırılıyor.
 + Eğer CNCF'nin ne olduğunu açıklamak gerekirse, konteyner teknolojileri ve bulut yerel uygulamalarının geliştirilmesi ve yaygınlaştırılmasını destekleyen bir vakıftır.
-### K8s Bileşenleri:
-#### 1.Node:
+
+### 1.Node:
 + **Node** (düğüm), Kubernetes kümesindeki bir fiziksel sunucu veya sanal makinedir.
 + Kubernetes kümesi (cluster) içinde her bir düğüm, üzerinde konteynerleri çalıştırarak iş yüklerini barındırır.
 + İki tür düğüm vardır:
 	1. **Master Node**: Kubernetes kontrol düzlemini (control plane) çalıştırır. Kaynakları yönetir ve iş yüklerinin uygun düğümlerde dağıtılmasını sağlar.
 	2. **Worker Node**: İş yüklerini taşıyan düğümdür ve kullanıcı uygulamalarını çalıştırır.
 
-#### 2.Cluster:
-+ Kubernetes'te **cluster** (küme), dağıtılmış bir uygulama ortamını oluşturmak için bir araya gelen bir dizi node'dan (düğüm) oluşur.
-+ Cluster, **Control Plane** (kontrol düzlemi) ve **Worker Nodes** (işçi düğümleri) olarak iki ana bileşenden oluşur.
-##### Control Plane:
+### 2.Master Node:
++ Master Node'un bir diğer adı Control plane olarak adlandırılır.
 + **Control Plane**, Kubernetes kümesinin "beyni"dir. Tüm node’ları, iş yüklerini ve kaynakları yönetir.
 + Kullanıcıdan gelen komutları ve talepleri işleyerek hangi konteynerlerin hangi node’larda çalışacağını belirler.
 ###### Control Plane Bileşenleri:
@@ -22,6 +20,130 @@
 + **etcd**: Tüm küme verilerinin saklandığı bir veritabanıdır. Kümenin durumuna ait bilgileri depolar.
 + **Controller Manager**: İş yükleri ve bileşenlerin durumunu izler ve gerektiğinde düzeltici işlemler yapar (örneğin, bir pod’un kapanması durumunda yeni bir pod başlatmak gibi).
 + **Scheduler**: Yeni oluşturulan pod’ları uygun node'lara yerleştirir.
+
+#### 2.1.Controller Manager:
++ Controller Manager, Kubernetes'teki kontrol döngülerinin (controllers) toplandığı bir bileşendir.
++ Kontrol döngüleri, Kubernetes'in **"istenen durum" (desired state)** ile **"mevcut durum" (current state)** arasındaki farkı algılayıp bu farkı kapatmaya çalışmasını sağlar.
+##### Controller:
++ Kubernetes'te bir **controller**, sürekli olarak kümenin mevcut durumunu izler ve bunu, kullanıcının belirttiği istenen duruma uydurmak için çalışır.
++ Controller Manager, birden fazla kontrol döngüsünü tek bir süreçte çalıştırarak, bu kontrol döngülerini etkin bir şekilde koordine eder.
+##### Controller Manager'ın Görevleri:
+1. **Replication Controller:** 
+	+ Pod'ların istenen kopya sayısının çalışıp çalışmadığını kontrol eder.
+	+ Eksik Pod'ları oluşturur ve fazla olan Pod'ları siller.
+2. **Node Controller:**
+	+ Düğümlerin(nodes) sağlık durumunu izler.
+	+ Bir düğümün erişilemez olduğunu algılarsai bu düğümdeki Pod'ları başka düğümlerde yeniden planlar.
+3. adsa
+
+#### 2.2.Etcd:
++ Kubernetes (k8s) içinde **etcd**, Kubernetes'in **veri depolama** çözümüdür ve Kubernetes kümesinin tüm yapılandırma bilgilerini, kümedeki bileşenlerin durumunu, iş yüklerini ve daha fazlasını depolar.
++ **Dağıtık bir anahtar-değer veritabanı** olan etcd, Kubernetes'in kritik bir bileşenidir ve kümenin sağlıklı çalışması için önemlidir.
++ Etcd'in temel özellikleri şunlardır:
+	1. **Dağıtık Depolama:** Etcd, yüksek erişilebilirlik ve veri bütünlüğünü sağlamak için birden fazla node üzerinde çalışır.
+	2. **Konsensüs Sağlama:** Etcd, Raft protokolünü kullanarak küme içinde konsensüs sağlar. Bu sayede verilerin tutarlılığı garanti altına alınır.
+	3. **Yüksek Performanslı Veri Erişimi:** Etcd hızlı okuma ve yazma işlemleri için optimize edilmiştir, bu da Kubernetes API'sinin hızlı yanıt vermesine olanak tanır.
+	4. **Geri Yükleme ve Yedekleme:** Etcd, önemli bir veri kaynağı olduğu için düzenli olarak yedeklenmesi önerilir. Bir kümede sorun çıkarsa, etcd yedeklerinden geri yükleme yapılabilir
+
+
+
+> [!IMPORTANT]
+> + **Etcd cluster** birden fazla master veya control plane toplamından oluşur.
+> + Lider(Leader) ve Takipçiler(Followers) etcd cluster arasında gerçeklerşir.
+
+#### 2.3.API Server:
++ Kubernetes'te **API Server**, Kubernetes'in **merkezi kontrol bileşeni** ve iletişim merkezidir.
++ Tüm bileşenlerin ve kullanıcıların Kubernetes ile etkileşime geçmek için kullandığı API'yi sağlar.
++ Temel olarak, Kubernetes kümesiyle ilgili tüm CRUD (Create, Read, Update, Delete) işlemleri API Server üzerinden gerçekleştirilir.
+
+##### API Server'un Görevi:
+1. **API Sunma:**
+	+ Kullanıcılar, geliştiriciler, `kubectl` komutları veya diğer Kubernetes bileşenleri (örn. Controller Manager, Scheduler) API Server'a HTTP REST çağrıları yaparak Kubernetes kümesine erişir.
+2. **Doğrulama ve Yetkilendirme:**
+	+ Gelen tüm istekleri doğrular ve bu isteğin yetkilendirilmiş olup olmadığını kontrol eder.
+	+ Örneğin, bir kullanıcı bir Pod oluşturmak istediğinde, bu işlemin yetkilendirilip yetkilendirilmediğini kontrol eder.
+3. **Etcd ile İletişim:**
+	+ Kubernetes kümesindeki durum bilgisi **etcd** adlı dağıtılmış anahtar-değer deposunda saklanır.
+	+ API Server, etcd ile iletişim kurarak kümenin durumunu okur ve günceller.
+4. **Diğer Bileşenlerle Haberleşme:**
+	+ Controller Manager, Scheduler gibi Kubernetes bileşenleri, kümenin durumunu anlamak ve güncellemeler yapmak için API Server ile iletişim kurar.
+5. **Durum Yönetimi:**
+	+ Kubernetes'teki istekler genellikle istenen durumun belirtilmesiyle ilgilidir (örn. "3 adet Pod çalıştır").
+	+ API Server bu istekleri alır ve kümenin gerçek durumunu bu istenen durumla uyumlu hale getirmek için diğer bileşenlere yönlendirir.
+
+##### API Server Çalışma Prensibi:
++ Kubernetes API Server'ın **çalışma prensibinde**, bir istemciden (örneğin `kubectl`, REST API veya başka bir araç) gelen bir istek, **Authentication**, **Authorization** ve **Admission Control** adımlarından geçerek işlenir.
++ Bu aşamalar, güvenliği ve küme yönetiminin düzenini sağlar. 
+###### 1.Authentication (Kimlik Doğrulama):
+**Nedir?**
++ Kullanıcının veya istemcinin **kim olduğunu doğrulama** işlemidir. İstemcinin API Server'a gönderdiği isteğin kimden geldiğini belirlemek için yapılır.
+---
+**Nasıl Çalışır?**
++ Kullanıcı veya istemci, bir kimlik doğrulama mekanizması aracılığıyla kendini tanıtır. Bu genellikle bir **token**, **sertifika** veya **kullanıcı adı ve parola** kullanılarak yapılır.
++ API Server, kimlik doğrulama bilgilerini belirli bir mekanizmaya yönlendirerek doğrular.
+---
+**Desteklenen Mekanizmalar:**
++ **x509 Sertifikaları:** Kullanıcı kimliğini TLS sertifikaları ile doğrular.
++ **Service Account Token:** Kubernetes içindeki Pod'lar, bu yöntemle kimlik doğrulaması yapar.
++ **Bearer Token:** API isteklerinde taşıyıcı jeton (bearer token) kullanılır.
++ **OIDC (OpenID Connect):** Harici kimlik sağlayıcılarla entegrasyon yapılır.
+---
+ **Sonuç:**
++ Eğer kimlik doğrulama başarısız olursa, istek **reddedilir** ve süreç burada sona erer.
++ Başarılı olursa, istemcinin kimliği (örn. kullanıcı adı) sonraki adıma geçirilir.
+###### 2.Authorization (Yetkilendirme):
+**Nedir?**
++ Kimliği doğrulanan kullanıcının **belirli bir eylemi gerçekleştirme yetkisi olup olmadığını kontrol etme** işlemidir.
+---
+**Nasıl Çalışır?**
++ Yetkilendirme, istemcinin API Server'da yapmak istediği işlemi (örneğin, bir Pod oluşturma) kontrol eder.
++ API Server, bu isteği yetkilendirme mekanizmalarına iletir ve izin alır ya da reddeder.
+---
+**Yetkilendirme Mekanizmaları:**
++ **RBAC (Role-Based Access Control):** Kubernetes'te en yaygın kullanılan mekanizma. Kullanıcılar, roller (roles) ve rollerin bağlamları (bindings) ile yönetilir.
++ **ABAC (Attribute-Based Access Control):** İzinler bir JSON dosyasına dayalı olarak atanır.
++ **Webhook:** Harici bir yetkilendirme sistemine API çağrısı yapılarak izin kontrol edilir.
+---
+**Sonuç:**
++ Yetkilendirme başarısız olursa, istek **reddedilir** ve süreç sona erer.
++ Başarılı olursa, istek Admission Control'e iletilir.
+###### 3.Admission Control (Giriş Kontrolü):
+**Nedir?**
++ İsteğin küme politikalarına uygun olup olmadığını kontrol eder ve gerektiğinde isteği değiştirir veya reddeder.
+---
+**Nasıl Çalışır?**
++ Admission Control, **admission plugins** adı verilen bir dizi modül aracılığıyla çalışır. Bu eklentiler, isteğin kabul edilip edilmeyeceğine karar verir.
++ Bazı eklentiler isteği **değiştirebilir** (örneğin, bir varsayılan değer eklemek), bazıları ise isteği sadece **doğrular**.
+**Örnek Admission Plugins:**
++ **NamespaceLifecycle:** Kapatılmış bir namespace'e istek yapılmasını engeller.
++ **LimitRanger:** Namespace'teki kaynak kullanım sınırlarını kontrol eder.
++ **PodSecurityPolicy:** Pod'ların güvenlik politikalarına uygun olup olmadığını kontrol eder.
++ **MutatingAdmissionWebhook ve ValidatingAdmissionWebhook:** Harici webhook'larla entegrasyon sağlar.
+---
+**Sonuç:**
++ Eğer Admission Control isteği reddederse, istek işlenmez.
++ Kabul edilirse, istek etcd'ye kaydedilir ve işlem tamamlanır.
+
+
+#### 2.4.Kube-schedular:
++ Scheduler, yeni oluşturulan ve bir düğüme atanmayı bekleyen Pod'lar için uygun bir düğüm (node) seçer.
++ Bu seçim, çeşitli kriterlere (kaynak durumu, etiketler, kısıtlamalar vb.) ve politika kurallarına göre yapılır.
++ Örneğin, bir Deployment ile bir uygulamanın 3 kopyasının çalıştırılmasını istediğinizde, Controller Manager bu kopyaları çalıştırır ve çalışmadığı durumlarda tekrar başlatır.
+
+### 3.Worker Node:
+#### 3.1.Kubelet:
+
+#### 3.2.Kube proxy:
+
+#### 3.3.CRI:
+
+#### 3.4.Pod:
+
+
+### 3.Cluster:
++ Kubernetes'te **cluster** (küme), dağıtılmış bir uygulama ortamını oluşturmak için bir araya gelen bir dizi node'dan (düğüm) oluşur.
++ Cluster, **Control Plane** (kontrol düzlemi) ve **Worker Nodes** (işçi düğümleri) olarak iki ana bileşenden oluşur.
+
 ##### Worker Nodes:
 + Worker node'lar, uygulama konteynerlerini çalıştıran fiziksel veya sanal sunuculardır.
 + Her bir worker node, iş yüklerini taşır ve kümedeki diğer node'larla birlikte çalışarak uygulamanın ölçeklenebilirliğini ve dayanıklılığını sağlar.
@@ -34,6 +156,7 @@
 + **Yüksek Erişilebilirlik(High Availability) ve Dayanıklılık**: Cluster, iş yüklerini birden fazla node’a dağıttığı için uygulama kesintilerini önler. Bir node kapanırsa, diğer node'lar iş yükünü devralır.
 + **Otomatik Ölçeklendirme**: İhtiyaç durumunda yeni pod'lar başlatılarak iş yükleri otomatik olarak ölçeklendirilir.
 + **Kaynak Yönetimi ve İzleme**: Control plane bileşenleri sayesinde kaynakların yönetimi yapılır ve sistemin her zaman güncel bir durumu saklanır.
+### K8s Bileşenleri:
 
 #### 3.Namespace:
 + **Namespace** (ad alanı), Kubernetes'te kaynakları izole etmek ve gruplandırmak için kullanılır.
@@ -66,21 +189,6 @@
 
 #### 9.PersistentVolume (PV) ve PersistentVolumeClaim (PVC):
 + **PersistentVolume (PV)**: Kalıcı depolama sağlayan bir kaynak birimidir. Depolama genellikle harici bir kaynaktan (bulut depolama, ağ dosya sistemi gibi) gelir.
-
-### Etcd:
-+ Kubernetes (k8s) içinde **etcd**, Kubernetes'in **veri depolama** çözümüdür ve Kubernetes kümesinin tüm yapılandırma bilgilerini, kümedeki bileşenlerin durumunu, iş yüklerini ve daha fazlasını depolar.
-+ **Dağıtık bir anahtar-değer veritabanı** olan etcd, Kubernetes'in kritik bir bileşenidir ve kümenin sağlıklı çalışması için önemlidir.
-+ Etcd'in temel özellikleri şunlardır:
-	1. **Dağıtık Depolama:** Etcd, yüksek erişilebilirlik ve veri bütünlüğünü sağlamak için birden fazla node üzerinde çalışır.
-	2. **Konsensüs Sağlama:** Etcd, Raft protokolünü kullanarak küme içinde konsensüs sağlar. Bu sayede verilerin tutarlılığı garanti altına alınır.
-	3. **Yüksek Performanslı Veri Erişimi:** Etcd hızlı okuma ve yazma işlemleri için optimize edilmiştir, bu da Kubernetes API'sinin hızlı yanıt vermesine olanak tanır.
-	4. **Geri Yükleme ve Yedekleme:** Etcd, önemli bir veri kaynağı olduğu için düzenli olarak yedeklenmesi önerilir. Bir kümede sorun çıkarsa, etcd yedeklerinden geri yükleme yapılabilir
-
-
-
-> [!IMPORTANT]
-> + **Etcd cluster** birden fazla master veya control plane toplamından oluşur.
-> + Lider(Leader) ve Takipçiler(Followers) etcd cluster arasında gerçeklerşir.
 
 #### Raft Algoritması:
 
@@ -120,79 +228,13 @@
 + Tüm cluster bilgileri, pod'ların durumu, node bilgileri ve yapılandırmalar etcd'de saklanır.
 + Tüm küme, tek bir lider düğüm üzerinden senkronize çalışır, bu da yönetimi kolaylaştırır.
 
-### API Server:
-+ Kubernetes'te **API Server**, Kubernetes'in **merkezi kontrol bileşeni** ve iletişim merkezidir.
-+ Tüm bileşenlerin ve kullanıcıların Kubernetes ile etkileşime geçmek için kullandığı API'yi sağlar.
-+ Temel olarak, Kubernetes kümesiyle ilgili tüm CRUD (Create, Read, Update, Delete) işlemleri API Server üzerinden gerçekleştirilir.
+### Yönetim Araçları:
+#### Kubectl:
 
-#### API Server'un Görevi:
-1. **API Sunma:**
-	+ Kullanıcılar, geliştiriciler, `kubectl` komutları veya diğer Kubernetes bileşenleri (örn. Controller Manager, Scheduler) API Server'a HTTP REST çağrıları yaparak Kubernetes kümesine erişir.
-2. **Doğrulama ve Yetkilendirme:**
-	+ Gelen tüm istekleri doğrular ve bu isteğin yetkilendirilmiş olup olmadığını kontrol eder.
-	+ Örneğin, bir kullanıcı bir Pod oluşturmak istediğinde, bu işlemin yetkilendirilip yetkilendirilmediğini kontrol eder.
-3. **Etcd ile İletişim:**
-	+ Kubernetes kümesindeki durum bilgisi **etcd** adlı dağıtılmış anahtar-değer deposunda saklanır.
-	+ API Server, etcd ile iletişim kurarak kümenin durumunu okur ve günceller.
-4. **Diğer Bileşenlerle Haberleşme:**
-	+ Controller Manager, Scheduler gibi Kubernetes bileşenleri, kümenin durumunu anlamak ve güncellemeler yapmak için API Server ile iletişim kurar.
-5. **Durum Yönetimi:**
-	+ Kubernetes'teki istekler genellikle istenen durumun belirtilmesiyle ilgilidir (örn. "3 adet Pod çalıştır").
-	+ API Server bu istekleri alır ve kümenin gerçek durumunu bu istenen durumla uyumlu hale getirmek için diğer bileşenlere yönlendirir.
+#### Openshift:
 
-#### API Server Çalışma Prensibi:
-+ Kubernetes API Server'ın **çalışma prensibinde**, bir istemciden (örneğin `kubectl`, REST API veya başka bir araç) gelen bir istek, **Authentication**, **Authorization** ve **Admission Control** adımlarından geçerek işlenir.
-+ Bu aşamalar, güvenliği ve küme yönetiminin düzenini sağlar. 
-##### 1.Authentication (Kimlik Doğrulama):
-**Nedir?**
-+ Kullanıcının veya istemcinin **kim olduğunu doğrulama** işlemidir. İstemcinin API Server'a gönderdiği isteğin kimden geldiğini belirlemek için yapılır.
----
-**Nasıl Çalışır?**
-+ Kullanıcı veya istemci, bir kimlik doğrulama mekanizması aracılığıyla kendini tanıtır. Bu genellikle bir **token**, **sertifika** veya **kullanıcı adı ve parola** kullanılarak yapılır.
-+ API Server, kimlik doğrulama bilgilerini belirli bir mekanizmaya yönlendirerek doğrular.
----
-**Desteklenen Mekanizmalar:**
-+ **x509 Sertifikaları:** Kullanıcı kimliğini TLS sertifikaları ile doğrular.
-+ **Service Account Token:** Kubernetes içindeki Pod'lar, bu yöntemle kimlik doğrulaması yapar.
-+ **Bearer Token:** API isteklerinde taşıyıcı jeton (bearer token) kullanılır.
-+ **OIDC (OpenID Connect):** Harici kimlik sağlayıcılarla entegrasyon yapılır.
----
- **Sonuç:**
-+ Eğer kimlik doğrulama başarısız olursa, istek **reddedilir** ve süreç burada sona erer.
-+ Başarılı olursa, istemcinin kimliği (örn. kullanıcı adı) sonraki adıma geçirilir.
-##### 2.Authorization (Yetkilendirme):
-**Nedir?**
-+ Kimliği doğrulanan kullanıcının **belirli bir eylemi gerçekleştirme yetkisi olup olmadığını kontrol etme** işlemidir.
----
-**Nasıl Çalışır?**
-+ Yetkilendirme, istemcinin API Server'da yapmak istediği işlemi (örneğin, bir Pod oluşturma) kontrol eder.
-+ API Server, bu isteği yetkilendirme mekanizmalarına iletir ve izin alır ya da reddeder.
----
-**Yetkilendirme Mekanizmaları:**
-+ **RBAC (Role-Based Access Control):** Kubernetes'te en yaygın kullanılan mekanizma. Kullanıcılar, roller (roles) ve rollerin bağlamları (bindings) ile yönetilir.
-+ **ABAC (Attribute-Based Access Control):** İzinler bir JSON dosyasına dayalı olarak atanır.
-+ **Webhook:** Harici bir yetkilendirme sistemine API çağrısı yapılarak izin kontrol edilir.
----
-**Sonuç:**
-+ Yetkilendirme başarısız olursa, istek **reddedilir** ve süreç sona erer.
-+ Başarılı olursa, istek Admission Control'e iletilir.
-##### 3.Admission Control (Giriş Kontrolü):
-**Nedir?**
-+ İsteğin küme politikalarına uygun olup olmadığını kontrol eder ve gerektiğinde isteği değiştirir veya reddeder.
----
-**Nasıl Çalışır?**
-+ Admission Control, **admission plugins** adı verilen bir dizi modül aracılığıyla çalışır. Bu eklentiler, isteğin kabul edilip edilmeyeceğine karar verir.
-+ Bazı eklentiler isteği **değiştirebilir** (örneğin, bir varsayılan değer eklemek), bazıları ise isteği sadece **doğrular**.
-**Örnek Admission Plugins:**
-+ **NamespaceLifecycle:** Kapatılmış bir namespace'e istek yapılmasını engeller.
-+ **LimitRanger:** Namespace'teki kaynak kullanım sınırlarını kontrol eder.
-+ **PodSecurityPolicy:** Pod'ların güvenlik politikalarına uygun olup olmadığını kontrol eder.
-+ **MutatingAdmissionWebhook ve ValidatingAdmissionWebhook:** Harici webhook'larla entegrasyon sağlar.
----
-**Sonuç:**
-+ Eğer Admission Control isteği reddederse, istek işlenmez.
-+ Kabul edilirse, istek etcd'ye kaydedilir ve işlem tamamlanır.
-
+#### Kdash:
++ Resmi [Sitesi](https://github.com/kdash-rs/kdash) 
 ### Docker, Podman, Containerd ve LXC/LXD Farkları:
 
 | Özellik                | Docker                             | Podman                             | containerd            | LXC/LXD                                 |
