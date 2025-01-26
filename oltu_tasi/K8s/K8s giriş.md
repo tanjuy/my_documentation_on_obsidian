@@ -126,7 +126,7 @@
 
 
 #### 2.4.Kube-schedular:
-+ Scheduler, yeni oluşturulan ve bir düğüme atanmayı bekleyen Pod'lar için uygun bir düğüm (node) seçer.
++ `Scheduler`, yeni oluşturulan ve bir düğüme atanmayı bekleyen Pod'lar için uygun bir düğüm (node) seçer.
 + Bu seçim, çeşitli kriterlere (kaynak durumu, etiketler, kısıtlamalar vb.) ve politika kurallarına göre yapılır.
 + Örneğin, bir Deployment ile bir uygulamanın 3 kopyasının çalıştırılmasını istediğinizde, Controller Manager bu kopyaları çalıştırır ve çalışmadığı durumlarda tekrar başlatır.
 
@@ -138,6 +138,11 @@
 #### 3.3.CRI:
 
 #### 3.4.Pod:
++ *Pod Kubernetes'in en küçük birimidir*. Pod, bir veya birden fazla konteyneri bir arada çalıştırır ve bu konteynerler genellikle aynı işi yapmak için birlikte hareket eder.
++ Container'lara ortak bir depolama alanı ve ortak bir ağ bağlantısı sunuyor. Yani aynı pod içerisindeki container'lar depolama ve ağları ortaktır.
+
+> [!CAUTION]
+> + `Best Practice` olarak bir pod içerisinde bir konteyner çalıştırılır.
 
 
 ### 3.Cluster:
@@ -158,39 +163,50 @@
 + **Kaynak Yönetimi ve İzleme**: Control plane bileşenleri sayesinde kaynakların yönetimi yapılır ve sistemin her zaman güncel bir durumu saklanır.
 ### K8s Bileşenleri:
 
-#### 3.Namespace:
+#### 1.Namespace:
 + **Namespace** (ad alanı), Kubernetes'te kaynakları izole etmek ve gruplandırmak için kullanılır.
 + Özellikle, aynı kümede farklı ekiplerin veya projelerin bağımsız olarak çalışmasına olanak tanır.
 + Kubernetes, küme düzeyinde bazı varsayılan ad alanlarına sahiptir (`default`, `kube-system`, `kube-public`), ancak kullanıcılar özel ad alanları da oluşturabilir.
 
-#### 4.ReplicaSet:
+#### 2.ReplicaSet:
 + **ReplicaSet**, bir pod’un belirli sayıda kopyasını (replikasını) çalıştıran bir birimdir. Pod’ları belirli bir sayıda tutarak yüksek erişilebilirlik(**High Availability**) sağlar.
 + Eğer bir pod kapanırsa, ReplicaSet eksik pod sayısını tamamlamak için otomatik olarak yeni pod’lar başlatır.
 
-#### 5.Deployment:
+#### 3.Deployment:
++ `Deployment`, Pod'ların yönetimini ve çoğaltılmasını sağlayan bir mekanizmadır. Bir uygulamanın ölçeklendirilmesini, güncellenmesi veya yeniden başlatılmasın gerektiğinde, bunu `deployment` yapar.
 + **Deployment**, iş yüklerinin düzenli ve sürdürülebilir bir şekilde dağıtılmasını sağlar.
 + Bir uygulamanın güncellenmesini, ölçeklendirilmesini ve gerektiğinde eski sürümlere dönülmesini kolaylaştırır.
-+ Deployment, arka planda bir ReplicaSet yönetir, bu da pod’ların sayısını kontrol altında tutar ve dağıtımları yönetir.
++ Deployment, arka planda bir `ReplicaSet` yönetir, bu da pod’ların sayısını kontrol altında tutar ve dağıtımları yönetir.
 
-#### 6.Service:
-+ **Service**, pod’lar arasındaki iletişimi ve dış erişimi yönetmek için kullanılan bir yapı birimidir. Pod’ların IP adresleri değişebilir, bu yüzden Service, pod’ların IP adreslerinden bağımsız bir erişim sunar.
+#### 4.Service:
++ `Service`, dış dünyadan veya diğer uygulamalardan bir Pod'a erişimi düzenler. Bir uygulamanın internette erişilebilir hale gelmesini sağlar.
++ `Service`, pod’lar arasındaki iletişimi ve dış erişimi yönetmek için kullanılan bir yapı birimidir. Pod’ların IP adresleri değişebilir, bu yüzden Service, pod’ların IP adreslerinden bağımsız bir erişim sunar.
 + Farklı tipte servisler vardır:
-	1. **ClusterIP**: İç erişim sağlar (dışa kapalıdır).
-	2. **NodePort**: Belirli bir port üzerinden dışarıdan erişim sağlar.
-	3. **LoadBalancer**: Bulut ortamında yük dengeleyici sağlar.
-	4. **ExternalName**: Harici DNS adlarını çözümlemek için kullanılır.
-#### 7.ConfigMap ve Secret:
+	1. **ClusterIP**: İç erişim sağlar (dışa kapalıdır). Pod'lar arasında iletişim için kullanılır. Sadece Kubernetes kümesi(`cluster`) içinde erişilebilir.
+	2. **NodePort**: Belirli bir port üzerinden dışarıdan erişim sağlar. Her node'a bir port numarası açar.
+	3. **LoadBalancer**: Bulut ortamında yük dengeleyici sağlar. Gelen trafiği birden fazla Pod'a dengeli bir şekilde dağitır.
+	4. **ExternalName:** Harici DNS adlarını çözümlemek için kullanılır.
+	5. **Ingress:** Uygulamalarınıza dış dünyadan gelen isteklerin nasıl yönlendirileceğini belirler. Belirli bir URL veya domain adresine gelen isteği ilgili Pod'a yönlendirir. HTTPS bağlantılarını destekler. Farklı domain adresleriyle birden fazla uygulamayı yönlendirebilirsiniz.
+#### 5.ConfigMap ve Secret:
++ `CongfigMap`, uygulamalarınızın konfigürasyon verilerini saklar.
++ `Secret`, hassas bilgileri(örneğin; şifleri, API anahtarları) saklar.
 + **ConfigMap** ve **Secret**, pod’lar için yapılandırma bilgilerini saklar. Uygulamaların çalışma zamanı yapılandırmalarını çevresel değişkenler veya dosyalar olarak sağlar.
-+ ConfigMap, yapılandırma bilgilerini düz metin olarak saklarken, Secret, hassas bilgileri şifreli bir şekilde tutar.
++ ConfigMap, yapılandırma bilgilerini düz metin olarak saklarken, `Secret`, hassas bilgileri şifreli bir şekilde tutar.
 
-#### 8.Volume:
+| **ConfigMap**                                    | **Secret**                                                  |
+| ------------------------------------------------ | ----------------------------------------------------------- |
+| Şifreli değildir, düz metin olarak saklanır.     | Şifreli (base64) olarak saklanır.                           |
+| Yapılandırma verilerini saklar.                  | Hassas verileri (parola, token) saklar.                     |
+| `kubectl edit` ile düz metin olarak görülebilir. | Hassas veriler korunur, yalnızca yetkili kişiler görebilir. |
+
+#### 6.Volume:
 + **Volume**, konteynerlerin dosya sistemini paylaşmasını veya veri depolamasını sağlamak için kullanılan birimdir. Bir pod’da çalışan konteynerler bir volume’a erişebilir.
 + Farklı türde volume’lar vardır; örneğin, `emptyDir`, `hostPath`, `persistentVolumeClaim`, `nfs`.
 
-#### 9.PersistentVolume (PV) ve PersistentVolumeClaim (PVC):
+#### 7.PersistentVolume (PV) ve PersistentVolumeClaim (PVC):
 + **PersistentVolume (PV)**: Kalıcı depolama sağlayan bir kaynak birimidir. Depolama genellikle harici bir kaynaktan (bulut depolama, ağ dosya sistemi gibi) gelir.
 
-#### Raft Algoritması:
+### Raft Algoritması:
 
 + Kubernetes'te **etcd**, kümenin yapılandırma verilerini ve durum bilgilerini saklayan bir dağıtık veri deposudur.
 + **Raft algoritması**, etcd'nin veri tutarlılığını ve hata toleransını sağlamak için kullandığı konsensüs mekanizmasıdır.

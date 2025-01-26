@@ -149,6 +149,11 @@ curl -X GET -i http://192.168.1.132:8000
 + Django'da bir **app** (uygulama), projenin belirli bir işlevselliğini ya da özelliğini sağlayan, modüler bir kod birimidir.
 + Bir Django projesi genellikle birden fazla uygulamadan oluşur ve bu uygulamalar, bağımsız bir şekilde geliştirilebilir ve tekrar kullanılabilir.
 
+
+> [!CAUTION]
+> + Django da oluşturulan uygulamalar(apps) tekrar kullanılabilir(reusable). Yani bir projede oluşturulduğunuz app başka bir projede tekrardan kullanılabilir. 
+
+
 ```shell
 $ python3 manage.py startapp posts
 ```
@@ -184,7 +189,8 @@ $ python3 manage.py startapp posts
 
 #### 1.Function-Based Views - FBV:
 + Basit ve küçük projelerde yaygındır. Python fonksiyonları kullanılarak tanımlanır.
-##### Basit Kullanımı:
+##### 1.1.Basit Kullanımı:
+**view.py dosyası:**
 ```python
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -202,6 +208,12 @@ def helloWorld(request):
 > 	+ **`request.GET`:** URL'deki sorgu parametrelerini alır (örneğin: `?name=John`).
 > 	+ **`request.POST`:** Formdan gelen verileri alır (eğer `POST` yöntemiyle gönderilmişse).
 > 	+ **`request.headers`:** HTTP başlık bilgilerini alır.
+
+
+> [!NOTE]
+> + `request` argümanı `HttpRequest Class`'ın bir `instance`'dır.
+> + URL'e bağlı view çağrıldığında `HttpRequest` Sınıfından bir örnek(`instance`) oluşturulur ve view fonksiyona argüman olarak verilir.
+
 
 **GET isteği:**
 ```shell
@@ -226,7 +238,7 @@ Hello World
 > 1. Django, bu URL’i bu `helloWorld` fonksiyonuna yönlendirir.
 > 2. Tarayıcıdan gelen istek bilgileri `request` parametresiyle fonksiyona iletilir.
 > 3. Sunucu, `"Hello World"` içeriğini tarayıcıya döner.
-##### urls.py Dosyası oluşturma:
+##### 1.2.`urls.py` Dosyası oluşturma:
 + Django'da bir **app** içinde ek olarak `urls.py` dosyası oluşturmak, uygulamanızın URL yönlendirmelerini daha modüler ve düzenli hale getirmek için kullanılan bir yöntemdir.
 
 ```shell
@@ -242,7 +254,7 @@ touch urls.py
     │   ├── __init__.py
     │   ├── __pycache__
     │   ├── settings.py
-    │   ├── urls.py
+    │   ├── urls.py     # <-------- blog project
     │   └── wsgi.py
     ├── db.sqlite3
     ├── manage.py
@@ -254,11 +266,11 @@ touch urls.py
         ├── models.py
         ├── __pycache__
         ├── tests.py
-        ├── urls.py     # <-------- touch urls.py
+        ├── urls.py     # <-------- touch urls.py (posts app)
         └── views.py
 ```
 
-
+**urls.py app dosyası:**
 ```python
 from django.urls import path
 from . import views
@@ -270,6 +282,62 @@ urlpatterns = [
 > **Explanation:**
 > + Bu yukarıdaki işlemleri yapıyorsanız, proje dosyasındaki(blog projesi) `urls.py` dosyasında `include fonksiyonu` ile uygulamadaki `urls.py` dosyasını dahil ediniz.
 > + Yani, blog Proje Başlatama `->` Proje urls.py Dosyası `->` include fonksiyonu başlığı altındaki işlemleri yapınız.
+> + `curl -X GET -i -L http://192.168.1.132/post/helloWorld/` ile istek gönderdiğimizde `blog` projesin içerisindeki `post` uygulaması içerisindeki `view.py` dosyasında yazılmış olan `helloWorld view fonksiyonu` çalıştırılacaktır.
+
+###### App urls.py Avantajları:
+1. **Modülerlik:** Django projeleri genellikle birden fazla uygulamadan oluşur. Her uygulamanın kendi `urls.py` dosyasına sahip olması URL yönetimini modüler hale getir.
+2. **Kolay Yönetim:** Uygulama bazlı URL'lerle çalışmak, projedeki URL'leri yönetmeyi kolaylaştırır. Ana `urls.py` dosyası, yalnızca uygulamaların URL'lerini dahil etmekle (örneğin, `include()`) ilgilenir ve bu da karmaşıklığı azaltır.
+3. **Yeniden Kullanılabilirlik:** Django uygulamaları modülerdir ve birden fazla projede tekrar kullanılabilir. Eğer bir uygulamanın kendi `urls.py` dosyası varsa bu uygulamayı başka bir projeye entegre ederken URI tanımlamalarını da kolayca beraberinde getirir.
+
+
+##### 1.3.Veri Çekme:
++ Program içerisinden veya veri tabanından kullanıcıya veya tarayıcıya veri gönderme işlemi.  
+
+**view.py dosyası:**
+```python
+from django.shortcuts import render
+from django.http import HttpResponse
+
+# Create your views here.
+
+posts = [
+    {
+        "id":1,
+        "title":'Let\'s expose python',
+        "content":'Python Is Intepreted, High level, general purpose \
+        programming language. Widely used in the fields of web \
+        development, data science and machine learning.'
+    },
+    {
+        "id":2,
+        "title": 'Let\'s explore Javascript',
+        "content": 'Javascript Is Interpreted, High level, general \
+        purpose programming language. Widely used in the fields \
+        of web development'
+    },
+    {
+        "id":3,
+        "title": 'Django the best web framework',
+        "content": 'Django is used by almost every big tech company\
+        like facebook, google, youtube, instagram etc.'
+    },
+]
+
+def helloWorld(request):
+    html = ""
+
+    for post in posts:
+        html += f'''
+            <div>
+                <h1>{post['id']} - {post['title']}</h1>
+                <p>{post['content']}</p>
+            </div>
+        '''
+    return HttpResponse(html)
+```
+> **Explanation:**
+> + `post` adındaki liste verisini kullanıcı tarafına aktarıyoruz;
+> + `for loop` ile liste verilerini `HttpResponse` sınıfına parametre olarak veriyoruz.
 
 #### 2.Class-Based Views - CBV:
 + Daha karmaşık projelerde esneklik sağlar. Python sınıfları kullanılarak tanımlanır.
@@ -285,7 +353,159 @@ urlpatterns = [
 >  + **authentication**: Kullanıcı oturumlarını ve kayıt işlemlerini yönetir.
 >  + **Django'nun MVC (Model-View-Controller) Yapısını Destekleme**:
 >  + Uygulamalar, Django’nun MVT (Model-View-Template) mimarisini takip ederek projeyi daha düzenli ve okunabilir kılar.
- 
+
+
+
+
+
+## Proje Ayarları:
+
+**settings.py:**
+```python
+"""
+Django settings for blog project.
+Generated by 'django-admin startproject' using Django 5.1.3.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/5.1/topics/settings/
+
+For the full list of settings and their values, see
+https://docs.djangoproject.com/en/5.1/ref/settings/
+"""
+
+from pathlib import Path
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-dy-!h3-l@vbpk6(r9x7syuy(@5##&s2!svxse=0#1r=z8ql@5$'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = []
+
+# Application definition
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'blog.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'blog.wsgi.application'
+
+# Database
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Password validation
+# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# Internationalization
+# https://docs.djangoproject.com/en/5.1/topics/i18n/
+
+LANGUAGE_CODE = 'en-us'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = True
+
+USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+
+STATIC_URL = 'static/'
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+```
+
+### ROOT_URLCONF:
+
++ **`ROOT_URLCONF`**, Django projesinin **ana URL yönlendirme(routing) dosyasını** tanımlar. Bu dosya genellikle bir Python modülüne (örneğin, `urls.py`) işaret eder.
+
+#### Varsayılan Ayar:
++  Django da bir proje oluşturduğunuzda, genellikle şu şekilde bir yapı oluşturulur:
++ `settings.py`  içinde;
+
+```python
+ROOT_URLCONF = '<Proje_Adı>.urls'
+```
+
++ Örneğin; **blog** adlı django projesinde bu ayar şöyle görünebilir:
+
+```python
+ROOT_URLCONF = 'blog.urls'
+```
+
++ Burada `blog/urls.py`, Django'nun tüm URL eşleşmelerini(routing) kontrol ettiği dosyadır.
+
+#### Nasıl Çalışır:
+1. **URL İstekleri:** Django'ya bir HTTP isteği geldiğinde, ilk olarak bu istek `ROOT_URLCONF` da belirtilen `urls.py` dosyasına yönlendirilir.
+2. **URL Yönlendirmesi:** Django, `urls.py` dosyasındaki URL desenleri(patterns) ve uygun bir eşleşme bulmaya çalışır. Eğer bir eşleşme bulunursa, ilgili `view` fonksiyonu çalıştırılır.
+3. **Eşleşme Yoksa:** Eğer bir eşleşme bulunamaz ise, Django otomatik olarak bir `404 Not Found` geri döner.
+
 ## Python Sınıfları:
 ### HttpRequest:
 

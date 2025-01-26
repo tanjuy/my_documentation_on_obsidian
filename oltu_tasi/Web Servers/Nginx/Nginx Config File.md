@@ -2720,9 +2720,112 @@ Connection: keep-alive
 
 ##### Best Practice:
 
+**nginx.conf:**
 ```nginx
+events {
+}
 
+http {
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        try_files $uri $uri/ /404.html;
+
+        # error_page 404 /404.html;
+
+        location = /404.html {
+            internal;
+        }
+    }
+}
 ```
+> **Explanation:**
+> + `error_page 404 /404.html;` 
+> + Bu direktif, 404 HTTP durum kodu döndüğünde istemciye hangi sayfanın gösterileceğini tanımlar. Burada, `/404.html` dosyasının hata sayfası olarak gösterilmesi belirtilmiştir. Bir istemci geçersiz bir dosya veya dizin isterse, `try_files` veya başka bir hata durumu sonucunda `404.html` döndürülür.
+> + `location = /404.html { internal; }`
+> + **`location = /404.html`**: Bu blok, tam olarak `/404.html` URI'si ile eşleşen isteklere özeldir (eşleme işlemi tam URI ile yapılır). `internal` direktifi, bu URI'nin doğrudan istemciler tarafından erişilemeyeceğini belirtir.
+
+**404.html**
+```html
+<!DOCTYPE html>
+<html lang="tr">
+    <head>
+        <title>Error Page</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        Bu bir hata dosyasıdır!
+    </body>
+</html>
+```
+> **Explanation:**
+> + `404.html` dosyasını `/var/www/html/bloggingtemplate/` dizin içerisinde oluşturduk.
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/hata
+```
+
+**Curl Çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Fri, 17 Jan 2025 12:22:09 GMT
+Content-Type: text/html
+Content-Length: 156
+Last-Modified: Fri, 17 Jan 2025 12:11:48 GMT
+Connection: keep-alive
+ETag: "678a4904-9c"
+Accept-Ranges: bytes
+
+<!DOCTYPE html>
+<html lang="tr">
+        <head>
+                <title>Error Page</title>
+                <meta charset="UTF-8">
+        </head>
+        <body>
+                Bu bir hata dosyasıdır!
+        </body>
+</html>
+```
+> **Explanation:**
+> + Eğer `/hata` kaynak URI istek atığımızda ve sistemde mevcut olmadığı için `try_files directive` en son olarak `/404.html` sayfasını dönecektir.
+
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/404.html
+```
+
+**Curl Çıkısı:**
+```http
+HTTP/1.1 404 Not Found
+Server: nginx/1.27.2
+Date: Fri, 17 Jan 2025 12:01:18 GMT
+Content-Type: text/html
+Content-Length: 153
+Connection: keep-alive
+
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+```
+> **Explanation:**
+> + `404.html` içeriğini servis etmek isteğimizde ise `location context` içerisindeki `internal`'den dolayı direk olarak servis edemeyeceğiz. Çıktıda da göründüğü üzeri nginx'in varsayılan hata sayfası dönecektir.
+> + `error_page directive` ile nginx'in varsayılan hata sayfasını değiştirebiliriz. `error_page 404 /404.html;` komut ile varsayılan hata sayfasını `404.html` yapıyoruz.
+> + `error_page 404 /404.html` yorum kaldırarak test ediniz!
+
 
 ### Allow and  Deny IP
 
@@ -2765,6 +2868,608 @@ location [optional_modifier] [URI] {
 
 
 **Kaynak:** [Best Tutorial - 2:32](https://www.youtube.com/watch?v=NwijBVfiK_o)
+
+## Dinamik Siteleri İşleme:
+
++ Nginx, bir **reverse proxy** sunucusu olarak yapılandırılır ve dinamik istekleri `backend` sunucuya veya uygulamaya iletir.
+### PHP:
+
+#### PHP-FPM:
++ **PHP-FPM (PHP FastCGI Process Manager)**, PHP için geliştirilmiş bir **FastCGI** uygulama yöneticisidir.
++ PHP betiklerinin daha hızlı, daha güvenilir ve yüksek trafik altında daha ölçeklenebilir bir şekilde çalışmasını sağlar.
++ Özellikle Nginx gibi bir web sunucusu ile birlikte kullanıldığında, dinamik PHP içeriklerini işlemek için optimize edilmiş bir çözümdür.
++ **FastCGI**: PHP'nin bir web sunucusundan bağımsız olarak çalıştırılmasını sağlayan bir *protokoldür*. Web sunucusu, PHP betiklerini işlemesi için FastCGI üzerinden bir istemci gibi PHP-FPM ile iletişim kurar.
++ **PHP-FPM**: PHP için geliştirilmiş özel bir FastCGI yönetim aracıdır. PHP-FPM, PHP işlemlerini yönetir ve optimize eder. Bu, daha iyi performans, daha düşük kaynak kullanımı ve ölçeklenebilirlik anlamına gelir.
+
+
+```shell
+sudo apt-get update
+```
+
+```shell
+sudo apt-get install php-fpm
+```
+
+```shell
+sudo systemctl status  php8.1-fpm.service
+```
+
+```shell
+ps aux | grep php-fpm
+```
+
+
+**nginx.conf**
+```nginx
+user www-data;         #   <------- worker process user
+
+events {
+}
+
+http {
+    include mime.types;
+
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.php index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+            include fastcgi.conf;
+            fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        }
+    }
+}
+```
+> **Explanation:**
+> + `user www-data` anlamı şudur; tüm `nginx worker process` www-data kullanıcısı tarafından çalıştırılacaktır.
+> + Eğer `www-data` kullanıcı mevcut değil ise; `sudo groupadd www-data` ve `sudo useradd -g www-data -s /sbin/nologin www-data` komut ile oluşturabilirsiniz.
+
+**fpm.sock**
+```shell
+sudo find / -name '*fpm.sock'
+```
+
+**find Çıktısı:**
+```shell
+/var/lib/dpkg/alternatives/php-fpm.sock
+/run/php/php-fpm.sock
+/run/php/php8.1-fpm.sock
+/etc/alternatives/php-fpm.sock
+```
+
+**info.php**:
+```php
+<?php phpinfo(); ?>
+```
+> **Explanation:**
+> + `/var/www/html/bloggingtemplate/` dizini içerisinde oluşturuyoruz.
+> + Mevcut PHP kurulumunuz hakkında detaylı bilgi verir.
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/info.php
+```
+
+**Curl Çıktısı:**
+```http
+HTTP/1.1 502 Bad Gateway
+Server: nginx/1.27.2
+Date: Sun, 19 Jan 2025 02:25:35 GMT
+Content-Type: text/html
+Content-Length: 157
+Connection: keep-alive
+
+<html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+```
+> **Explanation:**
+> +  Eğer  yalnızca `/var/www/html/bloggingtemplate/` dizin içerisinde dosya oluşturup, herhangi bir işlem yapmazsak ve `curl` ile `GET` isteği atığımızda `502 Bad Gateway` alırız.
+> + `502 Bad Gateway` : `info.php` dosyasını mevcut oluğunu ama nginx, php process ile iletişim kuramamaktadır.
+> + `502 Bad Gateway` hatası almamızın nedenini görebilmemiz için `/var/log/nginx/` dizini içerisindeki `error.log` dosyasını kontrol etmemiz gerekmektedir.
+
+**Log Dosyası:**
+```log
+==> error.log <==
+2025/01/19 05:25:35 [crit] 4534#0: *22 connect() to unix:/run/php/php8.1-fpm.sock failed (13: Permission denied) while connecting to upstream, client: 192.168.1.106, server: 192.168.1.132, request: "GET /info.php HTTP/1.1", upstream: "fastcgi://unix:/run/php/php8.1-fpm.sock:", host: "192.168.1.132"
+
+==> access.log <==
+192.168.1.106 - - [19/Jan/2025:05:25:35 +0300] "GET /info.php HTTP/1.1" 502 157 "-" "curl/8.10.1"
+```
+> **Explanation:**
+> + `error.log` dosyasından anlaşılacağı üzeri nginx ile `php8.1-fpm.sock` arasında iletişim olmamaktadır.
+> + Bağlanırken `Permission denied` hatası vermektedir.
+
+
+**nginx process:**
+```shell
+ps aux | grep nginx
+```
+
+**ps çıktısı:**
+```shell
+root     702  0.0  0.1  10064  3132 ?  Ss  Jan18   0:00 nginx: master process /usr/bin/nginx
+nobody   4534  0.0  0.1  10372  3440 ? S   02:35   0:00 nginx: worker process
+```
+> **Explanation:**
+> + nginx'in `master process`'i root kullanıcısı ile çalışırken, nginx'in `worker process`'i nobody kullanıcısı ile çalışmaktadır.
+> + `nobody` kullanıcısın php'i çalıştırma izni yoktur. Bundan dolayı da log dosyasındaki `permission denied` hatası vermektedir.
+
+**php process:**
+```shell
+ps aux | grep php
+```
+
+**ps çıktısı:**
+```shell
+root      658  0.0  0.9 202704 19340 ?    Ss   Jan18   0:10 php-fpm: master process (/etc/php/8.1/fpm/php-fpm.conf)
+www-data  731  0.0  0.3 203180  6812 ?    S    Jan18   0:00 php-fpm: pool www
+www-data  732  0.0  0.3 203180  6812 ?    S    Jan18   0:00 php-fpm: pool www
+```
+> **Explanation:**
+> + php'in `php master process`'i root kullanıcısı ile çalışırken, `php worker process`'i www-data kullanıcısı tarafından çalıştırılmaktadır.
+
+**nginx process:**
+```shell
+ps aux | grep nginx
+```
+
+**ps çıktısı:**
+```shell
+root       702  0.0  0.1  10036  3148 ?  Ss Jan18  0:00 nginx: master process /usr/bin/nginx
+www-data   20505  0.0  0.1  10344  3652 ?  S  12:42  0:00 nginx: worker process
+```
+> **Explanation:**
+> + `nginx.conf` dosyasına `user www-data;` yönergesini ekledikten sonra `ps` komutu çıktısındaki worker process kullanıcısı `nobody`'den `www-data` kullanıcısına dönüşmüş olmaktadır.
+> + Hem `nginx worker process` hem de `php worker process` aynı kullanıcıyı kullandığı için nginx ve php birbirleri ile konuşabilecektir.
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132/info.php
+```
+> **Explanation:**
+> + nginx tarafında `nginx worker process`'in kullanıcısını  `user directive` ile`www-data` yaptığımız için `php worker process` ile iletişim kurabildiği için `info.php` dosyası içindeki `phpinfo()` fonksiyon çıktısını servis edebilecektir.
+> + `curl` komutu yerine `http://192.168.1.132/info.php` adresini tarayıcı ile GET isteği yapabilirsiniz. 
+
+#### PHP-FPM: index
+
+```nginx
+user www-data;
+
+events {
+}
+
+http {
+    include mime.types;
+
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.php index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+            include fastcgi.conf;
+            fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        }
+    }
+}
+```
+> **Explanation:**
+> + `index directive`'ini kullanımı ile URI kaynak bildirilmediğinde varsayılan olarak ilk bakılacak dosya sıralamayı vermektedir.
+> + Eğer `http://192.168.1.132/` bir GET isteği atığımızda varsayılan olarak `index directive`'i `index.php` dosyasını sunar. Ama eğer mevcut değil ise `index.html` dosyasını sunar.
+
+**index.php**
+```php
+<?php
+echo "Hello<br>";
+echo "Welcome to NGINX Training<br>";
+echo "Enjoy all of the NGINX Lectures<br>";
+?>
+```
+> **Explanation:**
+> + `index.php` dosyamızı `/var/www/html/bloggingtemplate/` dizin içerisinde oluşturduk.
+> + php programlama dilinde mevcut olan `echo` fonksiyonu kullanarak ekran çıktı veriyoruz.
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132
+```
+> **Explanation:**
+> + Kaynak URI'ın `/` GET isteği atığımızda `index directive` varsayılan olarak ilk sırada bulunan `index.php` dosyasını sunacaktır.
+> + Eğer `index.php` dosyası `/var/www/html/bloggingtemplate/` dizinde mevcut olmasaydı ikinci sıradaki `/var/www/html/bloggingtemplate/` dizininde mevcut olan `index.html` dosyasını servis edilecektir. 
+
+**Curl Çıktısı:**
+```shell
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sun, 19 Jan 2025 14:31:54 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+
+Hello!<br>Welcome to NGINX Training<br>Enjoy all of the NGINX Lectures<br>
+```
+
+
+## Nginx Worker Process:
+
++ Sistem yöneticisin başlatmış olduğu nginx ikili dosyasına `nginx master process` denir. Yani `/usr/bin/nginx` dizininde olan binary dosyası çalıştırıldığında `nginx master process` olacaktır.
++ `nginx worker process` nginx'in kendisi tarafından başlatılan bir süreçtir(process). Yani `nginx worker process`'i `nginx master process` başlatmaktadır.
++ `worker process` istemci ile iletişim kuran temel süreçtir(process). Yani istemci(client) ile iletişim bağlantısı yapan `worker process` olmaktadır. 
++ `Nginx master process` her hangi bir isteği servis etmez. O sadece `worker process`'leri yönetir.
++ Nginx de varsayılan olarak `nginx worker process` bir tanedir.
++ Her `worker process`, istemciden gelen isteği `asenkron` olarak işleyecektir. Yani, **Asenkron**, işlemlerin birbirini beklemek zorunda kalmadan paralel şekilde yürütüldüğü bir yöntemdir.
+
+
+
+### worker_processes:
++ Bu direktif, sanal sunucumuzun uygun IP ve port(lar)a bağlandıktan sonra kaç adet işçi (worker) oluşturacağını belirlemekten sorumludur.
++ `worker_process` yönergesi *Global Context*'e aittir.
+
+> [!NOTE]
+> +  Her CPU çekirdeği başına bir işçi süreci (worker process) çalıştırmak yaygın bir uygulamadır. Yani, `Best practice` olarak her bir CPU için bir `worker process` tercih edilir.
+> + Eğer `2 Core CPU` kullanıyorsanız ve `nginx worker process` sayınızda 4 ise bu durumda her bir `nginx worker process` her bir CPU'dan %50 faydalanabilecektir. 
+> + Çünkü 2 `nginx worker process` aynı CPU core üzerinde çalışacaktır. Yani her iki `worker process` asenkron olarak %50 yük paylaşacaktır.
+> + Çalışan CPU'ya kıyasla daha fazla sayıda `worker process` tanımladığımızda hiçbir zaman tam `worker process`'i kullanamayız. Yani eğer 1 core CPU için 3 `worker process` mevcut ise, yük her bir`worker process` için %33,33 dağılacaktır.
+> + Eğer `2 CPU Core` makineniz var ise ve 1 `nginx worker process` var ise bu durumda `1 CPU core` boşta olacaktır.
+
+
+> [!NOTE]
+> + `worker_process directive`'i `hard-code` şeklinde olması bazı sorunları doğurmaktadır.
+> + Yani  `nginx.conf` dosyasını önce 2 CPU core da çalıştırıyorum. Daha sonra 16 CPU core da çalıştırıyorum. Bu durumda CPU core değiştiğinde `worker_process directive`'in değerini elle değiştirmek zorunda kalıyoruz.
+> + CPU core sayısının otomatik olarak belirlenmesini istiyorsak, `worker_process`'i `auto` olarak ayarlamamız gerekmektedir. Sonuç: `worker_process auto`
+
+
+
+> [!NOTE]
+> + **Sabit kodlama(hard-code)**, verileri harici kaynaklardan elde etmek veya çalışma zamanında oluşturmak yerine, doğrudan bir [programın](https://tr.wikipedia.org/wiki/Bilgisayar_program%C4%B1 "Bilgisayar programı") veya başka bir yürütülebilir nesnenin [kaynak koduna](https://tr.wikipedia.org/wiki/Kaynak_kodu "Kaynak kodu") gömmek için kullanılan yazılım geliştirme uygulamasıdır.
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes 4;          # <--------- 
+
+events {
+}
+
+http {
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.php index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+            include fastcgi.conf;
+            fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        }
+    }
+}
+```
+> **Explanation:**
+> + `worker_processes` değerini `auto` olarak ayarlarsak CPU core başına `worker process` oluşturacaktır.
+> + Yani, eğer 2 CPU core var ise otomatik olarak `worker process`'in değer 2 olacaktır.
+> + Aşağıdaki işlemler `worker_processes` değerini `hard-core` olarak artırdığımızda `worker process`'lerinde artığını göstermektedir. 
+
+**ps komut:**
+```shell
+ps aux --forest | grep nginx
+```
+
+**ps çıktısı: 1 worker process**
+```shell
+root        702  0.0  0.1  10620 3212 ?  Ss  Jan24  0:00 nginx: master process /usr/bin/nginx
+www-data  28721  0.0  0.1  10928 3684 ?  S   10:17  0:00  \_ nginx: worker process
+```
+> **Explanation:**
+> + process'i 702 olan bir tane `master process` var. `master process`'in bir tane `worker process`'i sahip. 
+> + `worker_processes 4` direktifini tanımlamadan önce `master process`'in sadece bir tane `worker process`'i var.
+
+**ps komut:**
+```shell
+ps aux --forest | grep nginx
+```
+
+**ps çıktısı: 4 worker process**
+```shell
+root        702  0.0  0.1  10620  3212 ?  Ss Jan24  0:00 nginx: master process /usr/bin/nginx
+www-data  28805  0.0  0.1  10928  3684 ?  S  10:37  0:00  \_ nginx: worker process
+www-data  28806  0.0  0.1  10928  3684 ?  S  10:37  0:00  \_ nginx: worker process
+www-data  28807  0.0  0.1  10928  3684 ?  S  10:37  0:00  \_ nginx: worker process
+www-data  28808  0.0  0.1  10928  3684 ?  S  10:37  0:00  \_ nginx: worker process
+```
+> **Explanation:**
+> + `worker_process` direktifin değerini 4 yapıldığında çıktıda göründüğü üzeri `master process`'in 4 tane `worker process` oluşmaktadır.
+> + `--forest` parametresi ile `parent` ile `child` arasındaki ilişkiyi görebiliyoruz. 
+
+**lscpu komut:**
+```shell
+lscpu
+```
+
+**CPU sayısı:**
+```shell
+Architecture:             x86_64
+  CPU op-mode(s):         32-bit, 64-bit
+  Address sizes:          39 bits physical, 48 bits virtual
+  Byte Order:             Little Endian
+CPU(s):                   2
+  On-line CPU(s) list:    0,1
+Vendor ID:                GenuineIntel
+  Model name:             12th Gen Intel(R) Core(TM) i5-12450H
+    CPU family:           6
+    Model:                154
+    Thread(s) per core:   1
+    Core(s) per socket:   2
+    Socket(s):            1
+    Stepping:             3
+    BogoMIPS:             4992.01
+    Flags:                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx rdtscp lm constant
+                          _tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 cx16 sse4_1 sse4_2 movbe popcnt aes rdrand hyper
+                          visor lahf_lm abm 3dnowprefetch ibrs_enhanced fsgsbase bmi1 bmi2 invpcid rdseed clflushopt arat md_clear flush_l1d arch_capabiliti
+                          es
+Virtualization features:
+  Hypervisor vendor:      KVM
+  Virtualization type:    full
+Caches (sum of all):
+  L1d:                    64 KiB (2 instances)
+  L1i:                    128 KiB (2 instances)
+  L2:                     4 MiB (2 instances)
+  L3:                     24 MiB (2 instances)
+NUMA:
+  NUMA node(s):           1
+  NUMA node0 CPU(s):      0,1
+Vulnerabilities:
+  Gather data sampling:   Not affected
+  Itlb multihit:          Not affected
+  L1tf:                   Not affected
+  Mds:                    Not affected
+  Meltdown:               Not affected
+  Mmio stale data:        Not affected
+  Reg file data sampling: Vulnerable: No microcode
+  Retbleed:               Mitigation; Enhanced IBRS
+  Spec rstack overflow:   Not affected
+  Spec store bypass:      Vulnerable
+  Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+  Spectre v2:             Mitigation; Enhanced / Automatic IBRS; RSB filling; PBRSB-eIBRS SW sequence; BHI SW loop, KVM SW loop
+  Srbds:                  Not affected
+  Tsx async abort:        Not affected
+```
+> **Explanation:**
+> + `Best Pratice` olarak CPU başına `worker process` oluşturmamız gerektiğini söylemiştik.
+> + Bu komut ile CPU değerin 2 tane olduğunu görebiliyoruz.
+> + Böyle çıktı almak yerine `nproc` komut ile direk CPU sayısını da alabiliriz.
+
+**ps komut:**
+```shell
+ps aux --forest | grep nginx
+```
+
+```shell
+root        702  0.0  0.1  10620 3212 ? Ss Jan24 0:00 nginx: master process /usr/bin/nginx
+www-data  29667  0.0  0.1  10928 3684 ? S  14:21 0:00  \_ nginx: worker process
+www-data  29669  0.0  0.1  10928 3684 ? S  14:21 0:00  \_ nginx: worker process
+```
+> **Explanation:**
+> + `worker_processes` direktif değerini `auto` olarak ayarladığımızda ve yukarıdaki `lscpu` komutu veya `nproc` komutu ile baktığımızda
+> + `auto` parametresi otomatik olarak CPU core sayısında `worker process` oluşturacaktır.
+### worker_connections:
+
++ Bu yönerge(`directive`), `worker process`'e Nginx tarafından aynı anda kaç kişiye hizmet verilebileceğini söyler.
++ Diyelim ki; `worker_connection` değeri 600 olarak tanımlanış,  2 CPU core  makineniz var ve `worker_process`'iniz `auto` olarak ayarlamış. Bu durumda 1200 `worker connection` bağlantısı sağlayabileceğiz.
++ Eğer CPU başına bin `worker connection` tanımlıyorsak, bu belirli bir `worker process`'in nginx de saniyede aynı anda binlerce bağlantıyı işleyebileceği anlamına gelir.
++ `worker_connection`, Events Context'in bir alt öğesidir. (This is the child of Events Context).
++ Varsayılan değer 768'dir; ancak her tarayıcının genellikle sunucu başına en az 2 bağlantı açtığını düşünürsek bu sayı yarıya indirilebilir.
++ Kullanıcı `ulimit` komutunu vererek çekirdeğimizin sınırlarını kontrol edebilir: 
+
+```shell
+ulimit -n          # 1024
+```
+
++ Bu çıkıtı bize İşletim sisteminizde kaç adet `worker connection` tanımlayabileceğimizi göstermektedir. Bu OS'de yani işletim sisteminde `worker_connetion` verebileceğimiz değer sınırı 1024'dür.
++ Temel olarak, işletim sisteminizin tek bir saniyede gerçekleştirebileceği IO, giriş ve çıkış işlemlerinin sayısını tanımlar.
++ Örneğin; `worker_connection 1000` anlamı; nginx `1000 client/second` servis eder.
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;    # <-----------
+}
+
+http {
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.php index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+            include fastcgi.conf;
+            fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        }
+    }
+}
+```
+> **Explanation:**
+> + `worker_connection` değerin 1024 olmasın anlamı; her `worker process` saniyede 1024 isteği işleyebileceğidir.
+> + `worker_processes` değeri `auto` olarak ayarlamış bundan dolayı CPU core sayısı kadar `worker process` olacak. O zaman 2 CPU core olduğu için 2 tane `worker process` olacak
+> + 2 `worker process` ile toplamda 2048 isteği karşılayabilecek anlamına gelir.
+
+## Virtual Host:
++ Nginx'de **sanal hostlar (virtual hosts)**, aynı sunucu üzerinde birden fazla web sitesi veya hizmet barındırmayı mümkün kılan bir özelliktir.
++ Bu özellik, her web sitesinin veya hizmetin kendi yapılandırmasına sahip olmasını sağlar ve genellikle **server blocks** olarak adlandırılır.
+
+### Virtual Host Türleri:
+#### 1.Name-Based Virtual Hosting (İsim Bazlı):
++ Aynı IP adresi ve port üzerinde birden fazla web sitesi barındırılır.
++ Gelen HTTP isteği, "Host" başlığına göre doğru siteye yönlendirilir.
++ Örneğin: `example.com` ve `example.org` aynı IP adresini paylaşabilir, ama farklı içerikler sunar.
+
+#### 2.IP-Based Virtual Hosting (IP Bazlı):
++ Her web sitesi için farklı bir IP adresi atanır.
++ Gelen trafik IP adresine göre ayrıştırılır.
++ Günümüzde daha az kullanılır çünkü modern tarayıcılar "name-based" yöntemini destekler.
+
+**nginx.conf**
+```nginx
+user www-data;
+
+events {
+}
+
+http {
+    include mime.types;
+
+
+    server {
+        # Virtual Host 1
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.php;
+
+        location ~ \.php$ {
+            include fastcgi.conf;
+            fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        }
+    }
+
+    server {
+        # Virtual Host 2
+        listen 80;
+        server_name 192.168.1.140;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+```
+> **Explanation:**
+> + `Virtual Host 1` de php sayfasını servis edilmektedir.(*Dinamik İçerik*)
+> + `/var/www/html/bloggingtemplate/` dizin içerisinde `index.php` dosyası mevcuttur.
+> + `php-fpm` programı `index.php` dosya içeriğini okumakta ve `fastcgi_pass` ile nginx aktarmakta ve oradan da nginx servis yapmaktadır.
+> + `Virtual Host 2` de statik web sitesi servis edilmektedir.(*Statik içerik*)
+> + `/var/www/html/bloggingtemplate/` dizini içerisindeki `index.html` dosyası nginx ile servis edilmektedir.
+
+**index.php:**
+```php
+<?php
+echo "Hello!<br>";
+echo "Welcome to NGINX Training<br>";
+echo "Enjoy all of the NGINX Lectures<br>";
+?>
+```
+> **Explanation:**
+> + `index.php` dosyasını basit bir şekilde kendimiz oluşturuyoruz.
+> + `bloggingtemplate` sitesi için [link](https://www.100utils.com/download/course-files-for-youtube-course-complete-nginx-training/) adresinden indiriyoruz. Basit sade güzel bir site şablonu.
+
+
+**Web Klasörü:**
+```shell
+nginx-tutorial3 :: www/html/bloggingtemplate » ls
+404.html  assets  index.html  index.php  info.php
+nginx-tutorial3 :: www/html/bloggingtemplate » pwd
+/var/www/html/bloggingtemplate
+```
+> **Explanation:**
+> + Mevcuttaki servis edilen web sitelerin içeriğini barındırmaktadır.
+> + Eğer dikkat ederseniz `ls` komutu ile hem `index.html` hem de `index.php` dosyalarını görebiliriz. Ayrıca `pwd` komutu ile de tam dizin yolunu görebiliriz.
+
+**00-installer-config.yaml**
+```yaml
+# This is the network config written by 'subiquity'
+network:
+  ethernets:
+    enp0s3:
+      addresses:
+      - 192.168.1.132/24
+      - 192.168.1.140/24
+      nameservers:
+        addresses:
+        - 1.1.1.1
+        - 8.8.8.8
+        search:
+        - google.com
+      routes:
+      - to: default
+        via: 192.168.1.1
+  version: 2
+```
+> **Explanation:**
+> + Bu işlemler Ubuntu 22.04 makine üzerinde yapılmıştır. Diğer Linux dağıtımlarında farklı bir yol ile bu işlem yapılabilir.
+> + Aynı makine üzerinde 2 tane IP tanımlıyoruz. Birincisi `192.168.1.132` olan kendi varsayılan IP adresi ek olarak tanımladığımız IP ise `192.168.1.140` olmaktadır.
+> + `192.168.1.140` ekledikten sonra dosyadaki değişikliklerin geçerli olabilmesi için `sudo netplan apply` komutunu çalıştırmamız gerekmektedir.
+> + `ip -c addr` komutu ile ek IP adresinin eklenmiş mi diye kontrol edebiliriz.
+
+**GET isteği:**
+```shell
+curl -X GET -i http://192.168.1.132
+```
+
+```shell
+curl -X GET -i http://192.168.1.140
+```
+> **Explanation:**
+> + Düzenlemiş olduğumuz IP adreslerine `GET` isteği yaparak durum kontrol yapabiliriz.
+> + Burada `curl` komutu kullanılmıştır. Dilerseniz her hangi bir tarayıcı ile de `GET` isteği atabilirsiniz.
+
+#### 3.Port-Based Virtual Hosting (Port Bazlı):
++ Her site veya hizmet farklı bir port üzerinden sunulur.
++ Örneğin: `example.com:80` ve `example.com:8080`.
+
 ## HTTP Cache Control header
 ``` nginx
 user www-data;
