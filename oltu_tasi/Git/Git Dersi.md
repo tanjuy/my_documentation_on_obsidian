@@ -384,6 +384,12 @@ $ git reset --hard <commit-hash>
 > + `Working Directory`, `Staged Area` ve `Local Repo` alanların tümünde geri alır.
 > + Tam sıfırlama yapar.
 
+
+
+> [!TIP]
+> + `git reset --soft HEAD~2` 
+> + `git reset --hard HEAD~2` 
+
 #### Commit'leri Geri Alma:
 
 ```shell
@@ -394,6 +400,7 @@ $ git revert <commit-hash>
 
 > [!TIP]
 > + `git revert HEAD` komut bir önceki komut tersine çevirecektir.
+> + `git revert HEAD~2..HEAD` komutu 2 önceki commit'i tersine çevirecektir.
 
 #### Değişiklikleri Görme:
 

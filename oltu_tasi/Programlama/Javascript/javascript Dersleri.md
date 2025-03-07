@@ -76,11 +76,155 @@ scope_key variable_name = variable_value
 > + Sonuç olarak; `let distro = ubuntu` k
 
 ## Let - Const - Var:
+
+
+**var, let ve const arasındaki fark:**
+
+|       | Scope | Redeclare | Reassign | Hoisted | Binds this |
+| :---: | :---: | :-------: | :------: | :-----: | :--------: |
+|  var  |  No   |    Yes    |   Yes    |   Yes   |    Yes     |
+|  let  |  Yes  |    No     |   Yes    |   No    |     No     |
+| const |  Yes  |    No     |    No    |   No    |     No     |
+
+> [!WARNING]
+> `let` ve `const` anahtar kelimeleri ile oluşturulan değişkenler `this`'e bağlanmaz.
+
+
+### Var:
+
+#### Redeclared:
+> [!CAUTION]
+> + `var` anahtar ile tanımlamış bir değişkeni **tekrar tanımlayabiliriz!**
+
+```javascript
+var variable = 10;
+var variable = 12;
+console.log('Variable:', variable);
+```
+
+```console
+Variable: 12
+```
+> **Explanation:**
+> + `let` anahtar kelimesi ile yeniden tanımlama problemi çözülebilir.
+
+
+#### Var Hoisting:
++ var ile tanımlanan değişkenler en üste taşınır(`hoisted`) ve istenildiği zaman başlatılabilir. Yani, Değişkeni bildirilmeden önce kullanabilirsiniz.
++ **Varsayılan Değer**: `Hoisted` değişkenlerin başlangıçta değeri `undefined` olur.
++ `var` ile tanımlanan değişkenler hoist edilir ve varsayılan değer olarak `undefined` atanır.
+
+##### Örnek 1: w3school
+
+```javascript
+progName = "Javascript";
+console.log(progName);
+var programName;
+```
+
+```console
+Javascript
+```
+> **Explanation:**
+> + `var` anahtar kelimesi ile `hoisting` kullanımı pek görülmez de `let` ve `const` anahtar kelimesi ile karşılaştırıldığında daha net olmaktadır.
+
+
 ### Let:
 + `let` anahtar sözcüğü ES6'da (2015) tanıtıldı.
-+ 
++ `let` ile bildirilen değişkenler `Block Scope` sahip. Yani, `if`, `for loop` ve `{...}` içerisinde `let` anahtar ile tanımlandığında `Block Scope` olur. `Block Scope` değişkeni süslü parantezler içerisinde geçerli olacaktır.
++ `let` ile bildirilen değişkenler kullanılmadan önce bildirilmelidir.(`Hoisting`)
++ `let` ile bildirilen değişkenler aynı kapsamda yeniden bildirilemez.(`No Redeclaring`)
++ `Scope`(Kapsam) başlığında örnekler ile açıklanmıştır.
 
-#### Kaynak:
+#### Redeclared:
+
+> [!CAUTION]
+> + `let` anahtar ile tanımlanmış bir değişkeni tekrardan tanımlayamazsınız!
+
+```javascript
+let variable = 10;
+let variable = 12;
+console.log('Variable:', variable);
+```
+
+```console
+Uncaught SyntaxError: Identifier 'variable' has already been declared
+```
+
+##### Örnek 1: w3school
++ `let` ile aynı blokta bir değişkenin yeniden tanımlanmasına izin verilmez:
+
+```javascript
+var x = 12;       // Allowed            1
+let x = 14;       // Not Allowed 
+
+{
+// Block Scope
+let x = 6;        // Allowed            2
+let x = 9;        // Not Allowed        
+}
+
+if (true) {
+// Block Scope
+let x = 54;      // Allowed             3
+var x = 23;      // Not Allowed         
+}
+```
+> **Explanation:**
+> 1. `var` anahtar değişkeni ile tanımlanmış değişkeni tekrardan `let` ile tanımlamaya izin veriyor.
+> 2. Süslü parantezler`{...}` ile oluşturulan `Block Scope` da `let` ile tanımlan değişken tekrardan `let` ile tanımlamaya izin  vermiyor.
+> 3. Bu kez `if` ile oluşturulan `Block Scope` içerisinde `let` ile tanımlan değişken tekrardan `let` ile tanımlanamıyor. Eğer dikkat ederseniz `if`'in bir `block scope` olduğunu görebiliyoruz.
+
+##### Örnek 2: w3school
+
+```javascript
+let x = 2;       // Allowed
+
+{
+// Block Scope
+let x = 3;      // Allowed
+}
+
+{
+// Block Scope
+let x = 34;     // Allowed
+}
+```
+> **Explanation:**
+> + Başka `Scope`'larda tekrardan aynı değişkeni tanımlayabiliriz.
+
+#### Let Hoisting:
++ `let` ile tanımlanan değişkenler de bloğun en üstüne taşınır(`hoisted`), ancak başlatılmaz. Yani, bir `let` değişkenini bildirilmeden önce kullanmak `ReferenceError` ile sonuçlanacaktır.
+
+##### Örnek 1: w3school
+```javascript
+progName = "Javascript";
+console.log(progName);
+let programName;
+```
+
+```console
+Uncaught ReferenceError: Cannot access 'progName' before initialization
+```
+
+### Const:
+
+
+> [!CAUTION]
+> + `const` anahtar ile tanımlanmış bir değişkeni tekrardan tanımlayamazsınız!
+
+```javascript
+const variable = 10;
+const variable = 12;
+console.log('Variable:', variable);
+```
+
+```console
+Uncaught SyntaxError: Identifier 'variable' has already been declared
+```
+
+
+### Kaynak:
 + [JS Let](https://www.w3schools.com/js/js_let.asp)
 
 ## Scope (Kapsam):
@@ -305,7 +449,7 @@ console.log("x :", x);
 console.log("window.x :", window.x);
 ```
 > **Explanation:**
-> + Bu kez `block scope` düzeyinde `if statement` kullanıyoruz. if block scope içerisinde `var` anahtar kelimesi ile tanımladığımız için `x` değişkeni *global değişken* olmaktadır.
+> + Bu kez `block scope` düzeyinde `if statement` kullanıyoruz. `if block scope` içerisinde `var` anahtar kelimesi ile tanımladığımız için `x` değişkeni  **global değişken** olmaktadır.
 > + `var` anathar kelimesinden dolayı `window` objesin içerisinde görebiliriz.
 
 #### Block: const key ile
@@ -338,49 +482,6 @@ function test2 () {                   // 4
 > 3.  4. basamakta fonksiyon tanımladık ve çalışması için çağırıyoruz.
 > 4. `a değişkeni` dosya düzeyin de olduğun için fonksiyon içerisinden de ekrana çıktı verebiliyoruz.
 
-### Dikkat: var - let - const
+## Hoisting:
 
-
-> [!CAUTION]
-> + `var` anahtar ile tanımlamış bir değişkeni tekrar tanımlayabiliriz!
-
-
-```javascript
-var variable = 10;
-var variable = 12;
-console.log('Variable:', variable);
-```
-
-```console
-Variable: 12
-```
-
-
-> [!CAUTION]
-> + `let` anahtar ile tanımlanmış bir değişkeni tekrardan tanımlayamazsınız!
-
-```javascript
-let variable = 10;
-let variable = 12;
-console.log('Variable:', variable);
-```
-
-```console
-Uncaught SyntaxError: Identifier 'variable' has already been declared
-```
-
-
-
-> [!CAUTION]
-> + `const` anahtar ile tanımlanmış bir değişkeni tekrardan tanımlayamazsınız!
-
-```javascript
-const variable = 10;
-const variable = 12;
-console.log('Variable:', variable);
-```
-
-```console
-Uncaught SyntaxError: Identifier 'variable' has already been declared
-```
-
++ `JavaScript Hoisting`, yorumlayıcının, kodun yürütülmesinden önce, fonksiyon, değişken, sınıf veya içe aktarma bildirimlerini kapsamlarının en üstüne taşıdığı süreci ifade eder.

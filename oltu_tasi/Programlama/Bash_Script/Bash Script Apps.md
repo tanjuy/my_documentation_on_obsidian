@@ -7,7 +7,7 @@
 > 2. `ls -ltr` komut ile çalıştırma iznini görebilir.
 > 3. `$ ./apps`  komut ile bash script  uygulamayı çalıştırıyoruz.
 
-###### Uygulama 1: shift - Positional Arg
+##### Uygulama 1: shift - Positional Arg
 ```bash
 #!/usr/bin/bash
 
@@ -32,7 +32,7 @@ $ ./apps.sh windows unix linux mac
 > **Explanation:**
 > `shift` komut Pozisyonel parametreleri bir adım kaydıracaktır yani `shift` komutundan sonraki `$1` argümanın değeri bir sonraki olan `$2` argümanın değerini alacaktır. `$2` ise kendisinden bir sonra olan argümanın değerini alacaktır.
 
-###### Uygulama 2: while - Positional Arg - shift
+##### Uygulama 2: while - Positional Arg - shift
 ```bash
 #!/usr/bin/bash
 
@@ -51,7 +51,7 @@ $ ./apps.sh linux windows mac ...
 > + `shift` komut her döngüde `$1` argüman değerini kaydırıp bir sonraki argümanı `$1` vermektedir.
 > + Bu işlemleri `$@` ile de yapabiliriz.
 
-###### Uygulama 3: if - test - positional arg
+##### Uygulama 3: if - test - positional arg
 ```bash
 #!/usr/bin/bash
 
@@ -76,7 +76,7 @@ fi
 > 3. `-f` parametresi dosya olup olmadığına bakar.
 > 4. `-e` parametresi dosya veya dizin olup olmadığına bakar.
 
-###### Uygulama 4: Positional Arg. - Aritmatik İşlem - fonksiyon
+##### Uygulama 4: Positional Arg. - Aritmatik İşlem - fonksiyon
 ```bash
 #!/usr/bin/env bash
 
@@ -127,7 +127,7 @@ $ ./app4.sh 10 5
 > 5. `RegEx` ile birinci argümanın ve ikinci argümanın doğru girildiğini kontrol ediyoruz.
 > 6. `dort_islem` adındaki fonksiyonu çağırıp ve parametrelerini fonksiyon veriyoruz. 
 
-###### Uygulama 3: Faktöriyel Hesaplama
+##### Uygulama 3: Faktöriyel Hesaplama
 ```bash
 #!/usr/bin/bash
 
@@ -165,7 +165,7 @@ echo "$sayi faktoriyel: $faktoriyel"     # 6
 > 4. Girilen position arg. sayısını `regex` ile doğru yazıldığını kontrol ediyoruz.
 > 5. `$faktoriyel` değişkeni ile sonucu ekrana basıyoruz ama dikkat edilmesi gereken nokta bu değişken fonksiyon içerisinde tanımlandığıdır yani değişken global'dir.
 
-###### Uygulama 4: Sayı Tahmin Oyunu
+##### Uygulama 4: Sayı Tahmin Oyunu
 ```bash
 #!/usr/bin/bash
 
@@ -200,7 +200,7 @@ fi
 > 2. `let` ile değişken tanımlanmıştır. `let` komutu değişken tanımlama, aritmetik işleri hesaplama ve `if` de koşul durumları oluşturma gibi görevleri mevcuttur.
 > 	+ `(( ... ))` ile de aynı görevleri yapar.
 
-###### Uygulama 5: Kullanıcı Söz Dizimi Oluşturma
+##### Uygulama 5: Kullanıcı Söz Dizimi Oluşturma
 ```bash
 #!/usr/bin/bash
 
@@ -293,7 +293,7 @@ echo "sudo useradd $createHomeVar -d /home/$loginVar -s $selShellVar \
 > 11. Array yüklü değişkenlerimizi dilimleme(slicing) yaparak array içindeki istediğimiz elemanları alıyoruz. 
 > 12. Video Kaynak: [Süleyman ŞEKER](https://youtube.com/watch?v=WEMl6t-yTFo&list=PLeKWVPCoT9e0jHStZlH-z8Gsoo1SBZJlG&index=32)
 
-###### Uygulama 6: Dosyaları Yedekleme
+##### Uygulama 6: Dosyaları Yedekleme
 ```bash
 #!/usr/bin/bash
 
@@ -317,7 +317,7 @@ done
 > 3. `ls` komut ile dizin içeriğini `for` döngüsü ile `file` değişkenine gönderiyoruz.
 > 4. Eğer değişken dosya ise `newFolder` değişkenin tutuğu dizine kopyalama yapıyoruz.
 
-###### Uygulama 7:
+##### Uygulama 7:
 ```bash
 #!/usr/bin/bash
 
@@ -359,3 +359,57 @@ echo "En büyük olan sayı: $MAX"
 > **Explanation:**
 > 
 
+##### Uygulama 8: if - test - regex
+
+```bash
+#!/usr/bin/bash
+
+while true; do
+    # Kullanıcıdan bir sayı girmesini iste
+    echo -e "Bir sayı girin(Çıkmak için 'q' ya da 'quit' yazın : \c"
+    read number
+
+    # Çıkış seçeneği kontrolü
+    if [[ "$number" == "q" || "$number" == "quit" ]]; then
+        echo "Çıkılıyor...";
+        sleep 2; break
+    fi
+
+    # Girilen değerin bir sayı olup olmadığını kontrol et
+    if ! [[ "$number" =~ ^-?[0-9]+$ ]]; then
+        echo "Lütfen geçerli bir sayı girin."
+        continue
+    fi
+
+    # Sayın negatif, pozitif veya sıfır olup olmadığını kontrol et
+    if [ "$number" -gt 0 ]; then
+        echo "Sayı pozitiftir."
+    elif [ "$number" -lt 0 ]; then
+        echo "Sayı negatiftir."
+    else
+        echo "Sayı sıfırdır."
+    fi
+
+    echo # Bir satır boşluk bırak
+done
+```
+
+##### Uygulama 9: case 
+```bash
+#!/usr/bin/bash
+
+# Kullanıcı dosya adını al
+echo -e "Bir dosya adı girin: \c"
+
+# Dosya türüne göre işlem yap
+case $1 in
+    *.txt)
+        echo "Bu bir metin doyası.";;
+    *.jpg|*.png)
+        echo "Bu bir resim dosyaı.";;
+    *.sh)
+        echo "Bu bir Bash script dosyası.";;
+    *)
+        echo "Dosya türü tanımıyor.";;
+esac
+```

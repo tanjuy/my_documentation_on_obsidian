@@ -253,6 +253,8 @@ $  curl -X DELETE https://jsonplaceholder.typicode.com/posts/1
 + **401 Unauthorized:** Yetkilendirme gerekiyor, ancak sağlanmamış.
 + **403 Forbidden:** İstemcinin kaynağa erişim izni yok.
 + **404 Not Found:** İstenen kaynak sunucuda bulunamadı.
++ **408 Request Timeout:** istemcinin (**client**) **sunucu tarafından belirlenen süre içinde isteğini tamamlayamaması** durumunda dönen bir hata kodudur.
++ **413 :** HTTP durum kodu `413`, "`Payload Too Large`" (Yük Çok Büyük) anlamına gelir. Bu hata, sunucunun istemciden gelen isteği işleyemeyeceğini belirtir çünkü isteğin içerdiği veri (payload) sunucunun kabul edebileceği boyut sınırını aşmıştır.
 ##### 5xx(Server Error) - Sunucu Hataları:
 + *Sunucu isteği işleyemediği durumlarda oluşur.*
 + **500 Internal Server Error:** Sunucuda beklenmeyen bir hata oluştu.
@@ -3470,6 +3472,832 @@ curl -X GET -i http://192.168.1.140
 + Her site veya hizmet farklı bir port üzerinden sunulur.
 + Örneğin: `example.com:80` ve `example.com:8080`.
 
+
+## Buffer:
+
++ Tampon(`Buffer`), nginx'in verileri bellek ile sabit disk arasında yazmak için kullanacağı bir şeydir.
+
+
+> [!NOTE]
+> + İstemciden gelen bağlantıyı kabul eden ve post isteğini(`post request`) kabul eden bir `NGINX Process`'in olduğunu varsayalım.
+> + Post isteği(`post request`) bir body'si var. nginx bu body'yi kaydetmek zorunda.
+> + ilk olarak nginx o belirli body'yi RAM belleğinin içine kaydeder.
+> + Yeterli alanımız yoksa ve nginx yapılandırmasına göre arabellek boyutu(`buffer size`) temel olarak düşük olarak tanımlanmışsa nginx o belirli şeyi sistem belleğine(`system memory`) kaydedecektir. Sistem belleği, hard disk olarak geçmektedir.
+> + nginx'in temel olarak post gövdesini RAM belleğine kaydettiği bu işleme tampon(`buffer`) adı verilir.
+
+
+> [!NOTE]
+> + Eğer tampon boyutları çok düşükse, Nginx geçici bir dosyaya yazmak zorunda kalacak ve bu da diskin sürekli olarak okuma ve yazmasına neden olacaktır. Yani, Eğer tampon boyutu(`buffer size`) düşükse nginx dosyayı diskin okunmasını ve yazılmasını sağlayacak sistem belleğine(`system buffer` - `disk`) yazmak zorunda kalacak ve bu da sürekli yavaş olduğundan tüm nginx sunucusunu yavaşlatacaktır.
+> + Öncelikle, çoğu post isteği için doğru tampon boyutunu(`buffer size`) tanımladığımızdan emin olmalıyız. Uygulamamın kabul edebileceği en fazla post isteğinin boyutunu(`most post request size`) belirlemeli ve buna göre nginx'te tampon boyutunu ayarlayabiliriz.
+
++ Bunlar tampon boyutunu(`buffer size`) yönetmenize yardımcı olacak birkaç yönergedir(`directive`).
+
+### 1. client_body_buffer_size:
+- **İşlevi**: İstemciden gelen istek gövdesini (request body) geçici olarak depolamak için kullanılan bellek buffer'ının boyutunu belirler.
+- **Varsayılan Değer**: Genellikle 8KB veya 16KB'dır (sistem ve Nginx sürümüne göre değişebilir).
+- Eğer istemciden gelen veri boyutu, `client_body_buffer_size` değerini aşarsa, Nginx bu veriyi **diske yazar** (genellikle `/var/lib/nginx/body` veya `/usr/local/nginx/client_body_temp` gibi bir dizine).
+- Eğer `buffer` boyutu yeterliyse, veri doğrudan bellekte işlenir, bu da performansı artırır.
+
+
+> [!WARNING]
+> + Backend(php, nodejs, django...) bir yazılım ile **daha sonra** uygulaması buraya aktarılacak yani hem kod hemde config dosyası.
+
+
+#### Ne Zaman Kullanılır?
+
+- **Büyük Dosya Yüklemeleri**: İstemcilerden büyük dosyalar (örneğin, resimler, videolar) yüklendiğinde, buffer boyutunu artırmak performansı iyileştirebilir.
+- **Form Verileri**: Büyük form verileri gönderildiğinde, buffer boyutunu artırmak veri işleme hızını artırabilir.
+- **API İstekleri**: JSON veya XML gibi büyük veri gövdeli API isteklerinde buffer boyutunu optimize etmek gerekebilir.
+
+**nginx.conf**
+```nginx
+http {
+    server {
+        listen 80;
+        server_name example.com;
+
+        # İstemci gövdesi için 1MB'lık buffer
+        client_body_buffer_size 1M;
+
+        location /form {
+            proxy_pass http://backend_server;
+        }
+    }
+}
+```
+> **Explanation:**
+> - Bu örnekte, istemciden gelen istek gövdesi 16KB'tan küçükse, veri bellekte işlenir. 16KB'tan büyükse, veri diske yazılır.
+> - `backend_server`'e 1 megabyte'tan fazla form, json gönder veya dosya yükleme işleminde diske yazılır aksi taktirde RAM kullanılacaktır.
+> - `backend_server` olarak django, nodejs ve php gibi 
+
+
+### 2. client_body_temp_path:
++ 
+
+
+### 3. client_header_buffer_size:
++ Bazen başlık uzun olabilir çünkü başlık içerisinde kimlik bilgileri(`credentials`), gizli(`Secret`), çerezler(`cookies`) gibi çok fazla veri gönderiyorsunuz.
++ `client_body_buffer_size` yönergesine benzer şekilde `client_header_buffer_size` yalnızca istemci başlığı için tampon boyutunu kabul edecektir.
++ `client_header_buffer_size` direktifi, Nginx'in istemciden gelen HTTP başlıklarını saklamak için ayırdığı tampon (`buffer`) boyutunu belirler.
++ Yani, istemciden gelen istek başlıklarının boyutu bu tamponun boyutunu aşmazsa, Nginx başlıkları tek seferde belleğe okur.
++ Ancak, başlıklar belirtilen tampon boyutundan büyükse, ek tamponlar kullanılır.
+
+### 4. client_body_max_size:
++  istemcilerin (kullanıcıların) sunucuya gönderebileceği HTTP isteği gövdesinin `(request body`) maksimum boyutunu belirler.
++ Bu direktif, özellikle dosya yükleme (upload) işlemlerinde veya büyük veri gönderimlerinde önemlidir.
++ **Değer:** `client_max_body_size` direktifi, boyutu bayt (B), kilobayt (K), megabayt (M) veya gigabayt (G) cinsinden belirtebilirsiniz. Örneğin:
+    - `10M`: 10 megabayt
+    - `100K`: 100 kilobayt
+    - `1G`: 1 gigabayt
+    - 5 : 5 bayt
+- **Varsayılan Değer:** Eğer bu direktif belirtilmezse, varsayılan değer `1M` (1 megabayt) olarak kabul edilir.
+- **Etki Alanı:** `http`, `server`, `location` bloklarında kullanılabilir.
+
+
+> [!CAUTION]
+> + Eğer bir istemci, belirtilen `client_max_body_size` değerinden daha büyük bir istek gönderirse, NGINX `413 Request Entity Too Large` hatası döner ve isteği reddeder.
+
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/formphp;
+
+        index index.html;
+
+        client_max_body_size 100;      # <-- 1.Durum
+	    # client_max_body_size 25;     # <-- 2.Durum
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+            include fastcgi.conf;
+            fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;  # Daha güvenli yapılandırma
+
+			add_header Content-Length $content_length;
+        }
+    }
+}
+```
+> **Explanation:**
+- `client_max_body_size`  değeri 100 olarak verdiğimizde ve form verisi 100 byte veriye izin vermeyecektir.
+- `add_header Content-Length $content_length` direktifi ile kullanıcın ne kadar form verisi gönderdiğini görebiliyoruz.(Normal şartlarda nginx varsayılan olarak `Content-Length` başlığını kullanıcıya gönderir.)
+- `index.html` ve `kayit.php` dosyaları `/var/www/html/formphp` dizin içerisinde bulunmaktadır.
+
+**index.html:**
+```html
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Kayıt Formu</title>
+</head>
+<body>
+    <h1>Kayıt Ol</h1>
+    <form method="post" action="kayit.php">
+        <label for="username">Kullanıcı Adı:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="email">E-posta:</label>
+        <input type="email" id="email" name="email" required>
+        <br>
+        <button type="submit">Kayıt Ol</button>
+    </form>
+</body>
+</html>
+```
+> **Explanation:**
+- **`<label>` öğesi;**
+	- `<label>` öğesi birkaç form öğeleri için bir etiket tanımlar.
+	- `<label>` öğesi ayrıca çok küçük bölgelere (örneğin radyo düğmeleri veya onay kutuları) tıklamada zorluk çeken kullanıcılara da yardımcı olur; çünkü kullanıcı `<label>` öğesinin içindeki metne tıkladığında radyo düğmesini/onay kutusunu değiştirir.
+	+ `<label>` etiketinin `for` niteliği, `<input>` öğesinin `id` niteliğine eşit olmalı ki, bunlar birbirine bağlansın.
++ **`<input>` öğesi;**
+	+  Form gönderildiğinde, sunucuya `username` ve `email` adları altında kullanıcının girdiği değerler gönderilir.
+	+ Örneğin, kullanıcı "John" ve "`Doe@gmail.com`" girdiyse, sunucuya `username=John&lname=Doe@gmail.com` şeklinde bir veri gönderilir.
+
+
+**kayit.php:**
+```php
+<?php
+// Form verilerini al
+$username = $_POST['username'];
+$email = $_POST['email'];
+
+// Veritabanına kaydetme işlemi (örnek amaçlı basit bir işlem)
+// Gerçek bir uygulamada burada veritabanı bağlantısı ve SQL sorguları kullanılır.
+echo "Kullanıcı Adı: " . htmlspecialchars($username) . "<br>";
+echo "E-posta: " . htmlspecialchars($email) . "<br>";
+echo "Kayıt işlemi başarılı!";
+?>
+```
+
+**POST İsteği:**
+```shell
+curl -i -X POST \
+	-F "username=tanjuyucal" \
+	-F "email=tanjuyucal@gmail.com" \
+	http://192.168.1.132/kayit.php
+```
+> **Explanation:**
+>+ (HTTP SMTP IMAP) HTTP protokol ailesi için, bu `curl`'ün kullanıcının gönder düğmesine bastığında doldurulmuş bir formu taklit etmesini sağlar.
+
+
+**Curl çıktısı:**
+```shell
+http://192.168.1.132/kayit.php
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Mon, 03 Feb 2025 15:32:47 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Content-Length: 46
+
+Kullanıcı Adı: tanjuyucal<br>E-posta: tanjuyucal@gmail.com<br>Kayıt işlemi başarılı!%
+```
+> **Explanation:**
+> - `Content_Length: 46` anlamı kullanıcı tarafından 46 byte boyutunda veri gönderildiğidir.
+> - Eğer `client_max_body_size` değerini 46'dan küçük verirsek nignx 413 `Request Entity Too Large` hatası verir.
+
+**POST isteği: Alternatif**
+```shell
+curl -i -X POST \                                                                  
+	-d "username=tanjuyucal&email=tanjuyucal@gmail.com" \
+	http://192.168.1.132:8080/kayit.php
+```
+> **Explanation:**
++ Alternatif olarak, `-F` parametresin yerine `-d` parametresi ile veri sunucuya gönderiliyor. 
+
+**Curl Çıktısı:**
+```shell
+http://192.168.1.132/kayit.php
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Mon, 03 Feb 2025 15:32:47 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Content-Length: 46
+
+Kullanıcı Adı: tanjuyucal<br>E-posta: tanjuyucal@gmail.com<br>Kayıt işlemi başarılı!%
+```
+
+**POST isteği: Tarayıcıda**
+![Tarayıcıda üzerinde client_max_body_size](images/client_max_body_size.png)
+
+
+![kayıt.php çalıştırılıyor](images/client_max_body_size-php.png)
+> **Explanation:**
+> - Yukarıda `curl` komut ile  `POST` isteği gönderme görevi ile aynı işlevi yapmaktadır. 
+
+### 5. large_header_buffer_size:
++ `large_client_header_buffers`, Nginx yapılandırma dosyasında (`nginx.conf`) kullanılan bir direktiftir.
++ Bu direktif, istemci tarafından gönderilen büyük HTTP başlıklarını (headers) işlemek için ayrılan bellek tamponlarının (buffers) sayısını ve boyutunu belirler.
++ Eğer istemci tarafından gönderilen başlıklar bu tamponların boyutunu aşarsa, Nginx `414 Request-URI Too Large` veya `400 Bad Request` gibi hatalar döndürebilir.
+
+
+> [!NOTE]
+> + `nginx.conf` dosyasında `large_client_header_buffers` direktifi genellikle `http`, `server` veya `location` bloklarında kullanılır.
+> + Varsayılan değer genellikle `4 8k` şeklindedir, yani 4 adet 8 KB'lık tampon.
+
+```nginx
+http {
+    large_client_header_buffers 4 16k;
+    ...
+}
+```
+> **Explanation:**
+> + Bu örnekte, Nginx'e istemci başlıklarını işlemek için 4 adet 16 KB'lık tampon kullanması söylenir.
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/formphp;
+
+        index index.html;
+
+        large_client_header_buffers 1 17k;
+	    
+        location / {
+            try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+            add_header Content-Length $content_length;
+            include fastcgi.conf;
+            fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;  # Daha güvenli yapılandırma
+        }
+    }
+}
+```
+
+**GET istek: 16KB**
+```shell
+curl -X GET -i -H "Large-Header: $(printf '%*s' 16384 '3')" http://192.168.1.132
+```
+> **Explanation:**
+ > - Bu komut, 16 KB'lık bir başlık gönderir. 
+ > - Eğer `large_client_header_buffers` yeterli boyutta ayarlandıysa, Nginx bu isteği başarıyla işleyecektir. 
+ > - Aksi takdirde `400 Bad Request` veya `414 Request-URI Too Large` hatası alabilirsiniz.
+
+**Curl Çıktısı:**
+```shell
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Fri, 07 Feb 2025 11:44:18 GMT
+Content-Type: text/html
+Content-Length: 513
+Last-Modified: Sat, 01 Feb 2025 08:42:44 GMT
+Connection: keep-alive
+ETag: "679dde84-201"
+Accept-Ranges: bytes
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Kayıt Formu</title>
+</head>
+<body>
+    <h1>Kayıt Ol</h1>
+    <form method="post" action="kayit.php">
+        <label for="username">Kullanıcı Adı:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="email">E-posta:</label>
+        <input type="email" id="email" name="email" required>
+        <br>
+        <button type="submit">Kayıt Ol</button>
+    </form>
+</body>
+</html>
+```
+> **Explanation:**
+> +  `large_client_header_buffers 1 17k` ifadesi 17 kilobayt kadar html başlıklarına(`Header`) izin vermektedir.
+> + `curl` komut ile 16 kilobayt html başlığı ile GET isteği yapılmaktadır ve bundan dolayı nginx, hata vermeden html kodları istemciye göndermektedir.
+
+
+**GET istek: 18KB**
+```shell
+curl -X GET -i -H "Large-Header: $(printf '%*s' 18384 '3')" http://192.168.1.132
+```
+
+**Curl Çıktısı:**
+```shell
+HTTP/1.1 400 Bad Request
+Server: nginx/1.27.2
+Date: Fri, 07 Feb 2025 11:44:24 GMT
+Content-Type: text/html
+Content-Length: 233
+Connection: close
+
+<html>
+<head><title>400 Request Header Or Cookie Too Large</title></head>
+<body>
+<center><h1>400 Bad Request</h1></center>
+<center>Request Header Or Cookie Too Large</center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+```
+> **Explanation:**
+> + `nginx.conf` da  `large_client_header_buffers 1 17k` ile 17 kilobayt kadar izin verildiğini görebiliyoruz.
+> + Ama `curl` komut ile 18 kilobayt veri gönderildiği için yani 17 kilobaytın üstünde olduğun için nginx, html 400 kodu ile birlikte `Request Header Or Cookie Too Large` mesajını göndermektedir.
+
+## Timeout Direktifleri:
+
+### a. client_body_timeout:
++ İstemcinin HTTP isteğinin gövdesini (body) ne kadar sürede göndermesi gerektiğini belirler.
++ **Dosya yükleme gibi işlemlerde önemlidir**. 
++ İstemci belirtilen sürede veri göndermeyi tamamlamazsa bağlantı **zaman aşımına uğrar**.
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        # Virtual Host
+        listen 80;
+        server_name 192.168.1.132;
+
+        # root /var/www/html/bloggingtemplate/;
+
+        client_max_body_size 4m;
+        client_body_timeout 3s;
+
+        location / {
+            proxy_pass http://127.0.0.1:5000/;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $host;
+            proxy_set_header X-Forwarded-Prefix /;
+        }
+    }
+```
+> **Explanation:**
+> + `client_max_body_size 4m` :  nginx, istemci(client) tarafından gönderilen(yüklenen dosya) body boyutunu 4 megabayta kadar izin vermektedir. Eğer 4 megabaytın üzerinde veri gönderildiğinde `413 Request Entity Too Large` hata mesajını verir.
+> + `client_body_timeout 3s` : istemcin `body` yani dosyayı tamamen yüklemesi için verilen süre 3 saniyedir. Eğer 3 saniye içerisinde veri gönderilmez ise nginx tarafında bağlantı zaman aşımına uğrayacaktır. 
+
+**Flask Dosyası: upload.py** 
+```python
+from flask import Flask, request, render_template
+import os
+
+app = Flask(__name__)
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Klasörü oluştur
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+@app.route("/", methods=["GET", "POST"])
+def upload_file():
+    if request.method == "POST":           # --> 1.Return
+        file = request.files["file"]
+        if file:
+            file.save(os.path.join(app.config["UPLOAD_FOLDER"], file.filename))
+            return "Dosya başarıyla yüklendi!"
+    return '''
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="file">
+            <input type="submit" value="Yükle">
+        </form>
+    '''                                    # --> 2.Return
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5000)
+```
+> **Explanation:**
+> + `app = Flask(__name__)` : Flask sınıfından `app` adında nesne oluşturuyoruz.
+> + `os.makedirs(UPLOAD_FOLDER, exist_ok=True)`: klasörü oluşturur(uploads) ve **eğer zaten varsa hata vermez.** `UPLOAD_FOLDER` bir değişken.
+> + `1.Return:` Eğer POST isteği geldiğinde çalışıp döndürülecek `if` bloğu
+> + `2.Return:` Eğer POST değil de GET isteği geldiğinde çalıştırılıp döndürülecek `return` değeri. 
+
+```shell
+gunicorn -w 2 -b 127.0.0.1:5000 upload:app
+```
+> **Explanation:**
+> + `gunicorn`: **Gunicorn**, Python web uygulamalarını çalıştırmak için kullanılan bir WSGI HTTP sunucusudur.
+> + `-w 2` : Bu, Gunicorn'un 2 çalışan işlem (`worker`) kullanacağını belirtir. Yani, uygulama 2 paralel işlemle çalışacaktır. `worker process`'leri `ps aux | grep gunicorn` komut ile görebilirsiniz.
+> + `127.0.0.1:5000`: Bu, uygulamanın çalışacağı IP adresi ve portu belirtir. Bu durumda, uygulama yerel makinede (localhost) 5000 portunda çalışacaktır.
+> + `upload:app`: Bu, Gunicorn'un hangi uygulamayı çalıştıracağını belirtir. `upload` modülünün içindeki `app` nesnesini kullanır. Örneğin, `upload.py` dosyasında `app = Flask(__name__)` gibi bir Flask uygulaması tanımlanmış olabilir.
+
+**GET isteği:**
+```shell
+curl --limit-rate 1k -X POST -F "file=@nature.jpg" http://192.168.1.132
+```
+> **Explanation:**
+> + `--limit-rate 1k`: Bu, veri transfer hızını sınırlar. `1k`, saniyede 1 kilobayt (KB) hızında veri gönderileceği anlamına gelir. Bu, özellikle yavaş ağ bağlantılarını simüle etmek veya sunucuya aşırı yük bindirmemek için kullanılır.
+> + `-X POST`: Bu, HTTP isteğinin türünü belirtir. `POST`, sunucuya veri göndermek için kullanılan bir HTTP metodudur. Bu durumda, dosya sunucuya POST edilecek.
+> + `-F "file=@nature.jpg"`: Bu, `multipart/form-data` formatında bir dosya göndermek için kullanılır. - `file=@nature.jpg` ifadesi, `nature.jpg` dosyasını `file` adıyla sunucuya gönderir. `@` işareti, dosyanın yerel sistemden okunacağını belirtir.
+> + **Özetle:** Bu komut, `nature.jpg` adlı dosyayı, saniyede 1 kilobayt hızında (`--limit-rate 1k`), `192.168.1.132` adresindeki sunucuya POST isteğiyle gönderir. Dosya, `multipart/form-data` formatında `file` adıyla sunucuya iletilir.
+
+**Curl Çıktı:**
+```shell
+HTTP/1.1 100 Continue
+
+```
+> **Explanation:**
+> +  `nginx.conf` dosyasında `client_body_timeout` değeri 3 saniye ayarlandığından ve curl komutu ile 2.34 boyutundaki `nature.jpg` dosyasını `--limit-rate` komut ile saniyede 1 kilobayt veri gönderildiğinde nginx, zaman aşımına uğramaktadır.
+> + Dikkat ederseniz  çıktı  **http 100 durum kodu** verdiğini görebiliriz bunun anlamı isteğin alındığını işlemin hala devam ettiğini göstermektedir. 
+
+### b. client_header_timeout:
++  Bu direktif, istemcinin (`client`) **HTTP başlıklarını** (`headers`) göndermesi için beklenen maksimum süreyi belirler.
++  Eğer istemci bu süre içinde başlıkları göndermezse, Nginx bağlantıyı sonlandırır ve `408 Request Timeout` hatası döndürür.
+- İstemci tarafından gönderilen HTTP başlıkları (örneğin, `Host`, `User-Agent`, `Cookie` gibi) yavaş bir ağ bağlantısı üzerinden geliyorsa, bu direktif sayesinde sunucunun sonsuza kadar beklemesi engellenir.
+- Özellikle yavaş bağlantılarda veya kötü niyetli istemcilerden gelen yavaşlatma (slowloris) saldırılarına karşı koruma sağlar.
+- `client_header_timeout` direktifinin varsayılan değeri genellikle **60 saniye**'dir.
+
+
+> [!NOTE]
+> + **Slowloris Saldırılarına Karşı Koruma**
+> + Slowloris saldırıları, istemcilerin yavaş yavaş başlık göndererek sunucu kaynaklarını tüketmeye çalıştığı bir saldırı türüdür.
+> + `client_header_timeout` değerini düşük tutarak bu tür saldırılara karşı koruma sağlayabilirsiniz.
+
+
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        client_header_timeout 5m;
+
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+
+}
+```
+> **Explanation:**
+> - `bloggingtemplate` web sitesi için:  [www.100utils.com](https://www.100utils.com/download/course-files-for-youtube-course-complete-nginx-training/)
+
+
+> [!NOTE]
+> + **slowhttptest Kurulum:**
+> + Debain temeli: `sudo apt install slowhttptest`, REHL temeli: `sudo yum install slowhttptest`
+
+```shell
+slowhttptest -c 1000 -H -g -o slowloris -i 10 -r 200 -t GET -u http://192.168.1.132/ -x 24 -p 3
+```
+> **Explanation:**
+> - `-c 1000`: 1000 bağlantı oluşturur.
+> - `-H`: Slowloris modunu etkinleştirir.
+> - `-i 10`: Her 10 saniyede bir yeni bağlantı açar.
+> - `-r 200`: Saniyede 200 bağlantı oluşturur.
+> - `-t GET`: GET isteği kullanır.
+> - `-u http://192.168.1.132/`: Hedef sunucunun URL'si.
+> - `-x 24`: Bağlantıları 24 saniye boyunca açık tutar.
+> - `-p 3`: 3 saniyede bir yavaş yavaş veri gönderir.
+
+### c. keepalive_timeout:
++ `keepalive-timeout`, istemciyle yapılan keep-alive bağlantıları için zaman aşımını(`timeout`) atar. Nginx, bu sürenin sonunda istemciyle(`client`) olan bağlantıları kapatacaktır.
++ İstemci nginx ile bağlantı oluşturduğunda, yapılandırma içerisinde `keepalive_timeout` değerini tanımladıysanız, istemci ve sunucu bağlantıları o belirli süre boyunca canlı kalacaktır.
+
+#### Syntax:
+```nginx
+keepalive_timeout timeout [header_timeout];
+```
+> **Explanation:**
+> - **timeout**: Bağlantının açık kalacağı süreyi belirtir (saniye cinsinden). Varsayılan değer genellikle `75s`'dir.
+> - **header_timeout** (isteğe bağlı): İstemciye gönderilen `Keep-Alive` başlığındaki süreyi belirtir. Bu değer, `timeout` değerinden farklı olabilir.
+
+#### Örnek 1: 
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+	# keepalive_timeout 25;        # 1
+    keepalive_timeout 10 15;       # 2
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        # root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            return 200 "Merhaba Dünya";
+        }
+    }
+
+}
+```
+> **Explanation:**
+> +  Bu örnekte, bağlantılar 65 saniye boyunca açık tutulacaktır.(1)
+> + Bu örnekte, bağlantılar 10 saniye boyunca açık tutulacak, ancak istemciye gönderilen `Keep-Alive` başlığında 15 saniye belirtilecektir.
+
+
+![keepalive_timeout on browser](./images/keepalive_timeout.png)
+
+
+**Paket analizi:**
+```shell
+sudo tcpdump -i enp0s3 port 80
+```
+> **Explanation:**
+> 1. `tcpdump:`  Ağ trafiğini dinlemek ve analiz etmek için kullanılan bir komut satırı aracıdır. Paketleri yakalar ve ekranda gösterir.
+> 2. **`-i enp0s3`**: 
+> 	+ `-i` seçeneği, dinlenecek ağ arayüzünü belirtir.
+> 	+ `enp0s3`, dinlenecek ağ arayüzünün adıdır. Bu, sisteminizdeki Ethernet arayüzünün adı olabilir. Arayüz adı, sistemden sisteme değişebilir (örneğin, `eth0`, `ens33`, `wlan0` gibi).
+> 3. **`port 80`**:  `port 80`, yalnızca 80 numaralı port üzerinden gelen ve giden trafiği dinlemek için kullanılır. Port 80, HTTP (web) trafiği için standart porttur. Bu nedenle, bu komut HTTP trafiğini yakalamak için kullanılır.
+
+**tcpdump çıktısı:**
+```shell
+16:01:57.206820 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [S], seq 2165208526, win 65535, options [mss 1460,nop,wscale 8,nop,nop,sackOK], length 0
+16:01:57.207013 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [S.], seq 1252249833, ack 2165208527, win 64240, options [mss 1460,nop,nop,sackOK,nop,wscale 7], length 0
+16:01:57.208139 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], ack 1, win 255, length 0
+16:01:57.208140 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [P.], seq 1:402, ack 1, win 255, length 401: HTTP: GET / HTTP/1.1
+16:01:57.210677 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [.], ack 402, win 501, length 0
+16:01:57.213723 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [P.], seq 1:187, ack 402, win 501, length 186: HTTP: HTTP/1.1 200 OK
+16:01:57.255177 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], ack 187, win 255, length 0
+16:01:57.287404 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [P.], seq 402:784, ack 187, win 255, length 382: HTTP: GET /favicon.ico HTTP/1.1
+16:01:57.288071 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [P.], seq 187:375, ack 784, win 501, length 188: HTTP: HTTP/1.1 200 OK
+16:01:57.330172 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], ack 375, win 254, length 0
+16:02:07.299210 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [F.], seq 375, ack 784, win 501, length 0
+16:02:07.300370 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], ack 376, win 254, length 0
+16:02:52.301916 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], seq 783:784, ack 376, win 254, length 1: HTTP
+16:02:52.301973 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [.], ack 784, win 501, length 0
+16:03:37.302974 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], seq 783:784, ack 376, win 254, length 1: HTTP
+16:03:37.303047 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [R], seq 1252250209, win 0, length 0
+```
+
+#### Örnek 1 Analizi:
+##### 1. TCP Bağlantı Kurulumu (3-Way Handshake):
++ Başlangıçta istemci (**192.168.1.102**) ve sunucu (**nginx-tutorial3**) arasında **TCP 3'lü el sıkışması (3-way handshake)** gerçekleşiyor:
+
+```shell
+16:01:57.206820 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [S], seq 2165208526, win 65535, options [mss 1460,nop,wscale 8,nop,nop,sackOK], length 0
+```
+> **Explanation:**
+> + İstemci SYN gönderiyor (Bağlantı isteği)
+> + **16:01:57.206820**: İstemci (`192.168.1.102.15517`), sunucuya (`nginx-tutorial3.http`) bir SYN paketi göndererek bağlantı kurmak istiyor.
+> 	- `Flags [S]`: SYN bayrağı, bağlantı kurma isteği.
+> 	- `seq 2165208526`: İstemcinin başlangıç sekans numarası.
+
+
+> [!TIP]
+> + `win 255`, TCP (Transmission Control Protocol) bağlantısında kullanılan **pencere boyutunu (window size)** ifade eder.
+> + Bu değer, alıcı tarafın (bu durumda istemci) ne kadar veriyi kabul edebileceğini gösterir. Daha spesifik olarak, bu değer, alıcının **TCP receive buffer**'ında ne kadar boş alan olduğunu belirtir.
+> + **Pencere Boyutu (Window Size) Nedir?**
+> 	- TCP, veri iletişiminde **akış kontrolü (flow control)** mekanizması kullanır. Bu mekanizma, gönderen tarafın, alıcı tarafın kapasitesini aşacak şekilde veri göndermesini engeller.
+> 	- **Pencere boyutu (window size)**, alıcının "daha ne kadar veri kabul edebileceğini" gönderen tarafa bildirir. Bu değer, bayt (byte) cinsinden ifade edilir.
+> 	- Örneğin, `win 255` değeri, alıcının 255 baytlık daha veri kabul edebileceğini belirtir.
+> + **`win 255` Ne Anlama Geliyor?**
+> 	- `win 255`, alıcı tarafın (bu durumda istemci) TCP `receive buffer`'ında 255 baytlık boş alan olduğunu gösterir.
+> 	- Bu değer dinamiktir ve bağlantı süresince değişebilir. Alıcı, veriyi işledikçe ve buffer'ı boşalttıkça, pencere boyutunu güncelleyerek gönderen tarafa bildirir.
+> 	- Eğer pencere boyutu sıfıra (`win 0`) düşerse, gönderen taraf veri göndermeyi durdurur (bu duruma **zero window** denir).
+
+
+
+```shell
+16:01:57.207013 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [S.], seq 1252249833, ack 2165208527, win 64240, options [mss 1460,nop,nop,sackOK,nop,wscale 7], length 0
+```
+> **Explanation:**
+> + Sunucu SYN-ACK ile yanıtlıyor (Bağlantı kabul edildiğini belirtiyor)
+> + **16:01:57.207013**: Sunucu, SYN-ACK paketi göndererek bağlantıyı kabul ediyor.
+> 	- `Flags [S.]`: SYN-ACK bayrağı, bağlantı kabulü.
+> 	- `seq 1252249833`: Sunucunun başlangıç sekans numarası.
+> 	- `ack 2165208527`: İstemcinin sekans numarasını onaylıyor.
+
+```shell
+16:01:57.208139 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], ack 1, win 255, length 0
+```
+> **Explanation:**
+> +  İstemci ACK göndererek bağlantıyı tamamlıyor.
+> + **16:01:57.208139**: İstemci, sunucunun SYN-ACK paketini onaylıyor.
+> 	- `Flags [.]`: ACK bayrağı, bağlantı tamamlandı.
+
+##### 2. İlk HTTP İsteği ve Yanıtı:
+
+```shell
+16:01:57.208140 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [P.], seq 1:402, ack 1, win 255, length 401: HTTP: GET / HTTP/1.1
+```
+> **Explanation:**
+> + Bağlantı kurulduktan sonra istemci **GET / HTTP/1.1** isteğini gönderiyor:
+> + `Flags [P.]` : Push (P) + ACK (.)
+
+
+```shell
+16:01:57.210677 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [.], ack 402, win 501, length 0
+```
+> **Explanation:**
+> + **16:01:57.210677**: Sunucu, isteği aldığını onaylıyor.
+> 	- `Flags [.]`: ACK bayrağı.
+
+```shell
+16:01:57.213723 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [P.], seq 1:187, ack 402, win 501, length 186: HTTP: HTTP/1.1 200 OK
+```
+> **Explanation:**
+> + Sunucu, HTTP **200 OK** yanıtını veriyor.
+> + **16:01:57.213723**: Sunucu, HTTP yanıtını gönderiyor.
+> 	- `Flags [P.]`: PUSH ve ACK bayrakları, veri gönderimi.
+> 	- `seq 1:187`: Gönderilen verinin sekans aralığı.
+> 	- `length 186`: Gönderilen verinin boyutu.
+> 	- `HTTP: HTTP/1.1 200 OK`: Başarılı yanıt.
+
+> [!TIP]
+> + **Push (P) Bayrağı nedir?**
+> + Normalde TCP, **verileri tamponlar (buffer)** ve uygun bir büyüklüğe ulaştığında paketleri gönderir. Ancak `P` bayrağı ayarlandığında, verinin **tamponda bekletilmeden** hemen alıcıya iletilmesini söyler.
+> + Örneğin, HTTP istekleri genellikle **tam ve eksiksiz olarak** gönderilmelidir. Bu yüzden **GET / HTTP/1.1** gibi isteklerde `P` bayrağını görürsün
+> + **P**: HTTP isteği eksiksiz olduğu için anında gönderiliyor.
+> + **. (ACK)**: Önceki verinin alındığını onaylıyor.
+
+```shell
+16:01:57.255177 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], ack 187, win 255, length 0
+```
+> **Explanation:**
+> + **16:01:57.255177**: İstemci, yanıtı aldığını onaylıyor.
+> 	- `Flags [.]`: ACK bayrağı.
+
+##### 3. İstemci favicon.ico İçin Yeni İstek Yapıyor:
+```shell
+16:01:57.287404 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [P.], seq 402:784, ack 187, win 255, length 382: HTTP: GET /favicon.ico HTTP/1.1
+```
+> **Explanation:**
+> + Tarayıcı, favicon.ico dosyasını istiyor.
+> + **16:01:57.287404**: İstemci, `/favicon.ico` dosyası için bir GET isteği gönderiyor.
+> 	- `Flags [P.]`: PUSH ve ACK bayrakları, veri gönderimi.
+> 	- `seq 402:784`: Gönderilen verinin sekans aralığı.
+> 	- `length 382`: Gönderilen verinin boyutu.
+
+```shell
+16:01:57.288071 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [P.], seq 187:375, ack 784, win 501, length 188: HTTP: HTTP/1.1 200 OK
+```
+> **Explanation:**
+> + Sunucu, tekrar **200 OK** yanıtı döndürüyor.
+>  + **16:01:57.288071**: Sunucu, favicon.ico için yanıt gönderiyor.
+> 	 - `Flags [P.]`: PUSH ve ACK bayrakları, veri gönderimi.
+> 	 - `seq 187:375`: Gönderilen verinin sekans aralığı.
+> 	 - `length 188`: Gönderilen verinin boyutu.
+> 	 - `HTTP: HTTP/1.1 200 OK`: Başarılı yanıt.
+
+```shell
+16:01:57.330172 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], ack 375, win 254, length 0
+```
+> **Explanation:**
+> + **16:01:57.330172**: İstemci, yanıtı aldığını onaylıyor.
+> 	- `Flags [.]`: ACK bayrağı.
+
+##### 4. Keepalive Süresi ve Bağlantının Kapatılması:
+
+```shell
+16:02:07.299210 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [F.], seq 375, ack 784, win 501, length 0
+```
+> **Explanation:**
+> + 10 saniye sonra, sunucu **bağlantıyı kapatma isteği (FIN) gönderiyor**.
+> + **16:02:07.299210**: Sunucu, `keepalive_timeout` süresi dolduğu için bağlantıyı kapatıyor.
+> 	- `Flags [F.]`: FIN ve ACK bayrakları, bağlantıyı kapatma isteği.
+> 	- `seq 375`: Sunucunun son sekans numarası.
+
+```shell
+16:02:07.300370 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], ack 376, win 254, length 0
+```
+> **Explanation:**
+> + İstemci bu **FIN** isteğini **ACK** ile onaylıyor. 
+> + **16:02:07.300370**: İstemci, FIN paketini onaylıyor.
+> 	- `Flags [.]`: ACK bayrağı.
+
+##### 5. Sonraki 45 ve 90. Saniyelerde Garip Bir Paket Geliyor:
+
+```shell
+16:02:52.301916 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], seq 783:784, ack 376, win 254, length 1: HTTP
+```
+> **Explanation:**
+> + Bağlantı kapandıktan sonra, istemcinin **45 saniye sonra** tek bir baytlık (length 1) **boş HTTP paketi gönderdiği** görülüyor.
+> + **16:02:52.301916**: İstemci, sunucuya bir byte'lık veri gönderiyor (muhtemelen bir test veya hata).
+> 	- `Flags [.]`: ACK bayrağı.
+> 	- `length 1`: Gönderilen verinin boyutu.
+
+```shell
+16:02:52.301973 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [.], ack 784, win 501, length 0
+```
+> **Explanation:**
+> + Sunucu bu isteğe normal bir **ACK** yanıtı veriyor.
+> + **16:02:52.301973**: Sunucu, bu veriyi onaylıyor.
+> 	- `Flags [.]`: ACK bayrağı.
+
+```shell
+16:03:37.302974 IP 192.168.1.102.15517 > nginx-tutorial3.http: Flags [.], seq 783:784, ack 376, win 254, length 1: HTTP
+```
+> **Explanation:**
+> + **90. saniyede istemci aynı hatalı paketi tekrar gönderiyor.**
+> + **16:03:37.302974**: İstemci, tekrar bir byte'lık veri gönderiyor.
+> 	- `Flags [.]`: ACK bayrağı.
+> 	- `length 1`: Gönderilen verinin boyutu.
+
+```shell
+16:03:37.303047 IP nginx-tutorial3.http > 192.168.1.102.15517: Flags [R], seq 1252250209, win 0, length 0
+```
+> **Explanation:**
+> + Bu kez sunucu **RESET (RST) paketi** ile yanıt veriyor.
+> + Bu, sunucunun bağlantıyı **zorla kapattığını** gösterir. **RST paketi**, istemciye "Bu bağlantı artık geçersiz, tekrar bağlan" mesajı verir.
+> + **16:03:37.303047**: Sunucu, bağlantıyı tamamen kapatıyor.
+> 	- `Flags [R]`: RST bayrağı, bağlantıyı zorla sonlandırma.
+
+##### 6. Özet:
++ `keepalive_timeout 10 15` ayarı:
+	- **10 saniye**: Sunucu, bağlantıyı 10 saniye boyunca açık tutar.
+	-  **15 saniye**: İstemciye gönderilen `Keep-Alive` başlığında belirtilen süre.
+- **16:01:57**'de bağlantı kuruldu ve **16:02:07**'de sunucu bağlantıyı kapattı. Bu, tam olarak 10 saniye sonra gerçekleşti ve `keepalive_timeout` ayarına uygun.
+- İstemci, bağlantı kapandıktan sonra bile veri göndermeye çalıştı, ancak sunucu RST bayrağı göndererek bağlantıyı tamamen kapattı.
+
+### d. send_timeout:
+
++ `send_timeout`, Nginx'in istemciye veri gönderirken belirli bir süre boyunca yanıt almazsa bağlantıyı kapatmasını sağlayan bir zaman aşımı (timeout) ayarıdır.
+
+
+> [!TIP]
+> + send_timeout, büyük veya yoğun trafikli uygulamalar için nginx performansını ayarlamanın bir diğer önemli yönüdür.
+
+#### d.1. Çalışma Mantığı:
+1. **`send_timeout` süresi boyunca istemci, veri almayı durdurursa** (örneğin, istemci ağ bağlantısını kaybeder veya çok yavaş çalışır), Nginx bağlantıyı **kapatarak** sistem kaynaklarını korur.
+2. Ancak **bu süre boyunca Nginx beklemeye devam eder**, hemen bağlantıyı sonlandırmaz.
+3. **Yanlış anlaşılmaması gereken nokta:** `send_timeout`, **tüm veri aktarımı için değil**, **sadece bir paket gönderme işlemi için bekleme süresidir**.
+
+```nginx
+server {
+    send_timeout 30s;
+    ...
+}
+```
+
+
+> [!NOTE]
+> - `send_timeout`, yalnızca sunucunun veri gönderme işlemi sırasında geçerlidir.
+> - İstemcinin yavaş bağlantısı veya ağ sorunları nedeniyle veri alımı gecikirse, bu süre aşıldığında bağlantı kapatılır.
+> - Bu direktif, özellikle yavaş istemcilerle çalışırken veya büyük dosya transferlerinde önemlidir.
+
+
 ## HTTP Cache Control header
 ``` nginx
 user www-data;
@@ -3525,7 +4353,7 @@ http {
 > 	+ Eğer kaynak belirtilen tarihten sonra değiştirilmişse, sunucu `200 OK` yanıtıyla birlikte güncellenmiş kaynağı döner.
 
 #### 1. İstemci ve Caching Sunucu Arasında İletişim
-1. **İlk İstek:**
+4. **İlk İstek:**
 ```http
 GET /resim.jpg HTTP/1.1
 Host: example.com
@@ -3533,7 +4361,7 @@ Host: example.com
 > **Explanation:**
 > İstemci, belirli bir kaynağı (örneğin, bir web sayfası veya resim dosyası) almak için caching sunucusuna bir istek gönderir. Bu istekte `If-Modified-Since` başlığı genellikle yer almaz, çünkü istemci kaynağı henüz önbelleğe almadı.
 
-2. **Caching Sunucunun Yanıtı:**
+5. **Caching Sunucunun Yanıtı:**
 ```http
 HTTP/1.1 200 OK
 Last-Modified: Wed, 21 Oct 2023 07:28:00 GMT
@@ -3546,7 +4374,7 @@ Content-Length: 12345
 > + Caching sunucusu, isteği orijinal sunucuya iletir. Orijinal sunucu, kaynağı döndürür ve `Last-Modified` başlığını içerir.
 > + Caching sunucusu, bu yanıtı alır ve hem istemciye iletir hem de yanıtı önbelleğe kaydeder.
 
-3. **Sonraki İstekler:**
+6. **Sonraki İstekler:**
 ```http
 GET /resim.jpg HTTP/1.1
 Host: example.com
@@ -3556,7 +4384,7 @@ If-Modified-Since: Wed, 21 Oct 2023 07:28:00 GMT
 > İstemci aynı kaynağı tekrar almak istediğinde, caching sunucusuna yeni bir GET isteği gönderir. Bu istek genellikle `If-Modified-Since` başlığını içerir ve daha önce aldığı `Last-Modified` tarihini içerir.
 
 #### 2. Caching Sunucu ve Orijinal Sunucu Arasında İletişim
-1. **Caching Sunucusunun Öncelikli Yanıtı:**
+7. **Caching Sunucusunun Öncelikli Yanıtı:**
 ```http
 HTTP/1.1 200 OK
 Content-Type: image/jpeg
@@ -3567,7 +4395,7 @@ Content-Length: 12345
 > **Explanation:**
 > Caching sunucusu, istemciden gelen isteği aldığında, önbelleğinde bulunan verinin `Last-Modified` tarihini kontrol eder. Eğer istemcinin `If-Modified-Since` tarihinden daha yeni bir veri varsa, caching sunucusu doğrudan istemciye `200 OK` yanıtıyla birlikte önbellekteki veriyi döner.
 
-2. **Orijinal Sunucuya İstek Gönderme:**
+8. **Orijinal Sunucuya İstek Gönderme:**
 ```http
 GET /resim.jpg HTTP/1.1
 Host: example.com

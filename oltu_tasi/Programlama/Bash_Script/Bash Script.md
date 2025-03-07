@@ -718,6 +718,21 @@ $ [ -z $kardiz ]                          # test -z $kardiz
 > + kardiz adlı değişkenin boş olup olmadığını kontrol ediyoruz. 
 > + Eğer `echo $?` komutu sıfır verirse kardiz boş karakterli ama bir verirse kardiz değişkeninde karakter dizini atanmıştır.
 
+###### Örnek 2.1:
+```bash
+#!/usr/bin/bash
+
+echo -e "Lütfen isminizi girin: \c"; read isim
+
+if [ -z "$isim" ]; then
+	echo "İsim boş bırakılamaz. Lütfen tekrar deneyin."
+else
+	echo "Merhaba, $isim!"
+fi
+```
+> **Explanation:**
++ 
+
 ###### Örnek 3: test -n
 ```shell
 kardiz="not empty"
@@ -2254,13 +2269,13 @@ $ cat < gecmis.txt
 
 ### Kurallı İfadeler(Regular Expressions-RegEx)
 ###### Tanım: 
-+ Bash scriptlerde **Regular Expressions (RegEx)**, bir metin içerisinde belirli bir desen (pattern) tanımlamak ve bu deseni aramak için kullanılan güçlü bir yapıdır.
-+ RegEx, özellikle metin işleme ve manipülasyon işlemlerinde yaygın olarak kullanılır.
++ Bash scriptlerde **Regular Expressions (`RegEx`)**, bir metin içerisinde belirli bir desen (pattern) tanımlamak ve bu deseni aramak için kullanılan güçlü bir yapıdır.
++ `RegEx`, özellikle metin işleme ve manipülasyon işlemlerinde yaygın olarak kullanılır.
 + Bash, RegEx'i `grep`, `sed`, `awk`, `[[ ... ]]` gibi komutlarla kullanmanıza olanak tanır.
 ###### Bash'te RegEx Kullanım Alanları:
 1. **Desen Arama(Pattern) ve Eşleşme:** Bir metinde belirli bir deseni (kelime, sayı vb.) bulmak için kullanılır.
 2. **Metin İşleme**: `sed` ve `awk` gibi araçlarla metin üzerinde işlem yapmak (örneğin, bir deseni değiştirmek).
-3. **Koşul Kontrolleri**: `[[ ... ]]` yapısıyla RegEx ile koşul kontrolü yapılabilir.
+3. **Koşul Kontrolleri**: `[[ ... ]]` yapısıyla `RegEx` ile koşul kontrolü yapılabilir.
 ###### RegEx Sembolleri ve Anlamları:
 | Sembol | Anlamı                                                                       |
 | ------ | ---------------------------------------------------------------------------- |

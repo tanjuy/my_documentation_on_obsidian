@@ -38,21 +38,21 @@
             }
           },
           {
-            "id": "b77664e2d63e6955",
+            "id": "8209bd6775d68452",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Programlama/Python/Django/Django.md",
+                "file": "Diskler/LVM.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Django"
+              "title": "LVM"
             }
           },
           {
-            "id": "fadad89dfb90a317",
+            "id": "a2e531737528c634",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -66,17 +66,17 @@
             }
           },
           {
-            "id": "5060756b4752b09b",
+            "id": "2183a2c56f260b5e",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "K8s/K8s giriş.md",
+                "file": "Programlama/PHP/PHP 8.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "K8s giriş"
+              "title": "PHP 8"
             }
           }
         ],
@@ -99,7 +99,8 @@
             "state": {
               "type": "file-explorer",
               "state": {
-                "sortOrder": "alphabetical"
+                "sortOrder": "alphabetical",
+                "autoReveal": false
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -136,7 +137,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 204.5
   },
   "right": {
     "id": "1413189cf439f38e",
@@ -198,10 +199,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "K8s/K8s giriş.md"
+                "file": "Programlama/PHP/PHP 8.md",
+                "followCursor": true,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of K8s giriş"
+              "title": "Outline of PHP 8"
             }
           }
         ],
@@ -209,7 +213,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 245.5
+    "width": 276.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -221,35 +225,41 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "5060756b4752b09b",
+  "active": "2183a2c56f260b5e",
   "lastOpenFiles": [
-    "Web Servers/Nginx/Nginx Config File.md",
+    "Diskler/LVM.md",
+    "Programlama/PHP/PHP 8.md",
     "K8s/K8s Kurulumu.md",
+    "Programlama/Javascript/javascript Dersleri.md",
+    "Linux Command/fzf.md",
+    "Web Servers/Nginx/Nginx Config File.md",
+    "Linux Command/Network/ip.md",
+    "Web Servers/Nginx/Nginx Directives.md",
+    "Web Servers/Nginx/images/keepalive_timeout.png",
+    "Programlama/Bash_Script/Bash Script.md",
+    "Windows Commands/PowerShell.md",
+    "Git/Git Dersi.md",
+    "Web Servers/Nginx/images/client_max_body_size-php.png",
+    "Web Servers/Nginx/images/client_max_body_size.png",
+    "Web Servers/Nginx/images/client_max_body_size.png",
+    "Web Servers/Nginx/images/cache_control_no_store.png",
+    "Diskler/Btrfs.md",
+    "Programlama/Bash_Script/Bash Script Apps.md",
+    "Programlama/PHP",
     "K8s/K8s giriş.md",
     "K8s/K8s Yükleme.md",
-    "Programlama/Javascript/javascript Dersleri.md",
     "Web Servers/Nginx/Nginx location.md",
     "Windows Commands/Kısayollar.md",
-    "Web Servers/Nginx/Nginx Directives.md",
     "Programlama/Python/Django/Django.md",
     "Müziklerim.md",
     "Linux Command/Linux Paket Komutları.md",
-    "Windows Commands/PowerShell.md",
     "Linux Command/Güvenlik/Nmap.md",
-    "Linux Command/Network/ip.md",
     "Network/Network Giriş.md",
     "Linux Command/Vim.md",
     "().md",
     "Database/PostgreSQL/Database Oluşturma.md",
     "Database/PostgreSQL/AS kullanımı.md",
-    "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
-    "Database/PostgreSQL/GROUP BY Kullanımı.md",
     "Programlama/Python/Sqlalchemy",
-    "Database/Welcome.md",
-    "To do.md",
-    "Linux Command/SSH.md",
-    "Linux Command/Güvenlik/Firewall.md",
-    "Linux Command/tmux.md",
     "Sistem İzleme",
     "Archlinux",
     "K8s",
@@ -258,17 +268,11 @@
     "Programlama/Python",
     "Network",
     "Database/NoSQL",
-    "Diskler",
     "Git/images/contributor.png",
     "Git/images/contributor1.png",
-    "Web Servers/Nginx/images/cache_control_no_store.png",
     "Database/PostgreSQL/Pictures/if-modified-since.png",
     "Database/PostgreSQL/Pictures/Left_Join.png",
     "Pasted image 20240810145256.png",
-    "Database/PostgreSQL/Pictures/inner_join.png",
-    "Database/PostgreSQL/Pictures/employee_table.png",
-    "Database/PostgreSQL/Pictures/department_table.png",
-    "Database/PostgreSQL/Pictures/unknown.png",
     "Untitled.canvas"
   ]
 }
