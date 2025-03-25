@@ -2841,12 +2841,254 @@ location /secure {
 > **Explanation:**
 > + Bu sayfaya sadece 192.168.1.4’den gelen isteklere izin ver (allow 192.168.1.4) tüm diğer ip’den gelen istekleri reddet (deny all ). 
 
+
+### sendfile direktifi:
+
++ `sendfile` direktifi, Nginx'in dosyaları istemciye (tarayıcıya) gönderirken işletim sisteminin `sendfile()` sistem çağrısını kullanıp kullanmayacağını belirler.
++  Bu direktif, özellikle statik dosyaların (örneğin, resimler, CSS, JS) sunulması sırasında performansı önemli ölçüde artırabilir.
+
+
+> [!NOTE]
+> **`sendfile` Direktifinin Amacı:**
+> - **Performans Artışı**: `sendfile()`, dosyaların kullanıcı alanı (`user space`) ve çekirdek alanı (`kernel space`) arasında kopyalanmasını önler. Bu, CPU ve bellek kullanımını azaltır.
+> - **Verimlilik**: Dosyalar doğrudan çekirdek tarafından ağ arabirimine gönderilir, bu da veri transfer hızını artırır.
+> - **Ölçeklenebilirlik**: Yüksek trafikli sunucularda kaynak kullanımını optimize eder.
+
+
+> [!NOTE]
+> **`sendfile` Nasıl Çalışır?**
+> - **Geleneksel Yöntem**: Dosyalar, kullanıcı alanından(`user namespace`) çekirdek alanına(`kernel namespace`) kopyalanır ve ardından ağ arabirimine gönderilir. Bu, ekstra bellek ve CPU kullanımına neden olur.
+> - **`sendfile()` Yöntemi**: Dosyalar doğrudan çekirdek tarafından(`kernel namespace`) ağ arabirimine gönderilir. Bu, kopyalama işlemini ortadan kaldırır ve performansı artırır.
+
+#### sendfile Syntax:
+
+```nginx
+sendfile on | off;
+```
+> **Explanation:**
+> - **`on`**: `sendfile()` sistem çağrısını etkinleştirir (varsayılan).
+> - **`off`**: `sendfile()` sistem çağrısını devre dışı bırakır.
+
+
+> [!NOTE]
+> **`sendfile` ile İlgili Önemli Notlar**
+> 1. **Uyumluluk**:
+> 	+ `sendfile()`, Linux, FreeBSD, macOS gibi modern işletim sistemlerinde desteklenir.
+> 	+ Windows'ta `sendfile()` desteklenmez, bu nedenle Nginx otomatik olarak geleneksel yöntemi kullanır.
+> 2. **Büyük Dosyalar**:
+> 	+ `sendfile()`, özellikle büyük dosyaların gönderilmesinde performans avantajı sağlar.
+> 	+ Küçük dosyalar için performans farkı daha az belirgindir.
+> 3. **Direct I/O**:
+> 	+ `sendfile()`, doğrudan diskten okuma yapabilir (Direct I/O). Bu, özellikle yüksek performans gerektiren senaryolarda faydalıdır.
+> 	+ `directio` direktifi kullanılıyor.
+> 4. **AIO (Asynchronous I/O)**:
+> 	+ `sendfile()`, AIO ile birlikte kullanıldığında daha da verimli olabilir.
+> 	+ `aio` direktifi kullanılıyor.
+
+#### Örnek 1: Temel Kullanımı:
+**nginx.conf:**
+```nginx
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    sendfile on;
+    # sendfile off;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+```
+
+**ab ile test:**
+```shell
+ab -n 1000 -c 100 http://192.168.1.132
+```
+> **Explanation:**
+> + `-n` parametresi( requests: istekler): Karşılaştırma(ing: benchmarking) oturumu için gerçekleştirilecek istek sayısı. Varsayılan olarak yalnızca tek bir istek gerçekleştirilir ve bu genellikle temsili olmayan karşılaştırma(ing: benchmarking) sonuçlarına yol açar. 
+> + `-c` parametresi(concurrency: eşzamanlılık): Aynı anda gerçekleştirilecek birden fazla istek sayısı. Varsayılan olarak bir seferde bir istek yapılır.
+
+**ab çıktısı: `sendfile on`**
+```shell
+This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 192.168.1.132 (be patient)
+Completed 100 requests
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        nginx/1.27.2
+Server Hostname:        192.168.1.132
+Server Port:            80
+
+Document Path:          /
+Document Length:        35548 bytes
+
+Concurrency Level:      100
+Time taken for tests:   4.209 seconds
+Complete requests:      1000
+Failed requests:        0
+Total transferred:      35799000 bytes
+HTML transferred:       35548000 bytes
+Requests per second:    237.60 [#/sec] (mean)
+Time per request:       420.873 [ms] (mean)
+Time per request:       4.209 [ms] (mean, across all concurrent requests)
+Transfer rate:          8306.54 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        2  133 350.0     22    3131
+Processing:    59  242 113.7    221    1153
+Waiting:        3   46  27.8     38     196
+Total:         70  375 361.6    262    3304
+
+Percentage of the requests served within a certain time (ms)
+  50%    262
+  66%    314
+  75%    333
+  80%    351
+  90%   1002
+  95%   1296
+  98%   1367
+  99%   1583
+ 100%   3304 (longest request)
+```
+
+**ab çıktısı: `sendfile off`**
+```shell
+This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 192.168.1.132 (be patient)
+Completed 100 requests
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        nginx/1.27.2
+Server Hostname:        192.168.1.132
+Server Port:            80
+
+Document Path:          /
+Document Length:        35548 bytes
+
+Concurrency Level:      100
+Time taken for tests:   4.179 seconds
+Complete requests:      1000
+Failed requests:        0
+Total transferred:      35799000 bytes
+HTML transferred:       35548000 bytes
+Requests per second:    239.26 [#/sec] (mean)
+Time per request:       417.947 [ms] (mean)
+Time per request:       4.179 [ms] (mean, across all concurrent requests)
+Transfer rate:          8364.69 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        2  108 289.8     30    2178
+Processing:    56  276 125.3    252    1159
+Waiting:        3   70  38.4     59     258
+Total:         58  384 311.4    297    2567
+
+Percentage of the requests served within a certain time (ms)
+  50%    297
+  66%    349
+  75%    377
+  80%    421
+  90%    640
+  95%   1296
+  98%   1348
+  99%   1436
+ 100%   2567 (longest request)
+```
+
+**wrk ile test:**
+```shell
+wrk  -t4 -c100 -d10s http://192.168.1.132/
+```
+> **Explanation:**
+> + `-t` parametresi:     -t, --threads  `<N>`  Kullanılacak iş parçacığı(ing: thread) sayısı
+> + `-c` parametresi: `--connections` `<N>`  Açık tutulması gereken bağlantılar
+> + `-d` parametresi:  `--duration`  `<T>`  Testin süresi
+
+
+### tcp_nopush direktifi:
+
++ `tcp_nopush` direktifi, Nginx'in TCP paketlerini nasıl göndereceğini kontrol eden bir ayardır.
++ Bu direktif, özellikle yüksek performanslı sunucular ve yüksek trafikli web siteleri için önemlidir.
++ `tcp_nopush`, TCP paketlerinin daha verimli bir şekilde gönderilmesini sağlayarak ağ performansını artırır.
+
 ## Nginx Log Dosyaları:
 
 
 > [!CAUTION]
 > + Eğer nginx de `404` durum konunda bakacaksanız, `error.log` dosyasında değil de `access.log` dosyasında aramanız gerekmektedir.
 
+**nginx.conf:**
+```nginx
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    sendfile on;
+    # sendfile off;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+```
 
 
 ## Nginx Contexts:
@@ -3493,15 +3735,22 @@ curl -X GET -i http://192.168.1.140
 + Bunlar tampon boyutunu(`buffer size`) yönetmenize yardımcı olacak birkaç yönergedir(`directive`).
 
 ### 1. client_body_buffer_size:
-- **İşlevi**: İstemciden gelen istek gövdesini (request body) geçici olarak depolamak için kullanılan bellek buffer'ının boyutunu belirler.
+
+- **İşlevi**: İstemciden gelen istek gövdesini (`request body`) geçici olarak depolamak için kullanılan bellek buffer'ının boyutunu belirler.
 - **Varsayılan Değer**: Genellikle 8KB veya 16KB'dır (sistem ve Nginx sürümüne göre değişebilir).
 - Eğer istemciden gelen veri boyutu, `client_body_buffer_size` değerini aşarsa, Nginx bu veriyi **diske yazar** (genellikle `/var/lib/nginx/body` veya `/usr/local/nginx/client_body_temp` gibi bir dizine).
 - Eğer `buffer` boyutu yeterliyse, veri doğrudan bellekte işlenir, bu da performansı artırır.
+-  **Alacağı Değerler:** 
+	+ `10M`: 10 megabayt, `100K`: 100 kilobayt, `1G`: 1 gigabayt ve  5 : 5 bayt
+	+ `case-sensitive` değil örneğin; 10M ile 10m aynı.
 
+```mermaid
+graph LR
+	A[Client] -->B(Server)
+```
 
 > [!WARNING]
 > + Backend(php, nodejs, django...) bir yazılım ile **daha sonra** uygulaması buraya aktarılacak yani hem kod hemde config dosyası.
-
 
 #### Ne Zaman Kullanılır?
 
@@ -3542,8 +3791,8 @@ http {
 + Yani, istemciden gelen istek başlıklarının boyutu bu tamponun boyutunu aşmazsa, Nginx başlıkları tek seferde belleğe okur.
 + Ancak, başlıklar belirtilen tampon boyutundan büyükse, ek tamponlar kullanılır.
 
-### 4. client_body_max_size:
-+  istemcilerin (kullanıcıların) sunucuya gönderebileceği HTTP isteği gövdesinin `(request body`) maksimum boyutunu belirler.
+### 4. client_max_body_size:
++  İstemcilerin (kullanıcıların) sunucuya gönderebileceği HTTP isteği gövdesinin `(request body`) maksimum boyutunu belirler.
 + Bu direktif, özellikle dosya yükleme (upload) işlemlerinde veya büyük veri gönderimlerinde önemlidir.
 + **Değer:** `client_max_body_size` direktifi, boyutu bayt (B), kilobayt (K), megabayt (M) veya gigabayt (G) cinsinden belirtebilirsiniz. Örneğin:
     - `10M`: 10 megabayt
@@ -3557,6 +3806,10 @@ http {
 > [!CAUTION]
 > + Eğer bir istemci, belirtilen `client_max_body_size` değerinden daha büyük bir istek gönderirse, NGINX `413 Request Entity Too Large` hatası döner ve isteği reddeder.
 
+```mermaid
+graph LR
+	A[Server] -->B(Client)
+```
 
 **nginx.conf:**
 ```nginx
@@ -3709,6 +3962,19 @@ Kullanıcı Adı: tanjuyucal<br>E-posta: tanjuyucal@gmail.com<br>Kayıt işlemi 
 > **Explanation:**
 > - Yukarıda `curl` komut ile  `POST` isteği gönderme görevi ile aynı işlevi yapmaktadır. 
 
+#### 4.1. `client_body_buffer_size` vs `client_max_body_size`:
+ 1. **`client_max_body_size`**
+	 - **Tanım:** Bir HTTP isteğinde (`POST`, `PUT` vb.) gönderilebilecek **maksimum** gövde (body) boyutunu belirler.
+	 - **Kullanım:** Büyük dosya yüklemelerini sınırlamak veya kontrol etmek için kullanılır.
+ 2. **`client_body_buffer_size`**
+	- **Tanım:** Gelen istek gövdesinin bellekte tamponlanacağı (buffer) maksimum boyutu belirler.
+	- **Kullanım:** Küçük boyutlu veri yüklemelerinin bellekte saklanmasını sağlar, böylece disk yazma işlemlerinden kaçınılabilir. Eğer gelen veri bu değeri aşarsa, veri geçici olarak diske yazılır.
+
+| Direktif                  | Amacı                                                         | Varsayılan Değer | Aşılırsa Ne Olur?                    |
+| ------------------------- | ------------------------------------------------------------- | ---------------- | ------------------------------------ |
+| `client_max_body_size`    | Maksimum istek gövde boyutunu belirler                        | 1 MB             | 413 (Payload Too Large) hatası döner |
+| `client_body_buffer_size` | Bellekte tamponlanacak maksimum istek gövde boyutunu belirler | 8 KB veya 16 KB  | Fazlası diske yazılır                |
+
 ### 5. large_header_buffer_size:
 + `large_client_header_buffers`, Nginx yapılandırma dosyasında (`nginx.conf`) kullanılan bir direktiftir.
 + Bu direktif, istemci tarafından gönderilen büyük HTTP başlıklarını (headers) işlemek için ayrılan bellek tamponlarının (buffers) sayısını ve boyutunu belirler.
@@ -3846,6 +4112,13 @@ Connection: close
 + İstemcinin HTTP isteğinin gövdesini (body) ne kadar sürede göndermesi gerektiğini belirler.
 + **Dosya yükleme gibi işlemlerde önemlidir**. 
 + İstemci belirtilen sürede veri göndermeyi tamamlamazsa bağlantı **zaman aşımına uğrar**.
++ Eğer birim bildirmeden değer verirsek `millisecond` olur. Örneğin; `client_body_timeout 13`
+	- `client_body_timeout 30s` ise değer 30 saniye olur. 
+	- `clietn_body_timeout 45m` ise değer 45 saniye olur.
+	- `clietn_body_timeout 1h` ise değer 1 saat olur.
+	- `client_body_timeout 1d` ise değer 1 gün olur.
+	- `client_body_timeout 1y` ise değer 1 yıl olur.
+	- **Not:** `case-sensitive` değildir, yani 45s ile 45S aynı anlama gelir. 
 
 **nginx.conf:**
 ```nginx
@@ -4331,7 +4604,827 @@ http {
 >  + [[Nginx location#Örnek 1| location_1]] 
 
 ![Cache-Control no-store](images/cache_control_no_store.png)
+
+## Gzip Compression(Gzip Sıkıştırma):
+
++ Nginx'de `gzip` sıkıştırması, web sunucusu tarafından istemciye (örneğin, bir tarayıcı) gönderilen içeriği sıkıştırarak aktarım boyutunu azaltan bir yöntemdir.
++ Bu, özellikle büyük metin tabanlı dosyalar (HTML, CSS, JavaScript gibi) için etkilidir ve sayfa yükleme sürelerini önemli ölçüde iyileştirebilir.
+
+> [!TIP]
+> + Gzip, Nginx'in ağ üzerinden gerçekleştirdiği transfer miktarını azaltmaya yardımcı olabilir.
+> + Ancak, sunucu CPU döngülerini boşa harcamaya başlayacağından `gzip_comp_level` direktifini çok fazla artırmamaya dikkat edin.
+
+### Gzip Sıkıştırmasının Avantajları:
+
+1. **Daha Hızlı İçerik İletimi**: Sıkıştırılmış dosyalar daha küçük boyutludur, bu da ağ üzerinden daha hızlı iletilmelerini sağlar.
+2. **Bant Genişliği Tasarrufu**: Sunucu(`Server`) ve istemci(`Client`) arasında iletilen veri miktarı azalır, bu da bant genişliği kullanımını optimize eder.
+3. **Kullanıcı Deneyimini İyileştirme**: Sayfalar daha hızlı yüklendiği için kullanıcı deneyimi artar.
+
+### gzip_types ve gzip_min_length direktifi:
+
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+	    log_format gzip_test '$remote_addr - $remote_user [$time_local] "$request" '
+	                         '$status $body_bytes_sent "$http_referer"'
+	                         '"$http_user_agent" "$http_x_forwarded_for" "$gzip_ratio"';
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        # Gzip sıkıştırmasını etkinleştir
+        gzip on;
+        # Hangi MIME tiplerinin sıkıştırılacağını belirtir
+        gzip_types text/plain;
+        # Sıkıştırılacak minimum dosya boyutu (varsayılan: 20 byte)
+		gzip_min_length 10;
+
+        location / {
+            charset utf-8;
+            return 200 "Gzip kullanılıyor...";
+        }
+
+    }
+
+}
+```
+> **Explanation:**
+> + **`gzip_types`**: Hangi MIME türlerinin sıkıştırılacağını belirtir. Bu örnekte yanlızca `text/plain` MINE türünün sıkıştırılması isteniyor. Ama `gzip_types`'ı daha genişletebiliriz. Örneğin; `gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;`
+> + **`gzip_min_length`:** Sıkıştırılacak dosyaların minimum boyutunu belirtir. Örneğin; `gzip_min_length 10` anlamı 10 byte üzerindeki dosyalara sıkıştırma(gzip) işlemi yap.
+> + **`$gzip_ratio`:** Bu log formatında `$gzip_ratio`, sıkıştırma oranını gösterir.
+
+**Browser:** 
+
+![gzip on ve gzip_types](images/gzip.png)
+
+**Curl Komutu**
+
+```shell
+curl -H "Accept-Encoding: gzip" -i http://192.168.1.132
+```
+
+**Curl Çıktısı:**
+```shell
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sat, 08 Mar 2025 15:16:04 GMT
+Content-Type: text/plain; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Content-Encoding: gzip
+
+Warning: Binary output can mess up your terminal. Use "--output -" to tell curl to output it to your terminal anyway, or consider "--output <FILE>" to
+Warning: save to a file.
+```
+> **Explanation:**
+> + `-H "Accept-Encoding: gzip"` parametresi ile nginx gönderdiğimizde nginx, gzip ile mesajı göndermektedir(`Content-Encoding: gzip`)
+> + **`Accept-Encoding: gzip`** başlığı, bir istemcinin (genellikle bir web tarayıcısı veya HTTP isteği yapan bir uygulama) sunucuya, yanıtın belirli bir sıkıştırma algoritması kullanılarak sıkıştırılmış olarak gönderilebileceğini bildirmek için kullanılır.
+> 	- **Başlık (Header):** `Accept-Encoding`
+> 	- **Değer (Value):** `gzip` (veya `deflate`, `br`, `compress` gibi diğer sıkıştırma türleri)
+> 	- **İşlev:** Sunucuya, istemcinin sıkıştırılmış yanıtları kabul edebileceğini bildirir.
+
+**gzip_test.log**
+
+```shell
+tail -f /var/log/nginx/gzip_test.log
+```
+
+**Çıktı: tail komutu**
+```log
+192.168.1.102 - - [08/Mar/2025:17:40:23 +0300] "GET /greeting HTTP/1.1" 200 53 "-""Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36" "-" "0.52"
+```
+> **Explanation:**
+> + `$gzip_ratio` değişkenini `gzip` direktifin(ing:`directive`) sıkıştırma oranını vermektedir. nginx, `$gzip_ratio` değerini `0.52` vermiştir.
+
+### gzip_comp_level direktifi:
++ `gzip_comp_level`, Nginx'de gzip sıkıştırmasının ne kadar agresif bir şekilde yapılacağını belirleyen bir direktiftir.
++ Bu direktif, sıkıştırma seviyesini 1 ile 9 arasında bir değerle ayarlamanıza olanak tanır. Daha yüksek seviyeler, daha iyi sıkıştırma sağlar ancak daha fazla CPU kaynağı tüketir.
+
+> [!NOTE]
+> - **Düşük Seviyeler (1-3)**: Daha az CPU kullanır, sıkıştırma oranı düşüktür. Hızlıdır, ancak dosya boyutunda çok fazla küçülme olmaz.
+> - **Orta Seviyeler (4-6)**: İyi bir denge sunar. Hem makul bir sıkıştırma oranı sağlar hem de CPU kullanımı dengelidir.
+> - **Yüksek Seviyeler (7-9)**: Maksimum sıkıştırma sağlar, ancak CPU kullanımı önemli ölçüde artar. Büyük dosyalar için idealdir, ancak yüksek trafikli sunucularda performans sorunlarına neden olabilir.
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    log_format gzip_test '$remote_addr - $remote_user [$time_local] "$request" '
+                         '$status $body_bytes_sent "$http_referer"'
+                         '"$http_user_agent" "$http_x_forwarded_for" "$gzip_ratio"';
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/gzip_test.log gzip_test;
+
+        # Gzip sıkıştırmasını etkinleştir
+        gzip on;
+        # Hangi MIME tiplerinin sıkıştırılacağını belirtir
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+        # Sıkıştırılacak minimum dosya boyutu (varsayılan: 20 byte)
+        gzip_min_length 10;
+        # Gzip seviyesi (1-9 arası, 1 en hızlı, 9 en yüksek sıkıştırma)
+        gzip_comp_level 3;
+
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+    }
+
+}
+```
+> **Explanation:**
+> + **bloggingtemplate** klasörünü indirmek için; [link](https://www.100utils.com/download/course-files-for-youtube-course-complete-nginx-training/)  Dilerseniz kendi web sitenizde kullanabiliriz.
+
+**GET isteği:**
+```shell
+ curl.exe  -H "Accept-Encoding: gzip" -i http://192.168.1.132/assets/css/font-awesome.min.css
+```
+> **Explanation:**
+> + `Accept-Encoding: gzip` başlığını sunucuya göndererek sunucuya `gzip`  dosyalarını `decoding`  yapabildiğimizi söylüyoruz.
+
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sun, 09 Mar 2025 10:46:11 GMT
+Content-Type: text/css
+Last-Modified: Wed, 06 Nov 2024 14:05:18 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+ETag: W/"672b779e-7918"
+Content-Encoding: gzip
+
+Warning: Binary output can mess up your terminal. Use "--output -" to tell curl to output it to your terminal anyway, or consider "--output <FILE>" to save to a file.
+```
+> **Explanation:**
+> + Nginx sunucusun bize dönmüş olduğu Response Header da `Content-Encoding: gzip` olduğuna dikkat ediniz!
+> + Bunun anlamı nginx sunucusu gönderdiği html body içeriğin gzip ile encodin yaptığını söylüyor.
+
+**Log Çıktısı:** 1
+```log
+192.168.1.102 - - [09/Mar/2025:13:16:05 +0300] "GET /assets/css/font-awesome.min.css HTTP/1.1" 200 7962 "-""curl/8.10.1" "-" "3.90"
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `gzip_min_length 1` olarak ayarladığımızda;
+> 	- Html body değeri : 7962 (Header: `Content-Length`, Variable: `$body_bytes_sent`)
+> 	- `$gzip_ratio` değeri 3.90 olarak çıkmaktadır.(**Log Çıktısı**)
+
+**Log Çıktısı:** 2
+```log
+192.168.1.102 - - [09/Mar/2025:13:20:16 +0300] "GET /assets/css/font-awesome.min.css HTTP/1.1" 200 7820 "-""curl/8.10.1" "-" "3.97
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `gzip_min_length 2` olarak ayarladığımızda;
+> 	- Html body değeri : 7820 (Header: `Content-Length`, Variable: `$body_bytes_sent`)
+> 	- `$gzip_ratio` değeri 3.97 olarak çıkmaktadır.(**Log Çıktısı**)
+
+**Log Çıktısı:** 3
+```log
+192.168.1.102 - - [09/Mar/2025:13:25:22 +0300] "GET /assets/css/font-awesome.min.css HTTP/1.1" 200 7794 "-""curl/8.10.1" "-" "3.98"
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `gzip_min_length 3` olarak ayarladığımızda;
+> 	- Html body değeri : 7794 (Header: `Content-Length`, Variable: `$body_bytes_sent`)
+> 	- `$gzip_ratio` değeri 3.98 olarak çıkmaktadır.(**Log Çıktısı**)
+
+**Log Çıktısı:** 4
+```log
+192.168.1.102 - - [09/Mar/2025:13:31:52 +0300] "GET /assets/css/font-awesome.min.css HTTP/1.1" 200 7267 "-""curl/8.10.1" "-" "4.27"
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `gzip_min_length 4` olarak ayarladığımızda;
+> 	- Html body değeri : 7267 (Header: `Content-Length`, Variable: `$body_bytes_sent`)
+> 	- `$gzip_ratio` değeri 4.27 olarak çıkmaktadır.(**Log Çıktısı**)
+
+**Log Çıktısı:** 5
+```log
+192.168.1.102 - - [09/Mar/2025:13:39:07 +0300] "GET /assets/css/font-awesome.min.css HTTP/1.1" 200 7115 "-""curl/8.10.1" "-" "4.36"
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `gzip_min_length 5` olarak ayarladığımızda;
+> 	- Html body değeri : 7115 (Header: `Content-Length`, Variable: `$body_bytes_sent`)
+> 	- `$gzip_ratio` değeri 4.36 olarak çıkmaktadır.(**Log Çıktısı**)
+
+**Log Çıktısı:** 6
+```log
+192.168.1.102 - - [09/Mar/2025:13:41:06 +0300] "GET /assets/css/font-awesome.min.css HTTP/1.1" 200 7063 "-""curl/8.10.1" "-" "4.40"
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `gzip_min_length 6 olarak ayarladığımızda;
+> 	- Html body değeri : 7063 (Header: `Content-Length`, Variable: `$body_bytes_sent`)
+> 	- `$gzip_ratio` değeri 4.40 olarak çıkmaktadır.(**Log Çıktısı**)
+
+**Log Çıktısı:** 7
+```log
+192.168.1.102 - - [09/Mar/2025:13:42:37 +0300] "GET /assets/css/font-awesome.min.css HTTP/1.1" 200 6978 "-""curl/8.10.1" "-" "4.45"
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `gzip_min_length 7 olarak ayarladığımızda;
+> 	- Html body değeri : 6978 (Header: `Content-Length`, Variable: `$body_bytes_sent`)
+> 	- `$gzip_ratio` değeri 4.45 olarak çıkmaktadır.(**Log Çıktısı**)
+
+**Log Çıktısı:** 8
+```log
+192.168.1.102 - - [09/Mar/2025:13:44:17 +0300] "GET /assets/css/font-awesome.min.css HTTP/1.1" 200 6943 "-""curl/8.10.1" "-" "4.47"
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `gzip_min_length 8 olarak ayarladığımızda;
+> 	- Html body değeri : 6943 (Header: `Content-Length`, Variable: `$body_bytes_sent`)
+> 	- `$gzip_ratio` değeri 4.47 olarak çıkmaktadır.(**Log Çıktısı**)
+
+**Log Çıktısı:** 9
+```log
+192.168.1.102 - - [09/Mar/2025:13:46:11 +0300] "GET /assets/css/font-awesome.min.css HTTP/1.1" 200 6943 "-""curl/8.10.1" "-" "4.47"
+```
+
+> **Explanation:**
+> + `nginx.conf` dosyasında `gzip_min_length 9 olarak ayarladığımızda;
+> 	- Html body değeri : 6943 (Header: `Content-Length`, Variable: `$body_bytes_sent`)
+> 	- `$gzip_ratio` değeri 4.47 olarak çıkmaktadır.(**Log Çıktısı**)
+### gzip_vary direktifi:
+
++ Bu direktif, Nginx'in gzip sıkıştırması kullanırken HTTP yanıtlarına `Vary: Accept-Encoding` başlığını eklemesini sağlar.
++ Bu başlık, özellikle önbelleğe alma (caching) mekanizmaları ve istemci-tarayıcı uyumluluğu açısından büyük önem taşır.
+#### Örnek Senaryo:
+
+1. **İstemci (Tarayıcı)**: Sunucuya bir istek gönderir ve `Accept-Encoding: gzip` başlığını ekler.
+```http
+GET /style.css HTTP/1.1
+Host: example.com
+Accept-Encoding: gzip
+```
+
+2. **Sunucu (Nginx)**: Eğer `gzip_vary on;` ayarlanmışsa, yanıta `Vary: Accept-Encoding` başlığını ekler.
+```http
+HTTP/1.1 200 OK
+Content-Type: text/css
+Content-Encoding: gzip
+Vary: Accept-Encoding
+Content-Length: 8192
+```
+
+3. **Ara Sunucu (Proxy) veya Tarayıcı**: `Vary: Accept-Encoding` başlığını görür ve sıkıştırılmış içeriği önbelleğe alır. Eğer başka bir istemci `Accept-Encoding: gzip` başlığı olmadan istek gönderirse, sıkıştırılmamış içerik gönderilir.
+
+
+> [!TIP]
+> + Proxy sunucular ve CDN'ler, **gzip destekleyen istemciler için önbelleğe sıkıştırılmış versiyonu kaydeder**.
+> + Gzip desteklemeyen istemciler için ise **önbelleğe sıkıştırılmamış versiyonu ayrı olarak tutar**.
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    log_format gzip_test '$remote_addr - $remote_user [$time_local] "$request" '
+                         '$status $body_bytes_sent "$http_referer"'
+                         '"$http_user_agent" "$http_x_forwarded_for" "$gzip_ratio"';
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/gzip_test.log gzip_test;
+
+        # Gzip sıkıştırmasını etkinleştir
+        gzip on;
+        # Hangi MIME tiplerinin sıkıştırılacağını belirtir
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+        # Sıkıştırılacak minimum dosya boyutu (varsayılan: 20 byte)
+        gzip_min_length 10;
+        # Gzip seviyesi (1-9 arası, 1 en hızlı, 9 en yüksek sıkıştırma)
+        gzip_comp_level 6;
+        # Tarayıcıların gzip desteğini kontrol etmesini sağlar
+        gzip_vary on;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+```
+> **Explanation:**
+> + **bloggingtemplate** klasörünü indirmek için; [link](https://www.100utils.com/download/course-files-for-youtube-course-complete-nginx-training/)  Dilerseniz kendi web sitenizde kullanabiliriz.
+
+**GET isteği:**
+```shell
+ curl -H "Accept-Encoding: gzip" -i http://192.168.1.132/assets/css/font-awesome.min.css
+```
+
+**Curl Çıktısı:**
+```shell
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sun, 09 Mar 2025 13:46:39 GMT
+Content-Type: text/css
+Last-Modified: Wed, 06 Nov 2024 14:05:18 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+Vary: Accept-Encoding
+ETag: W/"672b779e-7918"
+Content-Encoding: gzip
+
+Warning: Binary output can mess up your terminal. Use "--output -" to tell curl to output it to your terminal anyway, or consider "--output <FILE>" to
+Warning: save to a file.
+```
+> **Explanation:**
+> +  `nginx.conf` dosyasında `gzip_vary on` olduğu için `Vary: Accept-Encoding` http başlığını görebiliyoruz. 
+
+### gzip_buffer direktifi:
++ `gzip_buffers`, **Nginx’in gzip sıkıştırmasını kullanırken tampon (buffer) boyutlarını belirlemek için kullanılan bir direktiftir**.
++ Gzip sıkıştırması yapıldığında, sunucu **yanıt içeriğini belirli boyutlardaki bellek tamponlarına (buffer) bölerek işler ve sıkıştırır**.
++  Bu direktif, sıkıştırma işlemi sırasında ne kadar bellek kullanılacağını ve bu belleğin nasıl bölüneceğini belirler.
+
+#### Syntax:
+
+```nginx
+gzip_buffers <buffer_number> <buffer_size>;
+```
+
+> **Explanation:**
+> + **`<buffer_number>`**: Bellek tamponlarının sayısını belirtir. Yani, kaç tane buffer (tampon) oluşturulacağını belirler.
+> + **`<buffer_size>`**: Her bir tamponun boyutunu belirtir (genellikle 4k veya 8k gibi değerler kullanılır).
+> + **Varsayılan Değer**: `gzip_buffers 32 4k;` veya `gzip_buffers 16 8k;` (platforma bağlı olarak değişir).
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        access_log /var/log/nginx/gzip_test.log gzip_test;
+
+        #
+        gzip on;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;                                        
+        gzip_min_length 10;
+        gzip_comp_level 6;
+        gzip_vary on;
+        gzip_buffers 16 8k;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+    }
+
+}
+```
+> **Explanation:**
+> + **Varsayılan Ayar:** `gzip_buffers 16 8k` 
+> 	- Bu, 16 adet 8 KB'lık tampon kullanır (toplam 16 x 8KB = 128 KB bellek).
+> + **Daha Büyük Tamponlar**: `gzip_buffers 32 8k`
+> 	- Bu, 32 adet 8 KB'lık tampon kullanır (toplam 32 x 8KB = 256 KB bellek). Büyük dosyalar için uygundur.
+> + **Daha Küçük Tamponlar**: `gziğ_buffers 8 4k`
+> 	- Bu, 8 adet 4 KB'lık tampon kullanır (toplam 8 x 4KB = 32 KB bellek). Küçük dosyalar için uygundur.
+
+## Caching(önbellek) Sistem:
+
+### A. Client(İstemci) Tarafı:
+
+#### Expires Direktifi:
++ Değişmeyen ve düzenli olarak sunulan dosyalar için son kullanma tarihi başlığı(`expire headers`) ayarlamak mümkündür.
++ `expires` direktifi, Nginx'de istemcilere (tarayıcılara) gönderilen statik dosyaların (örneğin, CSS, JS, resimler) ne kadar süre boyunca önbellekte (cache) tutulacağını belirlemek için kullanılır.
+
+
+> [!TIP]
+> + Bu direktif, `Cache-Control` ve `Expires` HTTP başlıklarını otomatik olarak ayarlar.
+> + Bu sayede, tarayıcılar dosyaları belirli bir süre boyunca önbellekte tutar ve sunucuya tekrar istek göndermez, bu da performansı artırır.
+
+
+> [!NOTE]
+> `expires` Direktifinin Amacı:
+> - **Önbelleğe Alma (Caching)**: Tarayıcıların statik dosyaları önbellekte tutmasını sağlar.
+> - **Performans Artışı**: Sunucuya yapılan istek sayısını azaltır ve sayfa yükleme sürelerini iyileştirir.
+> - **Bant Genişliği Tasarrufu**: Aynı dosyaların tekrar tekrar indirilmesini önler.
+
+##### Syntax:
+
+```nginx
+expires time;
+```
+
+> **Explanation:**
+> + **time:** Dosyaların önbellekte tutulacağı süreyi belirtir. Bu süre, aşağıdaki formatlarda olabilir:
+> 	- **`off`**: Önbelleğe alma devre dışı bırakılır.
+> 	- **`epoch`**: Dosyaların sürekli olarak geçersiz kılınmasını sağlar (önbellekte tutulmaz).
+> 	- **`max`**: Dosyaların mümkün olan en uzun süre önbellekte tutulmasını sağlar.
+> 	- **`time[s|m|h|d|w|M|y]`**: Belirli bir süre belirtir (örneğin, `30d` = 30 gün, `1h` = 1 saat).
+
+
+##### Örnek 1: `expires time`
+
+> [!NOTE]
+> + `expires` direktifi, Nginx'in HTTP yanıtına `Cache-Control` ve `Expires` başlıklarını ekler.
+> + Örneğin, `expires 1h;` ayarlandığında, Nginx şu başlıkları ekler:
+> 	```http
+> 	Cache-Control: max-age=3600
+> 	Expires: Wed, 11 Oct 2023 13:34:56 GMT
+> 	```
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+
+        location ~* \.(jpg|jpeg)$ {
+            expires 30d;
+        }
+
+		location ~* \.(css|js)$ {
+			expires 1h;
+		}
+    }
+}
+```
+> **Explanation:**
+> + **bloggingtemplate** klasörünü indirmek için; [link](https://www.100utils.com/download/course-files-for-youtube-course-complete-nginx-training/)  Dilerseniz kendi web sitenizde kullanabiliriz.
+> + `jpg` ve `jpeg` uzantılı dosyalar için 30 gün boyunca tarayıcı önbelleğinde tutacak.
+> + `css` ve `js` uzantılı dosyalar için 1 saat boyunca tarayıcı önbelleğinde tutacak.
+
+**GET istek:**
+```shell
+curl -I http://192.168.1.132/assets/images/portfolio/p1.jpg
+```
+> **Explanation:**
+> + `jpg`, `jpeg` uzantılı dosyalar 30 gün boyunca önbellekte tutulur.
+
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Fri, 21 Mar 2025 12:11:53 GMT
+Content-Type: image/jpeg
+Content-Length: 5749
+Last-Modified: Wed, 06 Nov 2024 14:05:18 GMT
+Connection: keep-alive
+ETag: "672b779e-1675"
+Expires: Fri, 21 Mar 2025 12:12:53 GMT
+Cache-Control: max-age=60
+Accept-Ranges: bytes
+```
+> **Explanation:**
+> + `nginx.conf` dosyasında `expires 30d` direktifini kullandığımızda, nginx yukarıda görüldüğü üzeri `Expires` ve `Cache-Control` başlıklarını ayarlamaktadır.
+> 	- `Expires` başlığı: nginx'in çalışmış olduğu  işletim sistemin `Universal time`'ının vermektedir. `timedatectl` komutu  ile `Universal time` saat ve tarihini görebiliriz.
+> 	- `Cache-Control: max-age`, bir kaynağın önbelleğe alınmış bir kopyasının süresinin dolması için gereken süreyi saniye cinsinden tanımlar.
+
+```shell
+timedatectl
+```
+
+**timedatectl çıktısı:**
+```shell
+               Local time: Fri 2025-03-21 15:11:08 +03
+           Universal time: Fri 2025-03-21 12:11:08 UTC
+                 RTC time: Fri 2025-03-21 12:11:09
+                Time zone: Europe/Istanbul (+03, +0300)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+```
+
+
+> [!NOTE]
+> + **Universal Time (UT)**, dünya çapında zaman ölçümü için kullanılan bir referans sistemidir.
+> + Dünya’nın kendi ekseni etrafında dönüşüne dayalıdır ve Greenwich Ortalama Zamanı (GMT) ile büyük ölçüde benzerdir.
+
+
+> [!NOTE]
+> **Universal Time'ın Türleri:**
+> 1. **UT0** – Dünya’nın dönüşüne dayalı en temel zaman ölçeğidir. Ancak atmosferik etkiler nedeniyle bazı düzensizlikler içerir.
+> 2. **UT1** – UT0'ın, Dünya'nın düzensiz dönüş hareketlerine göre düzeltilmiş versiyonudur. Yıldızlara göre zaman ölçümü sağlar ve astronomik gözlemler için kullanılır.
+> 3. **UTC (Coordinated Universal Time)** – UT1 ile Atomik Zaman’ın (TAI) senkronize edilmiş halidir. Modern zaman ölçümlerinde kullanılan standart zamandır ve zaman dilimlerinin temelini oluşturur.
+
+##### Örnek 2: `expires off;`
++ Nginx’te `expires` direktifi, yanıtların tarayıcı tarafından önbellekte ne kadar süre saklanacağını belirlemek için kullanılır.
++ **`expires off;`**, ilgili yanıtlar için önbellekleme süre sınırını kaldırır, yani `Expires` ve `Cache-Control` başlıklarını göndermez.
+
+**nginx.conf:**
+```php
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+
+        location ~* \.(jpg|jpeg)$ {
+            expires off;
+        }
+    }
+}
+```
+> **Explanation:**
+> + **bloggingtemplate** klasörünü indirmek için; [link](https://www.100utils.com/download/course-files-for-youtube-course-complete-nginx-training/)  Dilerseniz kendi web sitenizde kullanabiliriz.
+> + Bu yapılandırma, `/` dizinindeki dosyalar için `Expires` ve `Cache-Control` başlıklarını devre dışı bırakır.
+
+**GET isteği:**
+```shell
+curl -I http://192.168.1.132/assets/images/portfolio/p1.jpg
+```
+
+**Çıktı:**
+```shell
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sat, 22 Mar 2025 12:46:16 GMT
+Content-Type: image/jpeg
+Content-Length: 5749
+Last-Modified: Wed, 06 Nov 2024 14:05:18 GMT
+Connection: keep-alive
+ETag: "672b779e-1675"
+Accept-Ranges: bytes
+```
+> **Explanation:**
+> + Eğer dikkat ederseniz `Cache-Control` başlığı ve `Expires` başlığı olmadığını görebiliriz.
+
+
+> [!NOTE]
+> - Nginx, **`Expires`** ve **`Cache-Control`** başlıklarını **hiç göndermediği** için, istemci ve proxy'lerin yanıtı önbelleğe alıp almaması tamamen onların kararına bağlı olur.
+> - **Dinamik içeriğin önbelleğe alınmasını engellemek** için kullanılmaz. Eğer önbellekleme tamamen engellenmek isteniyorsa, `Cache-Control: no-store` veya `no-cache` gibi başlıklar ayarlanmalıdır.
+
+##### Örnek 3: `expires -1;`
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+
+        location ~* \.(jpg|jpeg)$ {
+            expires -1;
+        }
+    }
+}
+```
+
+**GET isteği:**
+```shell
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sun, 23 Mar 2025 07:47:45 GMT
+Content-Type: image/jpeg
+Content-Length: 5749
+Last-Modified: Wed, 06 Nov 2024 14:05:18 GMT
+Connection: keep-alive
+ETag: "672b779e-1675"
+Expires: Sun, 23 Mar 2025 07:47:44 GMT
+Cache-Control: no-cache
+Accept-Ranges: bytes
+```
+> **Explanation:**
+> + nginx de `expires -1;` direktifini(ing: directive) eklediğimizde bu direktif,  html başlıklarına `Expires` ve `Cache-Control` eklediği görünmektedir.
+> + `Expires header:`
+> 	- **`Expires` HTTP başlığı**, bir kaynağın (HTML sayfası, CSS dosyası, JavaScript, resim vb.) **önbellekte ne kadar süre saklanacağını belirlemek** için kullanılır.
+> 	- Eğer bir HTTP yanıtında `Expires` başlığı varsa, istemci (tarayıcı veya ara proxy) belirtilen tarihe kadar bu kaynağı önbellekten kullanabilir ve tekrar sunucuya istekte bulunmaz.
+> 	- Tarayıcı, 23 Mart 2025 tarihine kadar bu kaynağı **önbellekten kullanabilir**.
+> + `Cache-Control: no-cache` header:
+> 	- tarayıcının bir yanıtı önbelleğe alabileceği ancak önce bir kaynak sunucuya bir doğrulama isteği göndermesi gerektiği anlamına gelir.
+> 	- tarayıcı önbelleğe almıyor anlama gelmesin, bu yönergede ==önbellekleme yapmaktedır.==
+
+ **Apache Konfigürasyonu (`.htaccess`)**
+
+```apache
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 30 days"
+</IfModule>
+```
+> **Explanation:**
+> + Eğer apache sunucusunda bu işlemi yapmak istiyorsanız, yukarıdaki config'i `.htaccess` dosyasına yazmanız gerekmektedir.
+
+**timedatectl komutu:**
+```shell
+timedatectl
+```
+
+**timedatectl çıktısı:**
+```shell
+Every 2.0s: timedatectl     nginx-tutorial3: Sun Mar 23 10:48:06 2025
+
+               Local time: Sun 2025-03-23 10:48:06 +03
+           Universal time: Sun 2025-03-23 07:48:06 UTC
+                 RTC time: Sun 2025-03-23 07:48:07
+                Time zone: Europe/Istanbul (+03, +0300)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+```
+
+##### Örnek 4: `expires max;`
+
++ Nginx'de `expires max;` direktifi, bir kaynağın (örneğin, bir dosya veya içerik) tarayıcı tarafından **mümkün olan en uzun süre boyunca önbelleğe alınmasını** sağlar.
++  Bu, tarayıcıya "Bu kaynağı mümkün olduğunca uzun süre önbelleğe al" anlamına gelir.
+
+
+> [!NOTE]
+> **Nasıl Çalışır?**
+> + `expires max;` direktifi, HTTP yanıt başlığına `Expires` ve `Cache-Control` başlıklarını ekler.
+> + Bu başlıklar, kaynağın önbellekte **12 yıl** boyunca tutulmasını sağlar.
+> + Bu, tarayıcının bu kaynağı uzun süre boyunca önbelleğe almasını ve sunucuya tekrar istek göndermesini engeller.
+
+
+> [!NOTE]
+> **Kullanım Amacı**
+> + Bu direktif, özellikle **statik içerikler** (örneğin, resimler, CSS dosyaları, JavaScript dosyaları) için kullanılır.
+> + Bu tür dosyalar genellikle sık değişmez ve tarayıcıda uzun süre önbelleğe alınabilir. Bu, performansı artırır ve sunucu yükünü azaltır.
+
+**nginx.conf:**
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+
+        location ~* \.(jpg|jpeg)$ {
+            expires max;
+        }
+    }
+```
+
+**GET isteği:**
+```shell
+curl -I http://192.168.1.132/assets/images/portfolio/p1.jpg
+```
+
+**Curl Çıktısı:**
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Mon, 24 Mar 2025 08:34:19 GMT
+Content-Type: image/jpeg
+Content-Length: 5749
+Last-Modified: Wed, 06 Nov 2024 14:05:18 GMT
+Connection: keep-alive
+ETag: "672b779e-1675"
+Expires: Thu, 31 Dec 2037 23:55:55 GMT
+Cache-Control: max-age=315360000
+Accept-Ranges: bytes
+```
+> **Explanation:**
+> + `nginx.conf` da `expires max;` direktifini(ing: directive) verdiğimizde `Cache-Control` ve `Expires` başlıkları eklendi.
+> 	- `Expires: Thu, 31 Dec 2037 23:55:55 GMT` olarak ayarlandı. Mevcut tarihten 12 yıl sonrasını göstermektedir. Bu başlık(ing: header) `Universal time` zaman dilimini kullanmaktadır.
+> 	- `Cache-Control: max-age=315360000` olarak ayarlandı. Yani 12 yıl süre ile tarayıcıların önbelleğe alması istenmektedir.
+
+**Universal time:**
+```shell
+timedatectl
+```
+
+**timedatectl çıktısı:**
+```shell
+Every 2.0s: timedatectl     nginx-tutorial3: Mon Mar 24 11:35:27 2025
+
+               Local time: Mon 2025-03-24 11:35:27 +03
+           Universal time: Mon 2025-03-24 08:35:27 UTC
+                 RTC time: Mon 2025-03-24 08:35:26
+                Time zone: Europe/Istanbul (+03, +0300)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+```
+### B. Server(Sunucu) Tarafı:
 ## HTTP If-Modified-Since:
+
 > [!INFO] Bilgi:
 > + if-modified-since sadece istemci(client) tarafında mevcuttur. Server tarafında mevcut değildir.  nginx yapılandırma dosyasında yapılandırmayı desteklememektedir.
 > + Her istek gönderen istemci(client) bu başlığı yani header'ı (if-modified-since) eklenmeli istek içerisine

@@ -1,7 +1,33 @@
 #programlama
 
+
+# Python Kullanım Alanları:
+1. **Web Geliştirme:** Python, Django ve Flask gibi popüler web framework'leri ile web siteleri geliştimek için kullanılabilir.
+2. **Otomansyon ve Betik Yazımı:** Python, tekrar eden görevleri otomatikleştirmek ve sistem üzerinde komut dosyalarını çalıştırmak için idealdir. Örneğin; dosya işlemleri, veri kazıma(`web scraping`), e-posta gönderimi gibi işlevler otomatikleştirilir.
+3. **Matematiksel Hesaplamalar:** Pandas, Numpy, Matplotlib gibi kütüphaneler sayesinde veri setleri üzerinde kolayca analiz yapılabilir.
+4. **Veri tabanı İşlemleri:** Python ile veritabanlarına(MySQL, PostgreSQL, SQLite gibi) bağlanabilir ve veri çekme, ekleme, güncelleme gibi işlemleri yapılabilir.
+5. **API ile Entegrasyon:** Python, REST API'ler ile iletişim kurmak, veri çekmek ve veri göndermek için kullanılabilir.
+6. **Görsel ve Grafikİşlemleri:** OpenCV, PIL(Pillow) gibi kütüphanelerle görsel işlemler yapılabilir. Görüntü analizleri, filtreleme ve grafiksel düzenlemeler mümkündür.
+7. **Oyun Geliştirme:** Pygame gibi kütüphanelerle basit oyunlar geliştirebilirsiz.
+8. **Yapay Zeka:** Doğal dil işleme, görüntü işleme, derin öğrenme gibi yapay zeka alanlarında python çok güçlüdür. Keras, PyTorch gibi kütüphaneler bu alanda sıkça kullanılır. 
+
 # Giriş:
-## Fonksiyonlar
+
+
+> [!CAUTION]
+> +  Python kodları Linux ortamında yazılıp test edilmektedir. 
+
+
+## İlk Kod:
+
+```python
+#!/usr/bin/python3
+
+print("Python is so easy!");
+```
+> **Explanation:**
+> + 
+# Fonksiyonlar
 ### print fonksiyonu:
 ```python
 #!/usr/bin/python3

@@ -1,13 +1,28 @@
 ## Sessions
+### Tmux Dışında:
+
 ```shell
 $ tmux
 ```
 > **Explanation:**
 > Terminal ekranına sadece `tmux` yazarsak varsayılan değerler ile açılacaktır.
 
+
 ```shell
-$ 
+$ tmux new -s nginx -c /etc/nginx
 ```
+
+### Tmux İçerisinde:
+
+- `tmux` içerisinde iken `Ctrl + b` tuş kombinasyonuna basın ve ardından `:` (iki nokta üst üste) tuşuna basarak komut satırı moduna geçin.
+
+```tmux
+: new -s nginx -c /etc/nginx
+```
+> **Explanation:**
+> + `-s nginx` : nginx adında yeni bir session açar.
+> + `-c /etc/nginx` : nginx session'ın varsayılan dizini `/etc/nginx` olacaktır.
+
 ## Windows
 ## Panes
 
