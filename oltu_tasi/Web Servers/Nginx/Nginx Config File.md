@@ -3054,6 +3054,102 @@ wrk  -t4 -c100 -d10s http://192.168.1.132/
 + Bu direktif, özellikle yüksek performanslı sunucular ve yüksek trafikli web siteleri için önemlidir.
 + `tcp_nopush`, TCP paketlerinin daha verimli bir şekilde gönderilmesini sağlayarak ağ performansını artırır.
 
+
+> [!NOTE]
+> **`tcp_nopush` Direktifinin Amacı:**
+> + **Ağ Verimliliği**: TCP paketlerinin daha büyük ve daha az sayıda gönderilmesini sağlar. Bu, ağ üzerindeki paket sayısını azaltır ve verimliliği artırır.
+> + **Performans Optimizasyonu**: Özellikle yüksek trafikli sunucularda, ağ kaynaklarını daha etkin kullanır.
+> + **`sendfile` ile Uyumluluk**: `tcp_nopush`, genellikle `sendfile` direktifi ile birlikte kullanılır. Bu kombinasyon, dosya gönderimi sırasında performansı artırır.
+
+
+> [!NOTE]
+> **`tcp_nopush` Nasıl Çlışıt?**
+> + **Normal Durum**: TCP, küçük paketleri hemen gönderme eğilimindedir. Bu, ağ üzerinde çok sayıda küçük paket oluşmasına neden olabilir.
+> + **`tcp_nopush` Etkin Olduğunda**: TCP, paketleri bir araya getirir ve daha büyük paketler halinde gönderir. Bu, ağ üzerindeki paket sayısını azaltır ve verimliliği artırır.
+> + **`tcp_nodelay` ile İlişki**: `tcp_nopush`, `tcp_nodelay` direktifi ile birlikte kullanıldığında daha etkilidir. `tcp_nodelay`, küçük paketlerin gecikmeden gönderilmesini sağlar, ancak `tcp_nopush` ile birlikte kullanıldığında daha büyük paketler oluşturulur.
+
+#### tcp_nopush syntax:
+
+```nginx
+tcp_nopush on | off;
+```
+> **Explanatiion:**
+> + **`on`**: TCP paketlerinin bir araya getirilmesini sağlar (varsayılan).
+> + **`off`**: TCP paketlerinin hemen gönderilmesini sağlar.
+
+#### Örnek 1:
+
+**nginx.conf:**
+```nginx
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    sendfile on;
+    tcp_nopush on;
+	# tcp_nopush off;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+```
+> **Explanation:**
+> + `sendfile` etkinleştirilmiştir.
+> + `tcp_nopush` etkinleştirilmiştir. Bu, TCP paketlerinin daha büyük ve daha az sayıda gönderilmesini sağlar.
+> + Eğer `tcp_nopush off` durumunda olursa,  `tcp_nopush` devre dışı bırakılmıştır. Bu, TCP paketlerinin hemen gönderilmesini sağlar.
+
+
+> [!NOTE]
+> **`tcp_nopush` ile İlgili Önemli Notlar:**
+> 1. **`sendfile` ile Birlikte Kullanım:**
+> 	- `tcp_nopush`, genellikle `sendfile` direktifi ile birlikte kullanılır. Bu kombinasyon, dosya gönderimi sırasında performansı artırır.
+> 2. **`tcp_nodelay` ile İlişki:**
+> 	- `tcp_nopush`, `tcp_nodelay` ile birlikte kullanıldığında daha etkilidir.
+> 	- `tcp_nodelay`, küçük paketlerin gecikmeden gönderilmesini sağlar, ancak `tcp_nopush` ile birlikte kullanıldığında daha büyük paketler oluşturulur.
+> 3. **Ağ Gecikmeleri:**
+> 	- Yüksek gecikmeli ağlarda `tcp_nopush`'ın performans avantajı daha belirgindir.
+
+#### `tcp_nopush` Direktifini Test Etme:
+
+##### 1. Ağ Trafiğini İzleme:
++ Ağ trafiğini izleyerek, `tcp_nopush`'ın paket boyutları üzerindeki etkisini gözlemleyebilirsiniz.
+
+```shell
+wrk -t4 -c100 -d10s http://192.168.1.132/
+```
+> **Explanation:**
+> + `-t4` parametresi: 4 iş parçacığı (thread) kullan → Yük testi sırasında 4 paralel iş parçacığı çalıştırır.
+> + `-c100` parametresi: 100 eşzamanlı bağlantı (concurrent connections) → Aynı anda 100 istemci bağlantısı açarak sunucuya istek gönderir.
+> + `-d10s` parametresi: 10 saniye boyunca testi çalıştır → Yük testi toplamda 10 saniye sürecek.
+> + `http://192.168.1.132/`: **Test edilecek hedef URL** → Belirtilen IP adresindeki web sunucusuna istek gönderilecek.
+
+```shell
+ab -n 1000 -c 100 http://192.168.1.132/
+```
+
+### tcp_nodelay Direktifi:
+
+
+
+### nmap direktifi:
+
+
 ## Nginx Log Dosyaları:
 
 
