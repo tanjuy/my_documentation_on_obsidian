@@ -1,6 +1,6 @@
-## Komut Modu
+# Komut Modu
 
-### Tuş Kombinasyonları
+## Tuş Kombinasyonları
 ##### Silme:
 1. `d^` : İmlecin bulunduğu noktadan en başına kadar siler.
 2. `d$`: İmlecin bulunduğu noktadan en sonuna kadar siler.
@@ -9,7 +9,33 @@
 ##### Kopyalama:
 1. `yy` : 
 
-#### set komutu:
+### HTML için Tuş Kombinasyonları:
+
+#### 1. `dit` tuş kombinasyonu:
+
++ **d**: delete (sil)
++ **i**: inner (içindeki)
++ **t**: tag (HTML/XML etiketi)
++ Yani `"dit"` kombinasyonu, imlecin bulunduğu yerdeki **HTML veya XML etiketinin içeriğini siler**, ancak etiketin kendisini silmez.
+
+```html
+<p>Merhaba dünya!</p>
+```
+
+> **Explanation:**
+> + Diyelim ki elinde şu satır var ve imleç `<p>` etiketi içindeyken:
+
+```html
+<p></p>
+```
+
+> **Explanation:**
+> + Yani `<p>` ve `</p>` yerinde durur, sadece içeriği silinir.
+
+#### 2. `dat` tuş kombinasyonu:
+
+
+## set komutu:
 ###### Örnek 1: clipboard'dan vim'e kopyalama
 ```vim
 :set paste 
@@ -24,7 +50,7 @@
 > 	- `:set paste` komutunu kullanarak, bu otomatik işlemleri devre dışı bırakarak, yapıştırdığınız metnin orijinal biçimini korumasını sağlayabilirsiniz.
 
 
-#### set cursorline:
+### set cursorline:
 
 ```vim
 :set cursorline

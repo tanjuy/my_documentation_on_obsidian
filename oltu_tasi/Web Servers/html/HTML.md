@@ -291,6 +291,7 @@
 | `title`          | Fare üzerine gelindiğinde gösterilen açıklama.                                                                                    | `title="Detaylı bilgi"`    |
 | `loading`        | Resmin yüklenme davranışı (`lazy` ile performans optimizasyonu). Sayfa kaydırıldıkça resim yüklenir (ilk yükleme hızını artırır). | `loading="lazy"`           |
 | `srcset`         | DPI veya ekran boyutuna göre farklı resimler belirtme (responsive).                                                               | `srcset="resim-2x.jpg 2x"` |
+
 **index.html:**
 ```html
 <!DOCTYPE html>
@@ -443,7 +444,7 @@ total 28
 > 3. `auto`: Tarayıcı ses dosyasını tamamen önceden yükleyebilir. Bu, sayfa yüklendiğinde ses dosyasının tamamının indirilmesine neden olabilir.
 > 4. (Varsayılan - `preload` belirtilmezse): Tarayıcı kendi kararına göre en uygun yükleme yöntemini seçer.
 
-#### `preload=none`
+#### 3.1. `preload=none`
 
 ```html
 <!DOCTYPE html>
@@ -469,7 +470,7 @@ total 28
 > **Explanation:**
 > + Tarayıcıdan da görüldüğü üzeri tarayıcı her hangi bir ön yükleme yapmamıştır.
 
-#### `preload="auto"`
+#### 3.2. `preload="auto"`
 
 ```html
 <audio controls preload="auto">
@@ -482,10 +483,9 @@ total 28
 ![preload_auto](images/preload_auto.png)
 
 > **Explanation:**
-> Tarayıcı çıktısından görüldüğü üzeri ses dosyası ve gereken her sey öncesinde yüklenmiş olduğu görünmektedir.
+> Tarayıcı çıktısından görüldüğü üzeri ses dosyası ve gereken her şey öncesinde yüklenmiş olduğu görünmektedir.
 
-
-#### `preload=metadata`
+#### 3.3. `preload=metadata`
 
 ```html
 <audio controls preload="metadata">
@@ -494,7 +494,21 @@ total 28
 </audio>
 ```
 
+**Çıktı:**
+![preload_metadata](images/preload_metadata.png)
+> **Explanation:**
+> + Eğer `auto` ile karşılaştırsak sadece dosyanın temel bilgileri (ör. uzunluk, codec bilgisi) yüklenir, ancak ses içeriği yüklenmediğini görebiliriz.
 
+
+#### 3.4. preload belirtilmezse
++ Eğer `<audio>` etiketinde `preload` attribute'ü belirtilmezse, tarayıcı kendi stratejisine göre en uygun ön yükleme yöntemini seçer.
++ Ancak bu seçim, tarayıcıya ve hatta kullanıcının internet bağlantı hızına bağlı olarak değişebilir.
+
+> [!NOTE]
+> **Ne Olur?**
+> + Çoğu modern tarayıcı **"preload=metadata"** gibi davranır, yani sadece ses dosyasının uzunluğu ve diğer metadata bilgileri yüklenir ama içeriğin tamamı indirilmez.
+> + Bazı tarayıcılar ve durumlara bağlı olarak, tarayıcı **hiçbir şey yüklemeyebilir (preload="none" gibi davranabilir)** ya da ses dosyasının tamamını yükleyebilir (**preload="auto" gibi davranabilir**).
+> + Mobil tarayıcılar genellikle bant genişliği tasarrufu yapmak için **"preload=none"** tercih eder.
 
 ## `<audio>` vs `<video>` Farkı:
 | Özellik           | `<audio>`                          | `<video>`                              |
@@ -542,4 +556,713 @@ total 28
 > + *Dezavantajı:*
 > 	- *Uzun Kod:* Basit senaryolarda gereksiz gelebilir.
 
+
 # Video:
+
++ **`<video>`** etiketi, bir web sayfasına **video içeriği** eklemek için kullanılan HTML5 elementidir.
++ Kullanıcıların videoyu oynatmasını, duraklatmasını, sesini kontrol etmesini ve tam ekran yapmasını sağlar.
+
+## Önemli Özellikler(Attributes):
+
+|**Attribute**|**Açıklama**|**Örnek**|
+|---|---|---|
+|`src`|Video dosyasının yolu (alternatif: `<source>` içinde kullanılır).|`src="film.mp4"`|
+|`controls`|Oynatma kontrollerini gösterir (play, ses, tam ekran vb.).|`<video controls>`|
+|`width` / `height`|Videoyu belirtilen boyutta gösterir (CSS ile de ayarlanabilir).|`width="800" height="450"`|
+|`autoplay`|Sayfa yüklendiğinde otomatik oynatır (tarayıcılar genelde sesi kapalı ister).|`<video autoplay muted>`|
+|`loop`|Videoyu döngüye alır (sürekli tekrar eder).|`<video loop>`|
+|`muted`|Varsayılan olarak sesi kapalı başlatır.|`<video muted>`|
+|`poster`|Video yüklenmeden önce gösterilecek resim (thumbnail).|`poster="resim.jpg"`|
+|`preload`|Videoyu önceden yükler (`auto`, `metadata`, `none`).|`preload="metadata"`|
+
+## Örnek 1:  
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+	    <!-- Kısa Yöntem -->
+        <video src="Linux_Find.mkv" width="500px"
+            controls autoplay>
+        </video>
+        <br>
+        <!-- Profesiyonel Yöntem -->
+        <video controls width="500px" autoplay muted>
+	        <!-- Firefox mkv uzantısını desteklemiyor -->
+            <source src="Linux_Find.mkv" type="video/webm">
+            <!-- Firefox mp4 uzantısını destekliyor --> 
+            <source src="Go_prog.mp4" type="video/mp4">
+        </video>
+    </body>
+</html>
+```
+
+**Çıktı:**
+![video_source](images/video_source.png)
+> **Explanation:**
+> + Kısa yol(`src`) ile Profesyonel Yöntem(`<source>`) arasında fark görülmüyor ama bazı tarayıcılar bazı uzantıları desteklememektedir.
+> + `audio` etiketi de olduğu gibi Profesyonel yöntem ile ek  format uzantılı dosyalar ekleyebiliriz. Böylece tarayıcı formatı desteklemez ise bir sonraki formatı çalıştır. 
+> + Yani, **`<source>`** ile birden fazla format ekleyerek tarayıcı uyumluluğu sağlanır (MP4, WebM, OGG).
+
+
+
+> [!NOTE]
+> 1. **Format Uyumsuzluğu:** Tüm tarayıcılar MP4'ü destekler, ancak WebM/OGG için ek `<source>` eklemek gerekebilir.
+> 	```html
+> 	<source src="Linux_Find.mkv" type="video/webm">
+> 	<source src="Go_prog.mp4" type="video/mp4">
+> 	```
+> 2. **`autoplay` Çalışmaması:** Modern tarayıcılar, otomatik oynatmayı **kullanıcı etkileşimi olmadan engeller** (özellikle sesli videolarda).
+> 3. **Erişilebilirlik Eksikliği:** Video içeriği için **altyazı** (`<track>` etiketi) eklemeyi unutmayın:
+> 	```html
+> 	<track src="altyazi.vtt" kind="subtitles" srclang="tr" label="Türkçe">
+> 	```
+
+
+**Destekleyen Video Formatları:**
+
+|**Format**|**MIME Type**|**Tarayıcı Desteği**|
+|---|---|---|
+|MP4|`video/mp4`|Tüm modern tarayıcılar (H.264).|
+|WebM|`video/webm`|Firefox, Chrome, Edge.|
+|OGG|`video/ogg`|Firefox, Opera (eski sürümler).|
+
+## Örnek 2: Otomatik Oynatma
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <video controls width="500px" autoplay muted>
+            <source src="Go_prog.mp4" type="video/mp4">
+        </video>
+    </body>
+</html>
+```
+
+> **Explanation:**
+> + `autoplay` ve `muted` attribute'leri ile sayfa yüklendiğinde video otomatik olarak başlıyor.
+> + Chrome ve Firefox gibi tarayıcılar `autoplay`'i sadece `muted` ile çalıştırır.
+
+## Örnek 4:  Döngü
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+	    <!-- loop: Video bittiğinde tekrardan başlar -->
+        <video controls width="500px" autoplay muted loop>
+            <source src="Linux_Find.mkv" type="video/webm">
+            <source src="Go_prog.mp4" type="video/mp4">
+        </video>
+    </body>
+</html>
+```
+> **Explanation:**
+> + `autoplay` ve `muted` attribute'lerini kullanmaksızın da `loop` attribute'ü kullanılır ama genellikle bu üç attribute birlikte kullanılır.
+
+## `preload` attribute:
+
+| Değer      | Ne yapar?                               | Ne zaman kullanılır?                                        |
+| ---------- | --------------------------------------- | ----------------------------------------------------------- |
+| `none`     | Hiçbir şey yüklemez                     | Veri tasarrufu isteniyorsa                                  |
+| `metadata` | Sadece video bilgilerini yükler         | Süre/thumbnail göstermek ama içeriği indirmemek isteniyorsa |
+| `auto`     | Gerekirse tamamını bile önceden indirir | Video büyük ihtimalle oynatılacaksa                         |
+### Örnek 5: `preload="none"`
+
++ Video hiç önceden yüklenmez.
++ **Ne zaman kullanılır?** Kullanıcı oynat butonuna basmadan video yüklenmesin istiyorsanız.
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <video controls width="500px" preload="none">
+            <source src="Linux_Find.mkv" type="video/webm"> <!-- 1.Durum -->
+            <source src="Go_prog.mp4" type="video/mp4"> <!-- 2.Durum -->
+        </video>
+    </body>
+</html>
+```
+> **Explanation:**
+> + Eğer tarayıcı 1.Durum'u desteklemez ise 2.Durumu çalıştırır. Çünkü tüm tarayıcılar `mp4` formatını destekler.
+
+
+**Çıktı:**
+
+![video_preload_none](video_preload_none.png)
+
+> **Explanation:**
+> + Çıktıda da gördüğümüz gibi video ne indirilmiş ne de yüklenmiştir. Çünkü, `preload="none"` olarak ayarlanmıştır.
+
+### Örnek 6: `preload="metadata"`
+
++ **Ne zaman kullanılır?** Video hakkında bilgi göstermek istiyor ama içeriği hemen indirmek istemiyorsanız.
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <video controls width="500px" preload="metadata">
+            <source src="Linux_Find.mkv" type="video/webm">
+            <source src="Go_prog.mp4" type="video/mp4">
+        </video>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![video_preload_metadata](video_preload_metadata.png)
+
+> **Explanation:**
+> + Bu çıktı da görüldüğü üzeri video'un sadece temel bilgiler(süre, çözünürlük gibi) yüklenir. *İçerik indirilmez.*
+
+### Örnek 7: `preload="auto"`
+
++ **Ne zaman kullanılır?** Kullanıcının videoyu oynatma ihtimali yüksekse ve akıcı bir deneyim isteniyorsa.
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <video controls width="500px" preload="auto">
+            <source src="Linux_Find.mkv" type="video/webm">
+            <source src="Go_prog.mp4" type="video/mp4">
+        </video>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![video_preload_auto](images/video_preload_auto.png)
+
+> **Explanation:**
+> + Tarayıcı videonun ne kadarını önceden yükleyeceğine kendi karar verir. Hatta tamamını da indirebilir.
+> + Video ortalarına hızlıca gittiğimizde bekleme olmadığını gözlemleyebilirsiniz.
+
+### Örnek 8: `preload` belirtilmezse
+
++ Tarayıcı **kendi varsayılanına göre davranır.**
++ Genellikle `preload="metadata"` gibi davranır ama bu, cihaz ve tarayıcıya göre değişebilir.
+-  Mobil tarayıcılar genellikle veri tasarrufu için **hiçbir şey yüklememeyi** tercih eder (yani `none` gibi davranır).
+
+## Özet:
+- `<video>` etiketi, **web sayfalarına video eklemenin standart yoludur**.
+- **`controls`** ile kullanıcı etkileşimi sağlanır.
+- Çoklu format desteği için **`<source>`** kullanın.
+- Otomatik oynatma (`autoplay`) için **`muted`** gerekebilir.
+- Mobil uyumluluk için **CSS ile boyutlandırma** yapın.
+
+## Metin Biçimlendirme:
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <p>Bu Normal Bir Yazı</p>
+        <p>Bu <b>Kalın</b> Bir Yazı</p>
+        <p>Bu <strong>Kalın</strong> Bir Yazı</p>
+        <p>Bu <i>İtalik</i> Bir Yazı</p>
+        <p>Bu <em>İtalic</em> Bir Yazı</p>
+        <p>Bu <big>Büyük</big> Bir Yazı</p>
+        <p>Bu <small>Küçük</small> Bir Yazı</p>
+        <p>Bu <sub>Alt Sembol</sub> Bir Yazı</p>
+        <p>Bu <sup>Üst Sembol</sup> Bir Yazı</p>
+        <p>Bu <ins>Altı Çizili</ins> Bir Yazı</p>
+        <p>Bu <del>Üstü Çizili</del> Bir Yazı</p>
+        <p>Bu <mark>Fosforlu</mark> Bir Yazı</p>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![text_formating](images/text_formating.png)
+
+### 1. `<b>` ve `<strong>` Etiketleri Arasındaki Farklar:
+
++ `<b>` ve `<strong>` etiketleri her ikisi de metni kalın (bold) göstermek için kullanılsa da, temel farkları vardır.
+
+**Semantik(Anlamsal) Fark**
+
+|`<b>` Etiketi|`<strong>` Etiketi|
+|---|---|
+|**Sadece görsel kalınlaştırma** yapar|**Metne güçlü vurgu/anlam** katar|
+|Semantik önemi yoktur|Semantik önemi vardır|
+|Sadece biçimlendirme amaçlıdır|İçeriğin önemini belirtir|
+|Ekran okuyucular için fark yaratmaz|Ekran okuyucular vurguyu farklı okuyabilir|
+
+### 2. `<i>` ve `<em>` Etiketleri Arasındaki Farklar:
+
++ `<i>` ve `<em>` etiketleri her ikisi de metni italik (eğik) göstermek için kullanılsa da, temel farkları vardır.
+
+**Semantik(Anlamsal) Fark:**
+
+|`<i>` Etiketi|`<em>` Etiketi|
+|---|---|
+|**Sadece görsel italikleştirme** yapar|**Metne vurgu/anlam** katar|
+|Semantik önemi yoktur|Semantik önemi vardır|
+|Sadece biçimlendirme amaçlıdır|İçeriğin vurgulanmasını sağlar|
+|Ekran okuyucular için fark yaratmaz|Ekran okuyucular vurguyu farklı tonlama ile okuyabilir|
+
+# Listeler:
+
++ HTML'de listeler, web sayfalarında bilgileri düzenli ve okunabilir bir şekilde sunmak için kullanılan temel bir yapıdır. Üç ana liste türü bulunur:
+## 1. Sırasız Liste(Unordered Lists):
+
++ Öğelerin belirli bir sırası önemli olmadığında kullanılır.
++ Her bir liste öğesi genellikle bir madde işareti (disk, daire, kare vb.) ile işaretlenir.
++ `<ul>` etiketi listenin başlangıcını ve `</ul>` etiketi listenin sonunu belirtir.
++ Her bir liste öğesi `<li>` (list item) etiketi içine alınır.
+
+### Örnek 1: Temel Kullanım
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Popüler Programlama Dilleri:</h1>
+        <ul>
+            <li>Python</li>
+            <li>Javascript</li>
+            <li>Python</li>
+            <li>java</li>
+            <li>C programlama</li>
+        </ul>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![unordered_lists](unordered_lists.png)
+
+### Örnek 2: `style Attribute`
+
++ CSS ile madde işaretlerinin görünümünü değiştirebilirsiniz:
+
+```html
+<ul style="list-style-type: disc;"> <!-- Varsayılan (dolu daire) -->
+  <li>Disk stili</li>
+</ul>
+
+<ul style="list-style-type: circle;"> <!-- İçi boş daire -->
+  <li>Çember stili</li>
+</ul>
+
+<ul style="list-style-type: square;"> <!-- Kare -->
+  <li>Kare stili</li>
+</ul>
+
+<ul style="list-style-type: none;"> <!-- İşaretsiz -->
+  <li>İşaretsiz</li>
+</ul>
+```
+
+### Örnek 3: nested list
+
++ Sırasız listeleri **iç içe(nested)** kullanabilirsiniz:
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Popüler Programlama Dilleri:</h1>
+        <ul>
+            <li>Linux OS
+                <ul>
+                    <li>Ubuntu</li>
+                    <li>Arch Linux</li>
+                    <li>Fedora</li>
+                </ul>
+            </li>
+            <li>Windows</li>
+            <li>Mac OS</li>
+        </ul>
+    </body>
+</html>
+```
+
+## 2. Sıralı Liste(Ordered Lists ):
+
++ Sıralı listeler, numaralı veya belirli bir sıraya göre düzenlenmiş listeler oluşturmak için kullanılır.
++ Her liste öğesi `<li>` (list item) etiketi ile tanımlanır.
+
+### Örnek 1: Temel Kullanım
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Best Operating System:</h1>
+        <ol>
+            <li>Ubuntu</li>
+            <li>Manjora</li>
+            <li>Fedora</li>
+            <li>Linux Mint</li>
+            <li>Arch Linux</li>
+        </ol>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![ordered_list](ordered_list.png)
+
+### Örnek 2: `type` attribute Kullanımı:
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Best Operating System:</h1>
+        <ol type="A">
+            <li>Ubuntu</li>
+            <li>Manjora</li>
+            <li>Fedora</li>
+            <li>Linux Mint</li>
+            <li>Arch Linux</li>
+        </ol>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![ordered_list_types](ordered_list_types.png)
+
++ `<ol>` element'in `type attribute`'ün alabileceği seçenekleri: 
+
+```html
+<ol type="A">
+  <li>Büyük harfler (A, B, C)</li>
+</ol>
+
+<ol type="a">
+  <li>Küçük harfler (a, b, c)</li>
+</ol>
+
+<ol type="I">
+  <li>Roma rakamları (I, II, III)</li>
+</ol>
+
+<ol type="i">
+  <li>Küçük Roma rakamları (i, ii, iii)</li>
+</ol>
+```
+
+### Örnek 3:  `start` attribute Kullanımı
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Best Operating System:</h1>
+        <ol start="3">
+            <li>Ubuntu</li>
+            <li>Manjora</li>
+            <li>Fedora</li>
+            <li>Linux Mint</li>
+            <li>Arch Linux</li>
+        </ol>
+    </body>
+</html>
+```
+
+> **Explanation:**
+> + Liste `start` attribute sayesinde 1 ile değil 3 ile başlayacaktır. 
+
+### Örnek 4: `reversed` attribute Kullanımı
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Best Operating System:</h1>
+        <ol reversed>
+            <li>Ubuntu</li>
+            <li>Manjora</li>
+            <li>Fedora</li>
+            <li>Linux Mint</li>
+            <li>Arch Linux</li>
+        </ol>
+    </body>
+</html>
+```
+
+> **Explanation:**
+> + `reversed` attribute ile liste 1'den 6'a sıralanmayacaktır. Bunun yerine 6'dan 1'e doğru bir sıralama olacaktır.
+> + `reversed` Türkçe karşılığı da *tersine çevrilmiş* 
+
+### Örnek 5: İç İçe Sıralı Listeler
+
++ Sırasız listeleri iç içe(`nested list`) kullanabilirsiniz:
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Best Operating System:</h1>
+        <ol type="A">
+            <li>
+                Compiled Programming:
+                <ol>
+                    <li>C programming</li>
+                    <li>Golang</li>
+                    <li>Java</li>
+                </ol>
+            </li>
+            <li>
+                Interpreted Programming:
+                <ul>
+                    <li>Python</li>
+                    <li>Javascript</li>
+                    <li>PHP</li>
+                </ul>
+            </li>
+        </ol>
+    </body>
+</html>
+```
+
+## 3. Açıklama Listesi:
+
++ Açıklama listeleri, terimleri ve onlara ait açıklamaları listelemek için kullanılan özel bir HTML listeleme yöntemidir.
++ Genellikle sözlük tarzı içerikler, tanımlamalar veya anahtar-değer çiftleri göstermek için idealdir.
+
+### Örnek 1: Temel Kullanımı
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Programming Languages</h1>
+        <dl>
+            <dt>Python</dt>
+            <dd>Python is a programming language that lets you work quickly
+            and integrate systems more effectively.</dd>
+
+            <dt>Javascript</dt>
+            <dd>JavaScript (JS) is a lightweight interpreted (or just-in-time compiled)
+             programming language with first-class functions.</dd>
+             
+            <dt>PHP</dt>
+            <dd>A popular general-purpose scripting language that is especially suited
+             to web development.</dd>
+             
+            <dt>Java</dt>
+            <dd>Java is a programming language and computing platform first released by 
+            Sun Microsystems in 1995.</dd>
+            
+            <dt>Mojo</dt>
+            <dd>Mojo is an innovative, high-performance programming language designed for
+             writing systems-level code for AI workloads.</dd>
+        </dl>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![description_list](images/description_list.png)
+
+
+> [!NOTE]
+> **Elementler ve Anlamları:**
+> 1. **`<dl>`** (Description List): Açıklama listesinin ana kapsayıcısı
+> 2. **`<dt>`** (Description Term): Tanımlanacak terim
+> 3. **`<dd>`** (Description Details): Terimin açıklaması
+
+### Örnek 2: Çoklu Açıklamalar
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Programming Languages</h1>
+        <dl>
+            <dt>HTML</dt>
+            <dd>Web sayfalarının yapısını oluşturur</dd>
+            <dd>1991'de Tim Berners-Lee tarafından oluşturuldu</dd>
+
+            <dt>JavaScript</dt>
+            <dd>Web sayfalarına dinamik davranış ekler</dd>
+        </dl>
+    </body>
+</html>
+```
+
+> **Explanation:**
+> + `HTML` için iki tane açıklama mevcut iken, `JavaScript` için yalnızca bir açıklama vardır. 
+> + Yani, `HTML` için çoklu açıklama yazılmıştır.
+
+### Örnek 3: nested list
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Programming Languages</h1>
+        <dl>
+            <dt>Frontend</dt>
+            <dd>
+                <dl>
+                    <dt>HTML</dt>
+                    <dd>Structure</dd>
+
+                    <dt>CSS</dt>
+                    <dd>Design</dd>
+
+                    <dt>Progamming</dt>
+                    <dd>JavaScript</dd>
+                </dl>
+            </dd>
+        </dl>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![nested_description_list](images/nested_description_list.png)
+
+
+# Tablolar:
+
++ Tablolar, verileri satırlar ve sütunlar halinde düzenli bir şekilde göstermek için kullanılan HTML elementleridir.
++ Temel tablo yapısı `<table>` etiketi ile oluşturulur.
+
+
+> [!NOTE]
+> **Tablo Elementleri:**
+> 1. **`<table>`**: Tablonun ana kapsayıcısı
+> 2. **`<tr>`** (Table Row): Tablo satırı
+> 3. **`<th>`** (Table Header): Başlık hücresi (varsayılan olarak kalın ve ortalanmış)
+> 4. **`<td>`** (Table Data): Normal veri hücresi
+
+
+```html
+
+```

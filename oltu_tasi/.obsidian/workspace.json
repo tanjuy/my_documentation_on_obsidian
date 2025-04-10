@@ -38,20 +38,6 @@
             }
           },
           {
-            "id": "8209bd6775d68452",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Diskler/LVM.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "LVM"
-            }
-          },
-          {
             "id": "a2e531737528c634",
             "type": "leaf",
             "state": {
@@ -85,26 +71,42 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Web Servers/html/HTML.md",
+                "file": "Linux Command/Linux komutları.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "HTML"
+              "title": "Linux komutları"
             }
           },
           {
             "id": "486a82d125e54680",
             "type": "leaf",
+            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Windows Commands/CMD.md",
+                "file": "Web Servers/html/HTML.md",
+                "mode": "source",
+                "source": false
+              },
+              "pinned": true,
+              "icon": "lucide-file",
+              "title": "HTML"
+            }
+          },
+          {
+            "id": "430f54d8e61ee413",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Linux Command/Vim.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "CMD"
+              "title": "Vim"
             }
           }
         ],
@@ -165,7 +167,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 243.5
+    "width": 281.5
   },
   "right": {
     "id": "1413189cf439f38e",
@@ -253,21 +255,28 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "2183a2c56f260b5e",
+  "active": "486a82d125e54680",
   "lastOpenFiles": [
-    "Web Servers/html/images/preload_auto.png",
-    "Web Servers/html/images/preload_none.png",
-    "Web Servers/html/images/audio_autoplay.png",
-    "Web Servers/html/images/audio.png",
+    "Web Servers/html/images/nested_description_list.png",
+    "Linux Command/Vim.md",
+    "Web Servers/html/images/unordered_lists.png",
+    "Web Servers/html/images/description_list.png",
+    "Web Servers/html/images/ordered_list.png",
+    "Web Servers/html/HTML.md",
+    "Web Servers/html/images/ordered_list_types.png",
+    "Web Servers/Nginx/Nginx Config File.md",
+    "Programlama/Javascript/javascript Dersleri.md",
+    "Web Servers/Nginx/images/ngx_http_image_filter_module.png",
+    "Web Servers/html/images/text_formating.png",
+    "Web Servers/html/images/video_preload_auto.png",
+    "Web Servers/html/images/video_preload_metadata.png",
+    "Web Servers/html/images/video_preload_none.png",
+    "Web Servers/html/images/video_source.png",
+    "Diskler/LVM.md",
+    "Linux Command/Linux komutları.md",
     "Windows Commands/CMD.md",
     "DevOps/Jenkins/Jenkins Kurulumu.md",
-    "Web Servers/Nginx/Nginx Config File.md",
     "Programlama/Python/Django/Django.md",
-    "Linux Command/Linux komutları.md",
-    "Web Servers/html/HTML.md",
-    "Web Servers/html/images/anchor.png",
-    "Web Servers/html/images/p_tag.png",
-    "Web Servers/html/images/heading_tag.png",
     "Web Servers/html/images",
     "Web Servers/html",
     "Web Servers/HTTP.md",
@@ -281,18 +290,11 @@
     "Database/PostgreSQL/Database Oluşturma.md",
     "Database/PostgreSQL/AS kullanımı.md",
     "Linux Command/tmux.md",
-    "Web Servers/Nginx/images/gzip.png",
-    "Diskler/LVM.md",
     "K8s/K8s Kurulumu.md",
-    "Programlama/Javascript/javascript Dersleri.md",
     "Linux Command/fzf.md",
     "Linux Command/Network/ip.md",
-    "Web Servers/Nginx/images/keepalive_timeout.png",
     "Git/Git Dersi.md",
-    "Web Servers/Nginx/images/client_max_body_size-php.png",
-    "Web Servers/Nginx/images/client_max_body_size.png",
     "Diskler/Btrfs.md",
-    "Programlama/Bash_Script/Bash Script Apps.md",
     "Programlama/PHP",
     "Programlama/Python/Sqlalchemy",
     "Sistem İzleme",

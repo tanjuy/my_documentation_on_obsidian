@@ -3209,6 +3209,383 @@ location [optional_modifier] [URI] {
 
 **Kaynak:** [Best Tutorial - 2:32](https://www.youtube.com/watch?v=NwijBVfiK_o)
 
+## Nginx Modülü:
+
++ NGINX modülleri, NGINX web sunucusunun işlevselliğini genişleten eklentilerdir. İki tür modül vardır:
+
+1. **Statik Modüller**: NGINX ile birlikte derlenen ve doğrudan çekirdeğe entegre olan modüller
+2. **Dinamik Modüller**: Çalışma zamanında yüklenebilen ve NGINX'i yeniden derlemeden ek özellikler sağlayan modüller
+
+**Statik vs Dinamik Modüller**
+
+| Özellik    | Statik Modül            | Dinamik Modül              |
+| ---------- | ----------------------- | -------------------------- |
+| Derleme    | Binary'e gömülü         | Ayrı .so dosyası           |
+| Yükleme    | Her zaman yüklü         | Çalışma zamanında yüklenir |
+| Performans | Biraz daha hızlı        | Minimal fark               |
+| Güncelleme | NGINX'i yeniden derleme | Modülü yeniden derleme     |
+### 1. Dinamik Modüller:
+
++ NGINX, 1.9.11 sürümünden itibaren dinamik modül desteği sunuyor.
+### Dinamik Modül Olarak Derlemenin Nedenleri:
+
+1. **Esneklik ve Modülerlik:**
+	-  Modülleri çalışma zamanında yükleyip kaldırabilme imkanı
+	-  NGINX'i yeniden derlemeden modül ekleyip çıkarabilme
+2. **Bellek Tasarrufu:**
+	- Sadece ihtiyaç duyulan modüller yüklendiğinde bellek kullanımı azalır.
+	- - Tüm modüller tek bir binary'de derlenmez.
+3. **Güncelleme Kolaylığı:**
+	- - Modülleri NGINX çekirdeğini güncellemeden bağımsız olarak güncelleyebilme
+4. **Dağıtım Kolaylığı:**
+	- Paket yöneticileri(apt, yum vb.) için daga uygun bir yapı
+	- Kullanıcılar sadece ihtiyacç duydukları modülleri yükleyebilir.
+
+### Örnek 1:
+
+```zsh
+nginx-tutorial3 :: /etc/nginx » ll
+```
+> **Explanation:**
+> + Mevcut dizin: `/etc/nginx` 
+
+**`ll` çıktısı:**
+```zsh
+total 72K
+-rw-r--r-- 1 root root 1.1K Oct 12 19:02 fastcgi.conf
+-rw-r--r-- 1 root root 1.1K Oct 12 19:02 fastcgi.conf.default
+-rw-r--r-- 1 root root 1007 Oct 12 19:02 fastcgi_params
+-rw-r--r-- 1 root root 1007 Oct 12 19:02 fastcgi_params.default
+-rw-r--r-- 1 root root 2.8K Oct 12 19:02 koi-utf
+-rw-r--r-- 1 root root 2.2K Oct 12 19:02 koi-win
+-rw-r--r-- 1 root root 5.3K Oct 12 19:02 mime.types
+-rw-r--r-- 1 root root 5.3K Oct 12 19:02 mime.types.default
+-rw-r--r-- 1 root root  548 Mar 29 18:08 nginx.conf
+-rw-r--r-- 1 root root 2.6K Oct 12 19:02 nginx.conf.default
+-rw-r--r-- 1 root root  636 Oct 12 19:02 scgi_params
+-rw-r--r-- 1 root root  636 Oct 12 19:02 scgi_params.default
+drwxr-xr-x 2 root root 4.0K Mar 30 12:22 server
+-rw-r--r-- 1 root root  664 Oct 12 19:02 uwsgi_params
+-rw-r--r-- 1 root root  664 Oct 12 19:02 uwsgi_params.default
+-rw-r--r-- 1 root root 3.6K Oct 12 19:02 win-utf
+```
+> **Explanation:**
+> + nginx'imin bir parçası olarak kaç modülümüz olduğunu görelim.
+> + Burada modüller adında bir dizinimizin olmadığını görebilirsiniz.
+> + Eğer burada el yapımı modülleriniz varsa, o zaman bu belirli konumda modüller adı verilen yeni bir dizin oluşturulacaktı.
+
+```shell
+nginx -V
+```
+
++ Bu nginx'i başlattığımızda bu belirli nginx üzerinde kurduğumuz yapılandırmayı belirlememiz gerekiyor.
+
+```shell
+nginx version: nginx/1.27.2
+built by gcc 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04)
+built with OpenSSL 3.0.2 15 Mar 2022
+TLS SNI support enabled
+configure arguments: --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module
+```
+
+
+```zsh
+nginx-tutorial3 :: ~/nginx-1.27.2 » ls -ltr
+```
+
+```zsh
+total 888
+drwxr-xr-x 9 ottoman ottoman   4096 Oct  2  2024 src
+-rw-r--r-- 1 ottoman ottoman    787 Oct  2  2024 SECURITY.md
+-rw-r--r-- 1 ottoman ottoman  14220 Oct  2  2024 README.md
+-rw-r--r-- 1 ottoman ottoman   1319 Oct  2  2024 LICENSE
+-rw-r--r-- 1 ottoman ottoman   4049 Oct  2  2024 CONTRIBUTING.md
+-rwxr-xr-x 1 ottoman ottoman   2611 Oct  2  2024 configure
+-rw-r--r-- 1 ottoman ottoman   5215 Oct  2  2024 CODE_OF_CONDUCT.md
+-rw-r--r-- 1 ottoman ottoman 503040 Oct  2  2024 CHANGES.ru
+-rw-r--r-- 1 ottoman ottoman 328790 Oct  2  2024 CHANGES
+drwxr-xr-x 2 ottoman ottoman   4096 Oct 11 22:02 html
+drwxr-xr-x 4 ottoman ottoman   4096 Oct 11 22:02 contrib
+drwxr-xr-x 2 ottoman ottoman   4096 Oct 11 22:02 conf
+drwxr-xr-x 6 ottoman ottoman   4096 Oct 11 22:02 auto
+drwxr-xr-x 2 ottoman ottoman   4096 Oct 11 22:02 man
+-rw-rw-r-- 1 ottoman ottoman    386 Oct 12 18:39 Makefile
+drwxrwxr-x 3 ottoman ottoman   4096 Oct 12 18:51 objs
+```
+> **Explanation:**
+> + Daha önce nginx kurulumu yapmış olduğumu yani kaynaktan derlemiş olduğumuz `nginx source code`'un dizinidir.
+> + Tekrardan bu kaynak kodlarını kullanarak nginx'e modül ekleyeceğiz.
+> + Burada konfigürasyonlarımız ve daha önceden çalıştırdıklarımız var.
+> + Mevcut Dizin: `/home/ottoman/nginx-1.27.2`
+
+
+```zsh
+nginx-tutorial3 :: ~/nginx-1.27.2 » ./configure --help | grep dynamic 
+```
+> **Explanation:**
+> + Bu özel konfigürasyonda kaç tane Dinamik modülün mevcut olduğunu belirlememiz gerekiyor.
+
+**Çıktı:**
+```shell
+  --with-http_xslt_module=dynamic    enable dynamic ngx_http_xslt_module
+  --with-http_image_filter_module=dynamic
+                                     enable dynamic ngx_http_image_filter_module
+  --with-http_geoip_module=dynamic   enable dynamic ngx_http_geoip_module
+  --with-http_perl_module=dynamic    enable dynamic ngx_http_perl_module
+  --with-mail=dynamic                enable dynamic POP3/IMAP4/SMTP proxy module
+  --with-stream=dynamic              enable dynamic TCP/UDP proxy module
+  --with-stream_geoip_module=dynamic enable dynamic ngx_stream_geoip_module
+  --add-dynamic-module=PATH          enable dynamic external module
+  --with-compat                      dynamic modules compatibility
+```
+> **Explanation:**
+> + NGINX derleme parametrelerinde `--with-..._module=dynamic` şeklinde görünen ifadeler, bu modüllerin **dinamik olarak yüklenebilir** şekilde derleneceğini belirtir. 
+> + Buradaki çıktılar, benim nginx'imin içinde bulunan dinamik modüllerdir.
+
+
+```shell
+./configure  --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module --with-http_image_filter_module=dynamic --modules-path=/etc/nginx/modules
+```
+> **Explanation:**
+> + Bu komut `nginx-1.27.2` sürümü olan dizin altında çalıştırılmıştır.
+> + `./configure` komutu, çoğu açık kaynak programın derlenmeden **önceki yapılandırma** adımıdır.
+> + Derlemenin nasıl yapılacağını belirleyen `Makefile` adlı dosyayı **otomatik olarak oluşturur**.
+> + Genellikle bir açık kaynak programın klasörüne girdiğinde bir `configure` adlı **betik (script)** bulursun.
+> + Bu betik çalıştırıldığında:
+> 	- Sistemini kontrol eder (Hangi işletim sistemi? Hangi kütüphaneler yüklü? Hangi derleyici var?)
+> 	- Eksik bir şey varsa seni uyarır.
+> 	- Derleme işlemi için gereken **Makefile** adlı dosyayı oluşturur.
+
+
+```shell
+make
+```
+> **Explanation:**
+> + `make`, bir programın *kaynak kodlarından derlenip* çalıştırılabilir hale getirilmesini sağlar.
+> + Bunu `Makefile` adlı özel bir dosyada tanımlı kurallara göre yapar.
+> + `make`, **derleme işlemini başlatır.**
+> + C/C++ gibi dillerde `.c` dosyalarından `.o` (object) dosyaları üretir.
+> + Daha sonra bu dosyaları birleştirerek çalıştırılabilir (`binary`) bir program oluşturur.
+
+```shell
+sudo make install 
+```
+> **Explanation:**
+> + `make install`, **derlenen dosyaları sistemde uygun yerlere kopyalar.**
+> + *Örneğin:*
+> 	- `/usr/local/bin` içine binary dosyalar
+> 	- `/usr/local/lib` içine kütüphane dosyaları
+> 	- `/usr/local/include` içine başlık (header) dosyaları
+> 	- `/usr/local/share/man` içine kılavuz sayfaları
+
+
+> [!NOTE]
+> + `make` komutu sadece derleme yapar, kurulum yapmaz.
+> + `make install` çalışmadan, derlenen program sistemde "kurulmuş" sayılmaz.
+> + Eğer derlemeyi silmek istersen:
+> 	```shell
+> 	make clean         # derlenen dosyaları siler
+> 	```
+
+
+> [!NOTE]
+> **Özet:**
+> + `./configure`  Derleme ayarlarını yapar, `Makefile` üretir.
+> + `make` Derler
+> + `make install`  Sisteme kurar.
+
+
+```shell
+ps -aux | grep nginx
+```
+> **Explanation:**
+> + Tüm bu işlemlerden sonra nginx'in hala çalışıyor mu diye kontrol ediyoruz.
+> + Aşağıdaki çıktıdan görüleceği üzeri nginx çalışmayı sürdürmektedir.
+> + **Alternative:** `sudo systemctl status nginx.service`
+
+**ps çıktısı:**
+```shell
+root         711  0.0  0.1   9932  2924 ?        Ss   Apr04   0:00 nginx: master process /usr/bin/nginx
+ottoman     1131  0.0  0.3  10932  6128 ?        Ss   Apr04   0:20 tmux new -s nginx -c /etc/nginx
+www-data    7159  0.0  0.1  10700  3328 ?        S    Apr05   0:15 nginx: worker process
+www-data    7160  0.0  0.1  10700  3328 ?        S    Apr05   0:03 nginx: worker process
+ottoman    42188  0.0  0.1   6612  2264 pts/7    S+   10:11   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv nginx
+```
+
+
+> [!NOTE] Title
+> + Eğer aşağıdaki gibi bir hata alıyorsanız
+> 	```shell
+> 	./configure: error: the HTTP image filter module requires the GD library.
+> 	You can either do not enable the module or install the libraries.
+> 	```
+> + Şu kütüphaneleri yükleyiz:
+> 	```shell
+> 	sudo apt  install libgd-dev
+> 	```
+
+
+> [!NOTE]
+> + Görsel (image) işleme ve grafik oluşturma işlemleri için kullanılan **GD (Graphics Draw)** kütüphanesinin başlık dosyalarını (`.h`) ve geliştirme araçlarını içerir.
+> + **GD (Graphics Draw)**, PNG, JPEG, GIF, WebP gibi formatlarda **resim oluşturmak, düzenlemek veya işlemek** için kullanılan bir C kütüphanesidir.
+> + `libgd-dev`, bu kütüphaneyle yazılım geliştirmen için gerekli olan:
+> 	- Header dosyaları (örneğin `gd.h`)
+> 	- Semboller, tanımlar
+> 	- Paket yapılandırma dosyaları gibi geliştirme araçlarını içerir.
+> + Kurulumdan sonra aşağıdakiler sisteme eklenir:
+> 	- `/usr/include/gd.h` → GD fonksiyonlarını içeren başlık dosyası
+> 	- `/usr/lib/x86_64-linux-gnu/libgd.a` ve `.so` → GD kütüphane dosyaları
+> 	- `pkg-config --libs gd` komutu kullanılabilir hale gelir
+
+
+```shell
+nginx -V
+```
+
+**Çıktı:**
+
+```shell
+nginx version: nginx/1.27.2
+built by gcc 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04)
+built with OpenSSL 3.0.2 15 Mar 2022
+TLS SNI support enabled
+configure arguments: --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module --with-http_image_filter_module=dynamic --modules-path=/etc/nginx/modules
+```
+
+> **Explanation:**
+> + Bu komut ile yukarıda yaptığımız işlemlerin gerçekleşip gerçekleşmediğini teyit ediyoruz.
+> + Çıktıda da göründüğü üzeri `--with-http_image_filter_module=dynamic` ve `--modules-path=/etc/nginx/modules` modüllerinin eklendiğini görebiliyoruz.
+
+
+```shell
+nginx-tutorial3 :: /etc/nginx » ls -ltr
+```
+> *Mevcut Dizin:* `/etc/nginx`
+> `pwd` komutu ile mevcut dizin ekran yazdırabiliriz. 
+
+**Çıktı:**
+```shell
+total 76
+-rw-r--r-- 1 root root 5349 Oct 12 19:02 mime.types
+-rw-r--r-- 1 root root 1007 Oct 12 19:02 fastcgi_params
+-rw-r--r-- 1 root root 1077 Oct 12 19:02 fastcgi.conf
+-rw-r--r-- 1 root root  664 Oct 12 19:02 uwsgi_params
+-rw-r--r-- 1 root root  636 Oct 12 19:02 scgi_params
+-rw-r--r-- 1 root root  548 Mar 29 18:08 nginx.conf
+drwxr-xr-x 2 root root 4096 Mar 30 12:22 server
+-rw-r--r-- 1 root root 2223 Apr  6 09:44 koi-win
+-rw-r--r-- 1 root root 2837 Apr  6 09:44 koi-utf
+-rw-r--r-- 1 root root 3611 Apr  6 09:44 win-utf
+-rw-r--r-- 1 root root 5349 Apr  6 09:44 mime.types.default
+-rw-r--r-- 1 root root 1007 Apr  6 09:44 fastcgi_params.default
+-rw-r--r-- 1 root root 1077 Apr  6 09:44 fastcgi.conf.default
+-rw-r--r-- 1 root root  664 Apr  6 09:44 uwsgi_params.default
+-rw-r--r-- 1 root root  636 Apr  6 09:44 scgi_params.default
+-rw-r--r-- 1 root root 2656 Apr  6 09:44 nginx.conf.default
+drwxr-xr-x 2 root root 4096 Apr  6 09:44 modules
+```
+> **Explanation:**
+> 1. **Nginx Derlenirken:**
+> 	- `./configure` aşamasında kullanılır:
+> 	- Bu parametre, **dinamik Nginx modüllerinin (`.so` uzantılı dosyalar)** hangi klasörde olacağını söyler.
+> 	- `make install` komutu çalıştırıldığında `.so` modüllerinin nereye kopyalanacağını belirler.
+> 	```shell
+> 	./configure --modules-path=/etc/nginx/modules
+> 	```
+> 2.  **Nginx yapılandırmasında (nginx.conf)**:
+> 	- Derleme sırasında tanımlanan bu yol, Nginx’in modül yükleme satırlarında kullanılır:
+> 	- Nginx, burada `modules/` dediğinde aslında `/etc/nginx/modules/` klasörünü kasteder.
+> 	```nginx
+> 	load_module modules/ngx_http_image_filter_module.so;
+> 	```
+> 3.  Dikkat ederseniz `--modules-path` parametresi ile modules adında klasör oluşturulmuştur.
+
+
+> [!NOTE]
+> **Neden `/etc/nginx/modules`**
+> + Genelde yapılandırma dosyalarının (`nginx.conf`) bulunduğu yerle aynı kökte tutulur.
+> + Sistem genelinde erişilebilir bir yerdir.
+> + Paket yöneticileri (örneğin `apt install nginx-module-*`) modülleri buraya kurar.
+
+
+```shell
+nginx-tutorial3 :: /etc/nginx/modules » ls -ltr
+```
+
+**ls Çıktısı:**
+
+```shell
+total 108
+-rwxr-xr-x 1 root root 107704 Apr  6 09:44 ngx_http_image_filter_module.so
+```
+
+> **Explanation:**
+> +  `--with-http_image_filter_module=dynamic` parametresi ile `ngx_http_image_filter_module.so` kütüphanesi oluşturuluyor.
+> +  `--modules-path` parametresi ile bu dinamik kütüphanelerin hangi dizine koyulacağını belirliyoruz.
+
+#### `ngx_http_image_filter_module` kullanımı:
+
++ `ngx_http_image_filter_module`, Nginx’in isteğe bağlı bir **dinamik modülüdür** ve temel olarak **gelen görseller üzerinde işlem yapmanı sağlar** — yani Nginx’e basit bir **resim işleyici (image processor)** özelliği katar.
++ Bu modül, bir **HTTP isteğiyle sunulan görüntülere** (PNG, JPEG, GIF) şu işlemleri yapabilir:
+
+| Özellik            | Açıklama                                                    |
+| ------------------ | ----------------------------------------------------------- |
+| `resize`           | Görseli belirli boyutlara göre yeniden boyutlandırır        |
+| `crop`             | Görseli belli bir boyuta göre keser (kırpar)                |
+| `rotate` (dolaylı) | Döndürme doğrudan yok ama dolaylı yapılabilir               |
+| `format`           | Görseli farklı bir formata dönüştürebilir (örn. PNG → JPEG) |
+
+**nginx.conf:**
+
+```nginx
+user www-data;
+
+worker_processes auto;
+load_module /etc/nginx/modules/ngx_http_image_filter_module.so;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+
+        location = /assets/images/about/welcome-banner.jpg {
+            image_filter rotate 180;
+        }
+    }
+
+    include server/html;
+}
+```
+
+> **Explanation:**
+> + `load_module` direktifi ile kendi derlemiş olduğumuz veya derlenmiş `so` kütüphaneleri nginx'e entegre edebiliriz.
+> + Bu örnekte `ngx_http_image_filter_module.so` kütüphanesini `load_module` direktifi ile `nginx.conf` dosyasına yüklemiş bulunmaktayız.
+> + Daha fazla bilgi için [`ngx_http_image_filter_module`](https://nginx.org/en/docs/http/ngx_http_image_filter_module.html)  bağlantısını tıklayınız.
+
+**Çıktı:**
+
+![ngx_http_image_filter_module](images/ngx_http_image_filter_module.png)
+
+> **Explanation:** 
+> + `image_filter` direktifi ile `welcome-banner.jpg` resim dosyasını 180 derece döndürülüyor.
+
+### 2. Statik Modüller:
+
 ## Dinamik Siteleri İşleme:
 
 + Nginx, bir **reverse proxy** sunucusu olarak yapılandırılır ve dinamik istekleri `backend` sunucuya veya uygulamaya iletir.
@@ -3270,6 +3647,7 @@ http {
     }
 }
 ```
+
 > **Explanation:**
 > + `user www-data` anlamı şudur; tüm `nginx worker process` www-data kullanıcısı tarafından çalıştırılacaktır.
 > + Eğer `www-data` kullanıcı mevcut değil ise; `sudo groupadd www-data` ve `sudo useradd -g www-data -s /sbin/nologin www-data` komut ile oluşturabilirsiniz.
@@ -5519,6 +5897,28 @@ System clock synchronized: yes
           RTC in local TZ: no
 ```
 ### B. Server(Sunucu) Tarafı:
+
+## Reverse Proxy:
+
++ Nginx reverse proxy (ters vekil sunucu), Nginx web sunucusunun bir istemci ile bir veya daha fazla arka uç(`backend`) sunucusu arasında aracı olarak çalıştığı bir yapılandırmadır.
+
+
+> [!NOTE]
+> **Temel İşlevleri:**
+> + İstemciler (kullanıcılar) doğrudan arka uç(`backend`) sunucularına bağlanmak yerine Nginx'e bağlanır.
+> + Nginx gelen istekleri uygun arka uç(`backend`) sunucusuna yönlendirir.
+> + Arka uç(`backend`) sunucularının yanıtlarını istemcilere iletir
+
+
+> [!NOTE]
+> **Avantajları:**
+> 1. **Yük Dengeleme**: Birden fazla sunucuya trafiği dağıtabilir.
+> 2. **Güvenlik**: Arka uç sunucularını doğrudan internete açmaz, ek güvenlik katmanı sağlar.
+> 3. **SSL Termination**: SSL şifreleme/şifre çözme işlemini Nginx üstlenebilir.
+> 4. **Önbellekleme**: Sık erişilen içerikleri önbelleğe alarak performansı artırabilir.
+> 5. **Sıkıştırma**: İçeriği sıkıştırarak bant genişliğinden tasarruf sağlayabilir.
+
+
 ## HTTP If-Modified-Since:
 
 > [!INFO] Bilgi:
