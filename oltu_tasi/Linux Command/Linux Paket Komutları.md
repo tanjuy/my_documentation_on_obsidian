@@ -43,11 +43,37 @@ $ sudo dnf upgrade --assumeno
 > + Bu komut, güncellemeleri listeleyecek ancak onay vermediğiniz sürece hiçbir paket yüklemeyecektir. Güncellemeleri gözden geçirmek için kullanışlıdır.
 
 ### 5.history:
-#### 1.Temel Kullanımı:
+#### 1.Temel Kullanım:
 ```sh
 $ sudo dnf history
 ```
 > **Explanation:**
+
+**Çıktı:**
+```shell
+ID  | Command line                   | Date and time      | Action(s)   | Altered
+-----------------------------------------------------------------------------------------
+19  | install ntpstat.noarch         | 2024-10-11 19:08   | Install     |    1
+18  | install pcre-devel             | 2024-10-11 09:45   | Install     |    4
+17  | groupinstall Development Tools | 2024-10-11 04:22   | I, U        |  203
+16  | install wget.x86_64            | 2024-10-11 01:05   | Install     |    2
+15  | history undo 14                | 2024-10-10 23:09   | Removed     |    4
+14  | install python3.12             | 2024-10-10 23:08   | Install     |    4
+13  | history undo 12                | 2024-10-10 23:06   | Removed     |    1
+12  | install telnet                 | 2024-10-10 23:04   | Install     |    1
+11  | remove python39                | 2024-10-10 19:46   | Removed     |    6
+10  | install python39               | 2024-10-10 19:44   | Install     |    6
+9   | remove python3.11              | 2024-10-10 19:39   | Removed     |    5
+8   | install python3.11             | 2024-10-10 19:37   | Install     |    5
+7   | remove nginx                   | 2024-10-10 19:29   | Removed     |   20
+6   | install vim                    | 2024-10-10 15:49   | Install     |    4
+5   | install git                    | 2024-10-10 15:47   | Install     |    7
+4   | install zsh                    | 2024-10-10 15:46   | Install     |    1
+3   | install nginx                  | 2024-10-10 13:05   | Install     |   61
+2   | install tmux                   | 2024-10-10 12:59   | Install     |    2
+1   |                                | 2024-10-10 12:19   | Install     |  442
+```
+
 
 #### 2. history info:
 ```sh

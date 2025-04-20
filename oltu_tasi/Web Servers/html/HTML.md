@@ -1,3 +1,5 @@
+#web 
+
 + HTML (**HyperText Markup Language**), web sayfaları oluşturmak için kullanılan standart bir işaretleme dilidir.
 + Web tarayıcıları (Chrome, Firefox, Edge gibi) HTML kodlarını yorumlayarak görsel ve etkileşimli web sayfalarına dönüştürür.
 + Günümüzde **HTML5** sürümü kullanılmaktadır ve multimedya (video, ses), form kontrolleri ve semantik etiketler (`<header>`, `<article>`, `<footer>`) gibi modern özellikler içerir.
@@ -131,6 +133,138 @@
 
 **Çıktı:**
 ![heading tag](images/heading_tag.png)
+
+
+# Meta Etiketi:
+
++ `<meta>` etiketi, bir HTML belgesi hakkında **metadata** (üst veri) sağlayan ve genellikle `<head>` bölümünde yer alan bir elementtir.
++ Bu etiket tarayıcılara, arama motorlarına ve diğer web servislerine sayfa hakkında önemli bilgiler iletir.
+
+
+> [!NOTE]
+> **Temel Özellikleri:**
+> - *Kendini kapatan etiket(self-closing tag)*: `<meta>` etiketi içerik almaz, tek başına kullanılır.
+> - *Tarayıcı/yönlendirme kontrolü*: Sayfa davranışını yönetir.
+> - *SEO optimizasyonu*: Arama motorlarına bilgi sağlar.
+
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="HTML meta etiketi nedir? Meta description nasıl yazılır? SEO için en iyi meta açıklama örnekleri.">
+        <meta name="keywords" content="HTML, web geliştirme, frontend, programlama">
+        <meta name="author" content="Tanju Yücel, tanju@example.com">                                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="refresh" content="30">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <p>
+            Linux (telaffuz: Lin-uks); Linux çekirdeğine dayalı, açık kaynak kodlu, Unix benzeri bir işletim sistemi ailesidir. GNU Genel Kamu Lisansı versiyon 2 ile sunulan ve Linux Vakfı çatısı altında geliştirilen bir özgür yazılım projesidir.
+        </p>
+    </body>
+</html
+```
+
+## 1. Karakter Kodlaması Belirtme (Zorunlu):
+
++ `<meta charset="UTF-8">`, bir HTML belgesinin **karakter kodlamasını (character encoding)** tanımlayan temel bir meta etiketidir.
++ Bu etiket, tarayıcıya *Bu sayfadaki metinler UTF-8 standardına göre kodlanmıştır* der.
+
+```html
+<meta charset="UTF-8">
+```
+
+> [!NOTE]
+> **Neden Önemli?**
+> 1. *Özel Karakter Desteği* (Türkçe karakterler dahil):
+> 	- Doğru: `ğ, ş, ç, ı, ö, ü`
+> 	- Yanlış: `ÄŸ, ÅŸ, Ã§, Ã½` (bozuk karakterler)
+> 2. *Evrensel Uyumluluk:*
+> 	-  Dünyadaki tüm dillerin karakterlerini destekler (Çince, Arapça, Rusça vb.)
+
+## 2. Sayfa Açıklaması (SEO):
+
++ `<meta name="description">` etiketi, bir web sayfasının içeriğini **kısa ve öz bir şekilde özetleyen** HTML meta etiketidir.
++ Arama motorları (Google, Bing vb.) bu açıklamayı, kullanıcıların arama sonuçlarında sayfanızı daha iyi anlaması için kullanır.
+
+```html
+<meta name="description" content="HTML meta etiketi nedir? Meta description nasıl yazılır? SEO için en iyi meta açıklama örnekleri.">
+```
+
+## 3. Anahtar Kelimeler(Eski SEO):
+
++ Bu etiket, bir web sayfasının hangi **anahtar kelimeler** ile ilgili olduğunu belirtmek için kullanılır.
++ Anahtar kelimeler (`keywords`), o sayfanın **konusunu** arama motorlarına anlatmaya yardımcı olurdu.
+
+```html
+<meta name="keywords" content="HTML, web geliştirme, frontend, programlama">
+```
+> **Explanation:**
+> + `name="keywords"` → Bu etiketin anahtar kelimeler içerdiğini belirtir.
+> + `content="..."` → Virgülle ayrılmış anahtar kelimeler burada yer alır.
+
+
+> [!CAUTION]
+> 🚨 **Modern SEO açısından:**
+> + Eskiden (2000’li yılların başında), arama motorları bu etiketi dikkate alıyordu. Ancak artık:
+> + **Google ve birçok büyük arama motoru `keywords` etiketini dikkate almıyor.**
+> + Çünkü zamanında birçok site, bu etiketi **spam** gibi doldurup kötüye kullandı:
+> ```html
+> <meta name="keywords" content="para, bedava, kazan, tıkla, para, para, para">
+> ```
+> + Bu yüzden Google gibi arama motorları, bu etiketi **görmezden** geliyor.
+
+## 4. Web Yazarı:
+
++ Bu etiket, **web sayfasını kimin yazdığını (yazarını)** belirtmek için kullanılır.
+
+```html
+<meta name="author" content="Tanju Yücel">
+```
+> **Explanation:**
+> + `name="author"` → Bu meta etiketinin sayfanın yazarı hakkında bilgi verdiğini söyler.
+> + `content="Tanju Yücel"` → Yazarın adı veya yazar hakkında bilgi buraya yazılır.
+
+```html
+<meta name="author" content="Tanju Yücel, tanju@example.com">
+```
+> **Explanation:**
+> + İstersen yazarın iletişim bilgisi gibi şeyleri de `content` içine dahil edebilirsin.
+
+
+> [!WARNING]
+> + Kişisel bilgiler bu şekilde herkese açık olur, yani yaygın bir yöntem değildir.
+> + SEO etkisi düşüktür.
+
+
+## Responsive Tasarımın Temeli:
+
++ Bu meta etiketi, **mobil cihazlarda sayfanın doğru şekilde ölçeklenmesini** sağlayan kritik bir HTML öğesidir.
++ Özellikle responsive (duyarlı) web tasarım için vazgeçilmezdir.
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+```
+
+**Parametre ve Anlamaları:**
+
+| Parametre       | Değer          | Açıklama                                      |
+| --------------- | -------------- | --------------------------------------------- |
+| `width`         | `device-width` | Cihazın ekran genişliğine uyum sağlar         |
+| `initial-scale` | `1.0`          | Yakınlaştırma olmadan %100 ölçekte başlatır   |
+| `minimum-scale` | `0.5`          | Minimum yakınlaştırma seviyesi                |
+| `maximum-scale` | `2.0`          | Maksimum yakınlaştırma seviyesi               |
+| `user-scalable` | `yes/no`       | Kullanıcının yakınlaştırma yapıp yapamayacağı |
+
+![meta_viewport](meta_viewport.png)
+
+> **Explanation:**
+> + `<meta name="viewport" content="...">` etiketi pasif veya aktif ederek nasıl çalıştığını görebilirsiniz. 
 # Paragraf Etiketi:
 
 + HTML'de **`<p>`** (paragraph/paragraf) etiketi, metin içeriğini **paragraf** olarak düzenlemek için kullanılan temel bir blok-level elementidir.
@@ -1248,7 +1382,6 @@ total 28
 
 ![nested_description_list](images/nested_description_list.png)
 
-
 # Tablolar:
 
 + Tablolar, verileri satırlar ve sütunlar halinde düzenli bir şekilde göstermek için kullanılan HTML elementleridir.
@@ -1262,7 +1395,221 @@ total 28
 > 3. **`<th>`** (Table Header): Başlık hücresi (varsayılan olarak kalın ve ortalanmış)
 > 4. **`<td>`** (Table Data): Normal veri hücresi
 
+## Temel Tablo attribute'leri:
+
+
+> [!NOTE]
+> **HTML5 ile Kaldırılan Özellikler:** Bu attribute'ler HTML5 ile artık desteklenmemektedir(CSS Kullanılmalıdır.)
+> + `align`
+> + `bgcolor`
+> + `cellpadding`
+> + `cellspacing`
+> + `width`
+> + `height`
+> + `border`
+
+### 1. `<table>` attribute'leri:
+
++ **border**: Tablo kenarlık kalınlığı (piksel cinsinden)
 
 ```html
-
+<table border="1">
 ```
+
++ `border attribute` kullanmak yerine aşağıdaki gibi CSS özelliğini(property) kullanınız! 
+
+```css
+border 1px solid black;
+```
+
+---
++ **cellpadding**: Hücre içi boşluk (piksel)
+
+```html
+<table cellpadding="5">
+```
+
++ Bir hücrenin içeriği ile sınırı arasındaki boşluğu tanımlar. Bu özellik(attribute) artık kullanılmıyor: Bunu kullanmak yerine, `<th>` ve `<td>` öğelerine `padding` CSS özelliğini(property) uygulayın.(Kaynak: [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/CSS/padding))
+
+```css
+padding: 1em;
+```
+
+---
++ **cellspacing**: Hücreler arası boşluk (piksel)
+
+```html
+<table cellspacing="3">
+```
+
++ İki hücre arasındaki boşluğun boyutunu tanımlar. Bu özellik(attribute) artık kullanılmıyor: Bunu kullanmak yerine, `<table>` öğesinde border-spacing CSS özelliğini(property) ayarlayın..(Kaynak: [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/CSS/border-spacing)
+
+```css
+border-spacing: 5;
+```
+
+---
++ **width**: Tablo genişliği (piksel veya yüzde)
+
+```html
+<table width="100">
+```
+
++ Specifies the width of the table. Bunun yerine `width` CSS özelliğini(property) kullanın, çünkü bu nitelik(attribute) kullanım dışıdır.
+
+```css
+width: 100px;
+```
+
+
+> [!CAUTION]
+> + Hiçbir HTML standardı `<table>` etiketi için `height` (yükseklik) özelliğini içermese de, bazı tarayıcılar `height` niteliğini(attribute) standart dışı bir şekilde yorumlayarak desteklemektedir.
+> + Birimsiz değer, piksel cinsinden minimum mutlak yüksekliği ayarlar.
+> + Yüzde değeri olarak ayarlanırsa, minimum tablo yüksekliği ana konteynerin(`parent container`) yüksekliğine göreli olacaktır.
+> + Bunun yerine min-height CSS özelliğini(property) kullanın, çünkü bu nitelik(attribute) kullanım dışıdır.
+> + Kaynak: [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/table)
+
+---
+
++  **align**: Tablo hizalaması (left|center|right) (CSS ile yapılması önerilir)
+
+```html
+<table align="right">
+```
+
++ Tablonun üst element(`parent element`) içindeki yatay hizalamasını belirtir. Olası numaralandırılmış(`enumerated`) değerler sol, merkez ve sağdır.
++ Bunun yerine `margin-inline-start` ve `margin-inline-end` CSS özelliklerini kullanın, çünkü bu öznitelik(attribute) kullanım dışıdır.
+
+```css
+margin-inline-start: 20px;
+```
+
+---
+
++ **bgcolor**: Arkaplan rengi (CSS ile yapılması önerilir)
+
+```html
+<table bgcolor="red">
+```
+
++ Tablonun arka plan rengini tanımlar. Değer bir HTML rengidir; ya  [6-digit hexadecimal RGB code](https://developer.mozilla.org/en-US/docs/Web/CSS/hex-color) yada [color keyword](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color)
++ Diğer CSS `<color>` değerleri desteklenmiyor. Bunun yerine background-color CSS özelliğini kullanın, çünkü bu öznitelik kullanım dışıdır.
+
+```css
+background-color: red;
+```
+
+---
+### 2. `<tr>`, `<td>`, `<th>` attribute'leri:
+
+
+
+## Örnek 1: attribute'ler kullanımı
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <h1>Açılış Saatleri</h1>
+        <table bgcolor="black" width="560">
+            <tr bgcolor="grey">
+                <th width="80">Pazartesi</th>
+                <th width="80">Salı</th>
+                <th width="80">Çarşamba</th>
+                <th width="80">Perşembe</th>
+                <th width="80">Cuma</th>
+                <th width="80">Cumartesi</th>
+                <th width="80">Pazar</th>
+            </tr>
+            <tr align="center"
+                bgcolor="lightgrey">
+                <td>9-5</td>
+                <td>9-5</td>
+                <td>9-5</td>
+                <td>9-5</td>
+                <td>9-5</td>
+                <td>Kapalı</td>
+                <td>Kapalı</td>
+            </tr>
+        </table>
+    </body>
+</html>
+```
+
+> **Explanation:**
+> + **align**: Tablo hizalaması (left|center|right) (CSS ile yapılması önerilir)
+> + **bgcolor**: Arkaplan rengi (CSS ile yapılması önerilir)
+> + **width/height**: Hücre genişlik/yükseklik (CSS ile yapılması önerilir)
+
+**Çıktı:**
+
+![table](images/table.png)
+
+# `span` etiketi:
+
++ `<span>` etiketi, HTML'de **metin veya belge içindeki belirli bir bölümü işaretlemek** için kullanılan satır içi (inline) bir elementtir.
+
+> [!NOTE]
+> **Temel Özellikleri:**
+> - Satır içi elementtir (blok oluşturmaz)
+> - Kendi başına görsel bir değişiklik yapmaz.
+> - CSS ve JavaScript ile kullanılmak üzere tasarlanmıştır.
+> - Diğer elementleri gruplamak için idealdir
+
+
+# `div` etiketi:
+
++ `<div>` (division - bölüm) etiketi, HTML'de **içerik blokları oluşturmak** için kullanılan temel bir blok-level (blok düzeyinde) elementtir.
+
+> [!NOTE] Title
+> **Temel Özellikleri:**
+> + Blok-level elementtir (yeni satırda başlar ve tüm genişliği kaplar).
+> + Kendi başına görsel bir değişiklik yapmaz.
+> + Sayfa düzeni ve CSS/JavaScript ile kullanım için tasarlanmıştır.
+> + Diğer elementleri gruplamak için idealdir
+
+
+> [!CAUTION]
+> 1. `<div>` semantik anlam taşımaz (HTML5'te genel amaçlı kapsayıcıdır).
+> 2. Gereksiz yere çok fazla div kullanımı ("div soup") kod okunabilirliğini azaltır.
+> 3. CSS sınıflarıyla birlikte kullanıldığında en etkilidir.
+> 4. Mümkün olduğunda semantik HTML5 elementleri tercih edilmelidir.
+
+## `div` etiketi vs `span` etiketi karşılaştırılması:
+
+|Özellik|`<div>`|`<span>`|
+|---|---|---|
+|**Görüntü Tipi**|Blok (block)|Satır içi (inline)|
+|**Varsayılan**|Yeni satır başlatır|Hiçbir stil uygulamaz|
+|**Kullanım**|Büyük içerik blokları|Metin içinde küçük bölümler|
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            İlk Sayfam
+        </title>
+    </head>
+    <body>
+        <span style="background-color: red;"
+            >This element is inline</span>
+        <div style="background-color: green;"
+            >This element is block-level</div>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![span_vs_div](images/span_vs_div.png)
+

@@ -1,4 +1,4 @@
-#nginx
+#nginx #web 
 ## Nginx Giriş
 #### A. Tanım:
 + Nginx, çok yönlü bir web sunucusu olarak kullanılır ve birçok farklı amaç için konfigüre edilebilir. İşte Nginx'in başlıca kullanım alanları:
@@ -5901,6 +5901,73 @@ System clock synchronized: yes
 ## Reverse Proxy:
 
 + Nginx reverse proxy (ters vekil sunucu), Nginx web sunucusunun bir istemci ile bir veya daha fazla arka uç(`backend`) sunucusu arasında aracı olarak çalıştığı bir yapılandırmadır.
++ Reverse proxy, web sunucularının önünde bulunan ve istemci (örneğin web tarayıcısı) isteklerini bu web sunucularına ileten bir sunucudur.
++ Reverse proxy’ler genellikle güvenlik, performans ve güvenilirliği artırmak amacıyla kullanılır.
+	-  **Güvenlik:** Gerçek sunucular (backend) dış dünyaya kapalı olur, saldırılara karşı daha korunaklı olur.
+	- **Performans:** Cache yapabilir, yük dengelemesi ile trafiği dağıtarak sistemin daha hızlı çalışmasını sağlar.
+	- **Güvenilirlik:** Bir sunucu devre dışı kalırsa diğerlerine yönlendirme yapılabilir (failover), böylece kesinti olmaz.
+
+### Reverse Proxy Nasıl Çalışır?
+
+```mermaid
+stateDiagram
+	direction LR
+    Client --> Reverse_Proxy(Nginx)
+    Reverse_Proxy(Nginx) --> Client
+    Reverse_Proxy(Nginx) --> Application_Server(Nginx)
+    Application_Server(Nginx) -->  Reverse_Proxy(Nginx)
+```
+
+#### Adım 1: Client, Nginx'e istek gönderir
+
++ İstemci tarayıcıya `http://example.com/login` yazar ve bu istek doğrudan **Nginx**'e gider. (DNS `example.com` adresini Nginx’in IP’sine çözmüş olur)
+
+```arduino
+Client → Nginx (reverse proxy)
+```
+
+#### Adım 2: Nginx isteği karşılar
+
++ Nginx bu isteği karşılar, konfigürasyon dosyasına bakar ve "bu istek `/` ile başlıyor, ben bunu application server’a göndermeliyim" der.
+
+```http
+GET /login HTTP/1.1
+Host: example.com
+X-Real-IP: 203.0.113.45
+```
+
+#### Adım 3: Nginx isteği Application Server'a iletir
+
++ Nginx isteği **backend application server**’a (örneğin `http://192.168.10.22:3000`) iletir:
+
+```arduino
+Nginx → Application Server
+```
+
+#### Adım 4: Application Server işleme yapar
+
++ Application server (örneğin bir Node.js uygulaması) login isteğini işler, kullanıcı adını kontrol eder, bir cevap oluşturur (örneğin "Giriş başarılı").
+
+#### Adım 5: Application Server yanıtı Nginx'e döner
+
++ Cevap örneğin şu olabilir:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"message": "Login successful"}
+```
+
++ Ve bu yanıt **Nginx**'e geri döner.
+
+#### Adım 6: Nginx cevabı Client'a iletir
+
++ Nginx, aldığı cevabı olduğu gibi client’a iletir. Artık tarayıcıda kullanıcı "Giriş başarılı" mesajını görür.
+
+```arduino
+Application Server → Nginx → Client
+```
 
 
 > [!NOTE]
@@ -5917,6 +5984,162 @@ System clock synchronized: yes
 > 3. **SSL Termination**: SSL şifreleme/şifre çözme işlemini Nginx üstlenebilir.
 > 4. **Önbellekleme**: Sık erişilen içerikleri önbelleğe alarak performansı artırabilir.
 > 5. **Sıkıştırma**: İçeriği sıkıştırarak bant genişliğinden tasarruf sağlayabilir.
+
+
+> [!NOTE]
+> + **Load Balancing (Yük Dengeleme)** - Her gün milyonlarca kullanıcıya ev sahipliği yapan popüler bir web sitesi, gelen site trafiğinin tamamını tek bir kaynak sunucuyla idare edemeyebilir.
+> 	+ Bunun yerine, site, hepsi aynı site için istekleri işleyen farklı sunuculardan oluşan bir havuza dağıtılabilir.
+> + **Reverse proxy**, gelen trafiği farklı sunucular arasında eşit şekilde dağıtarak herhangi bir sunucunun aşırı yüklenmesini önleyecek bir yük dengeleme çözümü sağlayabilir.
+> + **Protection from attacks(Saldırılardan koruma)** - reverse proxy ile bir web sitesi veya hizmetin kendi orijinal sunucularının IP adresini ifşa etmesi gerekmez. 
+> 	+ Bu, saldırganların kendilerine karşı DOS saldırısı, CDN saldırısı ve daha fazlası gibi hedefli bir saldırı düzenlemesini çok daha zor hale getirir.
+> + **Caching (Önbelleğe alma)** - bir reverse proxy de içeriği önbelleğe alabilir ve bu da daha hızlı performans sağlar.
+> + **SSL şifrelemesi** - Her istemci için SSL iletişimlerinin şifrelenmesi ve şifresinin çözülmesi, kaynak sunucu için hesaplama açısından maliyetli olabilir. 
+> 	+ Bir reverse proxy, gelen tüm istekleri şifresini çözmek ve giden tüm yanıtları şifrelemek üzere yapılandırılabilir; böylece kaynak sunucudaki değerli kaynaklar serbest bırakılabilir.
+ 
+
+### Reverse Proxy Seneryosu:
+
+#### a. Reverse Proxy Server:
++ 205
+
+> [!NOTE]
+> + REHL temeli işletim sistemi olan Alma Linux kullanılıyor.
+
+
+```shell
+sudo yum update
+```
+
+**Nginx Yükleme:**
+```shell
+sudo yum install nginx
+```
+
+> **Explanation:**
+> + `Alma Linux 8.10` sürümünde `yum` veya `dnf` paket yöneticisini ile nginx'i kuruyoruz.
+
+
+```shell
+systemctl status nginx.service
+```
+
+**Çıktı:**
+```shell
+● nginx.service - The nginx HTTP and reverse proxy server
+   Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; vendor preset: disabled)
+   Active: active (running) since Fri 2025-04-18 19:16:28 +03; 1h 38min ago
+  Process: 36254 ExecStart=/usr/sbin/nginx (code=exited, status=0/SUCCESS)
+  Process: 36250 ExecStartPre=/usr/sbin/nginx -t (code=exited, status=0/SUCCESS)
+  Process: 36249 ExecStartPre=/usr/bin/rm -f /run/nginx.pid (code=exited, status=0/SUCCESS)
+ Main PID: 36255 (nginx)
+    Tasks: 2 (limit: 11131)
+   Memory: 1.9M
+   CGroup: /system.slice/nginx.service
+           ├─36255 nginx: master process /usr/sbin/nginx
+           └─36256 nginx: worker process
+
+Apr 18 19:16:28 nginx-tutorial1 systemd[1]: Starting The nginx HTTP and reverse proxy server...
+Apr 18 19:16:28 nginx-tutorial1 nginx[36250]: nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+Apr 18 19:16:28 nginx-tutorial1 nginx[36250]: nginx: configuration file /etc/nginx/nginx.conf test is successful
+Apr 18 19:16:28 nginx-tutorial1 systemd[1]: Started The nginx HTTP and reverse proxy server.
+```
+
+veya
+
+```shell
+ps aux | grep nginx
+```
+
+**Çıktı:**
+```shell
+root    36255  0.0  0.0  26904   848 ?   Ss  19:16   0:00 nginx: master process /usr/sbin/nginx
+nginx   36256  0.0  0.2  50296  5308 ?   S   19:16   0:00 nginx: worker process
+```
+
+
+```shell
+sudo systemctl enable --now nginx.service
+```
+
+**Çıktı:**
+```shell
+Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /usr/lib/systemd/system/nginx.service
+```
+
+```shell
+sudo firewall-cmd --add-service=http --permanent
+```
+> **Explanation:**
+> + 
+
+```shell
+sudo firewall-cmd --reload
+```
+
+
+```shell
+ip -c addr
+```
+
+**ip çıktısı:**
+```shell
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:44:86:61 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.131/24 brd 192.168.1.255 scope global noprefixroute enp0s3
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a00:27ff:fe44:8661/64 scope link noprefixroute
+       valid_lft forever preferred_lft forever
+```
+
+> **Explanation:**
+> + nginx'in çalıştığını kontrol etmek için tarayıcıda `http://192.168.1.131` adresine istek yapınız.
+> + Eğer linux terminal kullanıyorsanız;
+> 	- `sudo apt-get install links2` komutu ile `links2` uygulamasını yükleyiniz
+> 	- `links http://192.168.1.131` komutu ile terminal de tarayıcı olarak kullanabilirsiniz.
+
+
+#### b. Application Server:
++ 130
+
+> [!NOTE]
+> + Debian temeli işletim sistemi olan Ubuntu kullanılıyor.
+> + Nginx Kaynak koddan(source code) derleme ile yükleme yapıldı.
+
++ ubuntu-custom-nginx => brownie website (nginx-tutorial3)
+
+
+
+#### c. Application Server:
+
+> [!NOTE]
+> + Debian temeli işletim sistemi olan Ubuntu kullanılıyor.
+
+```shell
+sudo apt update
+```
+
+
+```shell
+sudo apt-get install nginx
+```
+
+> **Explanation:**
+> + `Ubuntu 22.04.5` sürümünde `apt-get` paket yöneticisi ile nginx'i kuruyoruz.
+
+
+### CDN(Content Delivery Network):
+
++ **CDN (Content Delivery Network - İçerik Dağıtım Ağı)**, bir web sitesinin içeriğini (resimler, videolar, CSS/JS dosyaları vb.) dünyanın farklı bölgelerindeki sunuculara dağıtarak, kullanıcılara daha hızlı ve güvenilir erişim sağlayan bir sistemdir.
+
+
+
+
 
 
 ## HTTP If-Modified-Since:

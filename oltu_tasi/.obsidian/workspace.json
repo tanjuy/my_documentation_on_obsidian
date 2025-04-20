@@ -40,6 +40,7 @@
           {
             "id": "a2e531737528c634",
             "type": "leaf",
+            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
@@ -47,6 +48,7 @@
                 "mode": "source",
                 "source": false
               },
+              "pinned": true,
               "icon": "lucide-file",
               "title": "Nginx Config File"
             }
@@ -63,20 +65,6 @@
               },
               "icon": "lucide-file",
               "title": "Python Giriş"
-            }
-          },
-          {
-            "id": "2183a2c56f260b5e",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Linux Command/Linux komutları.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Linux komutları"
             }
           },
           {
@@ -101,16 +89,58 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Linux Command/Vim.md",
+                "file": "Programlama/PHP/PHP 8.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Vim"
+              "title": "PHP 8"
+            }
+          },
+          {
+            "id": "1612999a9d37cd2f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Linux Command/Linux Paket Komutları.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Linux Paket Komutları"
+            }
+          },
+          {
+            "id": "98fbf641a70a91fb",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Linux Command/Güvenlik/Firewall.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Firewall"
+            }
+          },
+          {
+            "id": "3fb570e306648698",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Linux Command/Güvenlik/SELinux.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "SELinux"
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 8
       }
     ],
     "direction": "vertical"
@@ -167,7 +197,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 281.5
+    "width": 200
   },
   "right": {
     "id": "1413189cf439f38e",
@@ -229,13 +259,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Web Servers/html/HTML.md",
+                "file": "Linux Command/Güvenlik/SELinux.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of HTML"
+              "title": "Outline of SELinux"
             }
           }
         ],
@@ -243,7 +273,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 276.5
+    "width": 312.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -255,46 +285,47 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "486a82d125e54680",
+  "active": "3fb570e306648698",
   "lastOpenFiles": [
-    "Web Servers/html/images/nested_description_list.png",
+    "Linux Command/Güvenlik/Firewall.md",
+    "Linux Command/Güvenlik/SELinux.md",
+    "Web Servers/Nginx/Nginx Config File.md",
+    "Programlama/Python/Python Giriş.md",
+    "Linux Command/Linux komutları.md",
+    "Linux Command/Linux Paket Komutları.md",
+    "Programlama/PHP/PHP 8.md",
     "Linux Command/Vim.md",
+    "Web Servers/html/HTML.md",
+    "Web Servers/html/images/meta_viewport.png",
+    "Web Servers/html/images/span_vs_div.png",
+    "Web Servers/css/CSS.md",
+    "Web Servers/css",
+    "Web Servers/html/images/table.png",
+    "Web Servers/html/images/nested_description_list.png",
     "Web Servers/html/images/unordered_lists.png",
     "Web Servers/html/images/description_list.png",
     "Web Servers/html/images/ordered_list.png",
-    "Web Servers/html/HTML.md",
     "Web Servers/html/images/ordered_list_types.png",
-    "Web Servers/Nginx/Nginx Config File.md",
     "Programlama/Javascript/javascript Dersleri.md",
     "Web Servers/Nginx/images/ngx_http_image_filter_module.png",
     "Web Servers/html/images/text_formating.png",
-    "Web Servers/html/images/video_preload_auto.png",
-    "Web Servers/html/images/video_preload_metadata.png",
-    "Web Servers/html/images/video_preload_none.png",
-    "Web Servers/html/images/video_source.png",
     "Diskler/LVM.md",
-    "Linux Command/Linux komutları.md",
     "Windows Commands/CMD.md",
     "DevOps/Jenkins/Jenkins Kurulumu.md",
     "Programlama/Python/Django/Django.md",
     "Web Servers/html/images",
     "Web Servers/html",
     "Web Servers/HTTP.md",
-    "Programlama/PHP/PHP 8.md",
     "Windows Commands/PowerShell.md",
     "Programlama/Bash_Script/Bash Script.md",
     "Web Servers/Benchmark Aracı.md",
     "Windows Commands/Kısayollar.md",
-    "Programlama/Python/Python Giriş.md",
     "Web Servers/Nginx/Nginx Directives.md",
     "Database/PostgreSQL/Database Oluşturma.md",
     "Database/PostgreSQL/AS kullanımı.md",
     "Linux Command/tmux.md",
     "K8s/K8s Kurulumu.md",
     "Linux Command/fzf.md",
-    "Linux Command/Network/ip.md",
-    "Git/Git Dersi.md",
-    "Diskler/Btrfs.md",
     "Programlama/PHP",
     "Programlama/Python/Sqlalchemy",
     "Sistem İzleme",
@@ -302,7 +333,6 @@
     "K8s",
     "Kısayollar",
     "Programlama/Python/Django",
-    "Programlama/Python",
     "Untitled.canvas"
   ]
 }

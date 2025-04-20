@@ -1280,6 +1280,7 @@ array(3) {
 
 ## 2. Associative Dizi:
 
+
 ```php
 <?php
 $person = [
