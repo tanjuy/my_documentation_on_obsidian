@@ -67,6 +67,19 @@ sudo firewall-cmd --remove-service=http --permanent
 sudo firewall-cmd --zone=home --remove-service=https --permanent
 ```
 
+#### 3. Servisleri Listeleme:
+
+```shell
+sudo firewall-cmd --list-services
+```
+
+#### 3.a. Belirli bir Servisin Zone'u Listeleme:
+
+```shell
+sudo firewall-cmd --zone=home --list-services
+```
+
+
 ### C. Zone İşlemleri:
 
 #### 1. Tüm Zone'ları Listeleme:

@@ -576,3 +576,34 @@ type=AVC msg=audit(1745027099.043:459): avc:  denied  { name_connect } for  pid=
 + Nginx'in **80 portunu dinlemesi** engellenmiş olabilir (ancak bu durumda genellikle `name_bind` hatası alırsınız).
 
 ### AVC nedir?
+
++ **AVC = Access Vector Cache**
++ SELinux’un erişim kontrol sisteminde kullanılan ve izin kontrol kararlarını **önbellekte tutan** bir yapıdır. Ancak biz günlük kullanımda "AVC mesajı" deyince şu anlamı kastediyoruz:
+
+> 🔴 **SELinux’un bir işlemin başka bir kaynağa erişimini engellediği olaylar.**
+
++ Yani sistem bir şeye erişmeye çalışmış ama SELinux “izin yok” diyerek engellemiş.
+
+#### `audit.log` içinde AVC nasıl görünür?
+
+```shell
+type=AVC msg=audit(1684512345.123:456): avc:  denied  { read } for  pid=1234 comm="httpd" name="config.php" dev="sda1" ino=987654 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:user_home_t:s0 tclass=file
+```
+
+|Alan|Açıklama|
+|---|---|
+|`type=AVC`|Bu bir SELinux erişim olayı.|
+|`avc: denied { read }`|"Okuma izni" reddedilmiş.|
+|`pid=1234`|İlgili işlem ID’si.|
+|`comm="httpd"`|Erişmeye çalışan komut/proses (örneğin Apache).|
+|`name="config.php"`|Erişilmeye çalışılan dosya.|
+|`scontext=...`|Kaynak bağlamı (erişmeye çalışan taraf).|
+|`tcontext=...`|Hedef bağlam (erişilmek istenen nesne).|
+|`tclass=file`|Erişilmeye çalışılan nesne türü (dosya, socket, vs.).|
+
+
+> [!NOTE]
+> + **Neden Önemli:**
+> + Uygulaman düzgün yapılandırılmış ama çalışmıyorsa SELinux engelliyor olabilir.
+> + AVC mesajları, "bu işlem neden başarısız oldu?" sorusunun SELinux cephesindeki cevabıdır.
+> + Sistem yöneticileri bu mesajları kullanarak SELinux policy ayarlamaları yapar.

@@ -242,7 +242,7 @@
 > + SEO etkisi düşüktür.
 
 
-## Responsive Tasarımın Temeli:
+## 5. Responsive Tasarımın Temeli:
 
 + Bu meta etiketi, **mobil cihazlarda sayfanın doğru şekilde ölçeklenmesini** sağlayan kritik bir HTML öğesidir.
 + Özellikle responsive (duyarlı) web tasarım için vazgeçilmezdir.
@@ -1612,4 +1612,433 @@ background-color: red;
 **Çıktı:**
 
 ![span_vs_div](images/span_vs_div.png)
+
+# Iframe:
+
++ `<iframe>` (Inline Frame), bir HTML belgesi içinde başka bir HTML belgesini gömmenizi sağlayan bir HTML elementidir.
++ "Çerçeve içinde çerçeve" anlamına gelir ve web sayfalarına harici içerik eklemek için yaygın olarak kullanılır.
++ Bir HTML iframe, bir web sayfasını bir web sayfası içerisinde görüntülemek için kullanılır.(Kaynak: [w3school](https://www.w3schools.com/HTML/html_iframe.asp))
+
+
+> [!NOTE]
+> **Nitelikleri(Attributes):**
+> - **src**: Eklenecek sayfanın URL'sini belirtir.
+> - **width**: Çerçevenin genişliği (piksel veya yüzde olarak).
+> - **height**: Çerçevenin yüksekliği (piksel veya yüzde olarak).
+> - **frameborder**: Çerçeve kenarlığını gösterir/gizler (0 veya 1).
+> - **scrolling**: Kaydırma çubuklarını ayarlar ("yes", "no", "auto").
+
+### Örnek 1: Dışarıdan
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="HTML meta etiketi nedir? Meta description nasıl yazılır? SEO için en iyi meta açıklama örnekleri.">
+        <meta name="keywords" content="HTML, web geliştirme, frontend, programlama">
+        <meta name="author" content="Tanju Yücel, tanju@example.com">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="refresh" content="30">
+        <title>
+            Iframe Kullanımı
+        </title>
+    </head>
+    <body>
+        <iframe
+            src="https://www.example.com/"
+            frameborder= "1"
+            width="500" height="400"
+        ></iframe>
+    </body>
+</html>
+```
+
+**Çıktı:**
+
+![iframe](images/iframe.png)
+
+
+### Örnek 2: İçeriden
+
+**nginx.conf**
+
+```nginx
+user www-data;
+worker_processes auto;
+
+events {
+	worker_connections 1024;
+}
+
+http {
+	include mine.types;
+
+	server {
+		listen 8080;
+		server_name 192.168.1.132;
+
+		root /var/www/html/HTML;
+
+		index index.html;
+
+		location / {
+			try_files $uri $uri/ =404;
+		}
+
+		location /reklam {
+			alias /var/www/html/HTML;
+			index ad.html;
+		}
+	}
+}
+```
+
+**index.html**
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="HTML meta etiketi nedir? Meta description nasıl yazılır? SEO için en iyi meta açıklama örnekleri.">
+        <meta name="keywords" content="HTML, web geliştirme, frontend, programlama">
+        <meta name="author" content="Tanju Yücel, tanju@example.com">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="refresh" content="30">
+        <title>
+            Iframe Kullanımı
+        </title>
+    </head>
+    <body>
+        <!-- Aynı klasör içerisinde 1 -->
+        <iframe
+            src="ad.html"
+            frameborder= "1"
+            width="500" height="400"
+        ></iframe>
+        <br>
+        <!-- Nginx'in Farklı Location Context'inden 2 -->
+        <iframe
+            src="http://192.168.1.132:8080/reklam/"
+        ></iframe>
+    </body>
+</html>
+```
+
+> **Explanation:**
+> 1. `index.html` dosyası ile `ad.html` aynı klasörde bulunmaktadır.
+> 2. nginx'in başka bir `location context`'inden yayınlan URI, `iframe` içerisinde kullanabiliriz.
+
+
+**Mevcut dizin**
+
+```shell
+ls -ltr
+```
+
+**ls Çıktısı:**
+
+```shell
+total 243592
+-rw-r--r-- 1 root     root         18328 Feb 25  2022 linux.jpg
+-rw-r--r-- 1 root     root         69947 Apr  1 17:47 index.html.1
+-rw-rw-r-- 1 ottoman  ottoman    2836968 Apr  1 17:57 alex-eglair.mp3
+-rw-rw-r-- 1 ottoman  ottoman  159115728 Apr  3 16:02 Linux_Find.mkv
+-rw-rw-r-- 1 ottoman  ottoman   87372446 Apr  3 16:39 Go_prog.mp4
+-rw-r--r-- 1 root     root           282 Apr  3 17:18 linux.html
+-rw-r--r-- 1 root     root           477 Apr 28 12:45 ad.html
+-rw-r--r-- 1 www-data www-data       708 Apr 28 13:48 index.html
+```
+
+> **Explanation:**
+> + Çıktıyı incelersek `index.html` dosyası ile `ad.html` dosyası aynı klasör olduğu görülmektedir. 
+
+**ad.html**
+
+```html
+ <!DOCTYPE html>
+
+<html lang=tr>
+        <head>
+                <meta charset="UTF-8">
+                <meta name="description" content="HTML meta etiketi nedir? ">
+                <meta name="keywords" content="HTML, web geliştirme, frontend, programlama">
+                <meta name="author" content="Tanju Yücel, tanju@example.com">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>
+                        Reklam Sitesi
+                </title>
+        </head>
+        <body style="background-color: aqua;">
+                <h1>Bu arabayı al</h1>
+        </body>
+</html>
+```
+
+**Sitenin Görünümü:**
+
+![iframe2](images/iframe2.png)
+
+
+
+> [!CAUTION]
+> **Güvenlik Notları:**
+> + `<iframe>` kullanırken güvenlik risklerine dikkat edin.
+> +  Güvenmediğiniz sitelerden içerik gömme
+> + `sandbox` özelliğini kullanarak gömülü içeriğin yetkilerini kısıtlayın
+> + Clickjacking saldırılarına karşı `X-Frame-Options` header'ını kontrol edin
+
+# Button Etiketi:
+
++ HTML'de `<button>` etiketi, kullanıcıların tıklayabileceği etkileşimli bir düğme (buton) oluşturmak için kullanılır.
++ Bu düğmeler formları göndermek, iletişim kutularını açmak veya JavaScript fonksiyonlarını tetiklemek gibi çeşitli işlevler(fonksiyonlar) gerçekleştirebilir.
++ `<button>` etiketi tıklanabilir bir düğmeyi tanımlar.
+
+
+> [!TIP]
+> + Tarayıcılara ne tür bir Button olduğunu söylemek için, `<button>` öğesi için her zaman type özniteliğini(attribute) belirtin.
+
+
+> [!NOTE]
+> + `<button>` öğesinin içine metin (ve  `<i>`, `<b>`, `<strong>`, `<br>`, `<img>` vb. etiketler) koyabilirsiniz.
+> + `<input>` elemanı ile oluşturulmuş bir buton ile bu mümkün değildir!
+
+## `<button>` vs `<input type="button">`:
+
+### `<button>` Etiketi:
+ 
+ + **İçerik olarak zengin öğeler alabilir**: `<button>` etiketinin içine **metin**, diğer HTML etiketleri (örneğin `<i>`, `<b>`, `<strong>`, `<br>`, `<img>`) ve hatta başka bileşenler koyabilirsiniz.
+
+```html
+<button>
+    <i class="fa fa-check"></i> Kaydet <!-- İkonlu buton -->
+    <br>
+    <small>Tıklayarak onay verirsiniz</small>
+</button>
+```
+
+###  `<input type="button">`:
+
++ **Sadece düz metin alabilir**: `<input>` elementiyle oluşturulan butonların **`value`** özelliği vardır, ama içine başka HTML etiketleri veya satır atlama (`<br>`) gibi öğeler ekleyemezsiniz.
+
+```html
+<input type="button" value="Kaydet"> <!-- Sadece metin -->
+```
+
++ Eğer `value` kısmına HTML kodu yazarsanız, tarayıcı onu metin olarak gösterir (örneğin `<b>Kalın</b>` yazarsanız, etiketler görünür).
+
+
+> [!NOTE]
+> + **`<button>`** → Daha esnek, içine HTML öğeleri yerleştirilebilir.
+> + **`<input type="button">`** → Sadece düz metin (`value` ile) kabul eder, görsel özelleştirme sınırlıdır.
+
+
+## Button Türleri:
+
+### 1. submit button:
+
++ Form verilerini sunucuya gönderir.
+
+```html
+<button type="submit">Gönder</button>
+```
+
+### 2. reset button:
+
++ Formdaki tüm alanları varsayılan değerlerine sıfırlar.
+
+```html
+<button type="reset">Sıfırla</button>
+```
+
+### 3. Normal Button:
+
++ Varsayılan davranışı yoktur, genellikle JavaScript ile kullanılır.
++ Html Events da `onclick` özniteliğinde sık sık kullanılır.
+
+```html
+<button type="button">Tıkla</button>
+```
+
+## Öznitelikleri(Attributes):
+
+|Özellik|Açıklama|
+|---|---|
+|`type`|Düğme türünü belirtir (`submit`, `reset` veya `button`)|
+|`disabled`|Düğmeyi devre dışı bırakır|
+|`autofocus`|Sayfa yüklendiğinde düğmeye otomatik odaklanır|
+|`form`|Düğmenin ilişkili olduğu formun ID'sini belirtir|
+|`formaction`|Form verisinin gönderileceği URL'yi geçersiz kılar|
+|`formmethod`|Form gönderme metodunu belirtir (GET, POST)|
+|`name`|Form gönderildiğinde kullanılacak isim|
+|`value`|Form gönderildiğinde kullanılacak değer|
+
+
+> [!NOTE]
+> 1. **Global Attributes:**
+> 	- `<button>` etiketi HTML'deki [Global Attribute](https://www.w3schools.com/tags/ref_standardattributes.asp)'leri de destekler.
+> 2. **Event Attributes:**
+> 	- `<button>` etiketi HTML'deki [Event Attributes](https://www.w3schools.com/tags/ref_eventattributes.asp)'leri de destekler.
+
+
+# input Etiketi:
+
+
+
+# Form:
+
++ HTML'de `<form>` etiketi, kullanıcıların web sayfası üzerinden veri girebileceği ve bu verileri sunucuya gönderebileceği interaktif alanlar oluşturmak için kullanılır.
++ Formlar, web'in en temel etkileşim araçlarından biridir.
+
+## Örnek 1: Temel Kullanımı
+
+**nginx.conf**
+
+```nginx
+user www-data;
+worker_processes auto;
+
+events {
+	worker_connections 1024;
+}
+
+http {
+	include mine.types;
+
+	server {
+		listen 8080;
+		server_name 192.168.1.132;
+
+		root /var/www/html/HTML;
+
+		index index.html;
+
+		location / {
+			try_files $uri $uri/ =404;
+		}
+
+		location ~ \.php$ {
+			include fastcgi.conf;
+			fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+		}
+	}
+}
+```
+
+> **Explanation:**
+> + **Hatırlatma:** `fastcgi_pass` parametre karşılığını `sudo find / -name '*fpm.sock'` komut ile buluyoruz.
+
+**index.html**
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="HTML meta etiketi nedir?">
+        <meta name="author" content="Tanju Yücel, tanju@example.com">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            Iframe Kullanımı
+        </title>
+    </head>
+    <body>
+        <h3> Form 1: label </h3>
+        <form action="kayit.php" method="POST">
+            <label for="user_name">Ad:</label><br>
+            <input type="text" name="user_name"><br>
+            <label for="user_surname">Soyadı:</label><br>
+            <input type="text" name="user_surname"><br><br>
+            <input type="submit" value="Gönder">
+            <!-- <button type="submi"t value="Send">Gönder</button> -->
+        </form>
+        <hr>
+        <h3> Form 2: placeholder </h3>
+        <form action="kayit.php" method="POST">
+            <input type="text" name="user_name" placeholder="Adınız"
+             ><br><br>
+            <input type="text" name="user_surname" placeholder="Soyadınız"
+            ><br><br>
+            <button type="submit" value="Send"><b>Gönder</b></button>
+        </form>
+    </body>
+</html>
+```
+
+> **Explanaiton:**
+> 1. **Form 1: label**
+> 	- Yönlendirmeyi `label` etiketi ile yaptık
+> 	- Gönder butonunu `input` etiketi ile yaptık ama dikkat ederseniz `Gönder` yazısını üzerinde şekillendirme yapmıyoruz.
+> 	- Form verisini  sunucudaki `kayıt.php` backend'ine gönderiyoruz. Bu için `form`'un `action` özniteliğini(attribute) kullanıyoruz.
+> 2. **Form 2: placeholder**
+> 	- Yönlendirmeyi `input` etiketinin `placeholder` attribute ile yapıyoruz.
+> 	- Gönder butonunu için `button` etiketi kullanıyoruz. Eğer dikkat ederseniz Gönder yazısını `b` etiketi ile daha kalın hale getiriyoruz.
+> 	- Yine backend'e göndermek için `form` etiketin `action` özniteliğini kullanıyoruz.
+
+
+**Backend:**
+
+```php
+<?php
+// Form verilerini al
+$userName = $_POST['user_name'];
+$userSurname = $_POST['user_surname'];
+
+// Veritabanına kaydetme işlemi (örnek amaçlı basit bir işlem)
+// Gerçek bir uygulamada burada veritabanı bağlantısı ve SQL sorguları kullanılır.
+echo "Kullanıcı Adı: " . htmlspecialchars($userName) . "<br>";
+echo "Kullanıcı Soyadı: " . htmlspecialchars($userSurname) . "<br>";
+echo "Kayıt işlemi başarılı!";
+?>
+```
+
+> **Explanation:**
+> + `$_POST`, PHP'de HTTP POST metoduyla gönderilen verileri almak için kullanılan önceden tanımlanmış (süper global) bir dizidir.
+> + `$_POST`, *değerleri `form` etiketi içerisindeki `input` etiketinin `name` özniteliğinden(attribute) çekmektedir.*
+> + `htmlspecialchars()`, PHP'de özel karakterleri HTML varlıklarına dönüştüren bir fonksiyondur. Bu, XSS (Cross-Site Scripting) gibi güvenlik açıklarını önlemek için kullanılan önemli bir fonksiyondur.
+
+**Görünüm:**
+
+![form](images/form.png)
+
+# HTML Events:
+
+## Mouse Events:
+
+### 1. `onclick()`:
+
++ onclick, element üzerinde fare tıklandığında tetiklenir.
+
+#### Örnek 1: Button ile
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="HTML meta etiketi nedir?">
+        <meta name="author" content="Tanju Yücel, tanju@example.com">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            Iframe Kullanımı
+        </title>
+    </head>
+    <body>
+        <button type="button" onclick="click_func()">Tıkla</button>
+        <p id="changeText">Press Button</p>
+        <script>
+            function click_func() {
+                document.getElementById("changeText")
+                            .innerHTML="Button is pressed!"
+            }
+        </script>
+    </body>
+</html>
+```
+
 

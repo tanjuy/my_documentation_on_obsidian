@@ -23,6 +23,18 @@ $ tmux new -s nginx -c /etc/nginx
 > + `-s nginx` : nginx adında yeni bir session açar.
 > + `-c /etc/nginx` : nginx session'ın varsayılan dizini `/etc/nginx` olacaktır.
 
+#### Session Adını Değiştirme:
+
++ `Ctrl` + `b`  daha sonrasında `$`  tuş kombinasyonu
+
+veya
+
++ `Ctrl` + `b`  daha sonrasında `:`
+
+```tmux
+: rename-session [-t current-name] [new-name]
+```
+
 ## Windows
 ## Panes
 

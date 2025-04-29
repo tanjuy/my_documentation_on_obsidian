@@ -27,6 +27,16 @@ print("Python is so easy!");
 ```
 > **Explanation:**
 > + 
+
+# Değişkenler:
+
+
+
+
+
+# Yorum Satırları:
+## Tek Satır Yorum(`#`):
+
 # Fonksiyonlar
 ### print fonksiyonu:
 ```python

@@ -269,9 +269,11 @@ $  curl -X DELETE https://jsonplaceholder.typicode.com/posts/1
 ## Nginx Kurulumu:
 
 #### A. Debian Temeli İşletim Sistemleri:
+
 ```shell
 $ sudo apt install nginx
 ```
+
 > **Explanation:**
 > + Ubuntu ve Debian işletim sistemlerinde *nginx* kurulumunu `apt` paket yöneticisi tarafından yapar.
 
@@ -520,6 +522,7 @@ WantedBy=multi-user.target
 ```shell
 $ sudo systemctl daemon-reload
 ```
+
 > **Explanation:**
 > + systemd manager configuration yeniden yükleyecektir.
 > + Yeni bir systemd servis dosyası eklediğinizde ya da mevcut bir servis dosyasında değişiklik yaptığınızda, `systemctl daemon-reload` çalıştırarak systemd'nin bu değişiklikleri okumasını sağlamanız gerekir.
@@ -537,7 +540,8 @@ $ sudo systemctl enable --now nginx.service
 > + Modülleri nginx'i kaynak koddan derlerken kullanılır;
 > + Genel şeması: `configure --module1 --module2 --module3 ...`
 
-###### 1. --sbin-path modülü:
+### 1. --sbin-path modülü:
+
 + nginx yürütülebilir dosyasının adını ayarlar. Bu ad yalnızca kurulum sırasında kullanılır. Varsayılan olarak dosya `prefix /sbin/nginx` olarak adlandırılır.([nginx.com](https://nginx.org/en/docs/configure.html))
 + derleme ve kurulum sürecinde Nginx’in ikili (binary) dosyasının sistemde nereye yükleneceğini belirlemek için kullanılır.(chatgpt)
 + Bu seçenek, Nginx’in çalıştırılabilir dosyasının (genellikle `/usr/sbin/nginx`) tam yolunu tanımlamanıza olanak tanır.
@@ -545,7 +549,7 @@ $ sudo systemctl enable --now nginx.service
 ```shell
 $ ./configure --sbin-path=/usr/bin/nginx
 ```
-###### 2. --conf-path modülü:
+### 2. --conf-path modülü:
 + nginx.conf yapılandırma dosyasının adını ayarlar. Eğer gerek duyulur ise nginx farklı bir yapılanadırma dosyası ile başlatılabilir; `nginx -c configFile` ile bul işlem yapılabilir.([nginx.com](https://nginx.org/en/docs/configure.html))
 + Nginx'in ana yapılandırma dosyasının (configuration file) sistemde nerede bulunacağını belirtmek için kullanılır.
 **Örnek Kullanım:**
@@ -553,7 +557,8 @@ $ ./configure --sbin-path=/usr/bin/nginx
 $ ./configure --conf-path=/etc/nginx/nginx.conf
 ```
 
-###### 3. --error-log-path modülü:
+### 3. --error-log-path modülü:
+
 + Birincil derece hatanın, uyarıların ve tanılama dosyasının adını ve dizin yolunu ayarlar. Yükleme sonrasında `error_log` yönergesi(directive) ile `nginx.conf` dosyasında dosyanın adı ve dizin yolu değiştirilebilir.([nginx.com](https://nginx.org/en/docs/configure.html))
 + Nginx'in hata günlüklerinin (error log) nereye yazılacağını belirlemek için kullanılır.
 + **Amaç:** Sunucudaki hataların kolayca izlenebilmesi ve teşhis edilmesi için kullanılır.
@@ -563,7 +568,8 @@ $ ./configure --conf-path=/etc/nginx/nginx.conf
 $ ./configure --error-log-path=/var/log/nginx/error.log
 ```
 
-###### 4. --http-log-path modülü:
+### 4. --http-log-path modülü:
+
 + HTTP sunucusunun birincil istek günlük dosyasının adını ve dizin yolunu ayarlar. Yükleme sonrasında `access_log` yönergesi(directive) ile `nginx.conf` dosyasında dosyanın adı ve dizin yolu değiştirilebilir. Varsayılan olarak dosya `prefix/logs/access.log` olarak adlandırılır. ([nginx.com](https://nginx.org/en/docs/configure.html))
 + HTTP isteklerinin günlüklerinin (access log) hangi dosyada tutulacağını belirlemek için kullanılır.
 + **Amaç:** Web sunucusuna yapılan HTTP isteklerinin kaydını tutmak, trafik analizleri ve hata ayıklama için önemlidir.
@@ -573,7 +579,8 @@ $ ./configure --error-log-path=/var/log/nginx/error.log
 $ ./configure --http-log-path=/var/log/nginx/access.log
 ```
 
-###### 5. --with-pcre module:
+### 5. --with-pcre module:
+
 + PCRE kütüphanesinin kullanımını zorlar.([nginx.com](https://nginx.org/en/docs/configure.html))
 + Perl Compatible Regular Expressions (PCRE) kütüphanesinin Nginx'e dahil edilmesini sağlar. 
 + PCRE, düzenli ifadeleri (regex) kullanarak metin eşleme ve işleme işlemleri yapar ve Nginx’in gelişmiş özelliklerinden bazıları için gereklidir.
@@ -601,7 +608,8 @@ location ~ ^/images/(.*)\.(jpg|jpeg|png)$ {
 ```
 > **Explanation:**
 > + nginx `pcre` kütüphanesini eklenmesi ile yukarıda görülen nginx de  `regex` yapısını kullanabiliyoruz.
-###### 6. --pid-path modülü:
+### 6. --pid-path modülü:
+
 + Ana process'in process ID depolayacak olan nginx.pid dosyasının adını ve dizin yolunu ayarlar. Nginx derleme sonrasında `pid` yönergesini(directive) kullanarak `nginx.conf` dosyasında dosya adı ve dizin yolu değiştirilebilir. ([nginx.com](https://nginx.org/en/docs/configure.html))
 + Nginx'in **Process ID (PID)** dosyasının nerede saklanacağını belirtmek için kullanılır.
 + PID dosyası, çalışan Nginx sürecinin kimliğini (process ID) içerir. Bu dosya, Nginx sürecini izlemek, yönetmek ve gerektiğinde yeniden başlatmak veya durdurmak için kullanılır.
@@ -611,7 +619,8 @@ location ~ ^/images/(.*)\.(jpg|jpeg|png)$ {
 ```sh
 $ ./configure --pid-path=/var/run/nginx.pid
 ```
-###### 7. --with-http_ssl_module modülü:
+### 7. --with-http_ssl_module modülü:
+
 + HTTP sunucusuna [HTTPS protokol desteği](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) ekleyen bir modülün oluşturulmasını sağlar.Bu modül varsayılan olarak derlenmez. Bu modülü derlemek ve çalıştırmak için OpenSSL kütüphanesi gereklidir.([nginx.com](https://nginx.org/en/docs/configure.html))
 + Nginx'in **SSL/TLS** (Secure Sockets Layer / Transport Layer Security) desteğiyle derlenmesini sağlar. SSL/TLS, web trafiğini şifreleyerek güvenli iletişim kurmanıza olanak tanır ve HTTPS protokolünün temelini oluşturur.
 
@@ -625,6 +634,85 @@ $ ./configure --pid-path=/var/run/nginx.pid
 ```sh
 $ ./configure --with-http_ssl_module
 ```
+
+### 8. `--prefix` modülü:
+
++ Nginx'i kaynak koddan derlerken, **`--prefix`** parametresiyle belirtilen yol, `root` direktifinin varsayılan **`PATH`**'ini (dosya sistemindeki temel dizin) belirler. 
++ Eğer `--prefix` belirtilmezse, Nginx genellikle `/usr/local/nginx`'e kurulur ve bu da `root` direktifinin varsayılan arama yolunu etkiler.
+
+#### 8.1. Derleme Sırasında `--prefix` Belirleme:
+
++ Nginx'i kaynak koddan derlerken, `./configure` aşamasında **`--prefix`** ile ana kurulum dizinini ayarlayabilirsiniz:
+
+```shell
+./configure --prefix=/opt/nginx
+```
+
+```shell
+make
+```
+
+```shell
+sudo make install
+```
+
+> **Explanation:**
+> + Nginx ana dizini: `/opt/nginx`
+> + Varsayılan `root` path: `/opt/nginx/html` (eğer `root` direktifi `nginx.conf` yapılandırmada belirtilmemişse).
+
+#### 8.2. Varsayılan `root` Yapılandırması:
+
++ Nginx kurulumundan sonra, **`nginx.conf`** dosyasında (genellikle `--prefix/conf/nginx.conf` yolunda) `root` direktifi tanımlıdır:
+
+**nginx.conf:**
+
+```nginx
+server {
+    listen 80;
+    server_name localhost;
+
+    location / {
+        root   html;  # Varsayılan: --prefix/html (örneğin /opt/nginx/html)
+        index  index.html index.htm;
+    }
+}
+```
+
++ `root html;` ifadesi, `--prefix/html` dizinine işaret eder (örneğin `/opt/nginx/html`).
+
+#### 8.3. `root` için Tam PATH Nasıl Belirlenir?
+
++ **Göreceli yol (ör. `html`)**: `--prefix` dizinine göre çözümlenir.
+
+```nginx
+root html;   # /opt/nginx/html
+```
+
++ **Mutlak yol (ör. `/var/www`)**: Doğrudan belirtilen dizin kullanılır.
+
+```nginx
+root /var/www/myapp;
+```
+
+
+> [!NOTE]
+> + Nginx'in `--prefix` değerini öğrenme:
+> ```shell
+> nginx -V 2>&1 | grep --color -- '--prefix'
+> ```
+
+
+> [!CAUTION]
+> 1. `root` **olmazsa ne olur?**
+> 	+ Eğer `root` belirtilmezse, Nginx **`403 Forbidden`** hatası verir (dosya bulunamadığında).
+> 1. **Güvelik Uyarısı:**
+> 	+ `root` dizini, **/etc/nginx** veya sistem dizinleri gibi hassas konumlara işaret etmemelidir. Örneğin:
+> 	
+> 	```nginx
+> 	root /etc/nginx;
+> 	```
+
+
 ## Nginx Config Dosyası:
 
 + **nginx configuration file is the heart of nginx web server**
@@ -1696,8 +1784,222 @@ server {
 1. [nginx.org](https://nginx.org/en/docs/http/ngx_http_core_module.html#listen)
 2. [How nginx processes a request](https://nginx.org/en/docs/http/request_processing.html)
 
-### Root Directive:
 
+### Alias ve Root Directive:
+
++ Nginx alias direktifini anlamanın en iyi yolu root direktifi ile kıyaslamaktadır.
++ Nginx'te **`root`** ve **`alias`** direktifleri, dosya sistemi yolunu belirlemek için kullanılır, ancak davranışları önemli ölçüde farklıdır.
++ Temel fark, **URI'nin dosya yoluna nasıl eklendiğidir**.
+
+#### 1. Root Direktifi:
+
++ `root`, belirtilen dizin ile `location` bloğundaki **URI'yi birleştirir**.
++ Yani, `location` path'i **`root` dizinin altına eklenir**.
+
+**nginx.conf:**
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    location /images/ {
+        root /var/www/static;
+    }
+}
+```
+
+
+> [!NOTE]
+> + **İstek Nasıl Çözümlenir?**
+> 	- **İstemci isteği:** `GET /images/cat.jpg`
+> 	- **Sunucu dosya yolu:** `/var/www/static/images/cat.jpg`
+> 	- Yani:` root + location + URI`
+
+#### 2. Alias Direktifi:
+
++ `alias`, `location` path'ini **tamamen değiştirir**.
++ Yani, `location` bloğundaki path **`alias` ile belirtilen dizine yönlendirilir**.
+
+**nginx.conf:**
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    location /static/ {
+        alias /var/www/assets/;
+    }
+}
+```
+
+
+
+> [!NOTE]
+> + **İstek Nasıl Çözümlenir?**
+> 	- **İstemci isteği:** `GET /static/cat.jpg`
+> 	- **Sunucu dosya yolu:** `/var/www/assets/cat.jpg`
+> 	- Yani, `alias + URI'den location kısmı çıkarılır`
+
+
+| Özellik                | `root`                                                  | `alias`                                               |
+| ---------------------- | ------------------------------------------------------- | ----------------------------------------------------- |
+| **Path Oluşturma**     | `root + location + URI`                                 | `alias + URI'den location çıkarılır`                  |
+| **Son `/` Önemli mi?** | Hayır                                                   | Evet (dizin sonunda `/` olmalı)                       |
+| **Kullanım Senaryosu** | `location` path'i dosya yolunda olmalı                  | `location` path'i dosya yolundan farklı               |
+| **Örnek**              | `location /img/ { root /data; }` → `/data/img/file.jpg` | `location /img/ { alias /data/; }` → `/data/file.jpg` |
+
+#### Örnek 1: alias vs root
+
+**nginx.conf:**
+
+```nginx
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 768;
+    # multi_accept on;
+}
+
+http {
+
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    ##
+    # Logging Settings
+    ##
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    ##
+    # Virtual Host Configs
+    ##
+
+    server {
+        listen 80;
+        server_name 192.168.1.129;
+
+        index index.php index.html;
+        root /var/www/html;
+
+        location ~\.php {
+            include fastcgi.conf;
+            fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        }
+
+        location /alias {
+	        # GET isteği: /var/www/html/linux/index.html
+            alias /var/www/html/linux;
+            index index.html;
+        }
+
+        location /linux {
+	        # GET isteği: /var/www/html/linux/index.html
+            root /var/www/html;
+            index index.html;
+        }
+    }
+}
+```
+
+**index.html**
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="Nginx Dersleri">
+        <meta name="author" content="Tanju Yücel, tanju@example.com">                                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="refresh" content="30">
+        <title>
+            Root ve Alias Direktifi
+        </title>
+    </head>
+    <body>
+        <p>
+            Linux (telaffuz: Lin-uks); Linux çekirdeğine dayalı, açık kaynak kodlu, Unix benzeri bir işletim sistemi ailesidir. GNU Genel Kamu Lisansı versiyon 2 ile sunulan ve Linux Vakfı çatısı altında geliştirilen bir özgür yazılım projesidir.
+        </p>
+    </body>
+</html
+```
+
+**GET isteği: alias**
+
+```shell
+curl -i -X GET http://192.168.1.129/alias
+```
+
+**curl Çıktısı:**
+
+```http
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.18.0 (Ubuntu)
+Date: Sun, 27 Apr 2025 14:58:10 GMT
+Content-Type: text/html
+Content-Length: 178
+Location: http://192.168.1.129/alias/
+Connection: keep-alive
+```
+
+
+```shell
+curl -i -X GET http://192.168.1.129/alias/
+```
+
+**curl Çıktısı:**
+
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+Date: Sun, 27 Apr 2025 14:59:55 GMT
+Content-Type: text/html
+Content-Length: 732
+Last-Modified: Sun, 27 Apr 2025 09:31:11 GMT
+Connection: keep-alive
+ETag: "680df95f-2dc"
+Accept-Ranges: bytes
+```
+
+**GET isteği:**
+
+```shell
+curl -i -X GET http://192.168.1.129/linux
+```
+
+**Curl Çıktısı:**
+
+```shell
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.18.0 (Ubuntu)
+Date: Sun, 27 Apr 2025 15:03:07 GMT
+Content-Type: text/html
+Content-Length: 178
+Location: http://192.168.1.129/linux/
+Connection: keep-alive
+```
+
+```shell
+curl -i -X http://192.168.1.129/linux
+```
+
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+Date: Sun, 27 Apr 2025 16:10:14 GMT
+Content-Type: text/html
+Content-Length: 732
+Last-Modified: Sun, 27 Apr 2025 09:31:11 GMT
+Connection: keep-alive
+ETag: "680df95f-2dc"
+Accept-Ranges: bytes
+```
 ### Server_name Directive:
 
 
@@ -3227,7 +3529,7 @@ location [optional_modifier] [URI] {
 ### 1. Dinamik Modüller:
 
 + NGINX, 1.9.11 sürümünden itibaren dinamik modül desteği sunuyor.
-### Dinamik Modül Olarak Derlemenin Nedenleri:
+#### Dinamik Modül Olarak Derlemenin Nedenleri:
 
 1. **Esneklik ve Modülerlik:**
 	-  Modülleri çalışma zamanında yükleyip kaldırabilme imkanı
@@ -3241,7 +3543,7 @@ location [optional_modifier] [URI] {
 	- Paket yöneticileri(apt, yum vb.) için daga uygun bir yapı
 	- Kullanıcılar sadece ihtiyacç duydukları modülleri yükleyebilir.
 
-### Örnek 1:
+#### `ngx_http_image_filter_module` Derlenmesi:
 
 ```zsh
 nginx-tutorial3 :: /etc/nginx » ll
@@ -5997,7 +6299,12 @@ Application Server → Nginx → Client
 > 	+ Bir reverse proxy, gelen tüm istekleri şifresini çözmek ve giden tüm yanıtları şifrelemek üzere yapılandırılabilir; böylece kaynak sunucudaki değerli kaynaklar serbest bırakılabilir.
  
 
-### Reverse Proxy Seneryosu:
+### 1. Reverse Proxy: 1 sunucu ile
+
++ **Senaryo:** 
+	1. 1 tane `reverse proxy` sunucu(`IP: 192.168.1.131`)  
+	2. 1 tane statik web sunucusu(`IP: 192.168.1.132`)
+	3. 1 tane istemci makinesi (`IP: 192.168.1.106`)
 
 #### a. Reverse Proxy Server:
 + 205
@@ -6070,12 +6377,15 @@ Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /u
 sudo firewall-cmd --add-service=http --permanent
 ```
 > **Explanation:**
-> + 
+> + Nginx dış dünyaya açılabilmesi için 80 portunu güvenlik duvarı(firewall) tarafında izin vermemiz gerekmektedir.
+> + `firewalld` de http servisi 80 portuna karşılık gelmektedir.
+> + **Alternatif Komut:** `sudo firewall-cmd --add-port=80/tcp --permanent` komutu yukarıdaki ile aynı işlemi yapar.
 
 ```shell
 sudo firewall-cmd --reload
 ```
 
+**Makinenin IP Adresi:**
 
 ```shell
 ip -c addr
@@ -6103,27 +6413,234 @@ ip -c addr
 > 	- `sudo apt-get install links2` komutu ile `links2` uygulamasını yükleyiniz
 > 	- `links http://192.168.1.131` komutu ile terminal de tarayıcı olarak kullanabilirsiniz.
 
+**SELinux Ayarları:**
 
-#### b. Application Server:
+```shell
+sudo getsebool httpd_can_network_relay
+```
+
+```shell
+httpd_can_network_relay --> off
+```
+
+> **Explanation:**
+> + REHL temeli işletim sistemlerini `reverse proxy` sunucusu olarak kullanmak için bu `policy` aktif etmek gerekir.
+> + `sudo grep avc /var/log/audit/audit.log` veya `sudo ausearch -m avc -ts recent` komutları ile hata durumlarını kontrol edebilirsiniz.
+
+```shell
+sudo setsebool httpd_can_network_relay on
+```
+
+**nginx.conf:**
+
+```nginx
+
+#user  nobody;
+worker_processes  1;
+
+#pid        logs/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+    tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  192.168.1.131;
+
+        location / {
+            proxy_pass http://192.168.1.132;
+        }
+    }
+}
+```
+
+#### b. Application Server(Statik Web):
 + 130
 
 > [!NOTE]
-> + Debian temeli işletim sistemi olan Ubuntu kullanılıyor.
+> + Debian temeli işletim sistemi olan Ubuntu 22.04.5 sürümü kullanılıyor.
 > + Nginx Kaynak koddan(source code) derleme ile yükleme yapıldı.
 
 + ubuntu-custom-nginx => brownie website (nginx-tutorial3)
 
 
+**Makinenin IP Adresi:**
 
-#### c. Application Server:
+```shell
+ip -c addr
+```
+
+**Çıktı:**
+```shell
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:e6:de:1b brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.132/24 brd 192.168.1.255 scope global enp0s3
+       valid_lft forever preferred_lft forever
+    inet 192.168.1.140/24 brd 192.168.1.255 scope global secondary enp0s3
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a00:27ff:fee6:de1b/64 scope link
+       valid_lft forever preferred_lft forever
+```
+
+
+**nginx.conf:**
+
+```nginx
+user www-data;
+
+worker_processes auto;
+load_module /etc/nginx/modules/ngx_http_image_filter_module.so;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+
+
+    log_format custom '$remote_addr + $host + $http_host + $request + $http_x_real_ip';
+
+    server {
+        listen 80;
+        server_name 192.168.1.132;
+
+
+        root /var/www/html/bloggingtemplate/;
+
+        index index.html;
+
+        location / {
+            charset utf-8;
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+```
+
+
+#### c. İstemci(Client) Tarafı:
+
+```shell
+ curl.exe -X GET -I http://192.168.1.131
+```
+
+**Çıktı:**
+```shell
+HTTP/1.1 200 OK
+Server: nginx/1.14.1
+Date: Sat, 19 Apr 2025 21:51:42 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 35548
+Connection: keep-alive
+Last-Modified: Sun, 10 Nov 2024 14:49:46 GMT
+ETag: "6730c80a-8adc"
+Accept-Ranges: bytes
+```
+
 
 > [!NOTE]
-> + Debian temeli işletim sistemi olan Ubuntu kullanılıyor.
+> + İstemcinin(client) IP adresi: 192.168.1.106
+> + Eğer linux kullanıyorsanız `ip -c addr` komutu ile öğrenebilirsiniz.
+> + Eğer windows kullanıyorsanız  powershell de `Get-NetIPConfiguration` komut ile veya CMD de `ipconfig` komutu ile öğrenebilirsiniz.
+
+**Reverse Proxy Server:**
+
+**Log Çıktısı::**
+
+```log
+192.168.1.106 - - [20/Apr/2025:00:51:42 +0300] "GET / HTTP/1.1" 200 28421 "-" "curl/8.11.1"
+```
+
+
+> [!NOTE]
+> + Chrome veya Mozilla tarayıcısı ile yapılan istekte de;
+> ```log
+> 192.168.1.106 - - [20/Apr/2025:01:53:08 +0300] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.
+> ```
+> + Eğer dikkat ederseniz `304` kodu ile istek yapıldığını, bunun anlamı html body'si sunucudan değil de tarayıcıdan önbelleğinden(browser cache) aldığını göstermektedir.
+
+
+**App: Statik Web**
+
+**Log Çıktısı:**
+
+```log
+192.168.1.131 - - [22/Apr/2025:16:14:29 +0300] "GET / HTTP/1.0" 200 35548 "-" "curl/8.11.1"
+```
+
+
+> [!NOTE]
+> + Chrome veya Mozilla tarayıcıları ile yapılan `GET` isteklerinde;
+> ```shell
+>  192.168.1.131 - - [22/Apr/2025:17:10:27 +0300] "GET / HTTP/1.0" 200 35548 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+>  ```
+>  + Bu log dosyasında da `304` kod isteği mevcut fakat bu sunucuya isteğin `reverse proxy` sunucusundan geldiğine dikkat ediniz(`reverse proxy IP: 192.168.1.131`).
+
+### 2. Reverse Proxy: `$host` değişkeni
+
+
+### 3. Reverse Proxy: 2 sunucu ile
+
++ **Senaryo:** 
+	1. 1 tane `reverse proxy` sunucu(`IP: 192.168.1.131`)  
+	2. 1 tane statik web sunucusu(`IP: 192.168.1.132`)
+	3. 1 tane dinamik web sunucusu - PHP (`IP: 192.168.1.129`)
+	4. 1 tane istemci makinesi (`IP: 192.168.1.106`)
+
+#### 3.1. Reverse Proxy Sunucusu:
+
++ 205
+
+> [!NOTE]
+> + `1. Reverse Proxy: 1 sunucu ile` senaryosunda(iki önceki başlıkta) kurulum yapılmıştı ve aşamaları yazılmıştı.
+
+**nginx.conf:**
+
+```nginx
+
+```
+#### 3.2. Statik Web Sunucusu:
+
++ 130
+
+> [!NOTE]
+> + `1. Reverse Proxy: 1 sunucu ile` senaryosunda(iki önceki başlıkta) kurulum yapılmıştı ve aşamaları yazılmıştı.
+
+**nginx.conf:**
+
+```nginx
+
+```
+#### 3.3. Dinamik Web Sunucusu(PHP):
+
++ 80
+
+
+> [!NOTE]
+> + Debian temeli işletim sistemi olan Ubuntu 22.04.5 kullanılıyor.
 
 ```shell
 sudo apt update
 ```
 
+**nginx kurulumu:**
 
 ```shell
 sudo apt-get install nginx
@@ -6133,11 +6650,95 @@ sudo apt-get install nginx
 > + `Ubuntu 22.04.5` sürümünde `apt-get` paket yöneticisi ile nginx'i kuruyoruz.
 
 
+```shell
+ps aux | grep nginx
+```
+
+**Çıktı:**
+```shell
+root       758  0.0  0.0  55228  1716 ?   Ss  16:45   0:00 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
+www-data   759  0.0  0.2  55896  5644 ?   S   16:45   0:00 nginx: worker process
+www-data   760  0.0  0.2  55896  5644 ?   S   16:45   0:00 nginx: worker process
+www-data   761  0.0  0.2  55896  5644 ?   S   16:45   0:00 nginx: worker process
+```
+
+
+> [!CAUTION]
+> + `nginx worker process`'lerin `www-data` kullanıcısı tarafında çalıştırıldığına dikkat ediniz. 
+> + Çünkü, `nginx worker process`'in kullanıcısı ile `php-fpm worker process(pool www)` aynı kullınıcı olması gerekmektedir.
+> + Aksi, taktirde `permission denied` hatası verecektir.
+> + `nginx worker process`'in kullanıcısını değiştirmek için `nginx.conf` dosyasında `user www-data` direktifini ekleyiniz.
+> + Eğer `www-data` kullanıcı mevcut değil ise; `sudo groupadd www-data` ve `sudo useradd -g www-data -s /sbin/nologin www-data` komut ile oluşturabilirsiniz.
+
+
+> [!NOTE]
+> + *Nginx kurulumunu kontrol etme:*
+> 	- `curl -X GET -I http://192.168.1.129` komutu düzgün çalışıp çalışmadığını teyit edebilirsiniz. 
+> 	- `nginx -v` komutun yüklü olup olmadığını kontrol edebilirsiniz.
+
+**php-fpm yükleme:**
+
+```shell
+sudo apt install php-fpm
+```
+
+
+```shell
+ps aux | grep php-fpm
+```
+
+```shell
+root       8042  0.0  1.0 202704 20204 ?   Ss  11:20   0:00 php-fpm: master process (/etc/php/8.1/fpm/php-fpm.conf)
+www-data   8043  0.0  0.3 203176  7416 ?   S   11:20   0:00 php-fpm: pool www
+www-data   8044  0.0  0.3 203176  7416 ?   S   11:20   0:00 php-fpm: pool www
+```
+
+**nginx.conf:**
+
+```nginx
+
+```
+
+**`fpm.sock` Arama:**
+
+```shell
+sudo find / -name "*.sock"
+```
+
+**Çıktı:**
+
+```shell
+/run/php/php8.1-fpm.sock
+/run/php/php-fpm.sock
+/run/irqbalance/irqbalance667.sock
+/var/lib/dpkg/alternatives/php-fpm.sock
+/etc/alternatives/php-fpm.sock
+```
+
+**index.php:**
+
+```shell
+sudo vim /var/www/html/index.php
+```
+
+```php
+<?php phpinfo(); ?>
+```
+
+#### 3.4. İstemci(Client) Tarafı:
+
+
+
+
+
 ### CDN(Content Delivery Network):
 
 + **CDN (Content Delivery Network - İçerik Dağıtım Ağı)**, bir web sitesinin içeriğini (resimler, videolar, CSS/JS dosyaları vb.) dünyanın farklı bölgelerindeki sunuculara dağıtarak, kullanıcılara daha hızlı ve güvenilir erişim sağlayan bir sistemdir.
 
 
+
+
+## Load Balancer:
 
 
 

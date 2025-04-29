@@ -12,6 +12,11 @@ $ curl -X GET www.example.com
 ```
 > **Explanation:**
 
+###### 1.3. `-L` parametresi:
+```shell
+curl -L http://192.168.1.132
+```
+
 ###### 1.3. ISO indir
 
 ```shell
