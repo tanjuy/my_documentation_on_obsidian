@@ -335,6 +335,106 @@ baseurl=https://brave-browser-rpm-release.s3.brave.com/$basearch
 
 
 ---
+
+### 13. info:
+
++ `yum info`, **YUM** (Yellowdog Updater Modified) paket yöneticisinde bir paket hakkında **detaylı bilgi** almak için kullanılan bir komuttur.
++ Bu komut, bir paketin sürüm numarası, açıklaması, bağımlılıkları, boyutu, repo bilgisi gibi önemli detaylarını gösterir.
+
+#### Syntax:
+
+```shell
+dnf info [PACKAGE [PACKAGE...]]
+```
+
+#### Örnek 1:
+
+```shell
+dnf info postgresql-server
+```
+
+**Çıktı:**
+
+```shell
+Last metadata expiration check: 0:53:54 ago on Sun 18 May 2025 07:05:12 PM +03.
+Available Packages
+Name         : postgresql-server
+Version      : 10.23
+Release      : 4.module_el8.9.0+3736+952d0ed7.alma.1
+Architecture : x86_64
+Size         : 5.1 M
+Source       : postgresql-10.23-4.module_el8.9.0+3736+952d0ed7.alma.1.src.rpm
+Repository   : appstream
+Summary      : The programs needed to create and run a PostgreSQL server
+URL          : http://www.postgresql.org/
+License      : PostgreSQL
+Description  : PostgreSQL is an advanced Object-Relational database management system (DBMS).
+             : The postgresql-server package contains the programs needed to create
+             : and run a PostgreSQL server, which will in turn allow you to create
+             : and maintain PostgreSQL databases.
+```
+
+> + **Name**: Paketin adı (ör. `postgresql`).
+> + **Version**: Paketin sürüm numarası (ör. `10.23`).
+> + **Release**: Paketin derleme (build) sürümü.
+> + **Architecture**: Paketin mimarisi (ör. `x86_64`).
+> + **Size**: Paketin boyutu.
+> + **Source**: Paketin kaynak kodu adı.
+> + **Repository**: Paketin hangi depodan alındığı (ör. `AppStream`).
+> + **Summary**: Paketin kısa açıklaması.
+> + **URL**: Paketle ilgili resmi web sitesi (varsa).
+> + **License**: Paketin lisans bilgisi (ör. `BSD`).
+> + **Description**: Paketin detaylı açıklaması.
+
+
+> [!TIP]
+> + Birden fazla paket hakkında bilgi almak için;
+> ```shell
+> dnf info postgresql postgresql-server
+> ```
+
+#### Örnek 2: Yüklü bir Paket
+
+```shell
+yum info installed postgresql.x86_64
+```
+
+**Çıktı:**
+
+```shell
+Installed Packages
+Name         : postgresql
+Version      : 10.23
+Release      : 4.module_el8.9.0+3736+952d0ed7.alma.1
+Architecture : x86_64
+Size         : 5.5 M
+Source       : postgresql-10.23-4.module_el8.9.0+3736+952d0ed7.alma.1.src.rpm
+Repository   : @System
+From repo    : appstream
+Summary      : PostgreSQL client programs
+URL          : http://www.postgresql.org/
+License      : PostgreSQL
+Description  : PostgreSQL is an advanced Object-Relational database management system (DBMS).
+             : The base postgresql package contains the client programs that you'll need to
+             : access a PostgreSQL DBMS server, as well as HTML documentation for the whole
+             : system.  These client programs can be located on the same machine as the
+             : PostgreSQL server, or on a remote machine that accesses a PostgreSQL server
+             : over a network connection.  The PostgreSQL server can be found in the
+             : postgresql-server sub-packa
+```
+
+> + **Name**: Paketin adı (ör. `postgresql`).
+> + **Version**: Paketin sürüm numarası (ör. `10.23`).
+> + **Release**: Paketin derleme (build) sürümü.
+> + **Architecture**: Paketin mimarisi (ör. `x86_64`).
+> + **Size**: Paketin boyutu.
+> + **Source**: Paketin kaynak kodu adı.
+> + **Repository**: Paketin sistemde kurulu olduğunu belirtir.(`@System`)
+> + **From repo:** Paketin hangi yum/dnf deposundan kurulduğunu gösterir(`appstream`)
+> + **Summary**: Paketin kısa açıklaması.
+> + **URL**: Paketle ilgili resmi web sitesi (varsa).
+> + **License**: Paketin lisans bilgisi (ör. `BSD`).
+> + **Description**: Paketin detaylı açıklaması.
 ## Yum Komutları:
 #### 1.check-update:
 ```

@@ -1887,7 +1887,7 @@ http {
         index index.php index.html;
         root /var/www/html;
 
-        location ~\.php {
+        location ~\.php$ {
             include fastcgi.conf;
             fastcgi_pass unix:/run/php/php8.1-fpm.sock;
         }
@@ -3891,9 +3891,9 @@ http {
 ## Dinamik Siteleri İşleme:
 
 + Nginx, bir **reverse proxy** sunucusu olarak yapılandırılır ve dinamik istekleri `backend` sunucuya veya uygulamaya iletir.
-### PHP:
+### 1. PHP:
 
-#### PHP-FPM:
+#### 1.1. PHP-FPM:
 + **PHP-FPM (PHP FastCGI Process Manager)**, PHP için geliştirilmiş bir **FastCGI** uygulama yöneticisidir.
 + PHP betiklerinin daha hızlı, daha güvenilir ve yüksek trafik altında daha ölçeklenebilir bir şekilde çalışmasını sağlar.
 + Özellikle Nginx gibi bir web sunucusu ile birlikte kullanıldığında, dinamik PHP içeriklerini işlemek için optimize edilmiş bir çözümdür.
@@ -4065,7 +4065,7 @@ curl -X GET -i http://192.168.1.132/info.php
 > + nginx tarafında `nginx worker process`'in kullanıcısını  `user directive` ile`www-data` yaptığımız için `php worker process` ile iletişim kurabildiği için `info.php` dosyası içindeki `phpinfo()` fonksiyon çıktısını servis edebilecektir.
 > + `curl` komutu yerine `http://192.168.1.132/info.php` adresini tarayıcı ile GET isteği yapabilirsiniz. 
 
-#### PHP-FPM: index
+#### 1.2. PHP-FPM: index
 
 ```nginx
 user www-data;
@@ -4132,6 +4132,228 @@ Connection: keep-alive
 
 Hello!<br>Welcome to NGINX Training<br>Enjoy all of the NGINX Lectures<br>
 ```
+
+
+
+
+##### 1.3. PHP-FPM: `$document_root` ve `$fastcgi_script_name`
+
+
+> [!NOTE]
+> 1. **`fastcgi_param`**: Nginx'in FastCGI (PHP-FPM) ile iletişim kurarken kullandığı bir parametreyi tanımlar.
+> 2. **`SCRIPT_FILENAME`**: PHP-FPM'e "işleyeceği PHP dosyasının tam yolunu" söyleyen özel bir değişkendir.
+> 3. **`$document_root`**: Nginx yapılandırmasında `root` direktifiyle tanımlanan ana dizini ifade eder.
+> 	- Örneğin: `root /var/www/html;` ise `$document_root` = `/var/www/html`
+> 4.  **`$fastcgi_script_name`**: İstenen PHP dosyasının kök dizine göre yolunu verir.
+> 	- Örneğin: `example.com/blog/index.php` ise `$fastcgi_script_name` = `/blog/index.php`
+> 	- `location /blog {  index index.php }`  ise `$fastcgi_script_name` = `/blog/index.php`
+
+**nginx.conf**
+
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+	worker_connections 1024;
+}
+
+http {
+	include mime.types;
+
+	server {
+		listen 80;
+	    server_name 192.168.1.132;
+
+	    root /var/www/html/HTML;
+
+	    index index.html;
+
+	    location / {
+	        try_files $uri $uri/ =404;
+	    }
+
+	    location ~ \.php$ {
+	        include fastcgi.conf;
+	        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+	        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+	    }
+
+		location /test1 {
+			# /var/www/html/HTML
+			return 200 "$document_root";
+		}
+
+		location /test2 {
+			# /test2
+			return 200 "$fastcgi_script_name";
+		}
+
+		location /test3 {
+			# /var/www/html/HTML/test3
+	        return 200 "$request_filename";
+		}	
+	}
+}
+```
+
+
+> [!TIP]
+> + PHP-FPM, kendisine gelen isteği işleyebilmek için dosyanın tam yolunu bilmek zorundadır.
+> + "Primary script unknown" hatası genellikle bu değerin yanlış ayarlanmasından kaynaklanır.
+> + Bu parametre olmadan PHP-FPM hangi dosyayı çalıştıracağını bilemez.
+> + Doğru çalışması için hem `$document_root` hem de `root` direktiflerinin doğru ayarlanmış olması gerekir.
+
+#### 1.4. Hata Ayıklama: Primary script unknown
+
+```nginx
+user www-data;
+
+worker_processes auto;
+
+events {
+	worker_connections 1024;
+}
+
+http {
+	include mime.types;
+
+	server {
+    listen 8080;
+    server_name 192.168.1.132;
+
+    root /var/www/html/HTML;
+
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+	    # 1. PHP-FPM
+        include fastcgi.conf;
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        # /var/www/html/HTML içerisindeki php dosyalarını okur.
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location /test2 {
+        index kayit.php;
+    }
+
+    location /phpDers {
+        root /var/www/html;
+        index index.php;
+
+        location ~ \.php$ {
+	        # 2. PHP-FPM
+	        # Dikkat: Bu location context'in olmayışı '
+	        # Primary script unknown' hatası verdirir.
+            include fastcgi.conf;
+            fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+            # /var/www/html içerisindeki php dosylarını okur.
+            fastcgi_param SCRIPT_FILENAME $request_filename;
+        }
+    }
+}
+```
+
+> **Explanation:**
+> + `/var/www/html` dosyası içerisindeki `index.php` dosyasını `php-fpm` servisine yönlendirebilmemiz için ikinci `php-fpm location context` oluşturuldu.
+
+**`/var/www/html/HTML` dizini:**
+
+```shell
+ls -ltr
+```
+
+**Çıktı:**
+
+```shell
+total 32
+-rw-r--r-- 1 root     root     18328 Feb 25  2022 linux.jpg
+-rw-r--r-- 1 root     root       477 Apr 28 12:45 ad.html
+-rw-r--r-- 1 www-data www-data  4012 May  1 08:26 index.html
+-rw-r--r-- 1 root     root       779 May  1 16:34 kayit.php
+```
+
+> **Explanation:**
+> + Bu dizin içerisinde `index.html` dosyası kullanılıyor.
+
+**`/var/www/html/phpDers` dizini:**
+
+```shell
+ls -ltr
+```
+
+**Çıktı:**
+
+```shell
+total 20
+-rw-r--r-- 1 root root 195 Feb  4 18:19 index.php.bak
+-rw-r--r-- 1 root root 228 Feb 20 19:55 process.php
+-rw-r--r-- 1 root root 604 Feb 23 13:57 form.html
+-rw-r--r-- 1 root root 163 Feb 23 13:59 processGET.php
+-rw-r--r-- 1 root root 149 May  1 14:27 index.php
+```
+
+> **Explanation:**
+> + Bu dizin içerisinde `index.php` dosyası kullanılıyor.
+
+**index.php**
+
+```php
+<?php
+
+$num_1 = 11;
+$num_2 = 12;
+
+if (is_integer(
+    ($num_1 + $num_2) / 2
+    )) {
+    echo "Tam sayı girildi";
+} else {
+    echo "Tam sayı Girilmedi";
+}
+?>
+```
+##### HATA:
+
++ `nested location` yorum(`#`) içerisine alındığında nginx `/var/log/nginx/error.log` dosyasında böyle hata mesajı basacaktır.
++ Log dosyasını incelerseniz `Primary script unknown` hatasını görebilirsiniz.
+
+```log
+==> error.log <==
+2025/05/01 16:10:56 [error] 22801#0: *152 FastCGI sent in stderr: "Primary script unknown" while reading response header from upstream, client: 192.168.1.106, server: 192.168.1.132, request: "GET /phpDerss/ HTTP/1.1", upstream: "fastcgi://unix:/run/php/php8.1-fpm.sock:", host: "192.168.1.132:80"
+```
+
++ Eğer `nested location` yorum(`#`) satırı içinde olduğunda `GET` isteği atılırsa;
+
+```shell
+curl -L -i http://192.168.1.132:8080/phpDers
+```
+
+```http
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.2
+Date: Thu, 01 May 2025 16:43:34 GMT
+Content-Type: text/html
+Content-Length: 169
+Location: http://192.168.1.132:8080/phpDers/
+Connection: keep-alive
+
+HTTP/1.1 404 Not Found
+Server: nginx/1.27.2
+Date: Thu, 01 May 2025 16:43:34 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+
+File not found.
+```
+
 
 
 ## Nginx Worker Process:

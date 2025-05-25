@@ -1950,11 +1950,12 @@ http {
         <h3> Form 1: label </h3>
         <form action="kayit.php" method="POST">
             <label for="user_name">Ad:</label><br>
-            <input type="text" name="user_name"><br>
+            <input type="text" name="user_name" id="user_name"><br>
             <label for="user_surname">Soyadı:</label><br>
-            <input type="text" name="user_surname"><br><br>
+            <input type="text" name="user_surname" id="user_surname"><br><br>
             <input type="submit" value="Gönder">
             <!-- <button type="submi"t value="Send">Gönder</button> -->
+            <input type="reset" value="Sıfırla">
         </form>
         <hr>
         <h3> Form 2: placeholder </h3>
@@ -1964,6 +1965,7 @@ http {
             <input type="text" name="user_surname" placeholder="Soyadınız"
             ><br><br>
             <button type="submit" value="Send"><b>Gönder</b></button>
+            <button type="reset"><i>Sıfırla</i></button>
         </form>
     </body>
 </html>
@@ -1974,11 +1976,13 @@ http {
 > 	- Yönlendirmeyi `label` etiketi ile yaptık
 > 	- Gönder butonunu `input` etiketi ile yaptık ama dikkat ederseniz `Gönder` yazısını üzerinde şekillendirme yapmıyoruz.
 > 	- Form verisini  sunucudaki `kayıt.php` backend'ine gönderiyoruz. Bu için `form`'un `action` özniteliğini(attribute) kullanıyoruz.
+> 	- `label` etiketi ile `input`etiketini birleştirmek için `label` etiketinin `for` özniteliği ile `input` etiketinin `id` özniteliği eşit olmalıdır.
+> 	- *Sıfırla:* `input` etiketi ile yazılmış olan sıfırla butonu girilen verileri siler.
 > 2. **Form 2: placeholder**
 > 	- Yönlendirmeyi `input` etiketinin `placeholder` attribute ile yapıyoruz.
 > 	- Gönder butonunu için `button` etiketi kullanıyoruz. Eğer dikkat ederseniz Gönder yazısını `b` etiketi ile daha kalın hale getiriyoruz.
 > 	- Yine backend'e göndermek için `form` etiketin `action` özniteliğini kullanıyoruz.
-
+> 	- *Sıfırla:* `button` etiketi ile yazılmış olan sıfırla butonu girilen verileri siler.
 
 **Backend:**
 
@@ -2004,6 +2008,308 @@ echo "Kayıt işlemi başarılı!";
 **Görünüm:**
 
 ![form](images/form.png)
+
+
+## Örnek 2: Kullanıcı ve Parola
+
+```nginx
+user www-data;
+worker_processes auto;
+
+events {
+	worker_connections 1024;
+}
+
+http {
+	include mine.types;
+
+	server {
+		listen 8080;
+		server_name 192.168.1.132;
+
+		root /var/www/html/HTML;
+
+		index index.html;
+
+		location / {
+			try_files $uri $uri/ =404;
+		}
+
+		location ~ \.php$ {
+			include fastcgi.conf;
+			fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+		}
+	}
+}
+```
+
+**index.html**
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="HTML meta etiketi nedir?">
+        <meta name="author" content="Tanju Yücel, tanju@example.com">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            Form Kullanımı
+        </title>
+    </head>
+    <body>
+        <h3>Kullanıcı Girişi:</h3>
+        <form action="backend.php" method="POST">
+            <input type="text" name="user_name" placeholder="Adınız">
+            <br><br>
+            <input type="password" name="user_password" placeholder="Şifreniz">
+            <br><br>
+            <button type="submit" value="Send"><b>Gönder</b></button>
+        </form>
+    </body>
+</html>
+```
+> **Explanation:**
+> + form yapımızda iki tane girdimiz var; birincisi *kullanıcı isimi* ikincisi ise *kullanıcı şifresi* 
+> + Sunucuda olan `backend.php` dosyasına gönderip çalıştırıyoruz.
+
+
+**backend.php**
+
+```php
+<?php
+// Gönderilen veri POST isteği gönderildiğini garantiliyoruz.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Formdan gelen veriyi al
+    $user_name = $_POST['user_name'];
+    $user_passwd =  $_POST['user_password'];
+
+    $user_passwd_hash = password_hash(
+        $user_passwd, PASSWORD_DEFAULT
+    );
+
+    // Basit Kontrol
+    if (!empty($user_name) && !empty($user_passwd)) {
+        echo "Kullanıcı Adı: " . htmlspecialchars($user_name);
+        # echo "<br>Şifre: [Güvenlik nedeniyle gösterilmiyor]";
+        if ( password_verify($user_passwd, $user_passwd_hash) ) {
+            echo "<br>Şifre Doğru..." . $user_passwd_hash;
+        }
+    } else {
+        echo "Lütfen tüm alanları doldurun!";
+    }
+}
+?>
+```
+
+
+**POST isteği:**
+
+```shell
+ curl -i -X POST -F "user_name=ottoman" -F "user_password=1234"  http://192.168.1.132:8080/backend.php
+```
+
+```shell
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Sat, 03 May 2025 13:20:20 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+
+Kullanıcı Adı: ottoman<br>Şifre Doğru: $2y$10$InRep4TpHIfjigfa9DqSBeIJm3mNEiyPq5KveeUyjgOdEusY0cuB.
+```
+
+## Örnek 3: Form verisini dosyaya yazma
+
+**nginx.conf:**
+
+```nginx
+user www-data;
+
+worker_processes auto;
+load_module /etc/nginx/modules/ngx_http_image_filter_module.so;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+	server {
+	    listen 8080;
+	    server_name 192.168.1.132;
+
+	    root /var/www/html/phpDers1;
+
+	    index index.html;
+
+	    location / {
+	        try_files $uri $uri/ =404;
+	    }
+
+	    location ~ \.php$ {
+	        include fastcgi.conf;
+	        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+	        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+	    }
+	}
+}
+```
+
+**index.html**
+
+```html
+<!DOCTYPE html>
+
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="HTML meta etiketi nedir?">
+        <meta name="author" content="Tanju Yücel, tanju@example.com">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            Form Kullanımı
+        </title>
+    </head>
+    <body>
+        <h3>Dosyaya Yazma:</h3>
+        <form action="save_file.php" method="POST">
+            <input type="text" name="user_name" placeholder="Adınız">
+            <br><br>
+            <input type="email" name="user_email"
+                pattern="[A-Za-z0-9]+@linux.com"
+                placeholder="E-Postanız">
+            <br><br>
+            <button type="submit" value="Send"><b>Gönder</b></button>
+        </form>
+    </body>
+</html>
+```
+> **Explanation:**
+> + 
+
+**backend.php**
+
+```php
+<?php
+//
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Formdan gelen veriyi al
+    $user_name = $_POST['user_name'] ?: ' _ ';
+    $user_email = $_POST['user_email'] ?: "No Given Email";
+
+    $user_name = strip_tags(trim($user_name));
+    $user_email = strip_tags(trim($user_email));
+
+    // echo gettype($user_name) . "\n";
+
+    $file = fopen('/var/www/html/backend/save_users.txt', 'a');
+    if ($file) {
+        fwrite($file, "$user_name : $user_email\n");
+        fclose($file);
+        echo 'İşlem Başarılı';
+        //
+        header("Location: thank_you.html");
+        exit;
+    } else {
+        echo 'Bir hata oluştu';
+    }
+}
+?>
+```
+
+> **Explanation:**
+> + `$_SERVER[...]`: 
+> + `$_POST`:
+> + 
+
+**Yazılacak Dosya:**
+
+```shell
+cd /var/www/html; sudo mkdir backend
+```
+
+```shell
+sudo chown -R www-data:www-data /var/www/html/backend
+```
+
+```shell
+sudo chmod 755 /var/www/html/backend 
+```
+
+
+> [!CAUTION]
+> + `www-data` kullanıcısın yazma işleminin yapabilmesi için gerekli izinleri vermemiz gerekmektedir.
+> + Aksi takdirde nginx `access.log` ve `error.log` dosyalarına hata mesajı olarak `permission denied` yazılacaktır.
+> ```log
+> ==> error.log <==
+2025/05/08 17:31:10 [error] 27608#0: *348 FastCGI sent in stderr: "PHP message: PHP Warning:  fopen(/var/www/html/backend/save_users.txt): Failed to open stream: Permission denied in /var/www/html/phpDers1/save_file.php on line 13" while reading response header from upstream, client: 192.168.1.106, server: 192.168.1.132, request: "POST /save_file.php HTTP/1.1", upstream: "fastcgi://unix:/run/php/php8.1-fpm.sock:", host: "192.168.1.132:8080", referrer: "http://192.168.1.132:8080/"
+> ```
+
+
+**Dosyayı İzleme:**
+
++ backend tarafında olan `backend.php` programın dosyaya yazma işlemini canlı olarak takip etmek istersek;
++ Linux `tail` komutun ve `-f` parametresi ile `save_users.txt` dosyasını canlı olarak takip edebiliriz.
+
+```shell
+tail -f /var/www/html/backend/save_users.txt
+```
+
+
+**İstemci Tarafı:**
+
+```shell
+ curl -i -X POST -F "user_name=ottoman" -F "user_email=tanjuyuca@linux.com"  http://192.168.1.132:8080/save_file.php
+```
+
+```http
+HTTP/1.1 302 Found
+Server: nginx/1.27.2
+Date: Tue, 06 May 2025 15:46:16 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Location: thank_you.html
+
+İşlem Başarılı
+```
+
+**Tarayıcı Çıktısı:**
+
+![form_write_file](images/form_write_file.png)
+
+## Örnek 4: Form verisini Database yazma:
+
+**nginx.conf:**
+
+```nginx
+
+```
+
+**index.html:**
+
+```html
+
+```
+
+**backend.php:**
+
+```php
+
+```
+
+
+
+> [!CAUTION]
+> + Eğer `form` ile `radio` verilerini `backend` sunucusuna göndermek isterseniz, mutlaka `input` etiketinin `value` özniteliğini mutlak yazmanız gerekmektedir.
+> ```html
+> <input type="radio" nama="user_gender" id="m_gender" value="male">
+> <input type="radio" nama="user_gender" id="f_gender" value="female">
+> ``` 
+
 
 # HTML Events:
 

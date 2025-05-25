@@ -692,25 +692,6 @@ if ($age >= 18) {               // Çıktısı: You can drive%
 > + Bu örnekte, `$age` 18'den büyük ve `$hasLicense` `true` olduğu için ekrana "You can drive." yazdırılır.
 > + `php index.php` komutu ile kodu çalıştırdık.
 
-### Ternary Operatör:
-+ PHP'de basit `if-else` koşullarını tek satırda yazmak için **ternary operatör** kullanılır.
-
-### Syntax:
-```php
-koşul ? true_değer : false_değer;
-```
-
-### Örnek 1:
-```php
-<?php
-$age = 20;
-echo ($age >= 18) ? "Adult" : "Minor";   // Çıktı: Adult%
-?>
-```
-> **Explanation:**
-> + Bu örnekte, `$age` 18'den büyük olduğu için ekrana "Adult" yazdırılır.
-> + `php index.php` komutu ile kodu çalıştırdık.
-
 ## `if` Koşullarında Mantıksal Operatörler:
 + `if` koşullarında birden fazla koşulu birleştirmek için mantıksal operatörler kullanılır:
 ### And operatör ile:
@@ -760,7 +741,105 @@ echo "$message\n";
 | **Daha Az Yazım Hatası** | `break` gerektirmez | `break` yazılmazsa hatalı çalışabilir |
 | **Tek Satır Kullanım**   | Mümkün              | Daha zor                              |
 
-# Girdi Alma:
+
+## Ternary Operatör(`?`):
+
++ PHP'de basit `if-else` koşullarını tek satırda yazmak için **ternary operatör** kullanılır.
+
+### Syntax:
+
+```php
+$sonuc = (koşul) ? true_da_çalışır : false_da_çalışır;
+```
+
++ Bu, aşağıdaki if-else yapısının kısa halidir:
+
+```php
+if (koşul) {
+	$sonuc = true_da_çalışır;
+} else {
+	$sonuc = false_da_çalışır;
+}
+```
+
+### Örnek 1:
+```php
+<?php
+$age = 20;
+echo ($age >= 18) ? "Adult" : "Minor";   // Çıktı: Adult%
+?>
+```
+> **Explanation:**
+> + Bu örnekte, `$age` 18'den büyük olduğu için ekrana "Adult" yazdırılır.
+> + `php index.php` komutu ile kodu çalıştırdık.
+## null coalescing operator(??):
+
++ **Senaryo:** `$value` değeri boş ise `$key` değişkenine `default` değerini ver.
++ Görüldüğü üzeri işlem başarılı fakat uyarı mesajı vermektedir.
+
+
+> [!CAUTION]
+> - PHP 7.0 ve üzeri tüm sürümlerde çalışır.(**php7.0+**)
+
+
+
+```php
+php > if (!$value) {$key = 'default';}
+```
+
+**Çıktı:**
+
+```php
+PHP Warning:  Undefined variable $value3 in php shell code on line 1
+
+Warning: Undefined variable $value3 in php shell code on line 1
+```
+**Değişken kontrolü:**
+
+```php
+php > echo $key;   // Çıktı: default
+```
+
++ Yukarıdaki kodu `best pratice` uygun yazmak için;
+
+```php
+php > $key = $value ?? 'default';
+```
+
+**Değişken kontrolü:**
+
+```php
+php > echo $key;   // Çıktı: default
+```
+
+### `??` operatör vs `?:` operatör Farkı:
+
+```php
+$value = null;
+echo $variable ?? 'Linux';     // 'Linux' (NULL olduğu)
+echo $variable ?: 'Linux';     // 'Linux' (NULL false kabul edildiği için)
+```
+
+```php
+$value = 0;
+echo $variable ?? 'Linux';     // 0 (NULL olmadığı için)
+echo $variable ?: 'Linux';     // 'Linux' (0 false kabul edildiği için)
+```
+
+```php
+$value = "";
+echo $variable ?? 'Linux';     //         (NULL değer olmadığı için)
+echo $variable ?: 'Linux';     // 'Linux' ("" yani boş string, false kabul edilir.)
+```
+
+
+> [!NOTE]
+> + `??` sadece **tanımsız veya NULL** durumlarda çalışır,
+> + `?:` ise **false, 0, ""** gibi tüm "falsy" değerlerde çalışır.
+
+
+	# Girdi Alma:
+
 + PHP'de kullanıcıdan girdi almak için farklı yöntemler kullanılabilir.
 + Bu yöntemler, girdinin kaynağına (örneğin, web formları, komut satırı, vs.) bağlı olarak değişir. İşte PHP'de girdi almanın en yaygın yöntemleri:
 
@@ -1309,6 +1388,21 @@ echo $students[1]['not'] . "\n";
 ?>
 ```
 
+
+# Superglobals:
+
++ Superglobals, PHP'de **her yerden erişilebilen** özel global değişkenlerdir.
++ Script'in herhangi bir yerinde, herhangi bir fonksiyon veya class içinde bile doğrudan kullanılabilirler.
+
+## A. `$_SERVER`:
+
++ `$_SERVER['REQUEST_METHOD']`, PHP'de **mevcut HTTP isteğinin metodunu** döndüren bir süper global değişkendir.
++ Bu değişken, sunucuya yapılan isteğin türünü (GET, POST, PUT, DELETE vb.) belirlemek için kullanılır.
+
+### A.1  `$_SERVER['REQUEST_METHOD']`
+
+
+
 # Fonksiyonlar:
 
 ## Built-in Fonksiyonlar:
@@ -1425,7 +1519,75 @@ echo strtolower($string);     // Çıktısı: hello world
 > + `strtolower`, ASCII karakterleri için optimize edilmiştir. `strtolower`: ASCII karakterleri için hızlı ve etkilidir. Türkçe karakterleri de destekler, ancak yerel ayarlara bağlıdır.
 > + UTF-8 gibi çok baytlı karakter kodlamaları için `mb_strtolower` kullanmak daha doğru sonuçlar verir. `mb_strtolower`: Çok baytlı karakter kodlamaları (UTF-8 gibi) için daha uygundur. Türkçe karakterlerle çalışırken daha güvenilirdir.
 
-#### 5. mb_strtolower:
+
+#### 5. strip_tags fonksiyonu:
+ 
+ + `strip_tags()`, gelen yazının içindeki `<b>`, `<script>`, `<div>` gibi HTML etiketlerini **siler**, sadece düz yazı bırakır.
+ + Formdan gelen veriler kullanıcı tarafından yazıldığı için, bazı kötü niyetli kullanıcılar HTML veya JavaScript kodları gönderebilir.
+ + `strip_tags()` → **HTML/JS kodlarını temizlemek** için kullanılır ve siteni daha güvenli yapar.
+
+```html
+<script>alert('hack: xss saldırısı');</script>
+```
+
++ Bu kod, eğer korunmazsa, sitende çalışabilir! İşte bu yüzden `strip_tags()` gibi fonksiyonlar kullanılır.
+
+##### Örnek 1:  Temel Kullanımı
+
+**backend.php:**
+
+```php
+<?php
+$input_data = "<b>Ali</b> <script>alert('xss');</script>";
+$clear_data = strip_tags($input_data);
+
+echo $clear_data;
+?>
+```
+
++ Php dosyasını linux terminal de çalıştırıyoruz:
+
+```shell
+php backend.php
+```
+
+**Çıkıt:**
+
+```shell
+Ali alert('xss');%
+```
+
+> **Explanation:**
+> + Eğer çıktıyı yukarıdaki kod ile karşılaştırışsanız;  `strip_tags` fonksiyonu `<b>` ve `<script>` etiketlerini temizlediğini görebilirsiniz. 
+> + Tüm etiketleri sildi, sadece yazıyı bıraktı.
+
+##### Örnek 2: Bazı etiketleri bırakma
+
++ `strip_tags()` fonksiyonun, ikinci parametresi ile hangi HTML etiketlerin etkilenmeyeceğini belirliyoruz.
++ Bu PHP script'in de `<b>` etiketi yazılmış, çıktıdan da görüleceği üzeri `<b>` etiketi silinmemiştir.
+ 
+**backend.php:**
+
+```php
+$input_data = "<b>Ali</b> <script>alert('xss');</script>";
+
+$clear_data = strip_tags($input_data, '<b>');
+echo $clear_data;
+```
+
++ Php dosyasını linux terminal de çalıştırıyoruz:
+
+```shell
+php backend.php
+```
+
+**Çıktı:**
+
+```shell
+<b>Ali</b> alert('xss');%
+```
+
+#### 6. mb_strtolower:
 + `mb_strtolower`, PHP'de çok baytlı (multibyte) karakter kodlamalarını (örneğin UTF-8) destekleyen bir fonksiyondur.
 + Bu fonksiyon, bir dizgeyi (string) küçük harflere dönüştürürken, çok baytlı karakterleri (Türkçe karakterler, Çince, Japonca vb.) doğru bir şekilde işler.
 
@@ -1461,6 +1623,7 @@ echo mb_strtolower($string, 'UTF-8');    // Çıktısı: merhaba dünya
 #### 7. mb_strtoupper fonksiyonu:
 
 #### 8. trim fonksiyonu:
+
 + PHP 8'de `trim()` fonksiyonu, bir string'in başındaki ve sonundaki boşlukları (veya belirtilen diğer karakterleri) kaldırmak için kullanılır.
 + Bu fonksiyon, özellikle kullanıcı girdilerini temizlerken veya veri işleme sırasında sıkça kullanılır.
 ##### trim syntax:
@@ -1905,15 +2068,62 @@ $difference = abs($num1 - $num2);              // İki sayı arasındaki farkın
 echo "$num1 ile $num2 arsındaki farkı: $difference";   // Çıktı: 4
 ```
 
-## Diğer Fonksiyonlar:
-### print_r fonksiyonu:
+
+#### 4.6. `is_integer` fonksiyonu:
+
++ Sonuç tam sayı ise `True` değeri döner.
+
+##### Örnek 1: Temel Kullanım
+
+```php
+<?php
+
+$user_name = "123";
+$user_name1 = 123;
+
+if (is_integer($user_name1)) {
+    echo "Tam sayı girildi";  // $user_name1
+} else {
+    echo "Tam sayı Girilmedi"; // $user_name
+}
+?>
+```
+
+> **Explanation:**
+> + `is_integer` fonksiyonuna;
+> 	- `$user_name` değişkeni verirsek çıktı `Tam sayı girilmedi` verir.
+> 	- `$user_name1` değişkeni verirsek çıkıt `Tam sayı girildi` verir.
+> + `php -a` komut ile `interactive shell` ile pratikler yapabilirsiniz!
+
+##### Örnek 2: 
+
++ Girilen 2 sayını ortalamasının tam sayı çıkmasını kontrol ediyoruz.
+
+```php
+<?php
+
+$num_1 = 11;
+$num_2 = 12;
+
+if (is_integer(
+    ($num_1 + $num_2) / 2     // 11.5
+    )) {
+    echo "Tam sayı girildi";  // integer: 
+} else {
+    echo "Tam sayı Girilmedi"; // Float: 11.5
+}
+?>
+```
+
+###  5. Diğer Fonksiyonlar:
+#### 5.1. print_r fonksiyonu:
 + PHP 8'de `print_r`, bir değişkenin (dizi, nesne, string, sayı vb.) insanlar tarafından okunabilir bir şekilde görüntülenmesini sağlayan bir fonksiyondur.
 
 
 > [!CAUTION]
 > + Bu fonksiyon, özellikle **diziler** ve **nesneler** gibi karmaşık veri yapılarını hızlıca incelemek ve hata ayıklamak için kullanılır.
 
-#### Sözdizimi:
+##### Sözdizimi:
 ```php
 <?php
 print_r(mixed $value, bool $return = false): mixed
@@ -1927,7 +2137,7 @@ print_r(mixed $value, bool $return = false): mixed
 > + `$return` parametresi `false` ise, sonuç doğrudan ekrana yazdırılır ve `true` döner.
 > + `$return` parametresi `true` ise, sonuç bir string olarak döndürülür.
 
-#### Örnek 1: Temel Kullanım
+##### Örnek 1: Temel Kullanım
 
 ```php
 <?php
@@ -1946,7 +2156,7 @@ Array
 )
 ```
 
-#### Örnek 2: Basit Değişkenler:
+##### Örnek 2: Basit Değişkenler:
 ```php
 <?php
 $string = "Linux is Awesome";
@@ -1954,7 +2164,7 @@ print_r($string);
 ?>
 ```
 
-#### Örnek 3: Sonucu String Olarak Alma:
+##### Örnek 3: Sonucu String Olarak Alma:
 
 ```php
 <?php
@@ -1998,7 +2208,7 @@ string(65) "Array
 > + Çıktı sonuçlarını daha alabilmek için; `php -a` komut ile php'in interaktif kabuk ortamında php kodlarını yazdık;
 > + `var_dump` fonksiyonu php de kullanılan verilerin tiplerini ayrıntılı bir şekilde ekran basar.
 
-#### Örnek 4: `print_r` ile `var_dump` Arasındaki Fark:
+##### Örnek 4: `print_r` ile `var_dump` Arasındaki Fark:
 
 - `print_r`, daha temiz ve okunabilir bir çıktı sunar. Özellikle diziler ve nesneler için kullanışlıdır.
 - `var_dump`, değişkenin türü ve değeri hakkında daha ayrıntılı bilgi verir (örneğin, string uzunluğu, integer değeri vb.). Ancak çıktısı `print_r`'ye göre daha karmaşıktır.
@@ -2034,9 +2244,9 @@ Array              // print_r fonksiyon çıktısı
 > - `echo` dil yapısı kullanılarak tarayıcıda daha düzgün gürünüm kazandırmak için yazılmıştır.
 
 
-### count fonksiyonu:
+#### 5.2. count fonksiyonu:
 + PHP 8'de `count()` fonksiyonu, bir dizideki eleman sayısını veya bir nesnedeki özellik sayısını döndüren yerleşik bir fonksiyondur.
-#### Syntax:
+##### Syntax:
 ```php
 count(array|Countable $value, int $mode = COUNT_NORMAL): int
 ```
@@ -2044,14 +2254,14 @@ count(array|Countable $value, int $mode = COUNT_NORMAL): int
 > - **$value**: Eleman sayısını almak istediğiniz dizi veya `Countable` arayüzünü(`interface`) uygulayan bir nesne.
 > - **$mode**: İsteğe bağlı bir parametredir. Varsayılan olarak `COUNT_NORMAL` kullanılır. Eğer `COUNT_RECURSIVE` olarak ayarlanırsa, çok boyutlu dizilerdeki tüm elemanlar sayılır.
 
-#### Örnek 1: Array
+##### Örnek 1: Array
 ```php
 <?php
 $array = [1, 2, 3, 4, 5];
 echo count($array) . "\n";
 ?>
 ```
-#### Örnek 2: Çok Boyutlu bir dizi
+##### Örnek 2: Çok Boyutlu bir dizi
 ```php
 <?php
 
@@ -2064,6 +2274,85 @@ $array = [
 echo 'Üst Seviye: '.count($array)."\n";
 echo 'Tüm Elemanlar: '.count($array, COUNT_RECURSIVE)."\n";
 ?>
+```
+
+
+
+#### 5.3. isset fonksiyonu:
+
++ Değişkenin değeri varsa `True` değeri geri döner.
+
+```php
+<?php 
+
+$user_passwd1;
+$user_passwd2 = 123;
+
+if (isset($user_passwd2)) {
+    echo "Şifre Girildi";   // $user_passwd2
+} else {
+    echo "Şifre Girilmedi"; // $user_passwd1
+}
+?>
+```
+
+> **Explanation:**
+> + `isset` fonksiyonuna; 
+> 	- `$user_passwd1` verirsek çıktı `Şifre Girilmedi` olur.
+> 	- `$user_passwd2` verirsek çıktı `Şifre Girildi` olur.
+> + Bu komut ile test edebilirsiniz;
+> ```php
+> 	php index.php
+> ```
+> +   `!` operatörü ile  `if` durumunu değiştirebiliriz: `if !(isset($user_passwd2))`  
+
+#### 5.4. empty fonksiyonu:
+
++ Değişkenin değeri yoksa `True` değerini geri döndürür.
+
+```php
+<?php 
+
+$user_passwd1;
+$user_passwd2 = 123;
+
+if (empty($user_passwd2)) {
+    echo "Şifre Girilmedi";   // $user_passwd1
+} else {
+    echo "Şifre Girildi"; // $user_passwd2
+}
+?>
+```
+
+> **Explanation:**
+> + `empty` fonksiyonuna; 
+> 	- `$user_passwd1` verirsek çıktı `Şifre Girilmedi` olur.
+> 	- `$user_passwd2` verirsek çıktı `Şifre Girildi` olur.
+> + Bu komut ile test edebilirsiniz;
+> ```php
+> 	php index.php
+> ```
+> +  `!` operatörü ile  `if` durumunu değiştirebiliriz: `if !(empty($user_passwd2))`  
+
+
+
+
+#### 5.5. header fonksiyonu:
+
++ `header()` fonksiyonu, PHP'de HTTP başlıkları (headers) göndermek için kullanılan temel bir fonksiyondur.
++ Bu fonksiyonla sunucunun istemciye (tarayıcıya) gönderdiği yanıtın özelliklerini kontrol edebilirsiniz.
+
+##### Synatax:
+
+```php
+header(string $header, bool $replace = true, int $response_code = 0): void
+```
+##### A. Yönlendirme(Redirect):
+
+```php
+// Başka bir sayfaya yönlendirme
+header('Location: https://www.orneksite.com/yenisayfa.php');
+exit; // Yönlendirmeden sonra scriptin çalışmasını durdurur
 ```
 # Fonksiyon Oluşturma:
 
@@ -2213,6 +2502,23 @@ echo multiple(3, '5') . "\n";
 
 > [!TIP]
 > - Tür bildirimi (`type hinting`) ve `strict_types` kullanarak daha güvenli kod yazabilirsiniz.
+
+
+
+
+# Dosya İşlemleri:
+
+
+> [!NOTE]
+> + `fopen()` :  Dosyayı açma ve okuma yapar.
+> + `fwrite()` : Dosyaya yazar.
+> + `fclose()` : Açık dosyaları kapatır.
+> + 
+
+## fopen
+
+
+# Database İşlemleri:
 
 
 
@@ -3130,6 +3436,199 @@ echo hesapMakinesi(10, 5, '*'); // 50
 echo hesapMakinesi(10, 0, '/'); // Warning: Division by zero
 ?>
 ```
+
+
+# Database Bağlantıları:
+
+## A. PDO:
+
++ PHP 8'de (ve önceki sürümlerde) **PDO** (PHP Data Objects), **veritabanlarına erişmek ve onlarla güvenli şekilde çalışmak için kullanılan bir veri erişim katmanıdır**.
++ PDO, farklı veritabanı sistemleriyle (MySQL, PostgreSQL, SQLite, MSSQL, Oracle vb.) **aynı kod yapısı ile** çalışmanı sağlar. Bu da uygulamanı daha taşınabilir ve yönetilebilir hale getirir.
++ Php de veritabanı bağlantısı oluşturmak için kullanılan bir sınıftır. Veritabanı eylemini standart hale getiren bir php sistemidir.
++ Veri ekleme, veri silme, veri güncelleme ve veri okuma işlemleri yapar.
++ PDO açılımı: Php Data Object anlamına gelir.
+
+
+> [!NOTE]
+>🔹 **PDO’nun Temel Özellikleri:**
+> 1. **Veritabanı Bağımsızlığı:** Aynı kod ile farklı veritabanlarını destekler.
+> 2. **Hazır (prepared) ifadeler desteği:** SQL enjeksiyon saldırılarına karşı koruma sağlar.
+> 3. **Hata yönetimi:** Hataları yakalayabilir ve yönetebilirsin (`try/catch` bloklarıyla).
+> 4. **Objeye dayalı yapı:** Modern PHP kodlamasına uygundur.
+
+### Syntax:
+
+
+```php
+$connect = PDO($dns, $sql_user, $sql_passwd, $options)
+```
+
+#### `$dns` değişkeni:
+
+> [!NOTE]
+> + `$sql_user` : 
+> + `$dns` : Data Source Name — Bağlantı bilgileri (veritabanı türü, sunucu adresi, veritabanı adı vs.)
+> 	- Örnek: `$dsn = "pgsql:host=localhost;dbname=ornek_veritabani;charset=utf8mb4"`;
+
+#### MySQL: `$dsn` değişkeni
+
+```php
+$dsn = "mysql:host=192.168.1.132;dbname=test_db;charset=utf8mb4";
+```
+
+| Parça                     | Açıklama                                                               |
+| ------------------------- | ---------------------------------------------------------------------- |
+| `mysql:`                  | Bağlantı tipi → PDO’ya MySQL kullanacağımızı söylüyoruz.               |
+| `host=localhost`          | Veritabanı sunucusu → Genelde `localhost` ya da IP adresi olur.        |
+| `dbname=ornek_veritabani` | Bağlanılacak veritabanı adı.                                           |
+| `charset=utf8mb4`         | Karakter seti → Türkçe karakterler dahil geniş Unicode desteği sağlar. |
+
+#### PostgreSQL: `$dsn` değişkeni
+
++ PostgreSQL’de bazı ayarlar DSN içinde verilir, bazıları dışarıda da verilebilir.
+
+```php
+$dsn = "pgsql:host=192.168.1.132;port=5432;dbname=test_db;user=tanju;password=sifre";
+```
+
+```php
+$dsn = "pgsql:host=$host;port=$port;dbname=$test_db"
+```
+
+### A.1. PDO: PostgreSQL
+
+#### Terminal ile Bağlanma:
+
+```shell
+psql "host=192.168.1.132 port=5432 dbname=tanju_data user=tanju sslmode=require connect_timeout=10"
+```
+
+
+#### Örnek 1: `PDO(...)`
+
+**connect_postgres.php:**
+
+```php
+<?php
+connect_pgsql = new PDO(
+    "pgsql:host=192.168.1.132;
+    port=5432;
+    dbname=linus_d;
+    user=tanju;
+    password=1234tyod"
+);
+?>
+```
+
+
+```shell
+ php -S 192.168.1.132:8082 connect_postgres.php
+```
+
+**GET isteğini:**
+
+```shell
+curl -i http://192.168.1.132
+```
+
++  `GET` isteğini `curl` komutu ile değil de  tarayıcı(`browser`) ile de yapabilirsiniz! 
+
+**Çıktı:**
+
+```http
+HTTP/1.1 200 OK
+Server: nginx/1.27.2
+Date: Fri, 16 May 2025 15:35:18 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 35548
+Last-Modified: Sun, 10 Nov 2024 14:49:46 GMT
+Connection: keep-alive
+ETag: "6730c80a-8adc"
+Accept-Ranges: bytes
+```
+
+> **Explanation:**
+> + `GET` isteğinin çıktısı 200 döndüğü için `PDO` örneği(instance) postgreSQL sunucusuna başarılı bir şekilde bağlanmıştır.
+
+#### Örnek 2: PDO - Try Catch
+
++ `Try Catch` ile `fatal error` veren bir projenin çalışmasına devam edilir.
++ `Try` eylemi kodlar, `catch` ise hatayı yakalar  ekrana yazar veya hata yönlendirilir.
++ `Finally` kodu hata kodu yakalansın yakalanmasın çalışan bir koddur.
++ Hatanın ne olduğunu log dosyasına yönlendirebiliriz.
+
+**connect_postgres.php:**
+
+```php
+<?php
+try {
+    new PDO(
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=linus_ad;
+        user=tanju;
+        password=1234tyod"
+    );
+} catch (PDOException $e) {
+    echo $e->getMessage();
+} finally {
+    echo "Hata olsa da olmasa da çalışacaktır!";
+}
+?>
+```
+
+
+##### PDOException nedir?
+
++ PDO ile ilgili bir sorun (örneğin bağlantı hatası, yanlış SQL sorgusu) çıktığında PHP otomatik olarak `PDOException` türünde bir hata (exception) üretir.
+
+| Terim          | Açıklama                                            |
+| -------------- | --------------------------------------------------- |
+| `try`          | Denemek istediğin (hata çıkarabilecek) kod bloğu    |
+| `catch`        | Hata çıkarsa yakalayacağın ve işleyeceğin kısım     |
+| `PDOException` | PDO işlemleri sırasında fırlatılan özel hata sınıfı |
+
+#### Örnek 3: 
+
+
+
+
+#### PHP ile Bağlanma:
+
+```php
+<?php
+$host = '192.168.1.132';
+$dbname = 'tanju_data';
+$username = 'tanju';
+$password = 'sifre';
+
+try {
+    $conn = new PDO("pgsql:host=$host;dbname=$dbname", $username, $password);
+    
+    // Hata modunu ayarla
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    echo "PostgreSQL'e başarıyla bağlandı!";
+    
+    // Sorgu örneği
+    $stmt = $conn->query("SELECT * FROM tablo_adi");
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    print_r($results);
+    
+} catch(PDOException $e) {
+    echo "Bağlantı hatası: " . $e->getMessage();
+}
+?>
+```
+
+
+## B. 
+
+```php
+
+```
+
 # php.ini dosyası:
 + `php.ini`, PHP’nin yapılandırma dosyasıdır ve PHP’nin nasıl çalışacağını belirleyen ayarları içerir. PHP çalıştırıldığında, bu dosya okunarak çeşitli yapılandırma seçenekleri belirlenir.
 ## php.ini'in Temel Görevleri:

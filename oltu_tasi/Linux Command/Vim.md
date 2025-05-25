@@ -34,8 +34,14 @@
 
 #### 2. `dat` tuş kombinasyonu:
 
+#### 3. `zfat` veya `zfit` tuş kombinasyonu:
+
++ İki etiket arasını kapatır 
++ `za`: iki etiketi acar.
 
 ## set komutu:
+
+### set paste
 ###### Örnek 1: clipboard'dan vim'e kopyalama
 ```vim
 :set paste 
@@ -58,3 +64,30 @@
 > **Explanation:**
 > + 
 
+### set laststatus
+
++ Vim'de ekranın alt kısmında bir **durum satırı (status line)** vardır.
++ Bu satırda genellikle açık olan dosyanın adı, değişiklik durumu, satır/kolon bilgisi gibi bilgiler yer alır.
+
+```vim
+:set laststatus
+```
+
+
+> [!NOTE]
+> Bu ayar:
+> - `0`: Hiçbir zaman gösterme
+> - `1`: Eğer birden fazla pencere (window) varsa göster
+> - `2`: Her zaman göster
+
+
+
+
+# fold ve unfold:
+
++ Fold, belirli bir satır aralığını **gizlenebilir bir blok** haline getirir. Bu bloklar daraltılabilir (fold) veya genişletilebilir (unfold).
+
+## Tuş Kombinasyonu ile
+
+
+## Komut ile

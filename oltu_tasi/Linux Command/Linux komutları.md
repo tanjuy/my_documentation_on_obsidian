@@ -67,12 +67,63 @@ $ echo "Linux is Awesome"
 > **Explanation:**
 
 ### 6. find
-###### Örnek 1: Temel Kullanımı
+#### Örnek 1: Temel Kullanımı
 ```shell
 $ find /usr -name words
 ```
 > **Explanation:**
 
+#### Örnek 2: Hariç tutma
+
++ Mevcut dizinimizde ne tür veya hangi dosyalar var diye kontrol ediyoruz:
+
+```shell
+ls
+```
+
+**Çıktı:**
+
+```shell
+bash_achive.tar  dosyaTürü.sh  loops.sh  tekÇift.sh
+```
+
++ `find` komutunun `-print` parametresi ile silinecek dosyaları kontrol ediyoruz:
+
+```shell
+$  find . -type f ! -name "*.tar" -print
+```
+
+> + `.` → mevcut dizinde ara
+> + `-type f` → sadece dosyalar (dizinler değil)
+> + `! -name` → şu isme uymayanları seç
+> + `-delete` → bulduklarını sil
+
+**Çıkıt:**
+
+```shell
+./loops.sh
+./dosyaTürü.sh
+./tekÇift.sh
+```
+
++ `-print` parametresini `-delete` parametresi ile değiştirdiğimizde yukarı da ekrana basılan dosyalar silinecektir.
+
+```shell
+find . -type f ! -name "*.tar" -delete
+```
+
+
+> [!TIP]
+> + Eğer birden fazla dosyayı hariç tutmak isterseniz:
+> ```shell
+> find . -type f ! -name "*.tar" ! -name ".zip"-delete
+> ```
+
++ `ls` komutu ile kontrol etiğinizde dosyaların silindiğini görebilirsiniz.
+
+```shell
+ls    # Çıkıt: bash_achive.tar
+```
 
 ### 7. grep
 ###### Örnek 1: 
@@ -418,3 +469,75 @@ nginx   29189     root    2w    REG      253,0    88818 1049333 /var/log/nginx/e
 | `SIZE/OFF` | Dosya boyutu veya offset değeri                                                             |
 | `NODE`     | Dosya veya bağlantının düğüm numarası                                                       |
 | `NAME`     | Açık dosyanın veya ağ bağlantısının adı                                                     |
+
+### tar Komutu:
+
++ `tar` komutu, Linux ve Unix tabanlı sistemlerde **dosya ve dizinleri arşivlemek** için kullanılan bir komuttur.
++ Genellikle `.tar`, `.tar.gz` veya `.tgz` uzantılı dosyalar oluşturmak ya da açmak için kullanılır.
+
+#### Örnek 1: Arşiv Oluşturma:
+
+```shell
+tar -cf arsiv.tar 
+```
+
+> `-c` : Arşiv oluştur(create)
+> `-f` : Arşiv dosyası ismi belirt(file)
+#### Örnek 2: Arşivi Görüntüleme:
+
+```shell
+tar -tf bash_achive.tar
+```
+
+> + Arşiv içeriğini listele (list)
+> + **Dikkat:** Dosyalar arşivden çıkarılmıyor. Sadece içeriğini ekran basar.
+
+**Çıktı:**
+
+```shell
+dosyaTürü.sh
+loops.sh
+tekÇift.sh
+```
+
+#### Örnek 3: Arşiv Açmak:
+
+```shell
+tar -xf bash_achive.tar
+```
+
+> + `-x`: Arşivi aç (extract)
+
+```shell
+ls -ltr
+```
+
+**Çıktı:**
+
+```shell
+total 24
+-rw-rw-r-- 1 ottoman ottoman   727 Feb  2 07:20 tekÇift.sh
+-rw-rw-r-- 1 ottoman ottoman   310 Feb  2 12:36 dosyaTürü.sh
+-rw-rw-r-- 1 ottoman ottoman   127 Mar 14 18:45 loops.sh
+-rw-rw-r-- 1 ottoman ottoman 10240 May 23 18:57 bash_achive.tar
+```
+#### Neden Arşivleme Kullanılır?
+
+
+1. **Daha Kolay Taşıma ve Paylaşım**
+	- Birden fazla dosya ve klasörü tek bir dosyada birleştirerek, e-posta ile gönderim, USB’ye atma veya sunucuya yükleme işlemlerini basitleştirir.
+	- Örneğin: 1000 dosya yerine tek bir `arsiv.tar.gz` dosyasını taşımak daha kolaydır.
+2. **Disk Alanı Tasarrufu:**
+	- `tar` komutu sıkıştırma yapmasa da, `tar.gz`, `tar.bz2`, `tar.xz` gibi biçimlerle sıkıştırma uygulanarak **dosya boyutları küçültülür**.
+	- Bu, özellikle yedekleme ve arşivleme işlemlerinde önemlidir.
+3. **Yedekleme Amaçlı:**
+	- Sistem dosyaları, kullanıcı belgeleri veya veritabanları gibi önemli veriler düzenli arşivlenerek yedeklenebilir.
+	- Gerektiğinde bu arşiv dosyaları ile sistem veya veri geri yüklenebilir.
+4. **Dosya Yapısını Koruma:**
+	- Arşivleme işlemi, bir dizinin altındaki tüm dosya ve alt dizinleriyle birlikte **klasör yapısını** korur.
+	- Bu, karmaşık projelerin veya uygulama dosyalarının bozulmadan saklanmasını sağlar.
+5. **Yayınlama ve Dağıtım:**
+	- Yazılım projeleri veya web uygulamaları genellikle `.tar.gz` formatında paketlenip yayınlanır.
+	- Örneğin: Linux’ta kaynak kodları genellikle `.tar.gz` dosyalarıyla dağıtılır.
+6. **Güvenlik ve Arşivleme Uyumluluğu:**
+	- Bazı durumlarda arşiv dosyaları şifrelenerek güvenli şekilde saklanır veya uzun vadeli yasal arşivleme yapılır.
