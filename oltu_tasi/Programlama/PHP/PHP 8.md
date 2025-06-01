@@ -838,15 +838,15 @@ echo $variable ?: 'Linux';     // 'Linux' ("" yani boş string, false kabul edil
 > + `?:` ise **false, 0, ""** gibi tüm "falsy" değerlerde çalışır.
 
 
-	# Girdi Alma:
+# Girdi Alma:
 
 + PHP'de kullanıcıdan girdi almak için farklı yöntemler kullanılabilir.
 + Bu yöntemler, girdinin kaynağına (örneğin, web formları, komut satırı, vs.) bağlı olarak değişir. İşte PHP'de girdi almanın en yaygın yöntemleri:
 
 ## 1. Web Formlarından Girdi Almak (POST ve GET Yöntemleri):
+
 + Web uygulamalarında, kullanıcıdan genellikle HTML formları aracılığıyla girdi alınır.
 + PHP'de bu girdiler `$_POST` ve `$_GET` süper global değişkenleriyle işlenir.
-
 
 **nginx.conf**
 ```nginx
@@ -2685,6 +2685,13 @@ echo Math::square(5); // Çıktı:
 
 + **`::` sembolü :** Statik özelliklere ve metotlara erişmek için kullanılır.
 
+### A.6. `get_class_methods` Fonksiyonu:
+
++ Bu fonksiyon, bir sınıfın (ya da nesnenin) tüm **public metotlarının** listesini döner.
+
+### A.7. `get_class` Fonksiyonu:
+
+
 ## B. Miras Alma:
 
 + Bir sınıf, başka bir sınıftan miras alabilir. Bu, `extends` anahtar kelimesi ile yapılır.
@@ -3115,7 +3122,7 @@ Bark bark...
 > [!TIP]
 > + `include` ifadesi, belirtilen dosyayı mevcut dosyaya dahil eder. 
 > + Eğer dosya bulunamazsa, PHP bir **uyarı (warning)** verir, ancak script çalışmaya devam eder.
-> +  Bu, dosyanın bulunmamasının kritik bir hata olmadığı durumlar için idealdir.
+> + Bu, dosyanın bulunmamasının kritik bir hata olmadığı durumlar için idealdir.
 
 ### Syntax:
 ```php
@@ -3456,6 +3463,45 @@ echo hesapMakinesi(10, 0, '/'); // Warning: Division by zero
 > 3. **Hata yönetimi:** Hataları yakalayabilir ve yönetebilirsin (`try/catch` bloklarıyla).
 > 4. **Objeye dayalı yapı:** Modern PHP kodlamasına uygundur.
 
+
+
+> [!NOTE]
+> **PDO'un Genel Şablonu:**
+> + **Connection(Bağlantı):**
+> 	1. `$db_name = "pgsql:host=localhost;dbname=DatabaseName";`
+> 	2. `$con = new PDO ($db_name, username, password);`
+> + **Run SQL Query(Sorgu Çalıştırma):**
+> 	1. `$con->query(SQL Query to be executed);`
+> 	2. `$con->prepare(SQL Query to be executed);`
+> + **Close Connection(Bağlantıyı Kapatma):**
+> 	1. `$con->null;`
+
+
+
+### Özellikleri:
+#### A. Prepared Statement:
+
++ SQL sorgusu ile veriler **ayrılır**. Bu sayede hem güvenlik sağlanır hem de sorgu motoru aynı sorguyu birden çok kez hızlıca çalıştırabilir.
+
+#### B. Database Abstraction:
+
+#### C. Error Handling:
+
+#### D. Database Driver Support:
+
+#### E. Transaction Support:
+
++ "**Transaction support**" (işlem desteği), veritabanında birden fazla işlemi **bir bütün** olarak çalıştırmanı ve gerektiğinde **toplu olarak geri almanı** (rollback) sağlayan bir özelliktir.
+
+##### E.1. Gerçek Hayat Benzetmesi:
+
++ Bir bankadan başka bir bankaya para transfer ettiğini düşün:
+	1. Hesaptan para çek (A hesabından 100₺ düş)
+	2. Diğer hesaba para yatır (B hesabına 100₺ ekle)
+
+> +  Eğer 1. adım başarılı ama 2. adım başarısız olursa, işlem **yarım kalmış olur**. Bu bir sorun.
+>   +  İşte bu gibi durumları önlemek için **transaction** kullanılır.
+
 ### Syntax:
 
 
@@ -3503,8 +3549,16 @@ $dsn = "pgsql:host=$host;port=$port;dbname=$test_db"
 psql "host=192.168.1.132 port=5432 dbname=tanju_data user=tanju sslmode=require connect_timeout=10"
 ```
 
+#### Veritabanı:
 
-#### Örnek 1: `PDO(...)`
+```shell
+sudo -u tanju -i
+```
+
+```shell
+psql -d 
+```
+#### Örnek 1: PDO Sınıfı ile Bağlanma
 
 **connect_postgres.php:**
 
@@ -3520,10 +3574,68 @@ connect_pgsql = new PDO(
 ?>
 ```
 
+veya
+
+```php
+<?php
+$database_psql = new PDO (
+    "pgsql:host=192.168.1.132;
+    port=5432;
+    dbname=linus_d;
+    user=tanju;
+    password=1234tyod"
+);
+
+if ($database_psql) {
+    echo "Connection is successfull\n";
+} else {
+    echo "Connection is failed!\n";
+}
+// PDO sınıfın sahip olduğu public metotları ekrana basar:
+print_r(get_class_methods($database_psql));
+?>
+```
+
+**GET isteği:**
 
 ```shell
- php -S 192.168.1.132:8082 connect_postgres.php
+ curl http://192.168.1.132:8080/connect_postgres1.php
 ```
+
+**Çıktı:**
+
++ `echo Connection is successfull` çıktısı ile bağlantın başarılı olduğunda görebiliriz.
++ `get_class_methods()` fonksiyonu ile PDO sınıfın hangi metotlara sahip olduğunu görebiliyoruz.
+
+```php
+Connection is successfull
+Array
+(
+    [0] => __construct
+    [1] => beginTransaction
+    [2] => commit
+    [3] => errorCode
+    [4] => errorInfo
+    [5] => exec
+    [6] => getAttribute
+    [7] => getAvailableDrivers
+    [8] => inTransaction
+    [9] => lastInsertId
+    [10] => prepare
+    [11] => query
+    [12] => quote
+    [13] => rollBack
+    [14] => setAttribute
+)
+```
+
+
+> [!NOTE]
+> + Eğer `nginx` veya `apache` gibi web sunucuların `config` ayarları ile uğraşmak istemiyorsanız, sadece test etme işlemi ile uğraşıyorsanız:
+> ```shell
+ php -S 192.168.1.132:8082 connect_postgres.php
+>```
+> + PHP'in kendi web sunucusu mevcuttur.
 
 **GET isteğini:**
 
@@ -3588,11 +3700,205 @@ try {
 | `catch`        | Hata çıkarsa yakalayacağın ve işleyeceğin kısım     |
 | `PDOException` | PDO işlemleri sırasında fırlatılan özel hata sınıfı |
 
-#### Örnek 3: 
+#### Örnek 3: Veri Girişi
+
++ Database bağlantısını `require_once "connect_postgres.php"` ile `Örnek 2`'den dahil ediyoruz. 
+##### index.php
+
+```php
+<?php
+require_once "connect_postgres.php";
+
+if (isset($_GET["page"])) {
+
+    switch ($_GET["page"]) {
+        case 'insertData':
+            require_once "insertData.php";
+            break;
+        case 'index.php':
+            require_once "index.php";
+            break;
+    }
+}
+?>
+```
+
+##### Database Tablosu:
+
++ Manual olarak `members` adında bir tablo oluşturuyoruz. Daha sonra php kodları ile veri giriş yapacağız.
+
+```sql
+ CREATE TABLE members (
+mem_ID SERIAL PRIMARY KEY,
+mem_name VARCHAR(255),
+mem_title TEXT,
+mem_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+```
+
+##### insertData.php
+
+|Yöntem|Amaç|Güvenli mi?|Ne döner?|
+|---|---|---|---|
+|`exec()`|INSERT/UPDATE/DELETE|Hayır|Etkilenen satır sayısı|
+|`query()`|SELECT gibi sorgular|Hayır|`PDOStatement`|
+|`prepare()`|Her tür sorgu (güvenli)|Evet (parametreli)|`PDOStatement`
+
+```php
+<?php
+echo "Veri Ekle Dosyası<br>";
+
+$database->exec(
+    "INSERT INTO members(mem_name, mem_title) VALUES ('Tanju', 'Linux System Administor');"
+);
+?>
+```
+
+> - **Amaç:** Veritabanına _INSERT_, _UPDATE_, _DELETE_ gibi **veri değiştirme** komutları göndermek için kullanılır.
+> -  **Dönen Değer:** Etkilenen satır sayısını döner. Hata olursa `false` döner.
+
+
+> [!CAUTION]
+> + `SELECT` sorguları için **kullanılamaz!**
+> +  Giriş verileri doğrudan SQL’e gömülürse SQL injection riskine dikkat edilmelidir.
+
+veya
+
+```php
+$database->query(
+    "INSERT INTO members(mem_name, mem_title) VALUES ('linus', 'Backend Developer');"
+);
+```
+
+> + **Amaç:** _SELECT_ gibi **veri sorgulama** işlemleri için kullanılır. Sorgu doğrudan çalıştırılır.
+> + **Dönen Değer:** `PDOStatement` nesnesi döner. Hata olursa `false` döner.
+
+veya
+
+```php
+<?php
+// PDO'nun varsayılan olarak hata kipinin "exceptions"(istisnalar) olarak ayarlıdır.
+// PDO hata oluştuğunda sessiz kal, exception (istisna) fırlatma, sadece `false` döndür.
+$database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+
+$result = $database->prepare(
+    "INSERT INTO memberss(mem_name, mem_title) VALUES (?, ?);"
+);
+
+// execute fonksiyonun true veya false değeri döner.
+$bool_result = $result->execute(
+    ['Linus', 'Linux Kernel Developer']
+);
+
+// $bool_result değişkenine true dönerse if bloğu çalışır.
+// Eğer false dönerse else bloğu çalışır.
+if ($bool_result) {
+    echo "Veri ekleme başarılı...";
+} else {
+    print_r($result->errorinfo());
+    echo "Veri ekleme başarısız!";
+}
+?>
+```
+
+
+| Hata Kipi                | Açıklama                                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `PDO::ERRMODE_SILENT`    | Hatalar bastırılır, `false` döner. (manuel kontrol gerekir)                                           |
+| `PDO::ERRMODE_WARNING`   | Hatalar PHP uyarısı olarak verilir.                                                                   |
+| `PDO::ERRMODE_EXCEPTION` | Hatalar `PDOException` olarak fırlatılır. (bu durumda `execute()` exception fırlatır, `false` dönmez) |
+
+
+> [!NOTE]
+> + `:email` bir _named placeholder_'dır.
+> + `?` kullanılarak _positioned placeholder_ da yapılabilir.
+
+
+> [!TIP]
+> + `exec()` ve `query()` metotları sql sorgularını her defasında yeniden yorumlar. Bundan dolayı SQL enjeksiyon saldırısına neden olabilir.
+> + `prepare()` sql metotlarını hazırlayan bir deyimdir. Sql sorgusunu bir kez yorumlar, bir çok kez çalıştırır. Hızlıdır ve SQL enjeksiyonu önler.
 
 
 
+**GET isteği:**
 
+```shell
+curl http://192.168.1.132/index.php?page=insertData
+```
+
+
+
+#### Örnek 4: Veri Alma:
+
++ `fetch()` fonksiyonu
+
+**connect.php:**
+
+```php
+<?php
+try {
+    $database_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=linus_d;
+        user=tanju;
+        password=1234tyo"
+    );
+    
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+}
+?>
+```
+
+**fetch.php:**
+
+```php
+<?php
+
+include "connect_postgres1.php";
+
+$fetch_records = $con_psql->query("SELECT * FROM public.employee_data;");
+
+$row = $fetch_records->fetch();
+
+echo "<pre>";
+print_r($row);
+echo "</pre>";
+// print_r(get_class_methods($row));
+?>
+```
+
+veya
+
+```php
+
+```
+
+
+> + PHP'de `PDO::fetch()` (veya sadece `$fetch_records->fetch()`) metodu, bir SQL sorgusu sonucundan **tek bir satırı** almanı sağlar.
+> + Veritabanından çekilen verileri satır satır işlemen gerektiğinde bu yöntem çok kullanışlıdır.
+
+
+> [!NOTE]
+> ```php
+> $sonuc = $fetch_records->fetch($fetch_style);
+> ```
+> + `$fetch_records`: `PDOStatement` nesnesidir (örneğin `prepare()` veya `query()` sonucu)
+> + `$fetch_style`: Sonucun hangi formatta alınacağını belirtir. (dizi mi, nesne mi, hem sütun isimleri hem index'li mi vs.)
+
+|Stil|Açıklama|
+|---|---|
+|`PDO::FETCH_ASSOC`|Sadece sütun adlarıyla ilişkilendirilmiş dizi döner. (En çok kullanılan ve önerilen.)|
+|`PDO::FETCH_NUM`|Sadece sayısal indekslerle döner (0, 1, 2...)|
+|`PDO::FETCH_BOTH`|Hem sütun adları hem de sayısal indekslerle döner (varsayılan)|
+|`PDO::FETCH_OBJ`|Sonuçları bir nesne olarak döner (sütun adları -> property)|
+
+
+```shell
+
+```
 #### PHP ile Bağlanma:
 
 ```php

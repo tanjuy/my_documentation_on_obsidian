@@ -56,45 +56,17 @@
             }
           },
           {
-            "id": "430f54d8e61ee413",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/PHP/PHP 8.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "PHP 8"
-            }
-          },
-          {
             "id": "da6d70efbab58cc8",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
                 "file": "Database/PostgreSQL/PostgreSQL Giriş.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
               "title": "PostgreSQL Giriş"
-            }
-          },
-          {
-            "id": "4cd52c9a459637ca",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/PHP/PHP 8.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "PHP 8"
             }
           },
           {
@@ -110,9 +82,23 @@
               "icon": "lucide-file",
               "title": "Veri Girişi - INSERT"
             }
+          },
+          {
+            "id": "6363e757d6e0276e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/PHP/PHP 8.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "PHP 8"
+            }
           }
         ],
-        "currentTab": 4
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -231,13 +217,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Database/PostgreSQL/PostgreSQL Giriş.md",
+                "file": "Programlama/PHP/PHP 8.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of PostgreSQL Giriş"
+              "title": "Outline of PHP 8"
             }
           }
         ],
@@ -245,7 +231,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 287.5
+    "width": 289.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -257,26 +243,27 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "da6d70efbab58cc8",
+  "active": "6363e757d6e0276e",
   "lastOpenFiles": [
-    "Web Servers/Nginx/Nginx Config File.md",
-    "Database/PostgreSQL/PostgreSQL Giriş.md",
-    "Programlama/PHP/PHP 8.md",
-    "K8s/K8s Kurulumu.md",
     "Database/PostgreSQL/Veri Girişi - INSERT.md",
+    "Programlama/PHP/PHP 8.md",
+    "Linux Command/Vim.md",
+    "Database/PostgreSQL/PostgreSQL Giriş.md",
+    "Web Servers/html/HTML.md",
+    "Web Servers/html/images/form_date.png",
+    "Programlama/Bash_Script/Bash Script Apps.md",
+    "Web Servers/Nginx/Nginx Config File.md",
+    "K8s/K8s Kurulumu.md",
     "Linux Command/Linux komutları.md",
     "Database/PostgreSQL/Tabloda Değişiklik - ALTER.md",
     "Database/PostgreSQL/Tablo Oluşturma - CREATE.md",
     "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
     "Linux Command/Linux Paket Komutları.md",
-    "Linux Command/Vim.md",
     "Programlama/Bash_Script/Bash Script.md",
-    "Programlama/Bash_Script/Bash Script Apps.md",
     "Database/PostgreSQL/GROUP BY Kullanımı.md",
     "Database/PostgreSQL/Database Oluşturma.md",
     "Windows Commands/Winget Komutları.md",
     "PostgreSQL'e Bağlanma.md",
-    "Web Servers/html/HTML.md",
     "Linux Command/Kullanıcı Oluşturma.md",
     "Linux Command/Systemd.md",
     "Linux Command/tmux.md",
@@ -288,14 +275,12 @@
     "Database/Welcome.md",
     "Database/PostgreSQL/Veri Silme.md",
     "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
-    "Database/PostgreSQL/AS kullanımı.md",
     "Database/PostgreSQL/SQL İstemcileri",
     "Web Servers/html/images/form_write_file.png",
     "Web Servers/html/images/form.png",
     "Web Servers/html/images/iframe2.png",
     "Web Servers/html/images/iframe.png",
     "Web Servers/html/images/meta_viewport.png",
-    "Web Servers/html/images/span_vs_div.png",
     "Web Servers/css",
     "Web Servers/html/images",
     "Web Servers/html",

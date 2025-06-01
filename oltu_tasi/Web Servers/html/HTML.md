@@ -2129,7 +2129,6 @@ Kullanıcı Adı: ottoman<br>Şifre Doğru: $2y$10$InRep4TpHIfjigfa9DqSBeIJm3mNE
 user www-data;
 
 worker_processes auto;
-load_module /etc/nginx/modules/ngx_http_image_filter_module.so;
 
 events {
     worker_connections 1024;
@@ -2283,24 +2282,157 @@ Location: thank_you.html
 
 ## Örnek 4: Form verisini Database yazma:
 
+**Senaryo:** 
++ nginx üzerinden servis yapacağız. 
++ *Frontend* tarafında `<input type=text ...> ` ve `<input type=date ...>` etiketlerini kullanacağız. 
++ *Backend* tarafında PHP ile PostgreSQL'e bağlanacağız ve PHP ile PostgreSQL'e veri girişi yapacağız.
++ Database tarafında `linus_d` veritabanına manuel olarak `members2` adında tablo oluşturacağız.
+
+### Nginx:
+
 **nginx.conf:**
 
 ```nginx
+user www-data;
 
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+	server {
+	    listen 80;
+	    server_name 192.168.1.132;
+
+	    root  /var/www/html/connectPostgreSQL;
+
+	    index index.html;
+
+	    location / {
+	        try_files $uri $uri/ =404;
+	    }
+
+	    location ~ \.php$ {
+	        include fastcgi.conf;
+	        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+	        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+	    }
+	}
+}
 ```
+
+### Veritabanı: PosgreSQL
+
+```shell
+sudo -u tanju -i psql -d linus_d
+```
+
++ `linus_d` veritabanın da `members2` adında tablo oluşturuyoruz.
+
+```sql
+ CREATE TABLE members2 (
+mem_ID SERIAL PRIMARY KEY,
+mem_name VARCHAR(255),
+mem_user_date DATE,
+mem_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+```
+
+### Frontend:
 
 **index.html:**
 
 ```html
+<!DOCTYPE html>
 
+<html lang=tr>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="HTML meta etiketi nedir?">
+        <meta name="author" content="Tanju Yücel, tanju@example.com">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            Form ve PostgreSQL
+        </title>
+    </head>
+    <body>
+        <h3>PostgreSQL Veritabanına Yazma:</h3>
+        <form action="index.php" method="POST">
+            <input type="text" name="user_name" placeholder="Adınız" required>
+            <br><br>
+            <input type="date" name="user_date">
+            <br><br>
+            <button type="submit" value="Send"><b>Gönder</b></button>
+        </form>
+    </body>
+</html>
 ```
 
-**backend.php:**
+> + Gönder butonunu `<button type="submit" value="Send"><b>Gönder</b></button>` etiketine alternatif olarak
+> + `<input type="submit" value="Gönder">` kullanılabilir. Fakat `<b>` etiketi kullanılamayacaktır.
+
+### Backend:
+
+**connect_postgres:**
 
 ```php
-
+<?php
+try {
+    $database_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=linus_d;
+        user=tanju;
+        password=1234tyod"
+    );
+} catch (PDOException $e) {
+    echo $e->getMessage();
+}
+?>
 ```
 
+**index.php:**
+
+```php
+<?php
+    require_once "connect_postgres.php";
+
+//
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Formdan gelen veriyi al
+    $user_name = $_POST['user_name'] ?: ' _ ';
+    $user_date = $_POST['user_date'] ?: "No Given Email";
+
+    $user_name = strip_tags(trim($user_name));
+    $user_date = strip_tags(trim($user_date));
+
+    $database_psql->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+
+    $result = $database_psql->prepare(
+        "INSERT INTO members2(mem_name, mem_user_date) VALUES (?, ?);"
+    );
+
+    // execute fonksiyonun true veya false değeri döner.
+    $bool_result = $result->execute(
+        [ $user_name, $user_date]
+    );
+
+    // $bool_result değişkenine true dönerse if bloğu çalışır.
+    // Eğer false dönerse else bloğu çalışır.
+    if ($bool_result) {
+        echo "Veri ekleme başarılı...";
+    } else {
+        print_r($result->errorinfo());
+        echo "Veri ekleme başarısız!";
+    }
+}
+```
+
+### İstemci:
+
+![form_date](images/form_date.png)
 
 
 > [!CAUTION]

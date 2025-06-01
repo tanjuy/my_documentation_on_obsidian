@@ -1177,7 +1177,7 @@ host    all             all             192.168.1.0/24          scram-sha-256
 ## Python:
 # Kullanıcılar:
 
-## Kullanıcıları Listeleme:
+## A. Kullanıcıları Listeleme:
 
 ### psql içerisinden:
 
@@ -1204,7 +1204,7 @@ SELECT * FROM pg_user;
  postgres |       10 | t           | t        | t       | t            | ******** |          |
 ```
 
-## Yeni Kullanıcı Oluşturma:
+## B. Yeni Kullanıcı Oluşturma:
 
 ### psql içinden:
 
@@ -1373,9 +1373,9 @@ sudo -u postgres createuser --interactive
 ```
 
 #### Örnek 2: 
-## Kullanıcıları Silme:
+## C. Kullanıcıları Silme:
 
-### psql içinden:
+### C.1. psql içinden:
 
 #### Syntax:
 
@@ -1383,7 +1383,7 @@ sudo -u postgres createuser --interactive
 DROP USER user_name;
 ```
 
-#### Örnek 1: Temel Kullanım
+#### Örnek C.1: Temel Kullanım
 
 ```sql
 \du
@@ -1420,9 +1420,9 @@ DROP ROLE
 ```
 
 
-## Kullanıcıları Düzenleme:
+## D. Kullanıcıları Düzenleme:
 
-### psql içerisinden:
+### D.1. psql içerisinden:
 
 #### Syntax:
 
@@ -1430,7 +1430,7 @@ DROP ROLE
 ALTER USER user_name WITH [OPTION]
 ```
 
-#### Örnek 1: Superuser Yetkisi Verme
+#### Örnek D.1: Superuser Yetkisi Verme
 
 
 > [!NOTE]
@@ -1589,6 +1589,10 @@ ALTER USER tanju WITH PASSWORD NULL;
 ```
 
 + Tekrardan  `SELECT rolname, rolpassword FROM pg_authid;` komutu ile kontrol etiğimizde `tanju` adlı kullanıcın `rolpassword` kolunun boş olduğunu göreceğiz. 
+
+#### Örnek: Role Membership
+
+
 # Database:
 
 ## a. Database Listeleme:
@@ -2321,11 +2325,23 @@ SELECT oid, relname, pg_get_userbyid(relowner) FROM pg_class;
 
 
 
+# Veri Girişi:
+
+## INSERT INTO:
+
+```sql
+INSERT INTO employee (
+	"name", description
+) 
+VALUES (
+	'Web Development', 'Web Development Description'
+)
+```
 
 
 # Backup(Yedek Alma):
 
-## pg_dump Komutu:
+## A. pg_dump Komutu:
 
 + `pg_dump`, PostgreSQL veritabanını yedeklemek için kullanılan resmi komut satırı aracıdır.
 + Bir veritabanının tamamını veya belirli tabloları dışa aktarmanı (export) sağlar.
@@ -2339,7 +2355,7 @@ SELECT oid, relname, pg_get_userbyid(relowner) FROM pg_class;
 > + Bu yedek, başka bir veritabanına ya da aynı veritabanına ileride **geri yüklenebilir**.
 
 
-### 1. Yerel(local) - peer auth
+### A.1. Yerel(local) - peer auth
 
 **Sistem Bilgileri:**
 
@@ -2492,7 +2508,7 @@ CREATE DATABASE backup_sql;
 ottoman@nginx-tutorial3:~$ sudo -u backup_sql -i
 ```
 
-#### Örnek 1.1:
+#### Örnek 1.1: plain format
 
 ```shell
 backup_sql@nginx-tutorial3:~$ pg_dump > default_backup.sql
@@ -2559,7 +2575,7 @@ backup_sql@nginx-tutorial3:~$ createdb default_restored
 > [!TIP]
 > + Her hangi bir parametre girilmediğinde varsayılan olarak şöyledir;
 > ```shell
-> createdb -h /var/run/postgresql -U backup_sql
+> createdb -h /var/run/postgresql -U backup_sql default_restored
 > ```
 > + `-U` parametresi yazılmadığında linux kullanıcısından alacaktır.
 
@@ -2575,11 +2591,14 @@ backup_sql@nginx-tutorial3:~$ psql -d default_restored < default_backup.sql
 >  psql -h /var/run/postgresql -U backup_sql -d backup_sql < default_backup.sql
 > ```
 
-#### Örnek 1.2: Özel Format:
+#### Örnek 1.2: custom format:
 
 ```shell
 backup_sql@nginx-tutorial3:~$ pg_dump -F c -f default_backup.dmp
 ```
+
+> `-f` : Hedef dosya adı
+> `-F`: Format: `p` = plain (sql), `c` = custom, `t` = tar
 
 ##### `.dmp` (Custom Format) - Format Nedir?
 
@@ -2587,11 +2606,37 @@ backup_sql@nginx-tutorial3:~$ pg_dump -F c -f default_backup.dmp
 + Bu format:
 	- Sıkıştırılmıştır.
 	- Bölümler halinde içeriğe sahiptir (tablo, veri, index, trigger vb.).
-	- Sadece `pg_restore` aracıyla geri yüklenebilir.
+
+> [!CAUTION]
+> - **Sadece `pg_restore` aracıyla geri yüklenebilir.**
 
 
+> [!TIP]
+>  **`.dmp` uzantısı zorunlu mu?**
+> + Hayır. Uzantı tamamen kullanıcı tercihine bağlıdır. `.dmp`, `.backup`, `.pgdump` veya `.custom` da kullanılabilir.
+> + Önemli olan **dosyanın içeriğinin hangi formatta olduğudur**, adı değil.
+> + En doğru sonucu `file` komutu verir:
+> ```shell
+> file default_backup.dmp 
+> ```
+> + Sonuc:
+> ```shell
+> default_backup.dmp: PostgreSQL custom database dump - v1.14-0
+> ```
 
-## pg_restore Komutu:
+#### Örnek 1.3: tar format
+
+```shell
+backup_sql@nginx-tutorial3:~$ pg_dump -F t -f backup.tar backup_sql
+```
+
+> `-f` : Hedef dosya adı
+> `-F`: Format: `p` = plain (sql), `c` = custom, `t` = tar
+
+> [!CAUTION]
+> - **Sadece `pg_restore` aracıyla geri yüklenebilir.**
+
+## B. pg_restore Komutu:
 
 + `pg_restore`, PostgreSQL veritabanı sisteminde kullanılan bir komut satırı aracıdır.
 + Bu araç, `pg_dump` komutuyla **özel formatta** (`-Fc` gibi) yedeklenmiş veritabanı dosyalarını geri yüklemek (restore etmek) için kullanılır.
@@ -2607,11 +2652,127 @@ backup_sql@nginx-tutorial3:~$ pg_dump -F c -f default_backup.dmp
 pg_restore [connection-option...] [option...] [filename]
 ```
 
-### Örnek 1: 
+### B.1. Yerel(local) - peer auth
+
+
++ `tar_backup` adında veritabanı oluşturalım:
 
 ```shell
-ackup_sql@nginx-tutorial3:~$ 
+backup_sql@nginx-tutorial3:~$ createdb tar_backup
 ```
+
++ Aşağıdaki komut oluşturulan veritabanlarını listeler. Eğer `tar_backup` liste içerisinde ise işlem başarılıdır:
+
+```shell
+backup_sql@nginx-tutorial3:~$ psql -l
+```
+
+#### B.1.1. `pg_restore -l` komutu:
+
++ `pg_restore -l` komutu, PostgreSQL veritabanı yedeklerini (dump dosyalarını) listelemek için kullanılan bir komuttur.
++ Bu komut, bir PostgreSQL yedek dosyasının(`dvdrental.tar`) içeriğini analiz eder ve dosyada bulunan tüm veritabanı nesnelerinin bir listesini gösterir.
+
+
+> [!NOTE]
+> **Ne İşe Yarar?**
+> + Yedek dosyasının içeriğini görüntüler (tablolar, indeksler, fonksiyonlar, vs.)
+> + Yedek dosyasının yapısını anlamanızı sağlar.
+> + Geri yükleme işlemi öncesinde inceleme yapmanıza olanak tanır.
+> + Hangi nesnelerin geri yükleneceğini kontrol etmenizi sağlar.
+
+```shell
+backup_sql@nginx-tutorial3:~$ pg_restore -l dvdrental.tar
+```
+
+**Çıktı:**
+
+```shell
+;
+; Archive created at 2019-05-12 10:36:37 +03
+;     dbname: dvdrental
+;     TOC Entries: 144
+;     Compression: 0
+;     Dump Version: 1.13-0
+;     Format: TAR
+;     Integer: 4 bytes
+;     Offset: 8 bytes
+;     Dumped from database version: 11.3
+;     Dumped by pg_dump version: 11.2
+;
+;
+; Selected TOC Entries:
+;
+632; 1247 16723 TYPE public mpaa_rating postgres
+635; 1247 16734 DOMAIN public year postgres
+231; 1255 16736 FUNCTION public _group_concat(text, text) postgres
+232; 1255 16737 FUNCTION public film_in_stock(integer, integer) postgres
+233; 1255 16738 FUNCTION public film_not_in_stock(integer, integer) postgres
+248; 1255 16739 FUNCTION public get_customer_balance(integer, timestamp without time zone) postgres
+249; 1255 16740 FUNCTION public inventory_held_by_customer(integer) postgres
+250; 1255 16741 FUNCTION public inventory_in_stock(integer) postgres
+234; 1255 16742 FUNCTION public last_day(timestamp without time zone) postgres
+235; 1255 16743 FUNCTION public last_updated() postgres
+196; 1259 16744 SEQUENCE public customer_customer_id_seq postgres
+197; 1259 16746 TABLE public customer postgres
+251; 1255 16753 FUNCTION public rewards_report(integer, numeric) postgres
+721; 1255 16754 AGGREGATE public group_concat(text) postgres
+198; 1259 16755 SEQUENCE public actor_actor_id_seq postgres
+199; 1259 16757 TABLE public actor postgres
+200; 1259 16762 SEQUENCE public category_category_id_seq postgres
+201; 1259 16764 TABLE public category postgres
+202; 1259 16769 SEQUENCE public film_film_id_seq postgres
+203; 1259 16771 TABLE public film postgres
+204; 1259 16783 TABLE public film_actor postgres
+205; 1259 16787 TABLE public film_category postgres
+206; 1259 16791 VIEW public actor_info postgres
+207; 1259 16796 SEQUENCE public address_address_id_seq postgres
+208; 1259 16798 TABLE public address postgres
+209; 1259 16803 SEQUENCE public city_city_id_seq postgres
+210; 1259 16805 TABLE public city postgres
+211; 1259 16810 SEQUENCE public country_country_id_seq postgres
+212; 1259 16812 TABLE public country postgres
+...
+```
+
+#### B.1.2. Dump Dosyasındaki TOC(Table of Contents):
+
+```shell
+632; 1247 16723 TYPE public mpaa_rating postgres
+```
+
+> 1. **632**: Bu, dump dosyası içindeki nesnenin sıra numarasıdır (entry ID).
+> 2. **1247**: Nesnenin "catalog ID"si. PostgreSQL'in sistem kataloğundaki `pg_class` tablosunda bu nesneye karşılık gelen OID (Object ID).
+> 3. **16723**: Nesnenin "catalog ID"si. Bu durumda, `pg_type` sistem tablosundaki OID.
+> 4. **TYPE**: Nesne türü. Burada bir veri tipi (user-defined type) olduğunu gösteriyor.
+> 5. **public**: Nesnenin ait olduğu şema (schema) adı.
+> 6. **mpaa_rating**: Nesnenin (tipin) adı.
+> 7. **postgres**: Nesneyi oluşturan kullanıcı (owner).
+
+#### Örnek B.1:
+
+```shell
+backup_sql@nginx-tutorial3:~$ pg_restore --no-owner -v -d tar_backup dvdrental.tar
+```
+
+> [dvdrental.tar](https://neon.tech/postgresql/postgresql-getting-started/postgresql-sample-database) dosyasını bu bağlantıdan indirebilirsiniz.
+
+
+> [!TIP]
+> + Her hangi bir parametre girilmediğinde varsayılan olarak alınan parametreler;
+> ```shell
+> backup_sql@nginx-tutorial3:~$ pg_restore -h /var/run/postgresql -p 5432 -U backup_sql --no-owner -v -d tar_backup dvdrental.tar
+> ```
+> + `pg_hba.conf` dosyasında `peer auth` dolayı `-h`, `-p`, `-d` ve `-U` parametre değerlerini linux(`backup_sql`) kullanıcısından alacaktır.  Ama dikkat ederseniz `-d` parametresi varsayılan değil de `tar_backup` veritabanı yazılmıştır.
+
+
+
+> [!CAUTION]
+> + Yukarıda `ps_restore -l dvdrental.tar` komutu ile `dvdrental.tar` dosyasın içerisine baktığımızda veritabanın `postgres` kullanıcısına ait olduğu görülmektedir.
+> + `--no-owner` parametresi kullanılmaz ise aşağıdaki hatayı verir.
+> ```
+> ERROR: must be member of role "postgres"
+> ```
+> + Bu parametre(`--no-owner`) ile yedeği geri yüklerken nesnelerin `OWNER TO ...` kısımlarını **atlayarak**, tüm nesnelerin sahibi olarak **geri yüklemeyi yapan kullanıcıyı** (yani `backup_sql`) atar.
 
 
 # Monitor(İzleme):
