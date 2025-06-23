@@ -228,7 +228,7 @@ postgres=# \echo :AUTOCOMMIT  -- Çıktı: off
 
 # SQL istemcileri:
 
-## psql:
+## psql istemcisi:
 
 ### Örnek 1: `psql --html` 
 
@@ -313,6 +313,39 @@ tanju@nginx-tutorial3:~$ psql -c "\du" -H
     <td align="left">{}</td>
   </tr>
 </table>
+```
+
+### Örnek 1: `\dt` Komutu:
+
++ PostgreSQL'de `\dt` komutu, *psql (PostgreSQL terminal arayüzü)* içinde kullanılan **bir meta-komuttur**.
++ Bu komut, veritabanındaki **mevcut tabloları listelemek** için kullanılır.
+
+
+> [!NOTE]
+> + `\dt`, "display tables" anlamına gelir.
+> + Sadece **tabloları** listeler (view, index, sequence gibi diğer nesneleri göstermez).
+> + Varsayılan olarak, **kullanıcının erişebildiği tabloları** listeler.
+
+```psql
+\dt
+```
+
+**Meta-komut Çıktı:**
+
+```shell
+            List of relations
+ Schema |      Name       | Type  | Owner
+--------+-----------------+-------+-------
+ public | employee_data   | table | tanju
+ public | employee_data_1 | table | tanju
+(2 rows)
+
+```
+
+#### `\dt` Komutun SQL Karşılığı:
+
+```sql
+
 ```
 ## pgcli istemcisi:
 
@@ -1967,10 +2000,7 @@ dropdb -h 192.168.1.132 -p 5432 -U tanju test
 
 # Tablolar:
 
-## a. Tablo Listeleme:
-
-
-## b. Tablo Oluşturma:
+## a. Tablo Oluşturma:
 
 
 ### Temel Syntax:
@@ -2207,13 +2237,153 @@ CREATE TABLE schools (
 );
 ```
 
+## b. Tablo Listeleme:
+
+### Örnek 1: Tüm tabloları listeleme
+
++ PostgreSQL'de `\d` komutu, **`psql` adlı komut satırı arayüzü** içinde kullanılan bir **meta-komuttur**.
++ Bu komut bir tablo, görünüm (view), dizin (index) veya başka bir nesne hakkında özet bilgi verir.
+
+> [!CAUTION]
+> + Sadece `psql` içinden çalışır, normal SQL sorgusu değildir.
 
 
+```sql
+\d
+```
+
+> + `\d` : Tabloları(`tables`), `views` ve `sequences` listeler
+> + `\dt` :  Komutu ise sadece tabloları(`tables`) listeler.
+
+**Çıktı:**
+
+```sql
+                  List of relations
+ Schema |          Name           |   Type   | Owner
+--------+-------------------------+----------+-------
+ public | students                | table    | tanju
+ public | students_student_id_seq | sequence | tanju
+ public | teacher                 | table    | tanju
+(3 rows)
+```
+
+### Örnek 2: Belirli bir tabloyu incelemek
+
+> [!NOTE]
+> **Syntax:**
+> + `\d[S+]` NAME
+> + NAME değeri tablo(`table`), `views` ve `sequences` olabilir! 
+
+
+**students tablosu:**
+
+```psql
+\d students
+```
+
+> + NAME  değeri `students` adında bir tablo(`table`)
+
+**students Çıktı:**
+
+```sql
+                       Table "public.teacher"
+   Column   |         Type          | Collation | Nullable | Default
+------------+-----------------------+-----------+----------+---------
+ teacher_id | integer               |           | not null |
+ name       | character varying(50) |           |          |
+ surname    | character varying(50) |           |          |
+Indexes:
+    "teacher_pkey" PRIMARY KEY, btree (teacher_id)
+
+```
+
+> + `students` tablosu oluşturulurken `teacher_id` veri tipi olarak `integer` olarak verilmiştir. Bu yüzden `Default` kolonunda `nextval` değeri yok!
+> + `PRIMARY KEY`'in `CONSTRAINT` değeri `teacher_pkey` postgreSQL tarafından varsayılan olarak verilmiştir.
+
+**teachers tablosu:**
+
+```psql
+\d teachers
+```
+
+**teachers Çıktısı:**
+
+```sql
+                                         Table "public.students"
+   Column   |         Type          | Collation | Nullable |                   Default
+------------+-----------------------+-----------+----------+----------------------------------------------
+ student_id | integer               |           | not null | nextval('students_student_id_seq'::regclass)
+ name       | character varying(50) |           |          |
+ surname    | character varying(50) |           |          |
+Indexes:
+    "students_pkey" PRIMARY KEY, btree (student_id)
+
+```
+
+### Örnek 3: `Sequence` veri tipini inceleme:
+
+```sql
+\d students_student_id_seq
+```
+
+**students_student_id_seq Çıktısı:**
+
+```sql
+              Sequence "public.students_student_id_seq"
+  Type   | Start | Minimum |  Maximum   | Increment | Cycles? | Cache
+---------+-------+---------+------------+-----------+---------+-------
+ integer |     1 |       1 | 2147483647 |         1 | no      |     1
+Owned by: public.students.student_id
+
+```
 ## c. Tablo Silme:
+
+### c.1. DELETE Komutu:
 
 ```sql
 DROP TABLE table_name;
 ```
+
+### c.2. TRUNCATE Komutu:
+
++ PostgreSQL'de `TRUNCATE` komutu, bir tablodaki **tüm verileri hızlıca ve kalıcı olarak silmek** için kullanılır.
++ `DELETE` komutuna benzer ama çok daha hızlı çalışır, çünkü verileri satır satır silmez, tüm tabloyu bir kerede boşaltır.
+
+> [!NOTE]
+> + Bir tablodaki **tüm satırları siler**.
+> + **Rollback yapılabilir** (eğer bir transaction içinde kullanılırsa).
+> + Varsayılan olarak **otomatik olarak COMMIT eder** (eğer transaction içinde değilse).
+> + `DELETE`'ten farklı olarak **trigger’ları çalıştırmaz** (önemli fark).
+
+#### TRUNCATE vs DELETE
+
+| Özellik           | `TRUNCATE`          | `DELETE`                 |
+| ----------------- | ------------------- | ------------------------ |
+| Hız               | Çok hızlı           | Daha yavaş (satır satır) |
+| WHERE kullanımı   | ❌ Desteklemez       | ✅ Destekler              |
+| Trigger çalışması | ❌ Çalışmaz          | ✅ Çalışır                |
+| Rollback desteği  | ✅ Evet (tx içinde)  | ✅ Evet                   |
+| Otomatik Commit   | ✅ Evet (tx dışında) | ❌ Hayır                  |
+#### Syntax:
+
+```sql
+TRUNCATE TABLE tablo_adi;
+```
+
+
+> [!CAUTION]
+> + `TRUNCATE`, verileri **geri alınamaz şekilde** siler (eğer bir transaction içinde değilse).
+
+
+> [!TIP]
+> + **İlişkili tablolar varsa** (foreign key ile bağlı), doğrudan `TRUNCATE` çalışmaz. Bunun yerine `CASCADE` kullanılır:
+> ```sql
+> TRUNCATE TABLE orders CASCADE;
+> ```
+>  + Bu, `orders` tablosuna bağlı diğer tabloların verilerini de siler.
+
+#### Örnek 1:
+
 
 # Tek Tırnak vs Çıft Tırnak:
 
@@ -2775,6 +2945,8 @@ backup_sql@nginx-tutorial3:~$ pg_restore --no-owner -v -d tar_backup dvdrental.t
 > + Bu parametre(`--no-owner`) ile yedeği geri yüklerken nesnelerin `OWNER TO ...` kısımlarını **atlayarak**, tüm nesnelerin sahibi olarak **geri yüklemeyi yapan kullanıcıyı** (yani `backup_sql`) atar.
 
 
+
+
 # Monitor(İzleme):
 
 + PostgreSQL'de bağlı olan client'ları (istemcileri) görüntülemek için birkaç farklı yöntem bulunmaktadır:
@@ -2843,3 +3015,105 @@ SELECT pid, usename, datname, state, query FROM pg_catalog.pg_stat_activity;
 
 > [!CAUTION]
 > + 1. **Çıkış**: `Ctrl+C` ile izlemeyi durdurabilirsiniz.
+
+# Veri Güncelleme(UPDATE):
+
++ PostgreSQL'de `UPDATE` komutu, bir tabloda **mevcut verileri güncellemek** (değiştirmek) için kullanılır.
++ Bu komutla bir veya birden fazla satırın belirli sütunlarındaki değerleri değiştirebilirsin.
+## Syntax:
+
+```sql
+UPDATE tablo_adi
+SET sütun1 = yeni_değer1,
+    sütun2 = yeni_değer2,
+    ...
+WHERE koşul;
+```
+
+> + `tablo_adi`: Güncelleme yapmak istediğin tablonun adı.
+> + `SET`: Güncellemek istediğin sütun ve yeni değeri.
+> + `WHERE`: Hangi satır ya da satırların güncelleneceğini belirten koşul (çok önemlidir!).
+
+
+> [!CAUTION]
+> + `WHERE` ifadesi koymazsan **bütün satırlar** güncellenir.
+> + `RETURNING` ile hangi verilerin değiştiğini görebilirsin.
+> + Karmaşık güncellemelerde alt sorgular (subquery) da kullanılabilir.
+
+
+## Örnek 1:
+
+**Senaryo:** `employee_data` tablosundaki `Utak` kelimesini `Utah` olarak çevirmek isteniyor.
+
+```sql
+SELECT * FROM public.employee_data;
+```
+
+**SELECT Çıktısı:**
+
+```sql
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | linus      | california |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utak       |      20 | 25/09/2003
+(3 rows)
+```
+
+**Veri Güncelleme:**
+
+```sql
+UPDATE employee_data SET emp_place = 'Utah' WHERE emp_id = 3;
+```
+
+**UPDATE Çıktısı:**
+
+```sql
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | linus      | california |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+(3 rows)
+
+```
+
+## Örnek 2: `RETURNING *`
+
++ PostgreSQL'de `UPDATE` komutuyla birlikte `RETURNING` ifadesi kullanmak, yapılan güncellemenin sonucunu **hemen görmek** için çok faydalıdır.
++ Bu özellik, özellikle veritabanında neyin değiştiğini anında kontrol etmek istediğinde kullanılır.
+
+```sql
+SELECT * FROM public.employee_data;
+```
+
+**SELECT Çıktısı:**
+
+```sql
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | linus      | california |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+(3 rows)
+
+```
+
+**Veri Güncelleme: RETURNING**
+
+```sql
+ UPDATE employee_data SET emp_place = 'California' WHERE emp_id = 1 RETURNING *;
+```
+
+**UPDATE Çıktısı:**
+
+```sql
+ emp_id | emp_name | emp_place  | emp_age |  emp_dob
+--------+----------+------------+---------+------------
+      1 | linus    | California |      25 | 25/09/2000
+(1 row)
+
+
+UPDATE 1
+```
+

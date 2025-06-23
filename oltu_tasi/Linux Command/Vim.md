@@ -89,5 +89,93 @@
 
 ## Tuş Kombinasyonu ile
 
-
+| Komut | Açıklama                                   |
+| ----- | ------------------------------------------ |
+| `zc`  | Fold'u kapat (collapse)                    |
+| `zo`  | Fold'u aç (open)                           |
+| `za`  | Açık ise kapatır, kapalı ise açar (toggle) |
+| `zM`  | Tüm fold’ları kapat                        |
+| `zR`  | Tüm fold’ları aç                           |
+| `zd`  | Fold’u sil (disable)                       |
+| `zE`  | Tüm fold’ları sil                          |
 ## Komut ile
+
+### Örnek 1: Marker yöntemi
+
++ Dosyaya şöyle bir şey yazınız:
+
+```python
+# {{{ Başlangıç
+def foo():
+    pass
+# }}}
+```
+
+
+```vim
+:set foldmethod=marker
+```
+
+> **Tuş kombinasyonu:**
+> + `zf` veya `zc` :  `# {{{` ile başlayan ve `# }}}` ile sonlana ara ifadeleri kapatacaktır.
+> + `zo` : `# {{{` ile başlayan ve `# }}}` ile sonlana ara ifadeleri açacaktır.
+
+
+# 2. Tabpage:
++ Vim, aynı anda birden fazla dosyayla çalışmanı sağlar. Bunu yapmanın birkaç farklı yolu vardır:
+	-  **Buffer**: Arka planda açık olan dosyalar.
+	- **Window**: Ekranı yatay veya dikey böler.
+	- **Tab Page (Sekme)**: Tam ekran bölünmesini ayrı ayrı düzenleyebileceğin farklı sayfalar.
+
+
+> [!TIP]
+> + Vim'in yardım sayfasında ulaşmak için;
+> ```vim
+> :help tagpage
+> ```
+
+## 2.1. Komut:
+
+### Örnek 1:
+
++ Yeni boş sekme (tab) açar.
+
+```vim
+:tabnew
+```
+
+### Örnek 2:
+
++ Eğer `python.py` dosyası var ise dosyayı açar aksi taktirde `python.py` dosyası oluşturur.
+
+```vim
+:tabnew python.py
+```
+
+### Örnek 3: sekme kapatma
+
++ Aktif sekmeyi kapatır.
+
+```vim
+:tabclose
+```
+
+## 2.2. Tuş Kombinasyonu:
+
++ Tab'lar arasında gezinmek için `gt` veya `gt` tuşlarına sırası ile basılır.
++ `g` tuş anlamı `go` ve `t` tuş anlamı `tab` 
+
+
+| Tuş Kombinasyonu |       Açıklama        |
+| :--------------: | :-------------------: |
+|       `gt`       | Bir sonraki tab'a geç |
+|       `gT`       | Bir önceki tab'a geç  |
+|      `2gt`       | 2. sıradaki tab'a geç |
+|                  |                       |
+
+
+# 3. Windows:
+
+## 3.1. vsplit:
+
+## 3.2. split:

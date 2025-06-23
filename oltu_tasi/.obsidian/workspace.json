@@ -56,35 +56,35 @@
             }
           },
           {
-            "id": "da6d70efbab58cc8",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Database/PostgreSQL/PostgreSQL Giriş.md",
-                "mode": "preview",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "PostgreSQL Giriş"
-            }
-          },
-          {
             "id": "5d9978daabe25074",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Database/PostgreSQL/Veri Girişi - INSERT.md",
+                "file": "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Veri Girişi - INSERT"
+              "title": "Veri Günceleme - UPDATE"
             }
           },
           {
             "id": "6363e757d6e0276e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/PHP/Laravel/Into to Laravel.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Into to Laravel"
+            }
+          },
+          {
+            "id": "6c2a21c3a881ab30",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -95,6 +95,34 @@
               },
               "icon": "lucide-file",
               "title": "PHP 8"
+            }
+          },
+          {
+            "id": "0b4ea52a06db2981",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Linux Command/tmux.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "tmux"
+            }
+          },
+          {
+            "id": "662249ca13d2c476",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Database/PostgreSQL/PostgreSQL Giriş.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "PostgreSQL Giriş"
             }
           }
         ],
@@ -155,7 +183,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 226.5
   },
   "right": {
     "id": "1413189cf439f38e",
@@ -231,7 +259,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 289.5
+    "width": 288.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -243,18 +271,28 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "6363e757d6e0276e",
+  "active": "6c2a21c3a881ab30",
   "lastOpenFiles": [
-    "Database/PostgreSQL/Veri Girişi - INSERT.md",
-    "Programlama/PHP/PHP 8.md",
+    "Linux Command/tmux.md",
     "Linux Command/Vim.md",
+    "Programlama/PHP/PHP 8.md",
     "Database/PostgreSQL/PostgreSQL Giriş.md",
+    "Linux Command/Linux komutları.md",
+    "Programlama/PHP/Laravel/Into to Laravel.md",
+    "Windows Commands/Kısayollar.md",
+    "Windows Commands/Çalıştır.md",
+    "Windows Commands/CMD.md",
+    "Perl Giriş.md",
+    "Programlama/PHP/Laravel",
+    "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
     "Web Servers/html/HTML.md",
+    "Programlama/perl",
+    "Database/PostgreSQL/Veri Girişi - INSERT.md",
+    "Linux Command/Network/ip.md",
     "Web Servers/html/images/form_date.png",
     "Programlama/Bash_Script/Bash Script Apps.md",
     "Web Servers/Nginx/Nginx Config File.md",
     "K8s/K8s Kurulumu.md",
-    "Linux Command/Linux komutları.md",
     "Database/PostgreSQL/Tabloda Değişiklik - ALTER.md",
     "Database/PostgreSQL/Tablo Oluşturma - CREATE.md",
     "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
@@ -264,17 +302,10 @@
     "Database/PostgreSQL/Database Oluşturma.md",
     "Windows Commands/Winget Komutları.md",
     "PostgreSQL'e Bağlanma.md",
-    "Linux Command/Kullanıcı Oluşturma.md",
-    "Linux Command/Systemd.md",
-    "Linux Command/tmux.md",
-    "Git/Git Dersi.md",
     "Database/PostgreSQL/Pictures/inner_join.png",
     "Database/PostgreSQL/Pictures/if-modified-since.png",
     "Database/PostgreSQL/Pictures/employee_table.png",
     "Database/PostgreSQL/Pictures/department_table.png",
-    "Database/Welcome.md",
-    "Database/PostgreSQL/Veri Silme.md",
-    "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
     "Database/PostgreSQL/SQL İstemcileri",
     "Web Servers/html/images/form_write_file.png",
     "Web Servers/html/images/form.png",
@@ -288,8 +319,6 @@
     "Programlama/Python/Sqlalchemy",
     "Sistem İzleme",
     "Archlinux",
-    "K8s",
-    "Kısayollar",
     "Untitled.canvas"
   ]
 }

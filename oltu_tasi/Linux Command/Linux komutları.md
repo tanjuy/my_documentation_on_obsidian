@@ -541,3 +541,145 @@ total 24
 	- Örneğin: Linux’ta kaynak kodları genellikle `.tar.gz` dosyalarıyla dağıtılır.
 6. **Güvenlik ve Arşivleme Uyumluluğu:**
 	- Bazı durumlarda arşiv dosyaları şifrelenerek güvenli şekilde saklanır veya uzun vadeli yasal arşivleme yapılır.
+
+### ipcalc Komutu:
+
++ `ipcalc`, IP adresleriyle ilgili çeşitli hesaplamaları kolayca yapmanı sağlayan bir komut satırı aracıdır.
++ Özellikle ağ (network) yöneticileri ve sistem yöneticileri tarafından sıkça kullanılır.
+
+#### 🔧 ipcalc Nedir, Ne İşe Yarar?
+
+- Ağ adresi (Network Address)
+- Yayın adresi (Broadcast Address)
+- Kullanılabilir IP aralığı (HostMin / HostMax)
+- Alt ağ maskesi (Netmask)
+- CIDR notasyonu
+- Kullanılabilir IP sayısı
+- Wildcard (özellikle ACL ve bazı yönlendirici yapılandırmalarında kullanılır)
+
+
+#### Kurulum:
+
+**Debian/Ubuntu:**
+
+```shell
+sudo apt install ipcalc
+```
+
+**Red Hat/Alma Linux/ Rocky Linux:**
+
+```shell
+sudo yum install ipcalc
+```
+
+**Arch Linux:**
+
+```shell
+sudo pacman -S ipcalc
+```
+
+#### Örnek 1: 🖥️ Temel Kullanım
+
+```shell
+ipcalc 192.168.1.0/24
+```
+
+veya
+
+```shell
+ipcalc 192.168.1.0 255.255.255.0
+```
+
+> + Yukarıdaki iki komut da aynı çıktıyı verecektir.
+
+**ipcalc Çıktısı:**
+
+```shell
+Address:   192.168.1.0          11000000.10101000.00000001. 00000000
+Netmask:   255.255.255.0 = 24   11111111.11111111.11111111. 00000000
+Wildcard:  0.0.0.255            00000000.00000000.00000000. 11111111
+=>
+Network:   192.168.1.0/24       11000000.10101000.00000001. 00000000
+HostMin:   192.168.1.1          11000000.10101000.00000001. 00000001
+HostMax:   192.168.1.254        11000000.10101000.00000001. 11111110
+Broadcast: 192.168.1.255        11000000.10101000.00000001. 11111111
+Hosts/Net: 254                   Class C, Private Internet
+```
+
+#### Örnek 2: subnet bölme(subnetting) işlemleri
+
+```shell
+ipcalc -s 25 50 100 192.168.1.0/24
+```
+
+**ipcalc Çıktısı:**
+
+```shell
+Address:   192.168.0.0          11000000.10101000.00000000. 00000000
+Netmask:   255.255.255.0 = 24   11111111.11111111.11111111. 00000000
+Wildcard:  0.0.0.255            00000000.00000000.00000000. 11111111
+=>
+Network:   192.168.0.0/24       11000000.10101000.00000000. 00000000
+HostMin:   192.168.0.1          11000000.10101000.00000000. 00000001
+HostMax:   192.168.0.254        11000000.10101000.00000000. 11111110
+Broadcast: 192.168.0.255        11000000.10101000.00000000. 11111111
+Hosts/Net: 254                   Class C, Private Internet
+
+1. Requested size: 100 hosts
+Netmask:   255.255.255.128 = 25 11111111.11111111.11111111.1 0000000
+Network:   192.168.0.0/25       11000000.10101000.00000000.0 0000000
+HostMin:   192.168.0.1          11000000.10101000.00000000.0 0000001
+HostMax:   192.168.0.126        11000000.10101000.00000000.0 1111110
+Broadcast: 192.168.0.127        11000000.10101000.00000000.0 1111111
+Hosts/Net: 126                   Class C, Private Internet
+
+2. Requested size: 50 hosts
+Netmask:   255.255.255.224 = 27 11111111.11111111.11111111.111 00000
+Network:   192.168.0.128/27     11000000.10101000.00000000.100 00000
+HostMin:   192.168.0.129        11000000.10101000.00000000.100 00001
+HostMax:   192.168.0.158        11000000.10101000.00000000.100 11110
+Broadcast: 192.168.0.159        11000000.10101000.00000000.100 11111
+Hosts/Net: 30                    Class C, Private Internet
+
+3. Requested size: 25 hosts
+Netmask:   255.255.255.224 = 27 11111111.11111111.11111111.111 00000
+Network:   192.168.0.192/27     11000000.10101000.00000000.110 00000
+HostMin:   192.168.0.193        11000000.10101000.00000000.110 00001
+HostMax:   192.168.0.222        11000000.10101000.00000000.110 11110
+Broadcast: 192.168.0.223        11000000.10101000.00000000.110 11111
+Hosts/Net: 30                    Class C, Private Internet
+
+Needed size:  224 addresses.
+Used network: 192.168.0.0/24
+Unused:
+192.168.0.224/27
+```
+### sipcalc Komutu:
+
+#### Kurulum:
+
+**Debian/Ubuntu**
+
+```shell
+sudo apt install sipcalc
+```
+
+**RHEL/Alma Linux/ Rocky Linux**
+
+```shell
+sudo yum install sipcalc
+```
+
+**Arch Linux**
+
+```shell
+sudo pacman -S sipcalc
+```
+
+#### Örnek 1: 
+
+### netdiscover Komutu:
+
+```shell
+sudo netdiscover -i eth0 -r 192.168.1.0/24 -c 5
+```
