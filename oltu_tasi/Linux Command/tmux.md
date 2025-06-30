@@ -254,6 +254,52 @@ tmux set-option -g status-position top
 tmux set-option -g mode-keys vi
 ```
 
+### `repeat-time`
+
++ `tmux` oturumlarında `prefix` tuş kombinasyonu (varsayılan olarak `Ctrl + b`) sonrasında bir komut girene kadar geçen süreyi değiştirmek için `repeat-time` ayarını kullanabilirsiniz.
++ Bu süre, `prefix` tuşuna bastıktan sonra tmux'un bir sonraki tuş girişini bekleme süresini belirler.
+
+
+> [!NOTE]
+> + Eğer `prefix` (örneğin `Ctrl + b`) sonrasında daha uzun süre beklemek istiyorsanız, bu değeri artırabilirsiniz.
+> + Ancak çok yüksek değerler kullanıcı deneyimini yavaşlatabilir.
+
+
+> [!CAUTION]
+> + Bu ayar, `prefix` tuş kombinasyonu sonrasındaki bekleme süresini etkiler, ancak `tmux` içindeki diğer tuş kombinasyonlarının tepkime süresini değiştirmez.
+
+#### Syntax:
+
++ **Geçici olarak değiştirmek** (mevcut oturumda geçerli):
+
+```tmux
+tmux set-option -g repeat-time <süre_ms>
+```
+
+> + `repeat-time`: Varsayılan değer genellikle `500` ms'dir (0.5 saniye).
+> + `<süre_ms>`: Milisaniye cinsinden süre (örneğin, `1000` = 1 saniye).
+> + `-g`: Bu ayarı tüm tmux oturumlarında global olarak uygular.
+
+#### 🧪Örnek 1: 
+
+```tmux
+tmux set-option -g repeat-time 1000
+```
+
+> + 1000 ms (1 saniye) yapmak için:
+
+
+> [!TIP]
+> + **Kalıcı olarak değiştirmek** (`~/.tmux.conf` dosyasına ekleyin):
+> ```tmux
+>  set-option -g repeat-time 1000
+> ```
+> + Değişikliği uygulamak için:
+> ```shell
+> tmux source-file ~/.tmux.conf
+> ```
+
+
 # Otomatik Oturum Başlatma:
 
 ## 🧪 Örnek 1:

@@ -98,20 +98,6 @@
             }
           },
           {
-            "id": "0b4ea52a06db2981",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Linux Command/tmux.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "tmux"
-            }
-          },
-          {
             "id": "662249ca13d2c476",
             "type": "leaf",
             "state": {
@@ -124,9 +110,37 @@
               "icon": "lucide-file",
               "title": "PostgreSQL Giriş"
             }
+          },
+          {
+            "id": "ae50f2d98c9f9029",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/Python/Python Giriş.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Python Giriş"
+            }
+          },
+          {
+            "id": "57957cd91f40b016",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Linux Command/tmux.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "tmux"
+            }
           }
         ],
-        "currentTab": 5
+        "currentTab": 8
       }
     ],
     "direction": "vertical"
@@ -245,13 +259,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Programlama/PHP/PHP 8.md",
+                "file": "Linux Command/tmux.md",
                 "followCursor": true,
-                "showSearch": false,
+                "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of PHP 8"
+              "title": "Outline of tmux"
             }
           }
         ],
@@ -271,13 +285,82 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "6c2a21c3a881ab30",
+  "floating": {
+    "id": "830cd3014370ba12",
+    "type": "floating",
+    "children": [
+      {
+        "id": "6cb1cb1dbbe35af0",
+        "type": "window",
+        "children": [
+          {
+            "id": "1d812e72e1eaef70",
+            "type": "tabs",
+            "dimension": 70.703125,
+            "children": [
+              {
+                "id": "bd49ce0d204e9e51",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Programlama/PHP/PHP 8.md",
+                    "mode": "source",
+                    "source": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "PHP 8"
+                },
+                "group": "7ba686909601504e"
+              }
+            ]
+          },
+          {
+            "id": "2af691d03f7c3446",
+            "type": "tabs",
+            "dimension": 29.296875,
+            "children": [
+              {
+                "id": "865ea88c505fcfee",
+                "type": "leaf",
+                "state": {
+                  "type": "outline",
+                  "state": {
+                    "file": "Programlama/PHP/PHP 8.md",
+                    "followCursor": true,
+                    "showSearch": false,
+                    "searchQuery": ""
+                  },
+                  "icon": "lucide-list",
+                  "title": "Outline of PHP 8"
+                },
+                "group": "7ba686909601504e"
+              }
+            ]
+          }
+        ],
+        "direction": "vertical",
+        "x": 256,
+        "y": 80,
+        "width": 1024,
+        "height": 800,
+        "maximize": true,
+        "zoom": 0
+      }
+    ]
+  },
+  "active": "57957cd91f40b016",
   "lastOpenFiles": [
-    "Linux Command/tmux.md",
-    "Linux Command/Vim.md",
     "Programlama/PHP/PHP 8.md",
+    "Linux Command/tmux.md",
+    "Untitled.md",
     "Database/PostgreSQL/PostgreSQL Giriş.md",
+    "Programlama/Python/Python Giriş.md",
+    "Linux Command/Vim.md",
+    "Windows Commands/WSL2.md",
     "Linux Command/Linux komutları.md",
+    "Web Servers/Nginx/Nginx Config File.md",
+    "Programlama/Bash_Script/Bash Script.md",
     "Programlama/PHP/Laravel/Into to Laravel.md",
     "Windows Commands/Kısayollar.md",
     "Windows Commands/Çalıştır.md",
@@ -291,17 +374,12 @@
     "Linux Command/Network/ip.md",
     "Web Servers/html/images/form_date.png",
     "Programlama/Bash_Script/Bash Script Apps.md",
-    "Web Servers/Nginx/Nginx Config File.md",
     "K8s/K8s Kurulumu.md",
     "Database/PostgreSQL/Tabloda Değişiklik - ALTER.md",
     "Database/PostgreSQL/Tablo Oluşturma - CREATE.md",
     "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
     "Linux Command/Linux Paket Komutları.md",
-    "Programlama/Bash_Script/Bash Script.md",
     "Database/PostgreSQL/GROUP BY Kullanımı.md",
-    "Database/PostgreSQL/Database Oluşturma.md",
-    "Windows Commands/Winget Komutları.md",
-    "PostgreSQL'e Bağlanma.md",
     "Database/PostgreSQL/Pictures/inner_join.png",
     "Database/PostgreSQL/Pictures/if-modified-since.png",
     "Database/PostgreSQL/Pictures/employee_table.png",

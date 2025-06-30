@@ -413,10 +413,11 @@ echo var_dump($metin);    // Çıktı: bool(true)
 
 ```
 
+
 ## 3. Özel (Special) Veri Türleri:
 
 
-# c.6. f-string yazım:
+# f-string yazım:
 
 ## printf ve sprintf Fonksiyonları:
 
@@ -500,6 +501,219 @@ php format2.php  # Çıktı: My Favour distro is Arch Linux 42
 
 
 
+
+# Tip Dönüşümü:
+
++ "Tip Dönüşümü(`Type Casting`)" terimi, bir veri türünün başka bir veri türüne dönüştürülmesini ifade eder.
++ PHP 8’de **tip dönüşümleri (type casting / type conversion)** hem **otomatik (implicit)** hem de **manuel (explicit)** olarak yapılabilir.
++ Bu dönüşümler PHP’nin gevşek (loosely typed) bir dil olmasından dolayı oldukça esnektir.
+
+## A. Otomatik (Zorunlu) Dönüşüm:
+
+### 🧪Örnek 1:
+
++ PHP, bir değişkeni bağlama göre **kendiliğinden** dönüştürür.
+
+```php
+<?php
+
+$a = '5' + 10;       // '5' string ama PHP bunu otomatik int'e çevirir
+echo gettype($a);    // integer
+echo "\n";
+echo var_dump($a);   // int(15)
+echo $a;             // 15
+```
+
+## B. Manual (Açık) Dönüşüm - Tip Cast
+
++ Kendimiz veri türünü değiştirebiliriz:
+
+### B.1. Tip Dönüştürme Operatörleri
+
++ Bir türdeki ifadeyi başka bir türe dönüştürmek için, ifadenin veri türünü ifadeden önce parantez içine almanız gerekir.
+
+#### Syntax:
+
+```php
+$var = (type)expr;
+```
+
+
+> [!NOTE]
+> **PHP'deki tip dönüştürme operatörlerinden bazıları şunlardır:**
+> 1. (int) veya (integer) → tam sayıya(integer) dönüştürür.
+> 2. (bool) veya (boolean)  →  boolean dönüştürür.
+> 3. (float) veya (double) veya (real) →  ondalıklı sayıya dönüştürür.
+> 4. (string) → karakter dizisine döüştürür.
+> 5. (array) → diziye dönüştürür.
+> 6. (object) → nesneye(`object`) dönüştürür.
+
+#### 🧪Örnek 1: String → Integer
+
+```php
+<?php
+
+$string_var = '123';
+$int_var = (int) $string_var;
+
+echo var_dump($string_var);   // Çıktı: string(6) "123abc"
+echo var_dump($int_var);      // Çıktı: int(123)
+
+
+// Eğer dikkat ederseniz Alfanümerik bir değişken veriliyor.
+$string_var2 = '123abc';
+// Dönüştürülme sırasında sadece rakamlar alınmaktadır.
+$int_var2 = (int) $string_var2;
+
+echo "\n";
+echo var_dump($string_var2);  // Çıktı: string(6) "123abc"
+echo var_dump($int_var2);     // Çıktı: int(123)
+```
+
+
+> [!TIP]
+> + Eğer string `"42abc"` ise sadece baştaki sayı alınır → `(int) "42abc"` → `42`
+> + `"abc42"` ise sayı yok → `0`
+
+#### 🧪Örnek 2: Integer → String
+
+```php
+<?php
+
+$int_var = 503;
+$string_var = (string) $int_var;
+
+echo var_dump($int_var);     // Çıktı: int(503)
+echo var_dump($string_var);  // Çıktı: string(3) "503"
+```
+
+#### 🧪Örnek 3: String → Float
+
+```php
+<?php
+
+$string_var = '3.14';
+$float_var = (float) $string_var;
+
+echo var_dump($string_var);     // Çıktı: string(4) "3.14"
+echo var_dump($float_var);      // Çıktı: float(3.14)
+```
+
+#### 🧪Örnek 4: Integer/Float/String → Bool
+
+```php
+<?php
+
+$bool_var = (bool) 12;
+echo var_dump($bool_var);       // Çıktı: bool(true)
+
+$bool_var_1 = (bool) 0;
+echo var_dump($bool_var_1);     // Çıktı: bool(false)
+
+$bool_var_2 = (bool) "";
+echo var_dump($bool_var_2);     // Çıktı: bool(false)
+
+$bool_var_3 = (bool) 'linux';
+echo var_dump($bool_var_3);     // Çıktı: bool(true)
+
+$bool_var_4 = (bool) 3.14;
+echo var_dump($bool_var_4);     // Çıktı: bool(true)
+```
+
+#### 🧪Örnek 5: Array → Object
+
+```php
+<?php
+<?php
+
+$arr = ['a' => 1, 'b' => 2];
+echo 'Array ilk elemanı:' . $arr['a'];
+echo "\n";
+$obj = (object) $arr;
+echo 'Nesnenin ilk elemanı: ' . $obj->a;
+echo "\n\n";
+echo var_dump($obj);
+```
+
+> + Array'in nesneye dönüşmesinden sonra array veya nesnenin elemanlarına nasıl ulaştığımıza dikkat ediniz.
+
+**PHP Çıktısı:**
+
+```
+Array ilk elemanı:1
+Nesnenin ilk elemanı: 1
+
+object(stdClass)#1 (2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+}
+```
+
+#### 🧪Örnek 6: Object → Array
+
+```php
+<?php
+
+class A {
+    public $x = 10;
+    private $y = 20;
+
+    public function t() {
+        return 'Merhaba';
+    }
+}
+
+$obj = new A();
+
+$arr = (array) $obj;
+
+print_r($arr);
+```
+
+**PHP Çıktısı:**
+
+```
+Array
+(
+    [x] => 10
+    [Ay] => 20
+)
+```
+
+
+> [!CAUTION]
+> + `t()` fonksiyonu array türüne dönüştürülemedi. Yalınca sınıf özelikleri(`class property`) diziye dönüştürülüyor.
+> + `echo $arr['x']` çıktısı 10 verirken
+> + `echo $arr['Ay']` çıktısı:
+> ```
+>  PHP Warning:  Undefined array key "Ay" in /home/ottoman/phpDerleri/callByValueReference.php on line 18
+>  Warning: Undefined array key "Ay" in /home/ottoman/phpDerleri/callByValueReference.php on line 18
+> ```
+> + Çünkü, y değeri sınıf düzeyinde `private` anahtar ile yazılmıştır.
+
+
+### B.2. Tip Dönüştürme Fonksiyonları:
+
+#### B.2.1. `intval()` Fonksiyonu:
+
++ PHP’de `intval()` fonksiyonu, bir değeri **tam sayıya (integer)** dönüştürmek için kullanılır.
+
+##### Syntax:
+
+```php
+int intval(mixed $value, int $base = 10)
+```
+
+> + `$value`: Dönüştürmek istediğin değer (string, float, bool vs.)
+> + `$base`: (isteğe bağlı) Eğer değer bir **string sayı** ise hangi sayı tabanında okunacağını belirtir. Varsayılan 10’dur (ondalık sistem).
+
+##### 🧪Örnek 1:
+
+```php
+
+```
 # PHP operatörleri:
 
 ## 1. Nokta(`.`) operatörü:
@@ -1067,6 +1281,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 + PHP, komut satırından çalıştırıldığında kullanıcıdan girdi almak için `fgets(STDIN)` veya `readline()` fonksiyonlarını kullanabilir.
 
 ### Örnek 1: `fgets(STDIN)` ile Girdi Almak
+
 ```php
 <?php
 echo "Enter your name: ";
@@ -1129,6 +1344,22 @@ for ($i = 0, $j = 10; $i < 10, $j > 0; $i++, $j--) {
     echo "i: $i, j: $j\n";
 }
 ```
+
+**Çıktı:**
+
+```shell
+i: 0, j: 10
+i: 1, j: 9
+i: 2, j: 8
+i: 3, j: 7
+i: 4, j: 6
+i: 5, j: 5
+i: 6, j: 4
+i: 7, j: 3
+i: 8, j: 2
+i: 9, j: 1
+```
+
 > **Explanation:**
 > + `$j > 0` çıkarırsak aynı çıktı verecektir. Çünkü `for` döngüsü ` $i < 10` koşulu sağladığı sürece  çalışacaktır. 
 > + `for ($i = 0, $j = 10; $i < 10; $i++, $j--) ` döngüsü yukarıdaki ile aynı çıktıyı verecektir.
@@ -1708,9 +1939,11 @@ php backend.php
 > + Özellikle UTF-8 gibi karakter kodlamaları kullanıldığında, `strtolower` yerine `mb_strtolower` kullanmak daha güvenilir sonuçlar verir.
 
 ##### mb_strtolower syntax:
+
 ```php
 mb_strtolower(string $string, ?string $encoding = null): string
 ```
+
 > **Explanation:**
 > + **Parametreler:** 
 > + `$string` Küçük harflere dönüştürülecek dizge.
@@ -1739,9 +1972,11 @@ echo mb_strtolower($string, 'UTF-8');    // Çıktısı: merhaba dünya
 + PHP 8'de `trim()` fonksiyonu, bir string'in başındaki ve sonundaki boşlukları (veya belirtilen diğer karakterleri) kaldırmak için kullanılır.
 + Bu fonksiyon, özellikle kullanıcı girdilerini temizlerken veya veri işleme sırasında sıkça kullanılır.
 ##### trim syntax:
+
 ```php
 trim(string $string, string $characters = " \n\r\t\v\x00"): string
 ```
+
 > **Explanation:**
 > + **Parametreler:**
 > + **$string**: Boşlukları veya belirtilen karakterleri kaldırmak istediğiniz string
@@ -1775,6 +2010,128 @@ echo trim($text2, "<>");  // php> Hello, World!
 > + `<` ve `>` işaretleri solunda veya sağında mevcut ise `trim` fonksiyonu kaldıracaktır.
 > + Dikkat ederseniz varsayılan dışında simge kullanılmıştır.
 
+
+
+#### 9. ucwords fonksiyonu:
+
++ PHP’de `ucwords()` fonksiyonu, **bir string ifadedeki her kelimenin ilk harfini büyük harfe çevirir** (diğer harfleri değiştirmez).
+
+##### ucwords syntax:
+
+```php
+string ucwords(string $string, string $separators = " \t\r\n\f\v")
+```
+
+##### 🧪Örnek 1: Temel Kullanım
+
+```php
+<?php
+$text = "merhaba dünya";
+echo ucwords($text);                  # Çıktı: Merhaba Dünya
+
+echo ucwords("php programlama dili"); # Çıktı: php Programlama Dili%
+?>
+```
+
+> + Her kelimenin **ilk harfi büyük**, diğerleri aynen kalır.
+
+##### 🧪Örnek 2: Büyük ve küçük harf karışık
+
+```php
+<?php
+echo ucwords("tAnJu yÜcaL");     # Çıktı: TAnJu YÜcaL%
+```
+
+
+> [!CAUTION]
+> + `ucwords()` **sadece ilk harfi büyük yapar**, geri kalan harflerin küçük olmasıyla ilgilenmez.
+
+
+> [!TIP]
+> + Eğer tüm kelimeleri düzgün biçimde **ilk harfi büyük, geri kalanı küçük** yapmak istersen:
+> ```php
+>  $text = "tAnJu yÜcaL";
+>  echo ucwords(strtolower($text));     // Tanju Yücal
+> ```
+
+##### 🧪Örnek 3: Ayırıcı(Separator) belirleme:
+
+```php
+<?php
+echo ucwords("merhaba-dünya",'-');
+?>
+```
+
+> `-` karakterini ayırıcı olarak kabul edip, `-` sonraki kelime başlarını büyütür.(`PHP 5.4+`)
+#### 10. mb_convert_case fonksiyonu:
+
++ `mb_convert_case()` fonksiyonu, PHP’de **çok baytlı (multibyte) karakter setlerinde** (özellikle Türkçe, Japonca, Rusça gibi dillerde) **metnin harflerinin büyük/küçük hâle dönüştürülmesi** için kullanılır.
+
+
+> [!TIP]
+> + 🔤 `strtolower()` ve `strtoupper()` gibi ama **çok dilli** (UTF-8 uyumlu) versiyonudur.
+
+##### Syntax:
+
+```php
+mb_convert_case(string $string , int $mode, ?string $encoding = null): string
+```
+
+> + `$string` :  Dönüştürülecek metin
+> + `$mode` : Dönüştürme tipi (aşağıda)
+> + `$encoding` : Karakter kodlaması (ör: `'UTF-8'`) (opsiyonel ama önerilir)
+
+**Kullanılabilri `mode` Sabitleri:**
+
+| Sabit                       | Açıklama                                           |
+| --------------------------- | -------------------------------------------------- |
+| `MB_CASE_UPPER`             | Tüm harfleri **büyük harf** yapar                  |
+| `MB_CASE_LOWER`             | Tüm harfleri **küçük harf** yapar                  |
+| `MB_CASE_TITLE`             | **Her kelimenin ilk harfini büyük** yapar          |
+| `MB_CASE_FOLD` _(PHP 7.3+)_ | Unicode’a uygun, karşılaştırma için normalize eder |
+
+##### Örnek 1: Tüm harfleri büyük yapma
+
+```php
+<?php
+$text = "istanbul büyükşehir";
+
+echo mb_convert_case(
+    $text, MB_CASE_UPPER, "UTF-8" // Çıktı: ISTANBUL BÜYÜKŞEHIR%
+);
+?>
+```
+
+##### Örnek 2: Tüm harfleri küçük yapma
+
+```php
+<?php
+$text = "İSTANBUL";
+
+echo mb_convert_case(
+    $text, MB_CASE_LOWER, "UTF-8"   // Çıktı: istanbul%
+);
+?>
+```
+
+##### Örnek 3: Baş harfleri büyütme (title case)
+
+```php
+<?php
+
+$text = "istabnul büyükşehir belediyesi";
+
+echo mb_convert_case(
+    $text, MB_CASE_TITLE, "UTF-8"  // Çıktı: Istabnul Büyükşehir Belediyesi%
+);
+?>
+```
+
+
+> [!CAUTION]
+> + `strtoupper()` ve `strtolower()` fonksiyonları **ASCII** tabanlıdır, yani: 
+> + `ı`, `ç`, `ğ`, `ş`, `ü`, `İ` gibi harfleri **yanlış işler**.
+> + `mb_convert_case()` ise **UTF-8 karakterleriyle doğru çalışır**.
 
 ### 2. Sayısal(Numeric) Fonksiyonlar:
 #### 1. is_int fonksiyonu:
@@ -2734,6 +3091,8 @@ greeting('Tanju');     // Çıktı: Hello, Tanju
 
 + Fonksiyonlar, `return` anahtar kelimesi ile bir değer döndürebilir. Bu değer, fonksiyonun çağrıldığı yerde kullanılabilir.
 
+### 🧪Örnek 1:
+
 ```php
 <?php
 // Return ile fonksiyon tanımlama
@@ -2747,6 +3106,37 @@ echo "Toplam: $result\n";
 ?>
 ```
 
+### 🧪Örnek 2: Return tipi belirleme
+
+```php
+declare(strict_types=0);
+
+function multiple(int $a, int $b) :int  {
+    return "Merhaba";
+}
+
+echo multiple(3, 5);
+```
+
+> + `multiple(...) :int` fonksiyonun geri dönüş değeri tam sayı(`:int`) olarak beklenmektedir ama `return` anahtar kelimesi string(`"Merhaba"`) kelimesini döndürmektedir.
+> + Eğer dikkat ederseniz `strict_types` değer sıfır olarak ayarlanarak yani tip kontrolü katı hale getirilmediği halde beklenen değer istenmektedir.
+> + Aksi takdirde hata fırlatmaktadır.
+
+**PHP Çıktısı:**
+
+```shell
+PHP Fatal error:  Uncaught TypeError: multiple(): Return value must be of type int, string returned in /home/ottoman/phpDerleri/callByValueReference.php:7
+Stack trace:
+#0 /home/ottoman/phpDerleri/callByValueReference.php(11): multiple()
+#1 {main}
+  thrown in /home/ottoman/phpDerleri/callByValueReference.php on line 7
+
+Fatal error: Uncaught TypeError: multiple(): Return value must be of type int, string returned in /home/ottoman/phpDerleri/callByValueReference.php:7
+Stack trace:
+#0 /home/ottoman/phpDerleri/callByValueReference.php(11): multiple()
+#1 {main}
+  thrown in /home/ottoman/phpDerleri/callByValueReference.php on line 7
+```
 ## 5. Çoklu Parametre ve Tür Bildirimi:
 
 + PHP 8'de fonksiyon parametrelerine ve dönüş değerlerine tür bildirimi (`type hinting`) ekleyebilirsiniz. Bu, fonksiyonun beklenen türde veri almasını ve döndürmesini sağlar.
@@ -2801,8 +3191,98 @@ $greeting("Tanju");             // Çıktı: Merhaba, Tanju!
 ?>
 ```
 ## 8. Fonksiyonlarda `strict_types` Kullanımı:
+
 + PHP 8'de `declare(strict_types=1);` kullanarak tür kontrolünü daha katı hale getirebilirsiniz.
 + Bu, fonksiyonlara tam olarak belirtilen türde veri gönderilmesini zorunlu kılar.
+
+
+> [!NOTE]
+> + Kodları terminal üzerinde çalıştırıyorum! PHP çıktıları da ona göre olacaktır.
+> ```shell
+>  php basicPHP.php
+> ```
+
+### 🧪Örnek 1: 
+
+```php
+<?php
+
+declare(strict_types=1);
+
+function multiple(int $a, int $b) {
+    return $a * $b;
+}
+
+echo multiple(3, 5);    // Çıktı: 15
+```
+
+### 🧪Örnek 2: string parametre ile
+
++ Eğer string bir değeri `multiple` fonksiyonuna gönderirsek:
+
+```php
+<?php
+
+declare(strict_types=1); # <--- Açık
+
+function multiple(int $a, int $b) {
+    return $a * $b;
+}
+
+echo multiple(3, '5');   // '5' string değeri
+```
+
+**PHP Çıktısı:**
+
+```shell
+PHP Fatal error:  Uncaught TypeError: multiple(): Argument #2 ($b) must be of type int, string given, called in /home/ottoman/phpDerleri/callByValueReference.php on line 10 and defined in /home/ottoman/phpDerleri/callByValueReference.php:6
+Stack trace:
+#0 /home/ottoman/phpDerleri/callByValueReference.php(10): multiple()
+#1 {main}
+  thrown in /home/ottoman/phpDerleri/callByValueReference.php on line 6
+
+Fatal error: Uncaught TypeError: multiple(): Argument #2 ($b) must be of type int, string given, called in /home/ottoman/phpDerleri/callByValueReference.php on line 10 and defined in /home/ottoman/phpDerleri/callByValueReference.php:6
+Stack trace:
+#0 /home/ottoman/phpDerleri/callByValueReference.php(10): multiple()
+#1 {main}
+  thrown in /home/ottoman/phpDerleri/callByValueReference.php on line 6
+```
+
+### 🧪Örnek 3: `strict_types` kapalı
+
+```php
+<?php
+
+declare(strict_types=0);      # <--- kapalı
+
+function multiple(int $a, int $b) {
+    return $a * $b;
+}
+
+echo multiple(3, '5');   // Çıktı: 15
+```
+
+> + `strict_types` modunu kapattığımızda her hangi bir hata vermeyecektir.
+
+### 🧪Örnek 4: `int $b`  →  `$b`
+
++ Eğer `multiple(int $a, int $b)` fonksiyonunu `multiple(int $a, $b)` durumuna yani `int` ön ekini kaldırsak: 
+
+```php
+<?php
+
+declare(strict_types=1);
+
+function multiple(int $a, $b) {
+    return $a * $b;
+}
+
+echo multiple(3, '5');   // Çıktı: 15
+```
+
+
+
+
 
 ```php
 // declare(strict_types=1);  // 1. Durum
@@ -2816,6 +3296,7 @@ echo multiple(3, 5) . "\n";
 echo multiple(3, '5') . "\n";
 ?>
 ```
+
 > **Explanation:**
 > 1. **Durum:** Hata vermeden çalışmaktadır. Yani `'5'` string karakterini integer olarak yorumlamaktadır.
 > 2. **Durum:**  `declare(strict_types=1)` aktif olduğu için hiç bir şekilde string karakter kabul etmemektedir ve hata fırlatmaktadır. 
@@ -5764,6 +6245,20 @@ echo "</pre>";
 */
 ```
 
+
+> [!NOTE]
+> **`execute()`** fonksiyonun görevleri:
+> 1. `prepare()` ile hazırlanan SQL ifadesini **çalıştırır** (execute eder),
+> 2. Eğer varsa **bağlı parametrelerin değerlerini gönderir**,
+> 3. Veritabanında sorgunun çalışmasını başlatır.
+
+| Özellik            | Açıklama                                        |
+| ------------------ | ----------------------------------------------- |
+| Fonksiyon          | `$stmt->execute([parametreler])`                |
+| Görevi             | Prepared SQL sorgusunu çalıştırmak              |
+| Parametre alır mı? | Evet, dizi olarak verebilirsin                  |
+| Geri dönüş         | Başarılıysa `true`, aksi takdirde `false` döner |
+
 **PHP çalıştır:**
 
 ```shell
@@ -5821,7 +6316,7 @@ try {
 ```php
 <?php
 
-include 'connect_postgres1.php';
+include 'connect_postgresql.php';
 
 
 $fetch_records = $con_psql->prepare(
@@ -5839,10 +6334,15 @@ $fetch_records->bindParam(1, $emp_place);
 * $emp_place → Bu değişkenin değeri, ilk ? yerine referans olarak bağlanır.
 * bindParam(1, $emp_name) → ilk ? yer tutucusunu doldurur.
 * */
+
 $fetch_records->bindParam(2, $emp_name);
 // bindParam(2, $emp_place) → ikinci ? yer tutucusunu doldurur.
 
 $fetch_records->execute();
+/* 
+* PHP’de PDO'nun execute() fonksiyonu, bir SQL sorgusunu hazırladıktan 
+* (prepare) sonra veritabanına gönderip çalıştırmak için kullanılır.
+* */
 
 $row = $fetch_records->fetchAll();
 
@@ -5929,7 +6429,7 @@ Array
 | **İsimli (named)**     | `:name`, `:place` | `bindParam(':name', $n)` |
 | **Pozisyonel (index)** |        `?`        | `bindParam(1, $n)`       |
 
-#### Örnek 13: `bindParam()` ve Tip Doğrulama
+#### 🧪Örnek 13: `bindParam()` ve Tip Doğrulama
 
 **connect_postgresql.php:**
 
@@ -5995,7 +6495,7 @@ print_r($row);
 | `PDO::PARAM_LOB`          | Değeri **binary büyük veri (BLOB)** olarak işler. (dosya, binary içerikler için)                                       |
 | `PDO::PARAM_INPUT_OUTPUT` | Girdi-çıktı parametresi (stored procedure ile kullanılır).                                                             |
 
-##### Örnek 13.1: bindParam ve Placeholder
+##### 🧪Örnek 13.1: bindParam ve Placeholder
 
 **connect_postgresql.php:** Örnek 13  ile aynı kodlar çalışmaktadır. Yani örnek 13 kodları ile postgreSQL'e bağlanılmaktadır.
 
@@ -6032,7 +6532,7 @@ $row = $fetch_records->fetchAll();
 print_r($row);
 ```
 
-#### Örnek 14: 
+#### 🧪Örnek 14: 
 
 **connect_postgresql:**
 
@@ -6161,7 +6661,7 @@ Stack trace:
 + `true` değeri PostgreSQL'e `'t'` olarak gitti,
 + PostgreSQL bunu `integer` sütuna uyduramayınca hata verdi.
 
-#### Örnek 15: `SELECT ... OR`
+#### 🧪Örnek 15: `SELECT ... OR`
 
 **connect_postgesql.php:** Örnek 14 yazılan kodlar ile aynıdır.
 
@@ -6236,7 +6736,7 @@ Array
 )
 ```
 
-#### Örnek 16:  `bindValue()` Fonksiyonu:
+#### 🧪Örnek 16:  `bindValue()` Fonksiyonu:
 
 
 > [!NOTE]
@@ -6345,7 +6845,7 @@ Array
 )
 ```
 
-##### Örnek 16.1: `bindValue()` ve Placeholder
+##### 🧪Örnek 16.1: `bindValue()` ve Placeholder
 
 **connect_postgresql.php:** Örnek 16 kod ile aynıdır.
 
@@ -6387,7 +6887,7 @@ $row = $fetch_records->fetchAll();
 print_r($row);
 ```
 
-#### Örnek 17:  `bindValue()` Fonksiyonu: HATA
+#### 🧪Örnek 17:  `bindValue()` Fonksiyonu: HATA
 
 **connect_postgesql.php:** Örnek 14 yazılan kodlar ile aynıdır.
 
@@ -6450,7 +6950,7 @@ Stack trace:
   thrown in /var/www/html/connectPostgreSQL/prepare.php on line 15
 ```
 
-#### Örnek 18: `execute()` ile bağlama
+#### 🧪Örnek 18: `execute()` ile bağlama
 
 **connect_postgesql.php:** Örnek 14 yazılan kodlar ile aynıdır.
 
@@ -6580,7 +7080,7 @@ Array
 |Kodun sade olması ve tek satırda çalışması isteniyorsa|`execute([...])` ✅|
 
 
-#### Örnek 19: `execute()` ve birden fazla değer:
+#### 🧪Örnek 19: `execute()` ve birden fazla değer:
 
 **connect_postgresql:**
 
@@ -6915,6 +7415,813 @@ Ad: POP!_OS
                 | Yaş: 20
 ```
 
+#### Örnek 21: `bindColumn()` fonksiyonu
+
+**connect_postgresql.php** Örnek 20 deki kod ile aynıdır.
+
+**prepare.php:**
+
+```php
+<?php
+
+include 'connect_postgres1.php';
+
+$fetch_records = $con_psql->prepare(
+    // bindColumn fonksiyonu kullanılabilmesi için yıldız karakteri
+    // yerine kolon isimleri yazılmalıdır.
+    "SELECT
+        emp_name, emp_place, emp_age
+    FROM
+        public.employee_data"
+);
+// PostgreSQL veritabanındaki emp_name kolunu $emp_name_var
+// değişkenine bağladık.
+$fetch_records->bindColumn(1, $emp_name_var);
+// 1 parametresi SELECT sorgusunda 1. kolona yani 
+// emp_name koluna karşılık gelir.
+
+// Aynı şekilde emp_place kolunu $emp_place_var değişkenine
+// bağladık.
+$fetch_records->bindColumn(2, $emp_place_var);
+// 2 parametresi SELECT sorgusunda 2. kolona yani
+// emp_place koluna karşılık gelir.
+
+// emp_age kolunuda $emp_age_var değişkenine bağladık.
+$fetch_records->bindColumn(3, $emp_age_var);
+// 3. parametresi SELECT sorgusunda 3. kolona yani
+// emp_age koluna karşılık gelir.
+
+$fetch_records->execute();
+
+// echo $emp_place_var;     # Çıktı: California
+
+while ($fetch_records->fetch()) {
+    echo "Ad: $emp_name_var
+        | Yer: $emp_place_var
+        | Yaş: $emp_age_var\n";
+}
+```
+
+**Kodun Çıktısı:** Örnek 20 deki ile aynıdır.
+
+#### 🧪Örnek 22: `bindColumn()` fonksiyonu
+
+**connect_postgresql.php** Örnek 20 deki kod ile aynıdır.
+
+**prepare.php:**
+
+> [!CAUTION]
+> Aşağıdaki kodu incele ve `Örnek 21` ile ve `Örnek  21`'in çıktısı ile karşılaştır!
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+$fetch_records = $con_psql->prepare(
+    // bindColumn fonksiyonu kullanılabilmesi için yıldız karakteri
+    // yerine kolon isimleri yazılmalıdır.
+    "SELECT
+        emp_name, emp_place, emp_age
+    FROM
+        public.employee_data"
+);
+// PostgreSQL veritabanındaki emp_name kolunu $emp_name_var
+// değişkenine bağladık.
+$fetch_records->bindColumn(2, $emp_name_var);
+
+// Aynı şekilde emp_place kolunu $emp_place_var değişkenine
+// bağladık.
+$fetch_records->bindColumn(1, $emp_place_var);
+
+// emp_age kolunuda $emp_age_var değişkenine bağladık.
+$fetch_records->bindColumn(3, $emp_age_var);
+
+$fetch_records->execute();
+
+// echo $emp_place_var;     # Çıktı: California
+
+while ($fetch_records->fetch()) {
+    echo "Ad: $emp_name_var
+        | Yer: $emp_place_var
+        | Yaş: $emp_age_var\n";
+}
+```
+
+**Çıktı:**
+
+```shell
+Connection is successful
+Ad: New York
+                | Yer: Arch Linux
+                | Yaş: 36
+Ad: Utah
+                | Yer: Ubuntu
+                | Yaş: 20
+Ad: California
+                | Yer: linus
+                | Yaş: 25
+Ad: Louisiana
+                | Yer: Fedora
+                | Yaş: 15
+Ad: California
+                | Yer: POP!_OS
+                | Yaş: 20
+```
+
+
+##### Output Value vs Input Value:
+
++ PDO'da `bindParam()` ve `bindValue()` **input** (girdi) parametreleridir, `bindColumn()` ise bir **output** (çıktı) parametresidir.
+
+| Fonksiyon      | Türü     | Ne işe yarar?                                                      |
+| -------------- | -------- | ------------------------------------------------------------------ |
+| `bindParam()`  | ✅ Input  | SQL sorgusuna **veri gönderir** (değişkenle, referansla)           |
+| `bindValue()`  | ✅ Input  | SQL sorgusuna **veri gönderir** (sabit değer veya değişken)        |
+| `bindColumn()` | ✅ Output | SQL sorgusundan **veri alır**, gelen sonucu PHP değişkenine bağlar |
+**🔹 1. `bindParam()` ve `bindValue()` → INPUT:**
+
+```php
+$name = 'Ali';
+$stmt = $pdo->prepare(
+	"SELECT * FROM public.employee_data 
+		WHERE emp_name = :name"
+	);
+
+// bindParam ile: referans (değişken)
+$stmt->bindParam(':name', $name); // Input (veri gönderme)
+$stmt->execute();
+```
+
+> + Bu örnekte **`$name` değişkeni sorguya gönderiliyor** → yani bu bir **girdi** (input).
+
+**🔹 2. `bindColumn()` → OUTPUT:**
+
+```php
+$stmt = $pdo->prepare(
+	"SELECT emp_name, emp_age FROM public.employee_data"
+	);
+$stmt->execute();
+
+$stmt->bindColumn('emp_name', $name_out);
+$stmt->bindColumn('emp_age', $age_out);
+
+while ($stmt->fetch(PDO::FETCH_BOUND)) {
+    // Veriler veritabanından alındı ve değişkenlere yazıldı
+    echo "$name_out - $age_out\n"; // Output
+}
+```
+
+> + Bu örnekte **`$name_out` ve `$age_out` veritabanından gelen veriyi alır** → yani bu bir **çıktı** (output).
+
+**📥 INPUT (Veri gönderme):**
+
+| Fonksiyon     | Açıklama                                    |
+| ------------- | ------------------------------------------- |
+| `bindParam()` | Değişkeni SQL sorgusuna bağlar (referansla) |
+| `bindValue()` | Değeri sorguya gönderir (değerle)           |
+
+**📤 OUTPUT (Veri alma):**
+
+| Fonksiyon      | Açıklama                                      |
+| -------------- | --------------------------------------------- |
+| `bindColumn()` | Sorgudan dönen verileri PHP değişkenine yazar |
+
+#### 🧪 Örnek 23: Placeholder(`?`) ve bindValue 
+
+**PostgreSQL: tanju database**
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+**Çıktı:**
+
+```sql
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | linus      | California |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+      4 | Fedora     | Louisiana  |      15 | 29/07/2010
+      5 | POP!_OS    | California |      20 | 29/07/2005
+(5 rows)
+```
+
+**connect_postgresql.php:**
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+?>
+```
+
+**prepare.php:**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+
+echo "Enter your place: ";
+$place= mb_convert_case(                     # <- Buit-in Fonksiyonlar
+    trim(fgets(STDIN)), MB_CASE_TITLE, 'UTF-8'
+);
+
+
+$fetch_records= $con_psql->prepare(
+    "SELECT * FROM employee_data 
+	    WHERE emp_place = ?"  # <- Positional Placeholder
+    // ? işaretin index değeri 1'dir
+);
+
+// bindParam birinci parametresi ? placeholder'ın index değerini alır.
+$fetch_records->bindParam(1 ,$place);
+
+$fetch_records->execute();
+
+$row = $fetch_records->fetchAll();
+print_r($row);
+```
+
+
+> [!TIP]
+> **Kod içerisinde kullanılan fonksiyonları:**
+> 1. `fgets(STDIN)` fonksiyonu: Terminalden veri almak için kullanılır.
+> 2. `trim()` fonksiyonu: sağ ve sol tarafından varsayılan olarak boşlukları siler.
+> 3. `mb_convert_case` fonksiyonu: Cümle içerisindeki kelimelerin baş harflerini büyük harfe çevirir.
+
+**PHP çalıştır:**
+
+```shell
+php prepare.php
+```
+
+**PHP Çıktı:**
+
+```shell
+Connection is successful
+Enter your place: New York
+Array
+(
+    [0] => Array
+        (
+            [emp_id] => 2
+            [emp_name] => Arch Linux
+            [emp_place] => New York
+            [emp_age] => 36
+            [emp_dob] => 25/09/1989
+        )
+
+)
+```
+
+> + `fgets(STDIN)` fonksiyonundan dolayı `prompt` gelecektir ve sizden veritabanındaki bir yer girmeniz istenecektir.
+> + Yukarıda görüldüğü üzeri `New York` girilmiştir.
+
+
+#### 🧪 Örnek 24: Placeholder(`:placeholderName`) ve bindValue 
+
+**PostgreSQL database:** Örnek  23 ile aynı veritabanını(`tanju database`) kullanmaktadır. 
+
+**connect_postgresql.php:** Örnek 23 ile aynı kod ile veritabanına bağlanmaktadır.
+
+**prepare.php:**
+
+```php
+<?php
+
+include 'connect_postgres1.php';
+
+
+function &input($info) {
+    echo $info;
+    $a = mb_convert_case(
+        trim(fgets(STDIN)), MB_CASE_TITLE, 'UTF-8'
+    );
+    return $a;
+}
+
+
+$fetch_records= $con_psql->prepare(
+    "SELECT * FROM employee_data
+        WHERE emp_place = :place
+            AND emp_name = :name"  # <--- named placeholder
+        // Bu SELECT sorgusu içerisinde "named placeholder"
+        // kullanılıyor ve bu değer bindParam fonksiyonun
+        // 1. parametresi olacaktır
+);
+
+$fetch_records->bindParam('name', input("Enter your name: "));
+$fetch_records->bindParam('place', input("Enter your place: "));
+/*
+$fetch_records->bindParam(1, input("Enter your name: "));
+$fetch_records->bindParam(2, input("Enter your place: "));
+* Dikkat!
+* 'name' yerine 1 ve 'place' yerine 2 yazdığımızda
+* program herhangi bir hata vermeden çalışacaktır.
+* Normal de ? placeholder da 1 ve 2 index numaralarını
+* veriyoruz.
+*/
+
+
+$fetch_records->execute();
+
+
+$row = $fetch_records->fetchAll();
+
+print_r($row);
+```
+
+
+**PHP Çalıştır:**
+
+```shell
+php prepare.php
+```
+
+**PHP Çıktı:**
+
+```shell
+Connection is successful
+Enter your name: arch linux       # <---- Kullanıcı girdileri
+Enter your place: new york        # <---- Kullanıcı girdileri
+Array
+(
+    [0] => Array
+        (
+            [emp_id] => 2
+            [emp_name] => Arch Linux
+            [emp_place] => New York
+            [emp_age] => 36
+            [emp_dob] => 25/09/1989
+        )
+
+)
+```
+
+#### 🧪Örnek 25: Named Placeholder ve `execute()`
+
+**PostgreSQL database:** Örnek  23 ile aynı veritabanını(`tanju database`) kullanmaktadır. 
+
+**connect_postgresql.php:** Örnek 23 ile aynı kod ile veritabanına bağlanmaktadır.
+
+> + `execute` fonksiyonun sayesinde değişkenler ile named placeholder'ları bağlıyoruz.
+
+**prepare.php:**
+
+```php
+<?php
+
+include 'connect_postgres1.php';
+
+// Bu fonksiyon kullanıcıdan veri alma amaçı için oluşturuldu.
+function &input($info) {
+    echo $info;
+    $a = mb_convert_case(
+        trim(fgets(STDIN)), MB_CASE_TITLE, 'UTF-8'
+    );
+    return $a;
+}
+
+
+$fetch_records= $con_psql->prepare(
+    "SELECT * FROM employee_data
+        WHERE emp_place = :place
+            OR emp_name = :name"  # <--- named placeholder
+        // Bu SELECT sorgusu içerisinde "named placeholder"
+        // kullanılıyor ve bu değer execute fonksiyonun da
+        // associate array içerisinde key değeri olarak yazılır.
+);
+
+
+$fetch_records->execute(   # <--- Buraya Dikkat!
+    [
+        ':place' => input('Enter a place: '),
+        ':name' => input('Enter a name: ')
+    ]
+);
+
+
+$row = $fetch_records->fetchAll();
+
+print_r($row);
+
+```
+
+**PHP Çalıştır:**
+
+```shell
+php prepare.php
+```
+
+**PHP Çıktı:**
+
+```shell
+Connection is successful
+Enter a place: california     # ---> Kullanıcı girişi
+Enter a name: linus           # ---> Kullanıcı girişi
+Array
+(
+    [0] => Array
+        (
+            [emp_id] => 1
+            [emp_name] => linus
+            [emp_place] => California
+            [emp_age] => 25
+            [emp_dob] => 25/09/2000
+        )
+
+    [1] => Array
+        (
+            [emp_id] => 5
+            [emp_name] => POP!_OS
+            [emp_place] => California
+            [emp_age] => 20
+            [emp_dob] => 29/07/2005
+        )
+
+)
+```
+
+> + `SELECT * FROM ... OR ...` sorgusu içerisinde `OR` operatöründen dolayı iki array dönmüştür.
+
+
+#### 🧪Örnek 26: Veri Girişi - `execute()`
+
+**Senaryo:** `execute()` fonksiyonunu kullanarak veri girişi yapacağız:
+
+**PostgreSQL: tanju database**
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+ + PHP kodu çalıştırılmadan **önceki** tablo durumu: **ilk durum**
+
+```sql
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | linus      | California |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+      4 | Fedora     | Louisiana  |      15 | 29/07/2010
+      5 | POP!_OS    | California |      20 | 29/07/2005
+(5 rows)
+```
+
+**connect_postgresql.php**
+
++ Daha önceki örnekler de olduğu gibi postgresql veritabanına bağlama php koduları:
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+
+?>
+
+```
+
++ Aşağıdaki PHP kodları ile PostgreSQL veritabanına veri yazdırma yapıyoruz:
+
+```php
+<?php
+
+include 'connect_postgres1.php';
+
+$empName = 'Shekar';
+$place = 'New York';
+$age = 34;
+$dob = 1990;
+
+
+$insert_query = $con_psql->prepare(
+    'INSERT INTO employee_data (
+        emp_name, emp_place, emp_age, emp_dob)
+    VALUES (
+        :emp_name, :emp_place, :emp_age, :emp_dob
+    )'
+);
+
+$insert_query-> execute(
+    [
+        ':emp_name' => $empName,
+        ':emp_place' => $place,
+        ':emp_age' =>  $age,
+        ':emp_dob' => $dob
+    ]
+);
+```
+
+**PostgreSQL: tanju database**
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+ + PHP kodu çalıştırılmadan **sonraki** tablo durumu: **Son durum**
+
+```sql
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | linus      | California |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+      4 | Fedora     | Louisiana  |      15 | 29/07/2010
+      5 | POP!_OS    | California |      20 | 29/07/2005
+      6 | Shekar     | New York   |      34 | 1990
+(6 rows)
+
+```
+
+> + Eğer 6. satıra dikkat ederseniz PHP kodunu çalıştırma ile geldiğini görürsünüz.
+
+#### 🧪Örnek 27: Kullanıcıdan veri girişi
+
+**Senaryo:**  Bir önceki `Örnek 26` aynısı fakat veri girdilerini terminal üzerinden kullanıcıdan alacağız.
+
+**connect_postgresql.php:** `Örnek 26` ile aynı kod ile veritabanına bağlanmaktadır.
+
+**prepare.php**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+
+// Bu fonksiyon kullanıcıdan veri alma amaçı için oluşturuldu.
+function &input($info) {
+    echo $info;
+    $a = mb_convert_case(
+        trim(fgets(STDIN)), MB_CASE_TITLE, 'UTF-8'
+    );
+    return $a;
+}
+
+
+while (true) {
+    $out_letter = 'Q';
+
+    $insert_query = $con_psql->prepare(
+        'INSERT INTO employee_data (
+            emp_name, emp_place, emp_age, emp_dob)
+        VALUES (
+            :emp_name, :emp_place, :emp_age, :emp_dob
+        )'
+    );
+
+	/*
+	* PHP’de PDO'nun execute() fonksiyonu, bir SQL sorgusunu hazırladıktan
+	* (prepare) sonra veritabanına gönderip çalıştırmak için kullanılır.
+	*/
+    $insert_query-> execute(
+        [
+            ':emp_name' => input('İsim giriniz: '), 
+            ':emp_place' => input('Yer giriniz: '),
+            ':emp_age' =>  input('Yaş giriniz: '),
+            ':emp_dob' => input('Doğum tarihi giriniz: ')
+        ]
+    );
+    $input_letter = input(
+	    "Çıkmak için 'Q', Devam için Enter tuşuna basın: "
+	);
+
+	// Sonsuz döngüyü if koşulu ile kırıyoruz!
+    if ($out_letter === $input_letter) {
+        break;
+    }
+}
+```
+
+> + Daha önce öğrendiğimiz *fonksiyon oluşturma*, *while döngüsü*, *kullanıcıdan veri alma(`fgets(STDIN`)* ve *string fonksiyonlarını(`trim` ve `mb_convert_case`)* kullanarak kodun kalitesini artırdık ayrıca daha önce öğrendiklerimizi pekiştirdik.
+
+#### 🧪Örnek 28: `FETCH_COLUMN style`
+
+**PostgreSQL: tanju database**
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+**SQL Çıktı:**
+
+```sql
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | Linus      | California |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+      4 | Fedora     | Louisiana  |      15 | 29/07/2010
+      5 | Pop!_Os    | California |      20 | 29/07/2005
+      6 | Shekar     | New York   |      34 | 1990
+      7 | John       | Virginia   |      20 | 12/20/2005
+(7 rows)
+
+```
+
+**connect_postgresql.php:**
+
+```php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+?>
+```
+
+**fetch_sytles2.php:**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+
+$fetch_records = $con_psql->prepare(
+    "SELECT * FROM public.employee_data ORDER BY emp_id"
+);
+
+$fetch_records->execute();
+
+$row = $fetch_records->fetchAll(
+    PDO::FETCH_COLUMN
+    // PDO::FETCH_COLUMN, 0  # Default
+);
+
+// echo "<pre>";    # Browser
+print_r($row);
+// echo "</pre>";   # Browser
+echo $row[3];       # Çıktı: 4
+?>
+```
+
+> [!TIP]
+> + `fetchAll(PDO::FETCH_COLUMN)` ile `fetchAll(PDO::FETCH_COLUMN, 0)` aynıdır.
+> + Yani, eğer `fetchAll` fonksiyonunda 2. parametre verilmez ise 0 kabul edilir.
+
+**PHP Çalıştır:**
+
+> + PHP kodlarını terminal üzerinde çalıştırıyoruz:
+
+```shell
+php fetch_sytles2.php
+```
+
+**PHP Çıktı:**
+
+```shell
+Connection is successful
+Array
+(
+    [0] => 1
+    [1] => 2
+    [2] => 3
+    [3] => 4
+    [4] => 5
+    [5] => 6
+    [6] => 7
+)
+4%
+```
+
+##### Örnek 28.1: `fetchAll(PDO::FETCH_COLUMN, 1)`
+
+> + `fetchAll` fonksiyonun 2. parametresini 1 olarak verdiğimizde `employee_data` tablosunun `emp_name` kolonu ekrana basılacaktır.
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+
+$fetch_records = $con_psql->prepare(
+    "SELECT * FROM public.employee_data ORDER BY emp_id"
+);
+
+$fetch_records->execute();
+
+$row = $fetch_records->fetchAll(
+    PDO::FETCH_COLUMN
+    // PDO::FETCH_COLUMN, 0  # Default
+);
+
+// echo "<pre>";    # Browser
+print_r($row);
+// echo "</pre>";   # Browser
+echo $row[3];       # Çıktı: 4
+?>
+```
+
+**PHP Çıktısı:**
+
+```shell
+Connection is successful
+Array
+(
+    [0] => Linus
+    [1] => Arch Linux
+    [2] => Ubuntu
+    [3] => Fedora
+    [4] => Pop!_Os
+    [5] => Shekar
+    [6] => John
+)
+Fedora%
+```
+
+**SQL ile Kontrol:**
+
+```sql
+SELECT emp_name FROM public.employee_data
+```
+
+**SQL Çıktısı:**
+
+```shell
+  emp_name
+------------
+ Linus
+ Arch Linux
+ Ubuntu
+ Fedora
+ Pop!_Os
+ Shekar
+ John
+(7 rows)
+
+```
+
 #### PHP ile Bağlanma:
 
 ```php
@@ -7074,3 +8381,8 @@ echo $config2->password . "\n";
 ?>
 ```
 
+# Kaynaklar:
+
+1. [tutorialspoint](https://www.tutorialspoint.com/php/index.htm)
+2. Step by Step - [Complete PHP PDO Course from scratch](https://www.youtube.com/watch?v=p5TH7_IVaMA)
+3. 

@@ -166,6 +166,10 @@ tr_en = {
 fruitBasket = {'elma', 'armut', 'kiraz', 'çilek'}
 ```
 
+
+# Fonksiyon Tanımlama:
+
+
 # String Veri Tipi:
 + Python'da _string_ (dize) verisi, bir metni veya karakterler dizisini temsil eder ve genellikle metinsel veri depolamak için kullanılır.
 + Stringler, tırnak işaretleri (tek `'...'` veya çift `"... "`) içinde tanımlanır.
