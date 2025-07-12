@@ -250,6 +250,7 @@ $sayi1 = 19;   => doğru
 ## 1. Basit (Skaler) Veri Türleri:
 + Bu türler, tek bir değer tutar.
 ### a. Integer(Tam Sayı):
+
 - Pozitif veya negatif tam sayıları temsil eder. Örnek: `45`, `-12`, `0`, `3`
 - Bellekte genellikle 32 veya 64 bit olarak saklanır.
 
@@ -263,6 +264,7 @@ echo var_dump($sayi);   // Çıktı: int(42)
 ```
 
 ### b. Float (Ondalıklı Sayı veya Double):
+
 - Ondalıklı sayıları temsil eder. Örnek: `3.14`, `-0.6`, `4.0`, `3.9`
 - Bellekte genellikle 64 bit olarak saklanır.
 
@@ -276,6 +278,7 @@ echo var_dump($sayi);    // Çıktı: float(3.14)
 ```
 
 ### c. String(Metin):
+
 - Metin verilerini temsil eder. 
 - Tek tırnak (`'`) veya çift tırnak (`"`) içinde yazılır. Örnek: `"Merhaba Dünya"`, `'PHP'`
 
@@ -703,17 +706,157 @@ Array
 ##### Syntax:
 
 ```php
-int intval(mixed $value, int $base = 10)
+intval(mixed $value, int $base = 10): int
 ```
 
 > + `$value`: Dönüştürmek istediğin değer (string, float, bool vs.)
 > + `$base`: (isteğe bağlı) Eğer değer bir **string sayı** ise hangi sayı tabanında okunacağını belirtir. Varsayılan 10’dur (ondalık sistem).
+> + Geri dönüş: `int` türünde bir sayı (tam sayı)
 
 ##### 🧪Örnek 1:
 
 ```php
+<?php
 
+$int_var = intval('42');
+echo var_dump($int_var);        // Çıktı: int(42)
+
+$int_var_1 = intval(3.99);
+echo var_dump($int_var_1);      // Çıktı: int(3)
+
+$int_var_2 = intval('123abc');
+echo var_dump($int_var_2);      // Çıktı: int(123)
+
+$int_var_3 = intval('abc123');
+echo var_dump($int_var_3);      // Çıktı: int(0)
+
+$int_var_4 = intval(true);
+echo var_dump($int_var_4);      // Çıktı: int(1)
+
+$int_var_5 = intval(false);
+echo var_dump($int_var_5);      // Çıktı: int(0)
 ```
+
+##### 🧪Örnek 2: Base (Taban) Parametresi
+
+```php
+<?php
+
+// Dikkat: intval fonksiyonun 1. parametresi string'dir.
+$var_bin = '1100';          // 2'li veri tipi
+echo intval($var_bin, 2);   // 2'li veri tipi → tam sayıya
+echo "\n";
+$var_oct = '14';            // 8'li veri tipi
+echo intval($var_oct, 8);   // 8'li veri tipi → tam sayıya
+echo "\n";
+$var_dec = '12';            // 10'lu veri tipi
+echo intval($var_dec, 10);  // 10'lu veri tipi → tam sayıya
+echo "\n";
+$var_hex = 'C';             // 16'lı veri tipi
+echo intval($var_hex, 16);  // 16'lı veri tipi → tam sayıya
+// Buradaki intval fonksiyonun tüm çıktıları 12 olacaktır.
+```
+
+**intval fonksiyonu vs (int)**
+
+| Özellik         | `(int)`             | `intval()`             |
+| --------------- | ------------------- | ---------------------- |
+| Amaç            | Tam sayıya çevirmek | Tam sayıya çevirmek    |
+| Tip dönüşüm mü? | ✅ Evet (cast)       | ❌ Hayır (fonksiyon)    |
+| Hız             | Daha hızlı          | Biraz daha yavaş       |
+| Ek özellik      | Yok                 | `base` parametresi var |
+| Okunabilirlik   | Daha kısa           | Daha açık              |
+
+##### 🧩Uygulama 1: 
+
+```php
+echo "
+    2'li, 8'li veya 16'li tabanındaki sayıları
+    10'lu tabana dönüştürür.
+
+";
+
+
+echo 'Bir sayı giriniz: '; $input = trim(fgets(STDIN));
+echo 'Taban sayısını girin(2/8/10/16): '; $base = trim(fgets(STDIN));
+
+// echo $input;
+
+$result = match ($base) {
+    '10' => intval($input, $base),
+    '2' => intval($input, $base),
+    '8' => intval($input, $base),
+    '16' => intval($input, $base),
+    default => 'Herhangi bir değer yok'
+};
+
+echo "$input sayısı $base tabanında ${result}'dır";
+```
+
+#### B.2.2. `floatval()` Fonksiyonu:
+
++ PHP 8’de `floatval()` fonksiyonu, bir değeri **ondalıklı sayıya (float)** dönüştürmek için kullanılır.
+
+##### Syntax:
+
+```php
+floatval(mixed $value): float 
+```
+
+> + `mixed $value`: Sayıya dönüştürülebilecek herhangi bir türde veri (string, int, bool, vs.)
+> + Geri dönüş: `float` türünde bir sayı (ondalıklı sayı)
+
+##### 🧪Örnek 1: String → Float
+
+```php
+<?php
+
+$str_var = '3.14';
+echo var_dump(floatval($str_var));  // Çıktı: float(3.14)
+
+echo floatval('10.20abc');          // Çıktı: 10.2
+echo "\n";
+echo floatval('abc11.15');          // Çıktı: 0
+?>
+```
+
+> + `var_dump()` fonksiyonu ile verinin hem türünü hem de içeriğini öğrenebiliyoruz.
+##### 🧪Örnek 2: Integer → Float
+
+```php
+<?php
+
+$int_var = 100;
+
+echo $int_var;                      // 100
+echo "\n";
+echo var_dump($int_var);            // int(100)
+
+$float_var = floatval($int_var);
+
+echo $float_var;                    // 100
+echo "\n";
+echo var_dump($float_var);          // float(100)
+```
+
+##### 🧪Örnek 3: Boolean → Float
+
+```php
+<?php
+
+echo floatval(true);    // Çıktı: 1
+echo "\n";
+echo floatval(false);   // Çıktı: 0
+```
+
+##### 🆚`floatval()` vs `(float)` Arasındaki Fark
+
+| Özellik       | `floatval()`               | `(float)`                        |
+| ------------- | -------------------------- | -------------------------------- |
+| Fonksiyon mu? | Evet                       | Hayır (tip dönüştürme operatörü) |
+| Okunabilirlik | Fonksiyonel kodda daha net | Daha kısa ve hızlı               |
+| Performans    | Biraz daha yavaş           | Daha hızlı                       |
+
 # PHP operatörleri:
 
 ## 1. Nokta(`.`) operatörü:
@@ -1280,7 +1423,17 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 ## 2. Komut Satırından Girdi Almak (CLI):
 + PHP, komut satırından çalıştırıldığında kullanıcıdan girdi almak için `fgets(STDIN)` veya `readline()` fonksiyonlarını kullanabilir.
 
-### Örnek 1: `fgets(STDIN)` ile Girdi Almak
+### 2.1. `fgets(STDIN)` Fonksiyonu:
+
++ **Tanım:** Belirli bir **dosya tanıtıcısından(`file descriptor`) satır okur**, genellikle `STDIN` ile birlikte kullanılır.
+
+#### 🎯Syntax:
+
+```php
+fgets(resource $stream, ?int $length = null): string|false
+```
+
+####  🧪Örnek 1: `fgets(STDIN)` ile Girdi Almak
 
 ```php
 <?php
@@ -1289,6 +1442,63 @@ $name = fgets(STDIN);     // Kullanıcıdan Girdi Alır.
 echo "Hello, ".trim($name)."\n"; // // trim() ile boşlukları temizle
 ?>
 ```
+
+### 2.2. `readline` Fonksiyonu:
+
++ **Tanım:** Komut satırından (CLI) **kullanıcıdan bir satır okur**.
++ Bu satırı `readline_add_history()` fonksiyonunu kullanarak geçmişe kendiniz eklemelisiniz.
+
+#### 🎯Syntax:
+
+```php
+readline(?string $prompt = null): string | false
+```
+
+
+> [!NOTE]
+> **Avantajları:**
+> + **Prompt** gösterebilir: Kullanıcıya bir mesaj gösterebilir (örnekteki `"Bir şey yaz: "` gibi).
+> + **Komut geçmişi** tutulabilir (`readline_add_history()`).
+
+
+> [!CAUTION]
+> + **Sadece CLI modunda çalışır** (web üzerinden çalışmaz).
+
+#### 🧪Örnek 1: Temel Kullanım
+
+```php
+$input = readline('Bir değer giriniz: ');
+
+echo $input;
+echo "\n";
+echo var_dump($input);
+```
+
+**PHP Çıktısı:**
+
+```shell
+Bir değer giriniz: 5          # <--- Kullanıcı girdisi
+5
+string(1) "5"
+```
+
+#### 🆚 `readline()` vs `fgets(STDIN)`
+
+| Özellik                 | `readline()`         | `fgets(STDIN)`            |
+| ----------------------- | -------------------- | ------------------------- |
+| Kullanım ortamı         | Sadece CLI           | CLI (ve dosya okuma)      |
+| Prompt gösterme         | Dahili destekler     | `echo` ile manuel yapılır |
+| Satır düzenleme desteği | Var (ok tuşları vb.) | Yok                       |
+| Komut geçmişi           | Destekler            | Desteklemez               |
+| Girdi sonu karakteri    | Otomatik temizlenir  | `\n` ile gelir            |
+| Kullanımı               | Daha kullanıcı dostu | Daha düşük seviyeli       |
+
+
+> [!TIP]
+> + CLI tabanlı bir uygulama yapıyorsan, kullanıcı deneyimi açısından **`readline()` daha uygundur**.
+> + Daha basit veya dosya tabanlı girişler için ise **`fgets()` tercih edilir**.
+
+
 # Döngüler(loops):
 +  PHP 8'de **loop** (döngü) yapıları, belirli bir işlemi tekrarlamak için kullanılır. PHP'de temel olarak dört tür döngü bulunur:
 ## 1. For Döngüsü:
@@ -2823,6 +3033,10 @@ class Car {
 }
 ```
 
+#### 5.2. get_class_methods
+
+
+
 ### 6. Diğer Fonksiyonlar:
 #### 6.1. print_r fonksiyonu:
 
@@ -3398,7 +3612,37 @@ Fonksiyon dışı: 15
 #### 🧪 Örnek 1:
 
 
+# Zaman ve Tarih:
 
+## A. Date Fonksiyonu:
+
+## B. Time Fonksiyonu:
+
+## C. DateTime Sınıfı:
+
+### `DateTime::createFromFormat()` Metodu:
+
+#### Syntax:
+
+```php
+public static DateTime::createFromFormat(
+	string $format, string $datetime, ?DateTimeZone $timezone = null
+): DateTime|false
+```
+
+> **Parametreler:**
+> + **$format**: Girdi tarih dizgisinin formatını belirtir (örneğin "d/m/Y H:i:s")
+> + **$datetime**: Dönüştürülecek tarih/zaman dizgisi
+> + **$timezone** (isteğe bağlı): Zaman dilimi bilgisi
+
+> **Dönüş Değeri:**
+> + Başarılı olursa bir `DateTime` nesnesi, başarısız olursa `false` döndürür.
+
+#### Örnek 1: 
+
+```php
+
+```
 # Dosya İşlemleri:
 
 
@@ -4791,11 +5035,12 @@ if (isset($_GET["page"])) {
 + Manual olarak `members` adında bir tablo oluşturuyoruz. Daha sonra php kodları ile veri giriş yapacağız.
 
 ```sql
- CREATE TABLE members (
-mem_ID SERIAL PRIMARY KEY,
-mem_name VARCHAR(255),
-mem_title TEXT,
-mem_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE members (
+	mem_ID SERIAL PRIMARY KEY,
+	mem_name VARCHAR(255),
+	mem_title TEXT,
+	mem_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ##### insertData.php
@@ -4889,7 +5134,6 @@ curl http://192.168.1.132/index.php?page=insertData
 ```
 
 
-
 #### Örnek 4: Veri Alma(fetch):
 
 **Postgresql Database:**
@@ -4898,32 +5142,41 @@ curl http://192.168.1.132/index.php?page=insertData
 
 ```sql
 CREATE TABLE employee_data (
-emp_id SERIAL PRIMARY KEY,
-emp_name VARCHAR(100),
-emp_place VARCHAR(255),
-emp_age INTEGER,
-emp_dob VARCHAR(255));
+	emp_id SERIAL PRIMARY KEY,
+	emp_name VARCHAR(100),
+	emp_place VARCHAR(255),
+	emp_age INTEGER,
+	emp_dob VARCHAR(255)
+);
 ```
 
 **Tabloya Veri Girişi:**
 
 ```sql
 INSERT INTO employee_data (
-emp_name, emp_place, emp_age, emp_dob) VALUES (
-'linus', 'california', 25, '25/09/2000');
+	emp_name, emp_place, emp_age, emp_dob
+) 
+VALUES (
+	'linus', 'california', 25, '25/09/2000'
+);
 ```
 
 ```sql
 INSERT INTO employee_data (
-emp_name, emp_place, emp_age, emp_dob) VALUES (
-'Arch Linux', 'New York', 36, '25/09/1989');
+	emp_name, emp_place, emp_age, emp_dob) 
+VALUES (
+	'Arch Linux', 'New York', 36, '25/09/1989'
+);
 ```
 
 
 ```sql
 INSERT INTO employee_data (
-emp_name, emp_place, emp_age, emp_dob) VALUES (
-'Ubuntu', 'Utak', 20, '25/09/2003');
+	emp_name, emp_place, emp_age, emp_dob
+) 
+VALUES (
+	'Ubuntu', 'Utak', 20, '25/09/2003'
+);
 ```
 
 **Verileri Listeleme:**
@@ -5139,7 +5392,7 @@ Array
 ```php
 <?php
 
-include "connect_postgres1.php";
+include "connect_postgresql.php";
 
 $fetch_records = $con_psql->query("SELECT * FROM public.employee_data;");
 
@@ -7716,7 +7969,7 @@ Array
 ```php
 <?php
 
-include 'connect_postgres1.php';
+include 'connect_postgresql.php';
 
 
 function &input($info) {
@@ -7798,7 +8051,7 @@ Array
 ```php
 <?php
 
-include 'connect_postgres1.php';
+include 'connect_postgresql.php';
 
 // Bu fonksiyon kullanıcıdan veri alma amaçı için oluşturuldu.
 function &input($info) {
@@ -7926,9 +8179,7 @@ try {
     echo "Connection is failed!";
     echo "Bağlantı Hatası:" . $e->getMessage();
 }
-
 ?>
-
 ```
 
 + Aşağıdaki PHP kodları ile PostgreSQL veritabanına veri yazdırma yapıyoruz:
@@ -7985,7 +8236,7 @@ SELECT * FROM public.employee_data ORDER BY emp_id;
 
 > + Eğer 6. satıra dikkat ederseniz PHP kodunu çalıştırma ile geldiğini görürsünüz.
 
-#### 🧪Örnek 27: Kullanıcıdan veri girişi
+#### 🧩Örnek 27: Kullanıcıdan veri girişi
 
 **Senaryo:**  Bir önceki `Örnek 26` aynısı fakat veri girdilerini terminal üzerinden kullanıcıdan alacağız.
 
@@ -8155,7 +8406,7 @@ Array
 4%
 ```
 
-##### Örnek 28.1: `fetchAll(PDO::FETCH_COLUMN, 1)`
+##### 🧪Örnek 28.1: `fetchAll(PDO::FETCH_COLUMN, 1)`
 
 > + `fetchAll` fonksiyonun 2. parametresini 1 olarak verdiğimizde `employee_data` tablosunun `emp_name` kolonu ekrana basılacaktır.
 
@@ -8222,6 +8473,1572 @@ SELECT emp_name FROM public.employee_data
 
 ```
 
+##### 🧩Uygulama 1: FETCH_COLUMN Style
+
+**connect_postgresql.php:**
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+?>
+```
+
+**fetch_styles.php:**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+
+// Bu fonksiyon kullanıcıdan veri alma amaçı için oluşturuldu.
+function input($info, $columns_num) {
+    // $input = (int) fgets(STDIN);     # Giriş Alternatifi
+    $input = readline($info);
+
+    if (is_numeric($input)) {
+        // $input değişkenini string → integer veri tipine
+        // dönüştürüyoruz:
+        $number = (int) $input;
+
+        return ($number >= 1 && $number <= $columns_num) ? $number : 0;
+    } else {
+        echo "Lütfen sadece sayı girin!";
+    }
+}
+
+
+$fetch_records = $con_psql->prepare(
+    "SELECT * FROM public.employee_data ORDER BY emp_id"
+);
+
+$fetch_records->execute();
+
+// Database tablosunun kolon sayısını alıyoruz:
+$columnCount = $fetch_records->columnCount();
+
+
+echo "Eğer aralık dışı değerler sıfır kabul edilir!\n";
+$row = $fetch_records->fetchAll(
+    PDO::FETCH_COLUMN, input(
+        "1 ile $columnCount arasında sayı giriniz: ", $columnCount
+    )
+);
+
+// echo "<pre>";
+print_r($row);
+// echo "</pre>";
+echo $row[3];
+
+?>
+```
+
+**PHP Çalıştır:**
+
+> + `fetch_styles.php` dosyasını terminal üzerinde çalıştırıyoruz:
+
+```shell
+php fetch_styles.php
+```
+
+**PHP Çıktısı:**
+
+```shell
+Connection is successful
+Eğer aralık dışı değerler sıfır kabul edilir!
+1 ile 5 arasında sayı giriniz: 1      # <--- Kullanıcı girdisi
+Array
+(
+    [0] => Linus
+    [1] => Arch Linux
+    [2] => Ubuntu
+    [3] => Fedora
+    [4] => Pop!_Os
+    [5] => Shekar
+    [6] => John
+)
+Fedora%           # <--- echo $row[3]
+```
+
+
+#### 🧪Örnek 29: FETCH_GROUP style
+
++ `PDO::FETCH_GROUP`, PDO’da `fetchAll()` ile birlikte kullanıldığında, sonuçları **bir grup altında gruplayarak** döndürür.
+
+
+> [!NOTE]
+> + Belirli bir sütunun değerine göre satırları **gruplayarak işlem yapmak** istiyorsan.
+> + Örneğin: Kullanıcılara göre sipariş listesini çekmek, kategorilere göre ürünleri ayırmak gibi.
+> + `GROUP BY` SQL komutuna **alternatif** değil, sadece sonucu PHP tarafında gruplanmış halde almak için kullanılır.
+
+
+> [!CAUTION]
+> + `FETCH_GROUP`, sadece `fetchAll()` ile kullanılabilir.
+> + *Gruplama için **ilk sütun**, dizi anahtarı olarak kullanılır.*
+> + Eğer ilk sütun **benzersiz değilse**, aynı anahtarla birden fazla değer diziye eklenir.
+
+**PostgreSQL: tanju database**
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+**SQL Çıktı:**
+
+```sql
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | Linus      | California |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+      4 | Fedora     | Louisiana  |      15 | 29/07/2010
+      5 | Pop!_Os    | California |      20 | 29/07/2005
+      6 | Shekar     | New York   |      34 | 1990
+      7 | John       | Virginia   |      20 | 12/20/2005
+(7 rows)
+
+```
+
+**connect_postgresql.php:**
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+?>
+```
+
+**fetch_styles.php:**
+
+```php
+include 'connect_postgresql.php';
+
+$fetch_records = $con_psql->prepare(
+    "SELECT emp_place, emp_name, emp_place FROM employee_data"
+    //      (GROUP)
+);
+
+
+$fetch_records->execute();
+
+$row = $fetch_records->fetchAll(
+    PDO::FETCH_GROUP
+    // PDO::FETCH_GROUP | PDO::FETCH_BOTH
+);
+
+print_r($row);
+?>
+```
+
+> + Eğer `PDO::FETCH_GROUP` yazdığınızda varsayılan olarak `PDO::FETCH_GROUP | PDO::FETCH_BOTH` olarak yorumlanır.
+
+**PHP Çalıştır:**
+
+```shell
+php fetch_styles.php
+```
+
+**PHP Çıktısı:**
+
+```shell
+Connection is successful
+Array
+(
+    [California] => Array
+        (
+            [0] => Array
+                (
+                    [emp_name] => Linus
+                    [1] => Linus
+                    [emp_place] => California
+                    [2] => California
+                )
+
+            [1] => Array
+                (
+                    [emp_name] => Pop!_Os
+                    [1] => Pop!_Os
+                    [emp_place] => California
+                    [2] => California
+                )
+
+        )
+
+    [New York] => Array
+        (
+            [0] => Array
+                (
+                    [emp_name] => Arch Linux
+                    [1] => Arch Linux
+                    [emp_place] => New York
+                    [2] => New York
+                )
+
+            [1] => Array
+                (
+                    [emp_name] => Shekar
+                    [1] => Shekar
+                    [emp_place] => New York
+                    [2] => New York
+                )
+
+        )
+
+    [Utah] => Array
+        (
+            [0] => Array
+                (
+                    [emp_name] => Ubuntu
+                    [1] => Ubuntu
+                    [emp_place] => Utah
+                    [2] => Utah
+                )
+
+        )
+
+    [Louisiana] => Array
+        (
+            [0] => Array
+                (
+                    [emp_name] => Fedora
+                    [1] => Fedora
+                    [emp_place] => Louisiana
+                    [2] => Louisiana
+                )
+
+        )
+
+    [Virginia] => Array
+        (
+            [0] => Array
+                (
+                    [emp_name] => John
+                    [1] => John
+                    [emp_place] => Virginia
+                    [2] => Virginia
+                )
+
+        )
+
+)
+
+```
+
+> + `[California], [New York], [Utah] ...` gibi alınan veriler `employee_data` tablosundaki `emp_place` verisinden gelmektedir.
+> + `"SELECT emp_place, emp_name, emp_place FROM employee_data"` sorgusunda ilk sıradaki kolon `emp_place` olmaktadır. 
+> + Yani, `FETCH_GROUP`, gruplama işlemini `SELECT` sorgusundaki ilk kolona göre yapmaktadır.
+
+##### 🧪Örnek 29.1: `FETCH_GROUP | FETCH_NUM`
+
+**connect_postgresql.php:** 
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+    /*
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_NUM
+    );
+     */
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+?>
+```
+
+**fetch_styles.php:**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+$fetch_records = $con_psql->prepare(
+    "SELECT emp_place, * FROM employee_data"  # <--- Dikkat
+);
+
+
+$fetch_records->execute();
+
+$row = $fetch_records->fetchAll(
+    PDO::FETCH_GROUP | PDO::FETCH_NUM
+);
+
+print_r($row);
+?>
+```
+
+
+> [!TIP]
+> + Eğer `fetchAll` fonksiyonunu bu durum da yazarsanız;
+> ```php
+> $row = $fetch_records->fetchAll(
+>	PDO::FETCH_GROUP
+> );
+> ```
+> + Alternatif olarak aşağıdaki gibi girebilirsiniz
+> ```php
+>  $con_psql->setAttribute(
+>        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_NUM
+>    );
+> ```
+> + Aynı çıktıyı üretecektir.
+
+**PHP Çalıştır:**
+
+```shell
+php fetch_styles.php
+```
+
+**PHP Çıktısı:**
+
+```shell
+Connection is successful
+Array 
+(  #  FETCH_GROUP'a göre array oluşturulmuştur.
+    [California] => Array 
+        ( 
+            [0] => Array
+                ( # FETCH_NUM'a göre 
+                    [0] => 1
+                    [1] => Linus
+                    [2] => California
+                    [3] => 25
+                    [4] => 25/09/2000
+                )
+
+            [1] => Array
+                ( # FETCH_NUM'a göre
+                    [0] => 5
+                    [1] => Pop!_Os
+                    [2] => California
+                    [3] => 20
+                    [4] => 29/07/2005
+                )
+
+        )
+
+    [New York] => Array
+        (
+            [0] => Array
+                ( # FETCH_NUM'a göre
+                    [0] => 2
+                    [1] => Arch Linux
+                    [2] => New York
+                    [3] => 36
+                    [4] => 25/09/1989
+                )
+
+            [1] => Array
+                ( # FETCH_NUM'a göre
+                    [0] => 6
+                    [1] => Shekar
+                    [2] => New York
+                    [3] => 34
+                    [4] => 1990
+                )
+
+        )
+
+    [Utah] => Array
+        (
+            [0] => Array
+                ( # FETCH_NUM'a göre
+                    [0] => 3
+                    [1] => Ubuntu
+                    [2] => Utah
+                    [3] => 20
+                    [4] => 25/09/2003
+                )
+
+        )
+
+    [Louisiana] => Array
+        (  
+            [0] => Array
+                ( # FETCH_NUM'a göre
+                    [0] => 4
+                    [1] => Fedora
+                    [2] => Louisiana
+                    [3] => 15
+                    [4] => 29/07/2010
+                )
+
+        )
+
+    [Virginia] => Array
+        (
+            [0] => Array
+                ( # FETCH_NUM'a göre
+                    [0] => 7
+                    [1] => John
+                    [2] => Virginia
+                    [3] => 20
+                    [4] => 12/20/2005
+                )
+
+        )
+
+)
+```
+
+> + Çıktıda da görüleceği üzeri gruplama `emp_place` kolonuna göre yapılmıştır.
+
+
+##### 🧪Örnek 29.2: FETCH_GROUP ve FETCH_ASSOC
+
+**connect_postgresql.php:**
+
+```php
+
+```
+
+**fetch_styles.php:**
+
+```php
+
+```
+
+#### 🧪Örnek 30: `FETCH_UNIQUE`
+
++ `PDO::FETCH_UNIQUE`, PHP'de PDO ile `fetchAll()` kullanılırken, sorgu sonucundaki satırları **ilk sütundaki değerlere göre benzersiz (unique) olarak indeksleyen** bir fetch modudur.
+
+
+> [!NOTE]
+> + **`PDO::FETCH_UNIQUE`**, ilk sütunu **anahtar (key)** olarak kullanır  ve her anahtara karşılık sadece **bir değer (satır)** döner.
+> + *Aynı anahtar (ilk sütun değeri) tekrar ederse: **sadece sonuncusu** kalır.*
+> + Yani anahtarlar **benzersiz** olur.
+
+**PostgreSQL: tanju database**
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+**SQL Çıktı:**
+
+```sql
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | Linus      | California |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+      4 | Fedora     | Louisiana  |      15 | 29/07/2010
+      5 | Pop!_Os    | California |      20 | 29/07/2005
+      6 | Shekar     | New York   |      34 | 1990
+      7 | John       | Virginia   |      20 | 12/20/2005
+(7 rows)
+
+```
+
+**connect_postgresql.php:** 
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+    /* setAttribute Pasif duruma alımıştır.
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+     */
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+
+?>
+```
+
+**fetch_styles.php:**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+$fetch_records = $con_psql->prepare(
+    "SELECT emp_name, emp_name, emp_place FROM employee_data"
+    //   (UNIQUE için) ( FETCH_BOTH için)
+);
+
+$fetch_records->execute();
+
+$row = $fetch_records->fetchAll(
+    PDO::FETCH_UNIQUE
+    // PDO::FETCH_UNIQUE | PDO::FETCH_BOTH  # (Varsyılan)
+);
+
+print_r($row);
+
+?>
+```
+
+> 1. `SELECT emp_place, * FROM employee_data` 
+> 	- Bu sorgu tarzı PostgreSQL sorgu tarzından farklı olduğu oldukça belli, buradaki `emp_place` kolonu yazılmasın sebebi gruplamayı bu kolona göre yapmasıdır.
+> 	- `PDO::FETCH_GROUP` ile aynıdır. Fakat `PDO::FETCH_UNIQUE` gruplama yaparken anahtar(key) kelimeyi bir kez kullanır ve eğer iki kez varsa en son anahtar(key) kelimeyi alır. 
+
+
+> [!TIP]
+> + Eğer sadece `PDO::FETCH_UNIQUE` olarak yazarsanız `PDO` bu ifadeyi varsayılan olarak `PDO::FETCH_UNIQUE | PDO::FETCH_BOTH` olarak alacaktır.
+
+
+**PHP Çalıştır:**
+
+```shell
+php fetch_styles.php
+```
+
+**PHP Çıktısı:**
+
+```shell
+Connection is successful
+Array   #   Bu array  FETCH_UNIQUE göre
+(
+    [California] => Array  # Bu array FETCH_BOTH göre
+        (
+            [emp_name] => Pop!_Os
+            [1] => Pop!_Os
+            [emp_place] => California
+            [2] => California
+        )
+
+    [New York] => Array  # Bu array FETCH_BOTH göre
+        (
+            [emp_name] => Shekar
+            [1] => Shekar
+            [emp_place] => New York
+            [2] => New York
+        )
+
+    [Utah] => Array     # Bu array FETCH_BOTH göre
+        (
+            [emp_name] => Ubuntu
+            [1] => Ubuntu
+            [emp_place] => Utah
+            [2] => Utah
+        )
+
+    [Louisiana] => Array # Bu array FETCH_BOTH göre
+        (
+            [emp_name] => Fedora
+            [1] => Fedora
+            [emp_place] => Louisiana
+            [2] => Louisiana
+        )
+
+    [Virginia] => Array  # Bu array FETCH_BOTH göre
+        (
+            [emp_name] => John
+            [1] => John
+            [emp_place] => Virginia
+            [2] => Virginia
+        )
+
+)
+```
+
+> 1. `emp_place` kolonunda 2 tane `new york` olmasına rağmen 1 tane gösterildiğine dikkat ediniz! Ayrıca `emp_id` kolonundan takip ederseniz, en son satır alındığını görebilirsiniz.
+
+
+> [!TIP]
+> **`PDO::FETCH_GROUP`  vs `PDO::FETCH_UNIQUE`**
+> + `PDO::FETCH_GROUP` 
+> ```shell
+> 	[New York] => Array
+> 	   (
+>          [0] => Array
+>             (
+>                    [emp_id] => 2
+>                    [emp_name] => Arch Linux
+>                    [emp_place] => New York
+>                    [emp_age] => 36
+>                    [emp_dob] => 25/09/1989
+>                )
+>            [1] => Array
+>                (
+>                    [emp_id] => 6
+>                    [emp_name] => Shekar
+>                    [emp_place] => New York
+>                    [emp_age] => 34
+>                    [emp_dob] => 1990
+>                )
+>        )
+> ```
+> + `PDO::FETCH_UNIQUE`
+> ```shell
+>     [New York] => Array
+>        (
+>            [emp_id] => 6
+>            [emp_name] => Shekar
+>            [emp_place] => New York
+>            [emp_age] => 34
+>            [emp_dob] => 1990
+>        )
+> ```
+
+
+##### 🧪Örnek 30.1: FETCH_UNIQUE ve FETCH_ASSOC
+
+**connect_postgresql.php:**
+
+```php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlan Şekli:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+    /*
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+     */
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+?>
+```
+
+**fetch_styles.php:**
+
+```php
+<?php
+include 'connect_postgresql.php';
+
+$fetch_records = $con_psql->prepare(
+    "SELECT emp_place, emp_name, emp_place FROM public.employee_data"
+);
+
+$fetch_records->execute();
+
+$users = $fetch_records->fetchAll(
+    PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC
+    /*
+    * | PDO::FETCH_BOTH yazmak yerine alternatif olarak
+    * setAttribute ile de ayarlayabilirsiz!
+    */
+);
+
+print_r($users);
+?>
+```
+
+
+> [!TIP]
+> + `PDO::FETCH_ASSOC` parametresini `fetchAll()` fonksiyona geçmek yerine `setAttribute()` fonksiyonuna aynı çıktıyı elde edebiliriz. 
+
+**PHP Çalıştır:**
+
+```shell
+php fetch_styles.php
+```
+
+**PHP Çıktısı:**
+
+```shell
+Connection is successful
+Array    # Bu array  FETCH_UNIQUE göre
+(
+    [California] => Array   # Bu array FETCH_ASSOC göre
+        (
+            [emp_name] => Pop!_Os
+            [emp_place] => California
+        )
+
+    [New York] => Array    # Bu array FETCH_ASSOC göre
+        (
+            [emp_name] => Shekar
+            [emp_place] => New York
+        )
+
+    [Utah] => Array        # Bu array FETCH_ASSOC göre
+        (
+            [emp_name] => Ubuntu
+            [emp_place] => Utah
+        )
+
+    [Louisiana] => Array   # Bu array FETCH_ASSOC göre
+        (
+            [emp_name] => Fedora
+            [emp_place] => Louisiana
+        )
+
+    [Virginia] => Array    # Bu array FETCH_ASSOC göre
+        (
+            [emp_name] => John
+            [emp_place] => Virginia
+        )
+
+)
+```
+
+#### 🧪Örnek 31: FETCH_KEY_PAIR
+
++ `PDO::FETCH_KEY_PAIR`, PHP'de `PDOStatement::fetchAll()` ile kullanıldığında, sorgudan dönen **ilk sütunu anahtar (key)**, **ikinci sütunu ise değer (value)** olarak alır ve bunlardan **anahtar-değer (associative) dizisi** oluşturur.
+
+
+
+**PostgreSQL: tanju veritabanı:**
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+**Çıktı:**
+
+```shell
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | Linus      | California |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+      4 | Fedora     | Louisiana  |      15 | 29/07/2010
+      5 | Pop!_Os    | California |      20 | 29/07/2005
+      6 | Shekar     | New York   |      34 | 1990
+      7 | John       | Virginia   |      20 | 12/20/2005
+(7 rows)
+
+```
+
+**connect_postgresql.php:** 
+
+```php
+<?php
+try {
+        /*
+        $con_psql = new PDO (
+                "pgsql:host=192.168.1.132;
+                port=5432;
+                dbname=pdo_tutorial;
+                user=tanju;
+                password=1234tyod"
+        );
+        */
+
+        // Alternatif Bağlantı:
+        $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+        $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+        $con_psql->setAttribute(
+                PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+        );
+
+        echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+        echo "Connection is failed!";
+        echo "Bağlantı Hatası:" . $e->getMessage();
+}
+
+?>
+```
+
+**fetch_styles.php:**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+$fetch_records = $con_psql->prepare(
+        "SELECT emp_place, emp_name FROM employee_data"
+				//  KEY      VALUE
+);
+
+$fetch_records->execute();
+
+$row = $fetch_records->fetchAll(
+        PDO::FETCH_KEY_PAIR
+        // PDO::FETCH_UNIQUE
+        // PDO::FETCH_GROUP
+);
+
+print_r($row);
+```
+
+> + **Amaç:** İki sütunlu bir sorgudan hızlıca `key => value` dizisi elde etmek.
+> + **Ne Zaman Kullanır:** `SELECT emp_place, emp_name` gibi sadece iki sütun çektiğinde ve bu değerleri hızlıca eşleştirmek istediğinde.
+
+**PHP Çalıştır:**
+
+```shell
+php fetch_styles.php
+```
+
+**PHP Çıktı:**
+
+```shell
+Connection is successful
+Array
+(
+    [California] => Pop!_Os
+    [New York] => Shekar
+    [Utah] => Ubuntu
+    [Louisiana] => Fedora
+    [Virginia] => John
+)
+```
+
+> + Eğer `employee_data` ile çıktıyı karşılaştırışsanız, `emp_place` kolonunda `California` iki kez geçmesine rağmen sadece bir kez geçmiştir. 
+> + 1. sırada `linus` var iken 5. sırada `Pop!_Os` var. En sondaki sıra olan `Pop!_Os` çıktı vermiştir. Kısacası bir kez yazılır ve en sondaki değer yazılır.
+
+
+
+> [!CAUTION]
+> 1. **Sorgu tam olarak 2 sütun** döndürmelidir. Aksi taktirde hata verir.
+> 2. *ilk sütun anahtar, ikinci sütun değer olur.*
+> 3. Anahtarlar benzersiz olmalıdır; aynı key varsa sonucusu geçerli olur.
+
+##### 🧪Örnek 31.1: FETCH_KEY_PAIR vs Fatal error
+
+> + Eğer `SELECT` sorgusuna 2'den fazla sütün girilirse, aşağıdaki gibi bir hata verecektir.
+
+**connect_postgresql.php:** Yukarıdaki `Örnek 31` ile aynıdır.**
+
+**fetch_styles.php:**
+
+```php
+
+include 'connect_postgres1.php';
+
+$fetch_records = $con_psql->prepare(
+        "SELECT emp_place, emp_name, emp_age FROM employee_data"
+	        //    KEY        VALUE   (Dikkat: Fazla sütün) 
+);
+
+$fetch_records->execute();
+
+$row = $fetch_records->fetchAll(
+        PDO::FETCH_KEY_PAIR
+        // PDO::FETCH_UNIQUE
+        // PDO::FETCH_GROUP
+);
+
+print_r($row);
+
+?>
+```
+
+**PHP Çıktısı:**
+
+```shell
+onnection is successful
+PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns. in /var/www/html/connectPostgreSQL/fetch_styles.php:15
+Stack trace:
+#0 /var/www/html/connectPostgreSQL/fetch_styles.php(15): PDOStatement->fetchAll()
+#1 {main}
+  thrown in /var/www/html/connectPostgreSQL/fetch_styles.php on line 15
+
+Fatal error: Uncaught PDOException: SQLSTATE[HY000]: General error: PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns. in /var/www/html/connectPostgreSQL/fetch_styles.php:15
+Stack trace:
+#0 /var/www/html/connectPostgreSQL/fetch_styles.php(15): PDOStatement->fetchAll()
+#1 {main}
+  thrown in /var/www/html/connectPostgreSQL/fetch_styles.php on line 15
+```
+
+#### 🧪Örnek 32: FETCH_CLASS
+
++ `PDO::FETCH_CLASS`, PHP'de `PDOStatement::fetch()` veya `fetchAll()` ile birlikte kullanıldığında, her sorgu sonucunu belirtilen bir **sınıfın nesnesi (object)** olarak döndürür.
+
+**PostgreSQL: tanju veritabanı:**
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+**Çıktı:**
+
+```shell
+ emp_id |  emp_name  | emp_place  | emp_age |  emp_dob
+--------+------------+------------+---------+------------
+      1 | Linus      | California |      25 | 25/09/2000
+      2 | Arch Linux | New York   |      36 | 25/09/1989
+      3 | Ubuntu     | Utah       |      20 | 25/09/2003
+      4 | Fedora     | Louisiana  |      15 | 29/07/2010
+      5 | Pop!_Os    | California |      20 | 29/07/2005
+      6 | Shekar     | New York   |      34 | 1990
+      7 | John       | Virginia   |      20 | 12/20/2005
+(7 rows)
+```
+
+**connect_postgresql.php:**
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+    /*
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+     */
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+?>
+```
+
+**fetch_styles.php:**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+$fetch_records = $con_psql->prepare(
+    "SELECT emp_name, emp_place, emp_age FROM employee_data"
+);
+
+$fetch_records->execute();
+
+$users = $fetch_records->fetchAll(
+    PDO::FETCH_CLASS
+    // PDO::FETCH_OBJ
+);
+
+print_r($users);
+?>
+```
+
+**PHP Çalıştır:**
+
+```shell
+php fetch_styles.php
+```
+
+**PHP Çıktısı:**
+
+```shell
+Connection is successful
+Array
+(
+    [0] => stdClass Object
+        (
+            [emp_name] => Linus
+            [emp_place] => California
+            [emp_age] => 25
+        )
+
+    [1] => stdClass Object
+        (
+            [emp_name] => Arch Linux
+            [emp_place] => New York
+            [emp_age] => 36
+        )
+
+    [2] => stdClass Object
+        (
+            [emp_name] => Ubuntu
+            [emp_place] => Utah
+            [emp_age] => 20
+        )
+
+    [3] => stdClass Object
+        (
+            [emp_name] => Fedora
+            [emp_place] => Louisiana
+            [emp_age] => 15
+        )
+
+    [4] => stdClass Object
+        (
+            [emp_name] => Pop!_Os
+            [emp_place] => California
+            [emp_age] => 20
+        )
+
+    [5] => stdClass Object
+        (
+            [emp_name] => Shekar
+            [emp_place] => New York
+            [emp_age] => 34
+        )
+
+    [6] => stdClass Object
+        (
+            [emp_name] => John
+            [emp_place] => Virginia
+            [emp_age] => 20
+        )
+
+)
+```
+
+
+##### 🧩Uygulama 2: FETCH_CLASS vs sınıf
+
+**connect_postgresql.php:** Yukarıdaki `Örnek 32` ile aynıdır.
+
+> [!CAUTION]
+> - Sadece **public** özellikler atanabilir. (*Dikkat*)
+> - **Sütun isimleri**, sınıf property isimleriyle **eşleşmelidir**.(*Önemli*)
+> - **fetch()** veya **fetchAll()** ile birlikte kullanılabilir.
+
+> [!NOTE]
+> 🎯**Ne İçin Kullanılır?**
+> + Nesne yönelimli programlama (OOP) yaparken daha düzenli veri çekimi.
+> + Veritabanı kayıtlarını doğrudan nesnelere aktarmak için.
+> + MVC yapılarında model katmanında kullanımı yaygındır.
+
+**fetch_styles.php:**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+// Veritabanı tablosunu sınıf üzerinden işleme alabiliriz.
+// İhtiyacınıza bağlı olarak sınıfı düzenleyebiliriz.
+class Employee {
+    public $emp_name;
+    public $emp_place;
+    public $emp_age;
+
+
+    public function print_users() {
+        echo "Kullanıcı: $this->emp_name
+             Yer: $this->emp_place
+             Yaş: $this->emp_age";
+    }
+}
+
+$fetch_records = $con_psql->prepare(
+    "SELECT emp_name, emp_place, emp_age FROM employee_data"
+    //     $emp_name  $emp_place  $emp_age     << class property 
+);
+
+$fetch_records->execute();
+
+$users = $fetch_records->fetchAll(
+    PDO::FETCH_CLASS, 'Employee'      // <<--- Employee Sınıfı
+);
+
+// print_r($users);
+
+foreach ($users as $user) {
+    echo $user->print_users() . "\n";
+}
+?>
+```
+
+> + Sınıf özelikleri(`property`) ile `employee_data` tablosunun sütün isimlerin aynı olduğuna dikkat ediniz. Aksi halde hata verecektir.
+
+**PHP Çalıştır:**
+
+```shell
+php fetch_styles.php
+```
+
+**PHP Çıktısı:**
+
+```shell
+Connection is successful
+Kullanıcı: Linus
+                         Yer: California
+                         Yaş: 25
+Kullanıcı: Arch Linux
+                         Yer: New York
+                         Yaş: 36
+Kullanıcı: Ubuntu
+                         Yer: Utah
+                         Yaş: 20
+Kullanıcı: Fedora
+                         Yer: Louisiana
+                         Yaş: 15
+Kullanıcı: Pop!_Os
+                         Yer: California
+                         Yaş: 20
+Kullanıcı: Shekar
+                         Yer: New York
+                         Yaş: 34
+Kullanıcı: John
+                         Yer: Virginia
+                         Yaş: 20
+```
+
+
+
+##### 🆚`PDO::FETCH_CLASS` vs `PDO::FETCH_OBJ`
+
+
+> [!NOTE]
+> 1. **`PDO::FETCH_OBJ`**
+> 	- Her bir satırı anonim (`stdClass`) nesne olarak döner.
+> 	- **Varsayılan bir sınıf** yoktur, PHP kendi oluşturur (`stdClass`).
+> 	- Sadece verileri alırsınız, **herhangi bir özel davranış** (metotlar, constructor vs.) yoktur.
+> 2. **`PDO::FETCH_CLASS`**
+> 	- Her bir satırı **belirttiğiniz bir sınıfın örneği** olarak döner.
+> 	- *Kolon değerleri sınıfın özelliklerine atanır.*
+> 	- İsterseniz `__construct()` çalıştırılır.
+> 	- Daha **özelleştirilebilir** bir yapıdır (örneğin: getter/setter, iş mantığı ekleyebilirsiniz).
+
+|Özellik|`PDO::FETCH_OBJ`|`PDO::FETCH_CLASS`|
+|---|---|---|
+|Nesne Türü|`stdClass` (anonim)|Belirttiğiniz sınıf|
+|Özelleştirme|Yok|Var (property + method)|
+|Constructor Çağrısı|Hayır|Evet (isterseniz parametreyle)|
+|Kullanım Kolaylığı|Basit veri alma için ideal|Nesne odaklı yapı için uygun|
+
+
+> [!TIP]
+> **Ne Zaman Hangisini Kullanmalı?**
+> + **Sadece veri çekilecek, iş mantığı yoksa**: `PDO::FETCH_OBJ`
+> + **Veri ile birlikte iş kuralları/metotlar da kullanılacaksa**: `PDO::FETCH_CLASS`
+
+#### 🧪Örnek 33: `rowCount` fonksiyonu
+
++ PHP 8'de `PDO::rowCount()` fonksiyonu, bir **PDOStatement** nesnesi üzerinden çalıştırılan SQL sorgusunun **etkilenen satır sayısını** döndürür
++ Ancak bu fonksiyonun **kullanımı sorgu türüne göre farklılık gösterir.**
+
+**connect_postgesql.php:**
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+
+?>
+```
+
+> + `setAttribute` fonksiyonu ile veritabanından veri alış tarzını `FETCH_ASSOC` olarak ayarlıyoruz.
+
+**PDO_methods.php:**
+
+```php
+<?php
+
+$fetch_records = $con_psql->prepare(
+    "SELECT * FROM public.employee_data WHERE emp_age = 20"
+);
+
+$fetch_records->execute();
+
+
+$users = $fetch_records->fetchAll();
+
+
+print_r($users);
+
+// PDO metodu ile
+echo "Sorgu Sayısı: " . $fetch_records->rowCount() . "\n";
+// PPHP Built-in fonksiyonu ile
+echo 'Sorgu Sayısı: ' . count($users) . "\n";
+?>
+```
+
+**PHP Çalıştır:**
+
+```shell
+php PDO_methods.php
+```
+
+**PHP Çıktı:**
+
+```shell
+Connection is successful
+Array
+(
+    [0] => Array
+        (
+            [emp_id] => 3
+            [emp_name] => Ubuntu
+            [emp_place] => Utah
+            [emp_age] => 20
+            [emp_dob] => 25/09/2003
+        )
+
+    [1] => Array
+        (
+            [emp_id] => 5
+            [emp_name] => Pop!_Os
+            [emp_place] => California
+            [emp_age] => 20
+            [emp_dob] => 29/07/2005
+        )
+
+    [2] => Array
+        (
+            [emp_id] => 7
+            [emp_name] => John
+            [emp_place] => Virginia
+            [emp_age] => 20
+            [emp_dob] => 12/20/2005
+        )
+
+)
+Sorgu Sayısı: 3  # $fetch_records->rowCount()
+Sorgu Sayısı: 3  # count($users)
+```
+
+> + Array içerisinde 3 veri çekilmiş associative array tarzında
+> + `Built-in` fonksiyon ve PDO metot çıktısına uymaktadır.
+
+#### 🧪Örnek 34: `lastInsertId` fonksiyonu
+
++ PHP 8'de `PDO::lastInsertId()` fonksiyonu, **veritabanına yapılan son `INSERT` işleminde otomatik olarak oluşturulan (auto-increment) ID değerini** verir.
++ `lastInsertId()` → son eklenen satırın otomatik ID’sini döner.
+
+
+> [!NOTE]
+> + Sadece **AUTO_INCREMENT** birincil anahtar (id) olan tablolar için çalışır.
+> + `INSERT` işleminden **hemen sonra** kullanılmalıdır.
+> + `lastInsertId()` **veritabanı bağlantısı bazlıdır**, yani aynı PDO nesnesiyle çağrılmalıdır.
+
+
+> [!CAUTION]
+> + AUTO_INCREMENT olmayan tablolar için çalışmaz.
+
+
+**❗ Dikkat Edilmesi Gerekenler**
+
+| Durum                                   | Sonuç                                  |
+| --------------------------------------- | -------------------------------------- |
+| Otomatik artan (`AUTO_INCREMENT`) yoksa | `lastInsertId()` boştur veya `0` döner |
+| Birden fazla satır eklersen             | Sadece **ilk satırın ID'sini** döner   |
+| Farklı PDO nesnesi ile çağrılırsa       | Yanlış veya boş değer dönebilir        |
+
+**connect_postgresql.php:**
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+?>
+```
+
+**PDO_methods.php:**
+
+```php
+<?php
+
+include 'connect_postgresql.php';
+
+$empName = 'Melih';
+$place = 'Çebeci';
+$age = 25;
+$dob = 2000;
+
+$insert_query = $con_psql->prepare(
+    'INSERT INTO employee_data (
+        emp_name, emp_place, emp_age, emp_dob
+    )
+    VALUES (
+        :emp_name, :emp_place, :emp_age, :emp_dob
+    )'
+);
+
+$insert_query->execute(
+    [
+        ':emp_name' => $empName,
+        ':emp_place' => $place,
+        ':emp_age' => $age,
+        ':emp_dob' => $dob
+    ]
+);
+
+echo 'Girilen en son verinin ID: ' . $con_psql->lastInsertId();
+?>
+```
+
+**PHP Çalştır:**
+
+```shell
+php PDO_methods.php
+```
+
+**PHP Çıktısı:**
+
+```shell
+Connection is successful
+Girilen en son verinin ID: 11% 
+```
+
+#### 🧪Örnek 35: `PDO::exec()` fonksiyonu
+
++ Bu fonksiyon, veritabanına bir SQL ifadesi gönderip çalıştırmak ve etkilenen satır sayısını döndürmek için kullanılır.
++ PHP 8’de (ve önceki sürümlerde), **PDO::exec()** fonksiyonu, veritabanında **veri üzerinde değişiklik yapan SQL komutlarını çalıştırmak** için kullanılır.
+
+
+> [!NOTE]
+> **Temel Özellikleri**
+> + **SQL sorgularını çalıştırır** (özellikle INSERT, UPDATE, DELETE gibi veri değiştiren sorgular)
+> + **Etkilenen satır sayısını döndürür**
+> + **SELECT sorguları için uygun değildir** (sonuç kümesi döndürmez)
+> +  **Hazırlanmış ifadeler (prepared statements) kullanmaz**
+
+
+> [!CAUTION]
+> 1. **Güvenlik**: Kullanıcı girdisi içeren sorgularda` PDO::exec` kullanıyorsanız, SQL enjeksiyon saldırılarına açık olabilir. Bu durumlarda `PDO::prepare` ve hazırlanmış ifadeler kullanmak daha güvenlidir.
+> 2. **Hata Yönetimi**: Hataları yakalamak için `PDO::errorCode()` veya `PDOException` kullanabilirsiniz.
+> 3. **SELECT sorguları**: Veri okuma işlemleri için `PDO::query()` veya `PDO::prepare() + PDOStatement::execute()` kullanmak daha uygundur.
+
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+**SQL Çıktısı:**
+
+```shell
+ emp_id | emp_name | emp_place  | emp_age |  emp_dob
+--------+----------+------------+---------+------------
+      1 | Ahmet    | california |      25 | 25/09/2000
+      2 | Melih    | New York   |      36 | 25/09/1989
+      3 | Oğuzhan  | Utak       |      20 | 25/09/2003
+      4 | Mert Can | Tunceli    |      24 | 12/05/2001
+      5 | Eyüphan  | New York   |      19 | 26/06/2006
+      6 | Atilla   | California |      38 | 15/02/1987
+      7 | Çetin    |            |      50 | 26/01/1975
+      8 | Ali Riza |            |      48 | 07/07/1977
+      9 | Umut     |            |      18 | 17/09/2006
+(9 rows)
+```
+
+**connect_postgresql.php:**
+
+```php
+<?php
+try {
+    /*
+    $con_psql = new PDO (
+        "pgsql:host=192.168.1.132;
+        port=5432;
+        dbname=pdo_tutorial;
+        user=tanju;
+        password=1234tyod"
+    );
+    */
+
+    // Alternatif Bağlantı:
+    $db_name = "pgsql:host=192.168.1.132; port=5432; dbname=pdo_tutorial";
+    $con_psql = new PDO ($db_name, 'tanju', "1234tyod");
+
+
+    $con_psql->setAttribute(
+        PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC
+    );
+
+    echo "Connection is successful\n";
+
+} catch (PDOexception $e) {
+    echo "Connection is failed!";
+    echo "Bağlantı Hatası:" . $e->getMessage();
+}
+?>
+```
+
+**PDO_methods.php:**
+
+```php
+include 'connect_postgres1.php';
+
+/*
+$fetch_records = "
+    UPDATE employee_data
+        SET emp_place = Çorum
+        WHERE emp_id BETWEEN 7 AND 9
+";
+ */
+
+$fetch_records = "
+    UPDATE employee_data1 AS e_d
+    SET
+        emp_place = v.emp_place
+    FROM (
+        VALUES
+            (7, 'Çorum'),
+            (8, 'Sivas'),
+            (9, 'Şanlıurfa')
+    ) AS v(emp_id, emp_place)
+    WHERE e_d.emp_id = v.emp_id
+";
+
+
+$result = $con_psql->exec($fetch_records);
+
+echo $result;
+?>
+```
+
+
+
+```sql
+SELECT * FROM public.employee_data ORDER BY emp_id;
+```
+
+**SQL Çıktısı:**
+
+```shell
+ emp_id | emp_name | emp_place  | emp_age |  emp_dob
+--------+----------+------------+---------+------------
+      1 | Ahmet    | california |      25 | 25/09/2000
+      2 | Melih    | New York   |      36 | 25/09/1989
+      3 | Oğuzhan  | Utak       |      20 | 25/09/2003
+      4 | Mert Can | Tunceli    |      24 | 12/05/2001
+      5 | Eyüphan  | New York   |      19 | 26/06/2006
+      6 | Atilla   | California |      38 | 15/02/1987
+      7 | Çetin    |            |      50 | 26/01/1975
+      8 | Ali Riza |            |      48 | 07/07/1977
+      9 | Umut     |            |      18 | 17/09/2006
+(9 rows)
+```
 #### PHP ile Bağlanma:
 
 ```php

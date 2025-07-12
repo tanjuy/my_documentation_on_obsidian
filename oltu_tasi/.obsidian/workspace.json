@@ -70,34 +70,6 @@
             }
           },
           {
-            "id": "6363e757d6e0276e",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/PHP/Laravel/Into to Laravel.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Into to Laravel"
-            }
-          },
-          {
-            "id": "6c2a21c3a881ab30",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/PHP/PHP 8.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "PHP 8"
-            }
-          },
-          {
             "id": "662249ca13d2c476",
             "type": "leaf",
             "state": {
@@ -112,21 +84,53 @@
             }
           },
           {
-            "id": "ae50f2d98c9f9029",
+            "id": "57957cd91f40b016",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Programlama/Python/Python Giriş.md",
+                "file": "DevOps/Grafana/Grafana ve Promethous.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Python Giriş"
+              "title": "Grafana ve Promethous"
             }
           },
           {
-            "id": "57957cd91f40b016",
+            "id": "0cc553557c336f92",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/PHP/PHP 8 Apps.md",
+                "mode": "source",
+                "source": false
+              },
+              "pinned": true,
+              "icon": "lucide-file",
+              "title": "PHP 8 Apps"
+            }
+          },
+          {
+            "id": "847ee99bf70d8473",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/PHP/PHP 8.md",
+                "mode": "source",
+                "source": false
+              },
+              "pinned": true,
+              "icon": "lucide-file",
+              "title": "PHP 8"
+            }
+          },
+          {
+            "id": "1e3e5ba187899cca",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -138,9 +142,23 @@
               "icon": "lucide-file",
               "title": "tmux"
             }
+          },
+          {
+            "id": "7915c9655dd337ac",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Windows Commands/PowerShell.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "PowerShell"
+            }
           }
         ],
-        "currentTab": 8
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -259,13 +277,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Linux Command/tmux.md",
+                "file": "DevOps/Grafana/Grafana ve Promethous.md",
                 "followCursor": true,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of tmux"
+              "title": "Outline of Grafana ve Promethous"
             }
           }
         ],
@@ -285,101 +303,38 @@
       "command-palette:Open command palette": false
     }
   },
-  "floating": {
-    "id": "830cd3014370ba12",
-    "type": "floating",
-    "children": [
-      {
-        "id": "6cb1cb1dbbe35af0",
-        "type": "window",
-        "children": [
-          {
-            "id": "1d812e72e1eaef70",
-            "type": "tabs",
-            "dimension": 70.703125,
-            "children": [
-              {
-                "id": "bd49ce0d204e9e51",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "Programlama/PHP/PHP 8.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "PHP 8"
-                },
-                "group": "7ba686909601504e"
-              }
-            ]
-          },
-          {
-            "id": "2af691d03f7c3446",
-            "type": "tabs",
-            "dimension": 29.296875,
-            "children": [
-              {
-                "id": "865ea88c505fcfee",
-                "type": "leaf",
-                "state": {
-                  "type": "outline",
-                  "state": {
-                    "file": "Programlama/PHP/PHP 8.md",
-                    "followCursor": true,
-                    "showSearch": false,
-                    "searchQuery": ""
-                  },
-                  "icon": "lucide-list",
-                  "title": "Outline of PHP 8"
-                },
-                "group": "7ba686909601504e"
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 256,
-        "y": 80,
-        "width": 1024,
-        "height": 800,
-        "maximize": true,
-        "zoom": 0
-      }
-    ]
-  },
   "active": "57957cd91f40b016",
   "lastOpenFiles": [
     "Programlama/PHP/PHP 8.md",
+    "Programlama/PHP/PHP 8 Apps.md",
+    "Windows Commands/PowerShell.md",
+    "Windows Commands/CMD.md",
     "Linux Command/tmux.md",
-    "Untitled.md",
-    "Database/PostgreSQL/PostgreSQL Giriş.md",
-    "Programlama/Python/Python Giriş.md",
+    "DevOps/Grafana/Grafana ve Promethous.md",
     "Linux Command/Vim.md",
-    "Windows Commands/WSL2.md",
+    "Database/PostgreSQL/PostgreSQL Giriş.md",
+    "DevOps/Grafana",
+    "K8s/K8s Kurulumu.md",
+    "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
+    "Programlama/PHP/Laravel/Into to Laravel.md",
+    "Programlama/Bash_Script/Bash Script Apps.md",
+    "Web Servers/css/CSS.md",
     "Linux Command/Linux komutları.md",
+    "Programlama/Python/Python Giriş.md",
+    "Programlama/perl/Perl Giriş.md",
+    "create a link.md",
+    "Web Servers/html/HTML.md",
+    "Untitled.md",
+    "Windows Commands/WSL2.md",
     "Web Servers/Nginx/Nginx Config File.md",
     "Programlama/Bash_Script/Bash Script.md",
-    "Programlama/PHP/Laravel/Into to Laravel.md",
     "Windows Commands/Kısayollar.md",
     "Windows Commands/Çalıştır.md",
-    "Windows Commands/CMD.md",
-    "Perl Giriş.md",
     "Programlama/PHP/Laravel",
-    "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
-    "Web Servers/html/HTML.md",
     "Programlama/perl",
     "Database/PostgreSQL/Veri Girişi - INSERT.md",
     "Linux Command/Network/ip.md",
     "Web Servers/html/images/form_date.png",
-    "Programlama/Bash_Script/Bash Script Apps.md",
-    "K8s/K8s Kurulumu.md",
-    "Database/PostgreSQL/Tabloda Değişiklik - ALTER.md",
-    "Database/PostgreSQL/Tablo Oluşturma - CREATE.md",
-    "Database/PostgreSQL/Tablo Birleştirme - JOIN.md",
-    "Linux Command/Linux Paket Komutları.md",
-    "Database/PostgreSQL/GROUP BY Kullanımı.md",
     "Database/PostgreSQL/Pictures/inner_join.png",
     "Database/PostgreSQL/Pictures/if-modified-since.png",
     "Database/PostgreSQL/Pictures/employee_table.png",
@@ -396,7 +351,6 @@
     "Programlama/PHP",
     "Programlama/Python/Sqlalchemy",
     "Sistem İzleme",
-    "Archlinux",
     "Untitled.canvas"
   ]
 }

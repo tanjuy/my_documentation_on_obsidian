@@ -3041,6 +3041,49 @@ WHERE koşul;
 > + Karmaşık güncellemelerde alt sorgular (subquery) da kullanılabilir.
 
 
+
+> [!NOTE]
+> + Aşağıdaki örneklerde kullanacağımız tablo:
+> ```sql
+> CREATE TABLE employee_data (
+>	emp_id SERIAL PRIMARY KEY,
+>	emp_name VARCHAR(100),
+>	emp_place VARCHAR(255),
+>	emp_age INTEGER,
+>	emp_dob VARCHAR(255)
+> );
+> ```
+
+
+> [!NOTE]
+> **Ve onun verileri:**
+> 1. Veri 
+> ```sql
+> INSERT INTO employee_data (
+>	emp_name, emp_place, emp_age, emp_dob
+> ) 
+> VALUES (
+>	'Ahmet', 'california', 25, '25/09/2000'
+> );
+> ```
+> 2. Veri
+> ```sql
+> INSERT INTO employee_data (
+>	emp_name, emp_place, emp_age, emp_dob) 
+> VALUES (
+>	'Melih', 'New York', 36, '25/09/1989'
+> );
+> ```
+> 3. Veri
+> ```sql
+> INSERT INTO employee_data (
+>	emp_name, emp_place, emp_age, emp_dob
+> ) 
+> VALUES (
+>	'Oğuzhan', 'Utak', 20, '25/09/2003'
+> );
+> ```
+
 ## Örnek 1:
 
 **Senaryo:** `employee_data` tablosundaki `Utak` kelimesini `Utah` olarak çevirmek isteniyor.
@@ -3115,5 +3158,102 @@ SELECT * FROM public.employee_data;
 
 
 UPDATE 1
+```
+
+## Örnek 3: BETWEEN ve UPDATE
+
+```sql
+
+```
+
+## Örnek 4: `UPDATE ... FROM (VALUES ...)`
+
+**Amaç:** Aynı tabloda **birden fazla satırı**, **farklı değerlerle**, **tek bir sorguda** güncellemek.
+
+**Öncesi:**
+
+```sql
+SELECT * FROM public.employee_data
+```
+
+**SQL Çıktısı:**
+
+```shell
+ emp_id | emp_name | emp_place  | emp_age |  emp_dob
+--------+----------+------------+---------+------------
+      1 | Ahmet    | california |      25 | 25/09/2000
+      2 | Melih    | New York   |      36 | 25/09/1989
+      3 | Oğuzhan  | Utak       |      20 | 25/09/2003
+      4 | Mert Can | Tunceli    |      24 | 12/05/2001
+      5 | Eyüphan  | New York   |      19 | 26/06/2006
+      6 | Atilla   | California |      38 | 15/02/1987
+      7 | Çetin    |            |      50 | 26/01/1975
+      8 | Ali Riza |            |      48 | 07/07/1977
+      9 | Umut     |            |      18 | 17/09/2006
+(9 rows)
+
+```
+
+**UPDATE komutu:**
+
+```sql
+    UPDATE employee_data AS e_d
+    SET
+        emp_place = v.emp_place
+    FROM (
+        VALUES
+            (7, 'Çorum'),
+            (8, 'Sivas'),
+            (9, 'Şanlıurfa')
+    ) AS v(emp_id, emp_place)
+    WHERE e_d.emp_id = v.emp_id
+```
+
+
+> [!NOTE]
+> `VALUES (...)`  Bu satırlar aslında **küçük bir geçici tablo** gibi çalışıyor:
+> ```text
+> emp_id | emp_place
+> -------+--------
+>     7  | 'Çorum'
+>     8  | 'Sivas'
+>     9  | 'Şanlıurfa'
+> ```
+
+
+> [!NOTE]
+> - `AS v(id, salary)` : Bu tabloya isim veriyoruz (`v`) ve sütun isimlerini tanımlıyoruz
+> 	+ `emp_id` : eşleştirme için
+> 	+ `emp_salary` : yeni değer
+> - `UPDATE employees_data SET emp_place = v.emp_place`
+> 	+ Gerçek tablodaki `emp_place` değerini, `v` tablosundaki yeni maaşla değiştiriyoruz.
+> - `WHERE e_d.emp_id = v.emp_id`: eşleşmeyi `emp_id` değerine göre yapıyoruz. Yani:
+> 	- `e_d.emp_id = 6` → `v.emp_place = 'Çorum'`
+> 	-  `e_d.emp_id = 7` → `v.emp_place = 'Sivas'`
+> 	- `e_d.emp_id = 8` → `v.emp_place = 'Şanlıurfa`
+
+
+
+**Sonrası:**
+
+```sql
+SELECT * FROM public.employee_data
+```
+
+**SQL Çıktısı:**
+
+```shell
+ emp_id | emp_name | emp_place  | emp_age |  emp_dob
+--------+----------+------------+---------+------------
+      1 | Ahmet    | california |      25 | 25/09/2000
+      2 | Melih    | New York   |      36 | 25/09/1989
+      3 | Oğuzhan  | Utak       |      20 | 25/09/2003
+      4 | Mert Can | Tunceli    |      24 | 12/05/2001
+      5 | Eyüphan  | New York   |      19 | 26/06/2006
+      6 | Atilla   | California |      38 | 15/02/1987
+      7 | Çetin    | Çorum      |      50 | 26/01/1975
+      8 | Ali Riza | Sivas      |      48 | 07/07/1977
+      9 | Umut     | Şanlıurfa  |      18 | 17/09/2006
+(9 rows)
 ```
 

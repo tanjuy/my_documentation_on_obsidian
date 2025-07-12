@@ -83,6 +83,17 @@
 
 
 
+
+### set mouse
+
++ Vim’de **mouse** (fare) desteğini aktif etmek oldukça kolaydır ve hem normal modda hem de visual, insert, command modlarda **tıklama**, **seçme**, **scroll** gibi işlemleri yapmanı sağlar.
+
+#### Tüm Modlar için:
+
+```vim
+:set mouse=a
+```
+
 # fold ve unfold:
 
 + Fold, belirli bir satır aralığını **gizlenebilir bir blok** haline getirir. Bu bloklar daraltılabilir (fold) veya genişletilebilir (unfold).
@@ -179,3 +190,39 @@ def foo():
 ## 3.1. vsplit:
 
 ## 3.2. split:
+
+# Metinde Düzenleme:
+
+## A. substitute:
+
+### A.1. Yardım Sayfası:
+
++ Vim'de **substitutions** konusu, resmi dokümantasyonda **":substitute"** komutu altında geçer ve **komut modunda (command-line mode)** kullanılan bir metin düzenleme komutu olarak adlandırılır.
+
+
+> [!NOTE]
+> + Vim terminolojisinde **substitution** işlemi:
+> 	- **"Ex command"** (ya da **Ex mode command**) olarak geçer.
+> 	- Tam adıyla **`:substitute` komutu** olarak tanımlanır.
+> + Komut satırında `:s` kısa adıyla kullanılır. Bu, `:substitute`'ün kısaltmasıdır.
+
+
+```vim
+:help :substitute
+```
+
+# change.txt:
+
+## 4. Complex changes
+
+### 4.1. Substitute
+
+#### Syntax:
+
+```vim
+:[range]s[ubstitute]/{pattern}/{string}/[flags] [count]
+```
+
+> + `:` → Komut moduna geç.
+> + `[range]` → Hangi satırlar üzerinde işlem yapılacağı.
+> + 
