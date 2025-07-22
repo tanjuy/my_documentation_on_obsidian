@@ -1264,10 +1264,10 @@ sudo systemctl start grafana-server.service
 ![grafana_dashboard3](./Pictures/grafana_dashboard3.png)
 
 
-![grafana_dashboard5](grafana_dashboard5.png)
+![grafana_dashboard5](./Pictures/grafana_dashboard5.png)
 
 
-![grafana_dashboard6](grafana_dashboard6.png)
+![grafana_dashboard6](./Pictures/grafana_dashboard6.png)
 
 + CPU, Bellek, Ağ ve diğer bir sürü ölçümü görselleştirmek için açık kaynaklı bir gösterge tablosunu(`dashboard`) içe aktarabiliriz.
 + Açık kaynaklı gösterge tablosu(`dashboard`) [web sitesi](https://grafana.com/grafana/dashboards/)
