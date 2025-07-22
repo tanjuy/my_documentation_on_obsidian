@@ -822,7 +822,9 @@ Type=simple
 Restart=on-failure
 RestartSec=5s
 ExecStart=/usr/local/bin/node_exporter \
-	--collector.logind
+	--collector.logind \
+	--collector.systemd \
+	--collector.processes
 
 [Install]
 WantedBy=multi-user.target
@@ -843,6 +845,8 @@ WantedBy=multi-user.target
 > 	3. Sistem Durumu:
 > 		+ Sistemin askıya alınma/uyku durumları
 > 		+ Yeniden başlatma/kapatma işlemleri
+
+
 
 
 > [!NOTE]
@@ -868,17 +872,44 @@ WantedBy=multi-user.target
 sudo systemctl enable node_exporter.service
 ```
 
+> + `node_exporter` programın(bir diğer adı servis) makine her yeniden başlatıldığında yeniden başlaması için gereken komut. 
+
 ```shell
 sudo systemctl start node_exporter.service
 ```
+
+> + `node_exporter` programını(diğer adı servis) arka tarafta(`daemon`) başlatıyoruz.
+
+
+> [!NOTE]
+> + `systemctl enable` ve `systemctl start` komutlarını aynı anda çalıştırmak için komut:
+> ```shell
+> sudo systemctl enable --now node_exporter.service
+> ```
+
 
 ```shell
 sudo systemctl status node node_exporter.service
 ```
 
+> + `node_exporter` servisin düzgün çalışıp çalışmadığını teyit ediyoruz.
+
+
+> [!TIP]
+> + Herhangi bir sorun yaşarsanız journalctl ile logları kontrol edin.
+> ```shell
+>  sudo journalctl -u node_exporter.service  -f --no-pager
+> ```
+
+---
+
++ Statik bir hedef oluşturmak için job_name'i static_configs ile birlikte eklemeniz gerekir.
+
 ```shell
 sudo vim /etc/prometheus/prometheus.yml
 ```
+
+**prometheus.yml:**
 
 ```yml
 # my global config
@@ -912,25 +943,151 @@ scrape_configs:
       - targets: ["localhost:9090"]
 
 
-  - job_name: node_export                   # <----
+  - job_name: node_export                   # <---- Dikkat
     static_configs:
       - targets: ["localhost:9100"]
 ```
 
+> + Varsayılan olarak `node_exporter` 9100 portundan dışarıya açıktır.
+
+> [!NOTE]
+> + Prometheus, izleme (monitoring) sistemidir ve farklı kaynaklardan (örneğin sunucular, uygulamalar, container’lar vb.) **veri toplamak için o kaynakların IP adreslerini ya da servis bilgilerini bilmesi gerekir**.
+> + Bu kaynakları elle tek tek tanımlamak yerine, **Prometheus kendisi otomatik olarak bunları "keşfedebilir"**. İşte bu keşif yöntemlerine **"service discovery mechanisms"** denir.
+> + Prometheus’un desteklediği bazı servis keşif yöntemleri şunlardır:
+> 	- Static config (statik IP ya da hostname listesi)
+> 	- **Kubernetes**: Pod’ları ve servisleri otomatik tanır.
+> 	- Consul
+> 	- **EC2 (Amazon AWS)**
+> 	- **Azure, GCE (Google Cloud), OpenStack**
+> 	- Docker Swarm veya file-based discovery
+> + **Örnek Kullanımı:**
+> ```yaml
+> scrape_configs:
+>  - job_name: 'my-kubernetes-job'
+>    kubernetes_sd_configs:
+>      - role: pod
+> ```
+> + Yukarıdaki örnekte, Prometheus **Kubernetes cluster’ındaki pod’ları otomatik keşfeder**.
+
+
+
+> [!NOTE]
+> **Service Discovery Mechanism (Servis Keşif Mekanizması)**
+> + **Tanım:**
+> 	- Dinamik altyapılarda (örneğin Kubernetes, AWS EC2, Docker) Prometheus’un **otomatik olarak hedefleri keşfetmesini sağlayan mekanizmadır**.
+> + **Özellikler:**
+> 	- Dinamik ortamlarda kullanılır.
+> 	- Hedefler otomatik olarak eklenir veya çıkarılır.
+> 	- Güncel duruma göre hedef listesi kendiliğinden değişir.
+> + **Örneğin:**
+> 	- Yeni bir pod eklendiğinde otomatik izlenmeye başlar.
+> 	- Bir EC2 örneği kapatıldığında listeden düşer.
+> ```yaml
+> scrape_configs:
+>  - job_name: 'my-kubernetes-job'
+>    kubernetes_sd_configs:
+>      - role: pod
+> ```
+> + Bu örnekte Prometheus, Kubernetes cluster'ındaki tüm node’ları **kendisi keşfeder**.
+
+
+> [!NOTE]
+> **Static Targets (Statik Hedefler)**
+> + **Tanım:**
+> 	- Manuel olarak yazdığın IP adresleri ya da hostname'lerdir. Prometheus sadece **senin belirttiğin hedeflere** gider.
+> + **Özellikler:**
+> 	- **Sabit yapılar için uygundur** (örneğin küçük sunucu grubu).
+> 	- Yeni hedefler eklemek için **config dosyasını manuel olarak değiştirmek gerekir**.
+> 	- Otomatik güncelleme yoktur.
+> 	
+> ```yaml
+> scrape_configs:
+>   - job_name: 'static_servers'
+>     static_configs:
+> 	  - targets: ['192.168.1.10:9100', '192.168.1.11:9100']
+> ```
+
+| Özellik                  | Service Discovery       | Static Targets                   |
+| ------------------------ | ----------------------- | -------------------------------- |
+| **Otomatik Keşif**       | ✔️                      | ❌ (manuel yazılır)               |
+| **Dinamik Ortama Uygun** | ✔️ (örneğin Kubernetes) | ❌                                |
+| **Manuel Konfigürasyon** | Hayır                   | Evet                             |
+| **Esneklik**             | Yüksek                  | Düşük                            |
+| **Yaygın Kullanım**      | Büyük altyapılar, cloud | Küçük sunucular, test sistemleri |
+
+| Senaryo                                   | Kullan            |
+| ----------------------------------------- | ----------------- |
+| Kubernetes, AWS, Docker gibi sistemler    | Service discovery |
+| 2-3 sabit IP adresi olan basit bir sistem | Static target     |
+
+---
 
 ```shell
 promtool check config /etc/prometheus/prometheus.yml
 ```
 
+>+ Bu komut ile `prometheus.yml` dosyasının syntax hatası var mı  diye teyit ediyoruz.
+
+
+**GET isteği:**
+
+```shell
+curl http://localhost:9090/api/v1/status/config | jq -r '.data.yaml'
+```
+
+> +  **Prometheus** sunucusunun şu anki yapılandırmasını (`prometheus.yml` dosyasının içeriğini) **API üzerinden sorgulamak** için kullanılır.
+> + Prometheus'un o anda kullandığı yapılandırma dosyasının (`prometheus.yml`) tam içeriğini gösterir.
+> + Bu komut, Prometheus API'sini kullanarak yapılandırmayı programlı bir şekilde çekmek isteyen senaryolarda (CI/CD, monitoring scriptleri) kullanılabilir.
+
+**Curl Çıktısı:**
+
+```yaml
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  scrape_protocols:
+  - OpenMetricsText1.0.0
+  - OpenMetricsText0.0.1
+  - PrometheusText0.0.4
+  evaluation_interval: 15s
+runtime:
+  gogc: 75
+alerting:
+  alertmanagers:
+  - follow_redirects: true
+    enable_http2: true
+    http_headers: null
+    scheme: http
+    timeout: 10s
+    api_version: v2
+...
+```
+
+
+---
+
 ```shell
 curl -X POST http://localhost:9090/-/reload
 ```
 
-## Grafana:
+> + `lifecycle management` yönetimini etkinleştirdiğimiz için, API çağrıları aracılığıyla  hizmeti yeniden başlatmadan ve kesintiye neden olmadan Prometheus yapılandırmasını yeniden yükleyebiliriz.
+> + Konfigürasyon ayarlarını yeniden yüklemek için bir POST isteği gönderiyoruz.
+
+## 3. Adım:
+
++ Metrikleri görselleştirmek için Grafana'yı kullanabiliriz.
++ Grafana'nın desteklediği birçok farklı veri kaynağı var, bunlardan biri de Prometheus'tur.
+### Grafana:
+
++ Ön koşul paketleri yüklüyooruz.
 
 ```shell
 sudo apt-get install -y apt-transport-https software-properties-common wget
 ```
+
+---
+
++ GPG anahtarını içe aktarın:
 
 ```shell
 sudo mkdir -p /etc/apt/keyrings/
@@ -940,66 +1097,209 @@ sudo mkdir -p /etc/apt/keyrings/
 wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
 ```
 
-+ stable
+---
+
++ **Kararlı sürümler** için bir depo eklemek üzere aşağıdaki komutu çalıştırın:
 
 ```shell
 echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 ```
 
-+ Beta
++ **Beta sürümleri** için bir depo eklemek üzere aşağıdaki komutu çalıştırın:
 
 ```shell
 echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com beta main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 ```
 
-
++ Mevcut paketlerin listesini güncellemek için aşağıdaki komutu çalıştırın:
 
 ```shell
 # Updates the list of available packages
 sudo apt-get update
 ```
 
++ **Grafana OSS'yi** yüklemek için aşağıdaki komutu çalıştırın:
+
 ```shell
 # Installs the latest OSS release:
 sudo apt-get install grafana
 ```
+
++ **Grafana Enterprise'ı** yüklemek için aşağıdaki komutu çalıştırın:
 
 ```shell
 # Installs the latest Enterprise release:
 sudo apt-get install grafana-enterprise
 ```
 
+---
+
+
 ```shell
 sudo systemctl enable grafana-server
 ```
 
-```shell
-sudo systemctl start grafana-server
-```
+> + `systemctl enable` komutu ile ubuntu makinesi yeniden başlatıldığında otomatik olarak grafana çalıştırılacaktır. 
 
 ```shell
-sudo vim /etc/grafana/provisioning/datasources/datasources/datasources.yaml
+sudo systemctl start grafana-server.service
 ```
 
-**datasources.yaml**
-
-```yaml
-apiVersion: 1
-
-datasources:
-  - name: Prometheus
-    type: prometheus
-    url: http://localhost:9090
-    isDefault: true
-```
+> + `grafana-server` servisini arka planda çalıştırıyoruz.
 
 
-```shell
-sudo systemctl restart grafana-server
-```
+> [!TIP]
+> + `systemctl enable` ve `systemctl start` komutlarını aşağıdaki komutlar ile aynı anda çalıştırabiliriz:
+> ```shell
+> sudo systemctl enable --now grafana-server.service
+> ```
+> + `systemctl status` komut ile daemon'ın durumunu kontrol ediyoruz:
+> ```shell
+> sudo systemctl status grafana-server.service
+> ```
+
++ Tarayıcıyı açın ve varsayılan kimlik bilgilerinizi kullanarak Grafana'ya giriş yapın.
++ Kullanıcı adı admin, şifre ise admin'dir.
++ İlk defa giriş yaptığınızda şifrenizi değiştirme imkânına sahip oluyorsunuz.
+
+![grafana_login](./Pictures/grafana_login.png)
 
 
-## Pushgateway:
+> [!NOTE]
+> 1. **Grafana'nın `admin` şifresini sıfırla**
+> 	+ Aşağıdaki komut ile `admin` kullanıcısının şifresini terminalden sıfırlayabilirsin:
+> 	```shell
+> 	grafana-cli admin reset-admin-password yeni_şifre
+> 	```
+> 2. **Eğer `grafana-cli` komutu bulunamıyorsa:**
+> 	+ Debian/Ubuntu’da şöyle yüklenmiş olabilir:
+> 	```shell
+> 	sudo /usr/sbin/grafana-cli admin reset-admin-password yeni_şifre
+>	 ```
+>	 + Ya da doğrudan `find` ile bulabilirsin:
+>	 ```shell
+>	 sudo find / -name grafana-cli
+>	```
+> 3. **Alternatif: SQLite veritabanı üzerinden manuel sıfırlama**
+> 	+ Eğer komutla sıfırlayamıyorsan, Grafana’nın `grafana.db` veritabanı dosyası içindeki `admin` kullanıcısını değiştirebilirsin (riskli, önerilmez ama mümkündür).
+> 	+ Grafana genelde kullanıcıları aşağıdaki veritabanında saklar:
+> 	```shell
+>	/var/lib/grafana/grafana.db  # SQLite DB
+>	```
+
+| Durum                               | Çözüm                                          |
+| ----------------------------------- | ---------------------------------------------- |
+| Varsayılan kullanıcı şifresi        | `admin` / `admin`                              |
+| Şifre değiştirildi ve unutuldu      | `grafana-cli admin reset-admin-password`       |
+| CLI yoksa                           | `find` ile yerini bul veya paketi tekrar yükle |
+| Veritabanı müdahalesi (en son çare) | `grafana.db` dosyasını düzenle                 |
+
+
++ Metrikleri görselleştirmek için öncelikle bir veri kaynağı(`data source`) eklemeniz gerekir.
+
+![grafana_data_source](./Pictures/grafana_data_source.png)
+
++ Veri kaynağı ekle'ye tıklayın ve Prometheus'u seçin.
+
+![gradana_prometheus](./Pictures/grafana_prometheus.png)
+
++ URL için http://localhost:9090 girin ve `save and test` tıklayın.
+
+![grafana_prometheus_URL](./Pictures/grafana_prometheus_URL.png)
+
+
+> [!TIP]
+> + `Production` ortamlarında genellikle tüm konfigürasyonları Git'te saklarsınız.
+> + Alternatif olarak, veri kaynağını(`data source`) terminal ile konfigürasyon ekleyebiliriz.
+> + Yeni bir `datasources.yaml` dosyası oluştuyoruz.
+> ```shell
+> sudo vim /etc/grafana/provisioning/datasources/datasources.yaml
+> ```
+> 
+> ```yaml
+> apiVersion: 1
+> 
+> datasources:
+>   - name: Prometheus
+>     type: prometheus
+>     url: http://localhost:9090
+>     isDefault: true
+> ```
+> + Ayarların geçerli olabilmesi için grafana servisini yeniden başlatıyoruz. 
+> ```shell
+> sudo systemctl restart grafana-server
+> ```
+
+
++ `scrape_duration_seconds` metrik örneği: 
++ `scrape_duration_seconds`, **Prometheus’un bir hedeften (target) metrik verilerini toplamasının (scrape etmesinin) ne kadar sürdüğünü saniye cinsinden ölçen bir metriktir.**
+
+![prometheus_scrape](./Pictures/prometheus_scrape.png)
+
+
+> [!NOTE]
+> + Prometheus, her hedefe belirli aralıklarla HTTP isteği (`/metrics` endpointine) gönderir ve metrik verilerini alır.
+> + Bu işlem sırasında geçen süreyi ölçer ve bunu `scrape_duration_seconds` adlı metrikte saklar.
+> ```prometheus
+> scrape_duration_seconds{instance="localhost:9100", job="node_export"}    0.003135206
+> ```
+> + `job="node_export"`: İzlenen iş (örneğin node exporter)
+> + `instance="localhost:9100"`: Hedef adres
+> + `0.003135206`: Veri toplama (scrape) işlemi 0.045 saniye sürmüş
+
+
+> [!TIP]
+> + **Performans analizi**: Hedef sistem yanıt verirken ne kadar gecikiyor görebilirsin.
+> + Ağ gecikmeleri veya yük altında kalan sistemleri tespit edebilirsin
+
++ `scrape_duration_seconds` metriği Grafana'da basit bir grafik oluşturmak için kullanacağız.
+
+![grafana_dashboard](./Pictures/grafana_dashboard.png)
+
++ `Add visualization` butonuna tıklayarak yeni bir panel oluşturuyoruz.
+
+![grafana_dashboard2](./Pictures/grafana_dashboard2.png)
+
+
+![grafana_dashboard3](./Pictures/grafana_dashboard3.png)
+
+
+![grafana_dashboard5](grafana_dashboard5.png)
+
+
+![grafana_dashboard6](grafana_dashboard6.png)
+
++ CPU, Bellek, Ağ ve diğer bir sürü ölçümü görselleştirmek için açık kaynaklı bir gösterge tablosunu(`dashboard`) içe aktarabiliriz.
++ Açık kaynaklı gösterge tablosu(`dashboard`) [web sitesi](https://grafana.com/grafana/dashboards/)
++ Örnek için [`open-source Node Exporter Full`](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)'u kullanacağız 
+
+![grafana_dashboard_template](./Pictures/grafana_dashboard_template.png)
+
+---
+
++  [`Node Exporter Full`](https://grafana.com/grafana/dashboards/1860-node-exporter-full/) sitesinde `Copy ID to clipboard` butonunu tıklayarak 
++ Aşağıdaki gösterildiği gibi siteden kopyalan ID'yi kutucuğa kopyalayarak, load butonuna tıklayarak dashboard yüklemesi yapabiliriz.
+
+![grafana_dashboard7](./Pictures/grafana_dashboard7.png)
+
+
+![grafana_dashboard8](./Pictures/grafana_dashboard8.png)
+
++ Burada node exporter'dan gelen her türlü metrik var.
+
+![grafana_Node_Exporter_Full](./Pictures/grafana_Node_Exporter_Full.png)
+
+## 4. Adım:
+
++ Pushgateway, scrape (çekilme) yapılamayan işler (job'lar) için metriklerin Prometheus'a gönderilmesini (push edilmesini) sağlayan bir servistir.
++ Normalde Prometheus, metrik verileri **kendisi çekerek (scrape)** alır.  
++ Yani Prometheus gidip bir servise `/metrics` isteği gönderir ve o servis de metrikleri döner.
++ Ancak bazı işler (örneğin kısa ömürlü batch script'ler, jenkins, cron job'lar, bir defaya mahsus çalışan komutlar) **çalışırken ortada uzun süre kalmadıkları için** Prometheus bu job’ları **zamanında bulamaz ve scrape edemez**.
++ İşte burada **Pushgateway** devreye girer.
+
+### Pushgateway:
+
++ Kurulum süreci Prometheus ve Node exporter'a oldukça benzerdir.
 
 ```shell
 sudo useradd \
@@ -1008,21 +1308,36 @@ sudo useradd \
 	--shell /bin/false pushgateway
 ```
 
+---
+
++ Pushgateway programını yerel makinemize indiriyoruz.
++ Pushgateway resmi [indirme](https://prometheus.io/download/) sayfası.
+
 ```shell
 wget https://github.com/prometheus/pushgateway/releases/download/v1.11.1/pushgateway-1.11.1.linux-amd64.tar.gz
 ```
+
+---
 
 ```shell
 tar -xvf pushgateway-1.11.1.linux-amd64.tar.gz
 ```
 
++ cp komutu ile Pushgateway ikili dosyasını `/usr/local/bin` dizinine taşıyın.
+
 ```shell
 sudo cp -v pushgateway-1.11.1.linux-amd64/pushgateway /usr/local/bin
 ```
 
+---
+
++ pushgateway adında bir servis oluşturuyoruz:
+
 ```shell
 sudo vim /etc/systemd/system/pushgateway.service
 ```
+
+**pushgateway.service:**
 
 ```systemd
 [Unit]
@@ -1046,6 +1361,15 @@ WantedBy=multi-user.target
 ```
 
 
+> [!NOTE]
+> `Type=simple`
+> 1. **Varsayılan Değer**: Eğer `Type` belirtilmezse, systemd varsayılan olarak `simple` kabul eder.
+> 2. **Davranış**:
+> 	- systemd, `ExecStart` komutunu çalıştırır ve hemen bir sonraki işleme geçer.
+> 	- Servis sürecinin başarılı şekilde başlayıp başlamadığını kontrol etmez.
+> 	- Süreç çalışıyorsa "active (running)" durumunu gösterir
+
+
 ```shell
 sudo systemctl enable pushgateway.service
 ```
@@ -1054,9 +1378,17 @@ sudo systemctl enable pushgateway.service
 sudo systemctl start pushgateway.service
 ```
 
+
+> [!TIP]
+> + Pushgateway'e 9091 numaralı porttan ulaşılabilir
+
++ Prometheus'a hedef(`target`) olarak Pushgateway'i ekleyelim.
+
 ```shell
 sudo vim /etc/prometheus/prometheus.yml
 ```
+
+**prometheus.yml:**
 
 ```yaml
 # my global config
@@ -1101,23 +1433,181 @@ scrape_configs:
       - targets: ["localhost:9091"]
 ```
 
++ Yukarıdaki `prometheus.yml` dosyasının söz dizimi(`systax`) doğru olup olmadığını kontrol ediyoruz.
+
 ```shell
 promtool check config /etc/prometheus/prometheus.yml
 ```
 
-```shell
-curl -X POST http://localhost:9090/-/reload
-```
+**Çıktı:**
 
 ```shell
-echo "jenkins_job_duration_seconds 15.98" | curl --data-binary @- http://localhost:9091/metrics/job/backup
+Checking /etc/prometheus/prometheus.yml
+ SUCCESS: /etc/prometheus/prometheus.yml is valid prometheus config file syntax
 ```
 
-## Promethous Temel Auth:
+---
+
+**POST isteği:**
+
++ `curl -X POST http://localhost:9090/-/reload`, **Prometheus** sunucusuna yapılandırma dosyasını (`prometheus.yml`) **yeniden yüklemesi** için gönderilen bir HTTP isteğidir.
++ Bu komut, Prometheus'un çalışırken (restart gerektirmeden) yapılandırma değişikliklerini uygulamasını sağlar.
+
+```shell
+curl -i -X POST http://localhost:9090/-/reload
+```
+
+**Curl Çıktıs:**
+
+```shell
+HTTP/1.1 200 OK
+Date: Tue, 15 Jul 2025 17:27:36 GMT
+Content-Length: 0
+
+```
+
+
+> [!NOTE]
+> 1. **Yapılandırma Değişikliklerini Uygular**:
+> 	- `prometheus.yml` dosyasında değişiklik yaptığınızda (örneğin, yeni bir scrape job eklediğinizde), Prometheus'un bu değişiklikleri algılaması için bu komutu kullanabilirsiniz.
+> 	- Prometheus, dosyayı tekrar okuyarak yeni ayarları uygular.
+> 2. **Servisi Restart Etmeye Gerek Kalmaz**
+> 	- Geleneksel yöntemde servisi yeniden başlatmak gerekir (`systemctl restart prometheus`), ancak bu komutla **kesinti olmadan** değişiklikler aktive edilir.
+> 3. **Sadece Yapılandırmayı Yeniden Yükler**
+> 	- Toplanan metrik verileri veya çalışan sorguları **etkilemez**. Yalnızca yapılandırma dosyası yeniden okunur.
+
+
+> [!CAUTİON]
+> 1. **`-web.enable-lifecycle` Etkin Olmalı**
+> 	+ Prometheus'un bu özelliği desteklemesi için başlatma komutunda bu flag'in olması gerekir. Örnek:
+> 	```shell
+> 	prometheus --config.file=/etc/prometheus/prometheus.yml --web.enable-lifecycle
+>	 ```
+>	 + Systemd kullanıyorsanız, servis dosyasını (`/etc/systemd/system/prometheus.service`) düzenlemeniz gerekebilir.
+> 2. **Güvenlik Riski**
+> 	+ Bu API, Prometheus'un konfigürasyonunu değiştirebildiği için **dış erişime açık olmamalıdır**.
+> 	+ Sadece `localhost` (127.0.0.1) üzerinden erişilebilir olması önerilir.
+> 	+ Eğer uzaktan erişim gerekiyorsa, bir `reverse proxy (Nginx/Apache)` ile yetkilendirme eklenmelidir.
+> 3. **Diğer Yeniden Yükleme Yöntemleri**
+> 	+ **SIGHUP Sinyali**: Prometheus'a `kill -SIGHUP <PID>` göndererek de yeniden yükleme yapılabilir.
+> 	+ **Servis Restart**: En garantili yöntemdir, ancak kısa bir kesintiye neden olur: `sudo systemctl restart prometheus.service`
+
++ API üzerinden POST ile yeniden yükleme(`reload`) sonucunda aşağıdaki resimde de görüldüğü üzeri `pushgateway target` görünmektedir. 
+
+![pushgateway_targets](./Pictures/pushgateway_targets.png)
+
+---
+
++ Metrikleri Pushgateway'e göndermek için, http://localhost:9091/metrics/job/backup uç noktasına(`endpoint`'a) bir POST isteği göndermeniz yeterlidir.
++ backup, etiket olarak görünecek keyfi bir isimdir. Yani, dilerseniz `backup` yerine başka bir ifade veya etiket kullanabilirsiniz.
++ `curl` komutunu kullanın ve dizeyi `echo` ile `Pushgateway`'e yönlendiriyoruz(`pipe`).
++ Jenkins'in backup adını verdiğimiz işinin(`job`'ın) yaklaşık 16 saniyede tamamlandığını düşünelim.
+
+```shell
+echo "jenkins_job_duration_seconds 15.98" | curl --verbose --data-binary @- http://localhost:9091/metrics/job/backup
+```
+
+> 1. `echo`, `"jenkins_job_duration_seconds 15.07"` metnini stdout'a yazar.
+> 2. Pipe (`|`) bu çıktıyı `curl` komutuna stdin olarak iletir.
+> 3. `curl --data-binary @-`, stdin'den gelen bu metni alır ve `http://localhost:9091/metrics/job/backup` adresine **POST eder**.
+
+**Çıktı:**
+
+```shell
+*   Trying 127.0.0.1:9091...
+* Connected to localhost (127.0.0.1) port 9091 (#0)
+> POST /metrics/job/backup HTTP/1.1
+> Host: localhost:9091
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 34
+> Content-Type: application/x-www-form-urlencoded
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Date: Wed, 16 Jul 2025 17:45:22 GMT
+< Content-Length: 0
+<
+* Connection #0 to host localhost left intact
+```
+
+
+> [!TIP]
+> Bir metrik dosyasını (`metrics.txt`) Prometheus PushGateway'ine göndermek istiyorsunuz. Dosya içeriği aşağıdaki gibi olsun: (**Yukarıdaki komuta alternatifdir.**)
+> 1. **`metrics.txt` Dosyasını Oluşturma:**
+> 	```shell
+> 	echo 'jenkins_job_duration_seconds 15.7' > metrics.txt
+>	 ```
+>	 + Bu komut, `metrics.txt` adlı bir dosya oluşturur ve içine 1 metrik ekler.
+> 2. **`curl --data-binary @metrics.txt` ile Gönderme:**
+> 	```shell
+> 	curl --data-binary @metrics.txt http://localhost:9091/metrics/job/backup
+> 	```
+> 	+ `metrics.txt` dosyasının içeriğini **binary (ham veri)** olarak alır.
+> 	+ `http://localhost:9091/metrics/job/backup` adresine **HTTP POST** isteği ile gönderir.
+> 	+ PushGateway, bu metrikleri `job="backup"` etiketiyle kaydeder.
+> 3. **`@metrics.txt` vs `@-` Farkı:** 
+> 	+ `curl --data-binary @metrics.txt` : Dosyalardan veri okur.
+> 	+ `curl --data-binary @-` : **Standart girdiden (stdin)** veri okur. önceki komutun çıktısını pipe(`|`) ile alır. 
+
+
+> [!NOTE]
+> 4. `--data-binary`:
+> 	- Bu seçenek, curl'e gönderdiğiniz verinin **ham (binary) formda** olduğunu ve herhangi bir işlem yapılmadan sunucuya iletilmesi gerektiğini söyler.
+> 	- `--data` veya `-d` seçeneğinden farkı, veride özel karakterlerin (örneğin `@`, `&`, boşluklar) yorumlanmamasıdır.
+> 5. **`@-`**:
+> 	- `@` işareti, `curl`'e bir dosyadan veri okumasını söyler.
+> 	- `-` özel bir dosya adıdır ve **standart girdi (stdin)** anlamına gelir. Yani, komutun öncesinde pipe (`|`) ile gelen veriyi alır.
+
+
+> [!TIP]
+> + Promethues'dan bir metrik veriyi aşağıdaki komut ile silebiliriz:
+> ```shell
+>  curl  -v -X 'DELETE' http://localhost:9091/metrics/job/backup2
+> ```
+> + Çıktısı:
+> ```shell
+> *   Trying 127.0.0.1:9091...
+> * Connected to localhost (127.0.0.1) port 9091 (#0)
+> DELETE /metrics/job/backup2 HTTP/1.1
+> Host: localhost:9091
+> User-Agent: curl/7.81.0
+> Accept: */*
+>
+> * Mark bundle as not supporting multiuse
+> < HTTP/1.1 202 Accepted
+> < Date: Wed, 16 Jul 2025 17:58:07 GMT
+> < Content-Length: 0
+> <
+>  * Connection #0 to host localhost left intact
+>  ```
+
+
++ Bu metriği `Prometheus`'ta bulabilirsiniz.
+
+![prometheus_metric](./Pictures/prometheus_metric.png)
+
+
+
+## 5. Adım:
+
++ Prometheus'u kurduğunuzda, uç noktayı(`endpoint`'ı) bilen herkese açık olacaktır.
++ Prometheus yakın zamanda her HTTP isteğine temel kimlik doğrulaması eklemenin bir yolunu tanıttı.
++ Eskiden Prometheus'un önüne nginx gibi bir proxy kurup temel kimlik doğrulamasını orada yapılandırmanız gerekiyordu.
++ Artık Prometheus'un kendisinde bulunan yerleşik kimlik doğrulama mekanizmasını kullanabilirsiniz.
+
+### Promethous Temel Auth:
+
++ Şifrenin hash'ini oluşturmak için python modülünü yükleyelim.
++ Prometheus şifrelerinizi saklamayacak; hash'i hesaplayacak ve bunu belirtilen kullanıcı için var olan hash ile karşılaştıracak.
 
 ```shell
 sudo apt-get -y install python3-bcrypt
 ```
+
+---
+
++ Şimdi, girdi isteyecek(`input`) ve parola için hash değerini döndürecek basit bir betik oluşturun.
 
 **generate_password.py:**
 
@@ -1132,22 +1622,62 @@ hashed_password = bcrypt.hashpw(
 print(hashed_password.decode())
 ```
 
+---
+
+**Python3 Çalıştır:**
+
 ```shell
 python3 generate_password.py
 ```
+
+> + Betiği(`script`) çalıştırdık ve şifre olarak `12345` girdik
+
+**Python Çıktısı:**
+
+```shell
+$2b$12$9bJgAbKW9gxmGXZFXSKcIOAVYFk1CupVT.vDU1se2a2Xl.EBBssVy
+```
+
+---
+
++ Bu hash'i kopyaladık ve ek bir Prometheus konfigürasyon dosyası oluşturduk.
 
 ```shell
 sudo vim /etc/prometheus/web.yml
 ```
 
+**web.yml**
+
++ Dosyaya birden fazla kullanıcı ekleyebilirsiniz
+
 ```yaml
 basic_auth_users:
-	admin: # generate_password.py hash çıktısı
+  # generate_password.py hash çıktısı
+  admin: $2b$12$9bJgAbKW9gxmGXZFXSKcIOAVYFk1CupVT.vDU1se2a2Xl.EBBssVy
 ```
+
+
+> [!CAUTION]
+> + `web.yml` dosyası bir yaml dosyası olduğu için girintilere(`indention`) dikkat edilmesi gerekir.
+> + Aksi takdirde hata verebilir. 
+> + Genellikle, yaygın kullanılan girinti tarzı, `space` tuşuna iki kere basarak iki boşluk vermektir. 
+
+```shell
+promtool check web-config web.yml  # web.yml SUCCESS
+```
+
+> + Eğer `SUCCESS` çıktısını veriyorsa `web.yml` dosyasını söz dizimi doğrudur. 
+
+---
+
++ Şimdi bu konfigürasyonu Prometheus servisi içeresinde tanımlamamız  gerekiyor.
++ Systemd servis tanımını güncelleyelim.
 
 ```shell
 sudo vim /etc/systemd/system/prometheus.service
 ```
+
+**prometheus.service:**
 
 ```yml
 [Unit]
@@ -1171,25 +1701,95 @@ ExecStart=/usr/local/bin/prometheus \
 	--web.console.libraries=/etc/prometheus/console_libraries \
 	--web.listen-address=0.0.0.0:9090 \
 	--web.enable-lifecycle \
-	--web.config.file=/etc/prometheus/web.yml
+	--web.config.file=/etc/prometheus/web.yml   # <<--- Sadece bu eklendi
 
 [Install]
 WantedBy=multi-user.target
 ```
 
+> Daha önceden oluşturmuş olduğumuz `prometheus` servisine `--web-config.file=/etc/prometheus/web.yml` parametresini ekliyoruz.
+
+---
+
++ Systemd servisini her güncellediğinizde, onu yeniden yüklemeniz gerekir.
+
 ```shell
 sudo systemctl daemon-reload
 ```
+
++ Ayrıca, prometheus servisini de yeniden başlatmanız gerekmektedir:
 
 ```shell
 sudo systemctl restart prometheus.service
 ```
 
++ Servisin düzgün çalışıp çalışmadığını kontrol edelim:
+
 ```shell
-sudo vim /etc/grafana/provisioning/datasources/datasources.yml
+sudo systemctl status prometheus.service
+```
+
+---
+
++ Prometheus'a gidin ve sayfayı yeniden yükleyin.
++ Kullanıcı adınızı ve şifrenizi girin.
+
+![prometheus_password](./Pictures/prometheus_password.png)
+
+
+> [!TIP]
+> + Tarayıcıya alternatif olarak cURL ile komut satırından da test edebilirsiniz.
+> + Kurulumunuzla etkileşim kurmak için cURL kullanabilirsiniz. Şu isteği deneyin:
+> ```shell
+> curl --head http://localhost:9090/graph
+> ```
+> + Geçerli bir kullanıcı adı ve parola sağlamadığınız için bu, `401 Unauthorized` yanıtı döndürecektir.
+
+
+> [!TIP]
+> + Temel kimlik doğrulamayı kullanarak Prometheus endpoints'a başarıyla erişmek için, örneğin; `/metrics` endpoint gibi, 
+> + -u bayrağını kullanarak doğru kullanıcı adını girin ve istendiğinde şifreyi girin
+> ```
+> curl -u admin http://localhost:9090/metrics
+> Enter host password for user 'admin':
+> ```
+> + Aşağıdakine benzer bir çıktı üretecektir:
+> ```shell
+>  # HELP go_gc_duration_seconds A summary of the GC invocation durations.
+>  # TYPE go_gc_duration_seconds summary
+>  go_gc_duration_seconds{quantile="0"} 0.0001343
+>  go_gc_duration_seconds{quantile="0.25"} 0.0002032
+>  go_gc_duration_seconds{quantile="0.5"} 0.0004485
+> ```
+
+
+---
+
++ `Targets` bölümüne(`status->targets`) giderseniz `Prometheus target`'ın düştüğünü göreceksiniz.
++ Prometheus'un kendinden veri çekebilmesi(`scrape`) için de kullanıcı adı ve şifreye ihtiyacı var.
+
+![promeheus_unauthorized](./Pictures/prometheus_unauthorized.png)
+
++ Grafana, prometheus'a ulaşabilmesi için `grafana datasource`'una kullanıcı ve şifre vererek güncellememiz gerekiyor.
+
+![grafana_unaauthorized](./Pictures/grafana_unauthorized.png)
+
++ Test butonuna tıkladığınızda `401 Unauthorized` bir hata alırsınız.
+
+![prometheus_unauthorized_2.png](./Pictures/prometheus_unauthorized_2.png)
+
+---
+
++ Grafana için veri kaynağı yapılandırmasını(`data source konfigürasyonunu`) temel kimlik doğrulamayı(`authorized`) içerecek şekilde güncelleyelim.
+
+```shell
+sudo vim /etc/grafana/provisioning/datasources/datasources.yaml
 ```
 
 **datasources.yml:**
+
++ Bu `/etc/grafana/provisioning/datasources/datasources.yaml` dosyası, **Grafana**'ya **otomatik olarak veri kaynağı (datasource)** tanımlamak için kullanılan bir yapılandırma (provisioning) dosyasıdır.
++ `Prometheus` gibi izleme/veri toplama sistemlerini Grafana’ya tanıtmak için kullanılır.
 
 ```yaml
 apiVersion: 1
@@ -1199,16 +1799,34 @@ datasources:
     type: prometheus
     url: http://localhost:9090
     isDefault: true
+
     basicAuth: true
     basicAuthUser: admin
     secureJsonData:
-	  basicAuthPassword: 1234tyo
+	  basicAuthPassword: 1234
 ```
+
+> + `apiVersion: 1` : Bu dosyanın **YAML API sürümünü** belirtir. Şu an sadece `apiVersion: 1` destekleniyor.
+> + `datasources`: Tanımlanacak veri kaynaklarının listesi.
+> + `name: Prometheus`: Grafana arayüzünde görünecek olan veri kaynağının adı. İstediğin bir isim verebilirsin.
+> + `type:` Veri kaynağının türünü belirtir. `prometheus`, `mysql`, `postgres`, `influxdb` gibi değerler alabilir. Burada Prometheus kullanıldığını gösteriyor.
+> + `url:` Prometheus sunucusunun adresi. `localhost:9090`, Prometheus'un çalıştığı makinenin IP'si ve portudur. Grafana, bu URL üzerinden Prometheus ile iletişim kurar.
+> + `isDefault:` Bu kaynak, **varsayılan veri kaynağı** olarak ayarlanır. Eğer birden fazla datasource varsa ve bir panelde özel bir kaynak belirtilmemişse, Grafana bu kaynağı kullanır.
+> + `basicAuth:` Temel HTTP kimlik doğrulaması kullanılacağını belirtir.
+> + `basicAuthUser:` Kullanıcı adı "admin" olarak ayarlanmış.
+> + `secureJsonData:` Şifre gibi hassas bilgiler `secureJsonData` altında tanımlanır.
+> + `basicAuthPassword: Burada `admin` kullanıcısının şifresi `1234` olarak girilmiş. 
 
 
 ```shell
-sudo systemctl restart grafana-server
+sudo systemctl restart grafana-server.service
 ```
+
+> + `datasources.yaml` dosyasında yaptığımız değişklerin gerçerli olabilmesi için `grafana-server` servisini yeniden başlatıyoruz.
+
+---
+
++ Prometheus target'ını **kullanıcı adı(username)** ve **parolayı(password)** içerecek şekilde güncelleyelim.
 
 ```shell
 sudo vim /etc/prometheus/prometheus.yml
@@ -1242,7 +1860,7 @@ scrape_configs:
   - job_name: "prometheus"
 	basic_auth:                  # <<---
 	  username: admin            # <<---
-	  password: 1234tyo          # <<---
+	  password: 1234             # <<---
 
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
@@ -1262,42 +1880,224 @@ scrape_configs:
       - targets: ["localhost:9091"]
 ```
 
+---
+
++ Yukarıdan düzenlemiş olduğumuz `prometheus.yml` dosyasını söz dizininde(`syntax`) hata var mı diye kontrol ediyoruz:
+
 ```shell
 promtool check config /etc/prometheus/prometheus.yml
 ```
 
+**promtool Çıktısı:**
+
 ```shell
-curl -X POST -u admin:1234tyo http://localhost:9090/-/reload
+Checking /etc/prometheus/prometheus.yml
+ SUCCESS: /etc/prometheus/prometheus.yml is valid prometheus config file syntax
 ```
 
-## alertmanager:
+--- 
++ Bu komut, `curl` kullanarak **Prometheus sunucusuna yapılandırmayı yeniden yüklemesi** için HTTP POST isteği gönderir.
+
+```shell
+curl -v -X POST -u admin:1234 http://localhost:9090/-/reload
+```
+
+> + Bu komut, **Prometheus yapılandırma dosyası (`prometheus.yml`) değiştirilmişse**, yeni yapılandırmanın Prometheus tarafından tekrar okunmasını sağlar.
+> + Yani `prometheus.yml` dosyasını yeniden başlatmadan (restart yapmadan) uygulamak için kullanılır.
+
+```shell
+*   Trying 127.0.0.1:9090...
+* Connected to localhost (127.0.0.1) port 9090 (#0)
+* Server auth using Basic with user 'admin'
+> POST /-/reload HTTP/1.1
+> Host: localhost:9090
+> Authorization: Basic YWRtaW46MTIzNHR5bw==
+> User-Agent: curl/7.81.0
+> Accept: */*
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Date: Fri, 18 Jul 2025 17:04:57 GMT
+< Content-Length: 0
+<
+* Connection #0 to host localhost left intact
+```
+
+
+> [!TIP]
+> + Yukarıdaki komuta alternatif olarak API üzerinden yapılacak POST isteği:
+> ```shell
+>  curl -v -X POST http://admin:1234tyo@localhost:9090/-/reload
+> ```
+
+
+> [!TIP]
+> **Kimlik Doğrulama Notu:**
+> + Eğer Prometheus üzerinde **Basic Auth** (kullanıcı adı/şifre) yapılandırılmadıysa, `-u admin:1234` kısmına gerek yoktur ve hatta bu istek başarısız olur.
+> + Varsayılan Prometheus kurulumu genelde **kimlik doğrulama içermez**, yani bu komutun sade hali genelde yeterlidir:
+> ```shell
+> curl -X POST http://localhost:9090/-/reload
+> ```
+
+
+> [!CAUTION]
+> + `/-/reload` komutu çalışabilmesi için Prometheus’un `--web.enable-lifecycle` parametresiyle başlatılmış olması gerekir:
+> ```shell
+> ./prometheus --config.file=prometheus.yml --web.enable-lifecycle
+> ```
+
+
+## 6. Adım
+
++ Alertmanager, alarmların yinelenmesini önlemek (deduplication), gruplanması (grouping) ve doğru alıcıya yönlendirilmesi (routing) işlemlerini gerçekleştirir — bu alıcılar e-posta, PagerDuty ya da bizim durumumuzda Slack olabilir.
+
+| Parça                                              | Anlamı                                                                                                                       |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Alertmanager takes care of**                     | Alertmanager şunları halleder / yönetir                                                                                      |
+| **deduplicating**                                  | Aynı uyarının tekrar tekrar bildirilmesini önler (örneğin bir alarm sürekli tetikleniyorsa tek bir bildirimle sınırlandırır) |
+| **grouping**                                       | Benzer uyarıları bir araya toplar (örneğin aynı servisle ilgili 5 ayrı uyarıyı tek bir bildirimde gruplar)                   |
+| **routing**                                        | Hangi uyarının hangi kişiye ya da platforma gideceğini belirler (e-posta, Slack, vs.)                                        |
+| **receiver integration**                           | Uyarıların gönderileceği hedef sistem (e-posta sunucusu, Slack webhook'u, vs.)                                               |
+| **such as email, PagerDuty, or in our case Slack** | Alıcı sistemlere örnekler: e-posta, PagerDuty, **ve bizim örneğimizde Slack**                                                |
+
++ `High Availability`(Yüksek erişilebilirlik) elde etmek için birden fazla Uyarı Yöneticisi ayarlayabilirsiniz.
+
+### alertmanager:
+
++ Öncelikle Alertmanager için bir sistem kullanıcısı oluşturalım.
 
 ```shell
 sudo useradd \
-	--system \ 
+	--system \
 	--no-create-home \
 	--shell /bin/false alertmanager 
 ```
+
++ Daha sonra aynı indirme sayfasından Alertmanager'ı indirelim.
 
 ```shell
 wget https://github.com/prometheus/alertmanager/releases/download/v0.28.1/alertmanager-0.28.1.linux-amd64.tar.gz
 ```
 
++ `gz` ile sıkıştırılmış binaray alertmanager arşiv dosyasını çıkaralım.
+
 ```shell
 tar -xvf alertmanager-0.28.1.linux-amd64.tar.gz
 ```
+
+---
+
++ Alertmanager için depolama alanına ihtiyacımız var.
 
 ```shell
 sudo mkdir -p /alertmanager-data /etc/alertmanager
 ```
 
+> + Alertmanager için bir veri dizini zorunludur (varsayılan olarak `data/` klasörü kullanılır) ve bu dizin, bildirim durumları ile susturma (silence) bilgilerini saklamak için kullanılır.
+
+
+> [!NOTE]
+> **Alertmanager:**
+> + Uyarılar için **durum bilgisi** tutar (örneğin "bu uyarı gönderildi mi, hala aktif mi").
+> + Kullanıcıların ayarladığı **silence (susturma)** ayarlarını dosya sistemi üzerinde saklar.
+> + Bu bilgiler **kalıcı (persisted)** tutulur, böylece Alertmanager yeniden başlatılsa bile bu ayarlar kaybolmaz.
+
+
+> [!NOTE]
+> + Varsayılan olarak Alertmanager şunları bu klasöre yazar:
+> ```shell
+> data/
+  ├── notification.log
+  └── silences.json
+> ```
+> + Hangi alarmlar tetiklendi ve ne zaman gönderildi?
+> + Hangi susturmalar aktif?
+
+
+> [!WARNING]
+> + Bu durum bilgisi (state) olmadan — ya da silinirse — Alertmanager yeniden başlatıldığında hangi susturma (silence) kurallarının oluşturulduğunu veya hangi bildirimlerin (notification) zaten gönderildiğini bilemez.
+
+---
+
++ Alermanager'ın ikili dosyasını yerel bin'e(`/usr/local/bin`) taşıyalım ve örnek yapılandırmayı kopyalayalım.
+
 ```shell
-sudo mv alertmanager-0.28.1.linux-amd64/alertmanager /usr/local/bin
+sudo cp -v alertmanager-0.28.1.linux-amd64/alertmanager /usr/local/bin
 ```
+
+
+```shell
+sudo cp -v alertmanager-0.28.1.linux-amd64/alertmanager.yml /etc/alertmanager/
+```
+
+**alertmanager.yml**
+
+```yml
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: 'web.hook'
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'http://127.0.0.1:5001/'
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']
+```
+
+> [!NOTE]
+> 1. **`route:`** → Alarmların nasıl gruplandığı ve hangi alıcıya gönderileceği.
+> 	+ **`group_by: ['alertname']`**
+> 		- Aynı `alertname` (uyarı adı) olan alarmlar **tek grup** olarak işlenir.
+> 		- Örneğin 3 farklı sunucuda `HighCPU` uyarısı varsa, bunlar tek bildirimde birleştirilir.
+> 	+ **`group_wait: 30s`**
+> 		- Yeni bir grup uyarı geldiğinde 30 saniye beklenir, böylece aynı gruba ait başka alarmlar da gelirse aynı bildirimde gönderilir.
+> 	+ **`group_interval: 5m`**
+> 		-  Aynı uyarı grubuna ait yeni alarmlar 5 dakika içinde tekrar bildirilmez (spam engelleme).
+> 	+ **`repeat_interval: 1h`**
+> 		-  Aynı alarm devam ediyorsa, 1 saatte bir tekrar gönderilir.
+> 	+ **`receiver: 'web.hook'`**
+> 		- Bu uyarılar `'web.hook'` adındaki alıcıya (receiver) yönlendirilir.
+
+
+> [!NOTE]
+> 2. **`receivers:`** → Alarmların gönderileceği hedef sistemler (örneğin webhook, e-posta, Slack).
+> 	+ **`name: 'web.hook'`**
+> 		- Bu, yukarıdaki route tarafından kullanılacak olan alıcı tanımı.
+> 	+ **`webhook_configs:`**
+> 		- Uyarılar, belirtilen HTTP adresine `POST` isteğiyle JSON formatında gönderilir.
+> 	+ **`url: 'http://127.0.0.1:5001/'`**
+> 		- Alertmanager, uyarı oluştuğunda bu URL'ye HTTP isteği gönderir.
+> 		- Örneğin, bu adreste çalışan bir Flask/Python sunucu olabilir.
+
+
+> [!NOTE]
+> 3. **`inhibit_rules:`** → Belirli uyarıların diğerlerini bastırma (susturma) kuralları.
+> 	+ Eğer bir **`critical` seviyesinde** alarm varsa (source),
+> 	+ Aynı `alertname`, `dev`, ve `instance` etiketlerine sahip bir **`warning` seviyesindeki** alarm (target),
+> 	+ **gönderilmez** (bastırılır), çünkü zaten daha ciddi (`critical`) versiyonu aktif.
+> 	+ Aynı alarmın hem `warning` hem `critical` versiyonu varsa, yalnızca kritik olan bildirilsin diye kullanılır.
+> 	+ Spam ve kafa karışıklığı engellenmiş olur.
+
+|Bölüm|Görevi|
+|---|---|
+|`route:`|Alarmların nasıl gruplanacağı, ne zaman gönderileceği, hangi alıcıya yönlendirileceği|
+|`receivers:`|Uyarıların nereye gönderileceğini tanımlar (örneğin bir webhook)|
+|`inhibit_rules:`|Bazı uyarıların, daha kritik uyarılar varken bastırılmasını sağlar|
+
+---
 
 ```shell
 sudo vim /etc/systemd/system/alertmanager.service
 ```
+
+**alertmanager.service**
 
 ```systemd
 [Unit]
@@ -1322,22 +2122,61 @@ ExecStart=/usr/local/bin/alertmanager \
 WantedBy=multi-user.target
 ```
 
-```shell
-sudo systemctl enable alertmanager
-```
+> 1. **`--storage.path=/alertmanager-data`**
+> 	+ **Alertmanager’ın verilerini** (state bilgisi) kaydedeceği dizindir.
+> 	+ Bu dizin şunları saklar:
+> 		- Aktif **silences** (susturulan alarmlar)
+> 		- Gönderilmiş **bildirim geçmişi**
+> 	+ Bu veri kalıcıdır, Alertmanager yeniden başlatıldığında alarm durumu hatırlanır.
+> 	+ Eğer bu klasör silinirse, Alertmanager her şeyi **sıfırdan başlatır**.
+> 	+ 📌 Eğer bu klasör silinirse, Alertmanager her şeyi **sıfırdan başlatır**.
+> 2. **`--config.file=/etc/alertmanager/alertmanager.yml`**
+> 	+ Alertmanager’ın **yapılandırma dosyasını** belirtir.
+> 	+ Bu dosya:
+> 		- Hangi alarmlar nereye gidecek?
+> 		- Hangi alıcılar (receivers) var?
+> 		- Susturma kuralları (inhibit rules)
+> 		- Routing (yönlendirme) kuralları
+> 		- Slack, e-posta, webhook tanımları gibi tüm ayarları içerir.
+> 	+ 📌 Bu dosya, genellikle `/etc/alertmanager/` gibi bir sistem dizininde olur.
+
+
+> [!NOTE]
+> **Tüm Akış:** Bu komut çalıştığında;
+> 1. Alertmanager açılır.
+> 2. `/etc/alertmanager/alertmanager.yml` içeriğine göre yapılandırılır.
+> 3. `/alertmanager-data` klasörüne alarm/silence bilgilerini yazar.
+> 4. HTTP sunucusu başlar (`localhost:9093` varsayılan porttur).
+
++ Ubuntu işletim sistemin her yeniden başlatıldığında `alertmanager` servisin aktif olabilmesi için:
 
 ```shell
-sudo systemctl start alertmanager
+sudo systemctl enable alertmanager.service
 ```
+
++ `alertmanager` servisini çalıştırıyoruz:
 
 ```shell
-sudo systemctl status alertmanager
+sudo systemctl start alertmanager.service
 ```
 
++ `alertmanager` servisin çalışma durumunu kontrol ediyoruz:
+
+```shell
+sudo systemctl status alertmanager.service
+```
+
+---
+
++ Prometheus veya Alertmanager'da bir sorun olması durumunda, izleme sisteminizin kapalı olduğuna dair acil bir bildirim alırsınız.
++ Özellikle üretim(`Production`) ortamlarında oldukça kullanışlı bir hizmet.
++ Prometheus düzgün çalıştığı sürece bu alarm hep aktif olsun. Eğer bir gün bu alarm **gelmezse**, sistemde ciddi bir sorun var!
 
 ```shell
 sudo vim /etc/prometheus/dead-mans-snitch-rule.yml
 ```
+
+**dead-mans-snitch-rule:**
 
 ```yaml
 ---
@@ -1349,6 +2188,50 @@ groups:
       message: This alert is integrated with DeadMansSnitch.
     expr: vector(1)
 ```
+
+> 1. **`groups:`**
+> 	+ Bu satır, **alarm kurallarını gruplamak** için kullanılır.
+> 	+ Prometheus, bu grupları aynı anda işler. Her grup `name` ve `rules` içerir.
+> 2.  **`name: dead-mans-snitch`**
+> 	+ Bu, bu kurallar grubunun adıdır.
+> 	+ Örneğin, Alertmanager loglarında veya arayüzde bu adla görünür.
+> 	+ 📌 Anlamı: Bu grup, “Dead Man’s Snitch” tipi alarm kurallarını içeriyor.
+> 3. **`rules:`**
+> 	+ Bu grup altındaki alarmları listeler.
+> 4. **`- alert: DeadMansSnitch`**
+> 	+ Bu satır, bir alarm tanımlar.
+> 	+ 📌 Alarm adı `DeadMansSnitch` olacak. Alertmanager ve Prometheus UI’de bu isimle görünür.
+> 5. **`annotations:`**
+> 	+ Alarm hakkında **açıklama, mesaj, yardım bilgisi** eklemek için kullanılır.
+> 	+ Alertmanager bu bilgileri e-posta, Slack, webhook gibi yerlere yollar.
+> 	```yaml
+> 	message: This alert is integrated with DeadMansSnitch.
+>	```
+> 6. `expr: vector(1)`
+> 	+ Bu satır **alarm koşulunu** tanımlar.
+> 	+ Bu ifade **her zaman 1 döner**
+> 	+ Yani bu alarm **sürekli tetiklenmiş (aktif) durumda olur**
+
+
+> [!TIP]
+> + Prometheus'un canlı olduğunu doğrulamak için
+> + Alertmanager'ı test etmek için
+> + Harici bir "Dead Man's Snitch" servisi kullanıyorsan (örneğin: [deadmanssnitch.com](https://deadmanssnitch.com))
+
+|Alan|Anlamı|
+|---|---|
+|`expr: vector(1)`|Sürekli aktif bir alarm üretir|
+|`alert: DeadMansSnitch`|Alarmın adı|
+|`annotations.message`|Alarm açıklama mesajı|
+|`groups.name`|Kural grubunun adı|
+
++ Alertmanager, 9093 portu üzerinde dışaryıya yayın vermekterdir.
+
+![Alertmanager.png](./Pictures/Alertmanager.png)
+
+---
+
++ Ayrıca Alertmanager'ın konumunu ve yeni kuralın yolunu belirtmek için Prometheus yapılandırmasını güncellemeniz gerekir.
 
 ```shell
 sudo vim /etc/prometheus/prometheus.yml
@@ -1364,11 +2247,11 @@ global:
   # scrape_timeout is set to the global default (10s).
 
 # Alertmanager configuration
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-	      - localhost:9093   # <<----------------  
+alerting:                    # <<---------------
+  alertmanagers:             # <<---------------
+    - static_configs:        # <<---------------
+        - targets:           # <<---------------
+	      - localhost:9093   # <<---------------  
           # - alertmanager:9093
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
@@ -1404,14 +2287,270 @@ scrape_configs:
       - targets: ["localhost:9091"]
 ```
 
++ Yukarıdaki `prometheus.yml` dosyasında `Alertmanager configuration` detaylı inceleyelim:
+
+```yaml
+# Alertmanager configuration
+alerting:                    # <<---------------
+  alertmanagers:             # <<---------------
+    - static_configs:        # <<---------------
+        - targets:           # <<---------------
+	      - localhost:9093   # <<---------------  
+          # - alertmanager:9093
+```
+
+> 1. `alerting:`
+> 	+ Bu blok, Prometheus’un **alertmanager entegrasyonunu** başlatır.
+> 	+ Burada Prometheus’a “Uyarı varsa, şu Alertmanager’a gönder” dersin.
+> 2. `alertmanagers:`
+> 	+ Buraya bir veya birden fazla **Alertmanager adresi** tanımlayabilirsin.
+> 3. `static_config:`
+> 	+ Alertmanager adreslerini **elle (statik olarak)** tanımlamak için kullanılır.
+> 	+ Alternatif: `kubernetes_sd_configs`, `dns_sd_configs` gibi dinamik yöntemler de vardır (daha gelişmiş).
+> 4. `targets:`
+> 	+ Alertmanager'ların **`host:port`** adreslerini listelersin.
+> 	+ Prometheus, alarmları bu adreslere yollar.
+> 	+ Bu satırda deniyor ki: “Alertmanager şu anda **aynı makinede (localhost)** ve **9093 portunda** çalışıyor.”
+> 	+ 📌 Bu, Alertmanager'ın **varsayılan portudur**.
+
+
+> [!NOTE]
+> **Akış Nasıl İşler?**
+> 1. Prometheus bir alarm üretir (örneğin CPU > %90).
+> 2. `prometheus.yml` dosyasındaki bu yapı sayesinde:
+> 	+ Alarm **Alertmanager’a** HTTP üzerinden (`localhost:9093/api/v1/alerts`) gönderilir.
+> 3. Alertmanager, alarmları Slack, e-posta, webhook gibi yerlere yollar.
+
+| Konu         | Açıklama                                                                              |
+| ------------ | ------------------------------------------------------------------------------------- |
+| Port         | Alertmanager varsayılan olarak **9093** portunda çalışır.                             |
+| Hostname     | `localhost` yerine Docker içinde `alertmanager` gibi servis adları da kullanılabilir. |
+| Multi-Target | Aynı anda birden fazla Alertmanager hedefi tanımlayabilirsin.                         |
+
++ Prometheus servisini yeniden başlatmadan önce Prometheus yapılandırmasını(`Prometheus Config`) kontrol etmek her zaman iyi bir fikirdir.
+
 ```shell
 promtool check config /etc/prometheus/prometheus.yml
 ```
+
+**promtool Çıktısı:**
+
+```shell
+Checking prometheus.yml
+  SUCCESS: 1 rule files found
+ SUCCESS: prometheus.yml is valid prometheus config file syntax
+
+Checking dead-mans-snitch-rule.yml
+  SUCCESS: 1 rules found
+```
+
++ `prometheus.yml` dosyasında yapılan değişikliklerin geçerli olabilmesi için:
 
 ```shell
 sudo systemctl restart prometheus.service
 ```
 
++ Tarayıcıdan `http://192.168.1.129:9090` adresine gittiğimizde `Alerts` bölümünde görüncektir. 
+
+![Alertmanager_DeadMansSnitch](./Pictures/Alertmanager_DeadMansSnitch.png)
+
+## 7. Adım:
+
+### Alertmanager ile Slack Entegrasyonu:
+
++ Alertmanager'dan oluşan tüm alarmların gönderileceği bir Slack kanalı oluşturacağız.
++ `Create a new channel` butonu ile yeni bir `alert` adında bir channel oluşturuyoruz.
+
+![slack_channel](./Pictures/slack_channel.png)
+
++ Aşağıdaki resimde de görüleceği üzeri `#alert channel` oluşturulmuştur. (*Resimde 3. Adım*)
++ Daha sonra sıfırdan yeni bir Slack uygulaması(`Slack Apps`) oluşturalım(*Resimde 4. Adım*)
+
+![slack_alert_channel](./Pictures/slack_alert_channel.png)
+
+![slack_Build](./Pictures/slack_Build.png)
+
+
+![slack_create_an_app](./Pictures/slack_create_an_app.png)
+
++ İsmini `Prometheus` olarak veriyoruz ve bir çalışma alanı olarak `Grafana_Prometheus` seçiyoruz.
+
+![](./Pictures/slack_Name_app.png)
+
+
+![](./Pictures/slack_Incoming_Webhooks.png)
+
+![slack_active_incoming_webhooks](./Pictures/slack_active_incoming_webhooks.png)
+
+
+![slack_select_alerts](./Pictures/slack_select_alerts.png)
+
+
+
+![slack_copy_URL](./Pictures/slack_copy_URL.png)
+
+```shell
+sudo vim /etc/alertmanager/alertmanager.yml
+```
+
+**alertmanager.yml**
+
+```yaml
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 6m #1h
+  receiver: 'web.hook'
+  routes:
+  - receiver: slack-notifications
+    match:
+      severity: warning
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'http://127.0.0.1:5001/'
+  - name: slack-notifications
+    slack_configs:
+    - channel: "#alerts"
+      send_resolved: true
+      api_url: "https://hooks.slack.com/services/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"
+      title: "{{ .GroupLabels.alertname }}"
+      text: "{{ range .Alerts }}{{ .Annotations.message }}\n{{ end }}"
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']
+```
+
+
+```shell
+sudo vim /etc/prometheus/batch-job-rules.yml
+```
+
+**batch-job-rules.yml**
+
+```shell
+groups:
+- name: batch-job-rules
+  rules:
+  - alert: JenkinsJobExceededThreshold
+    annotations:
+      message: Jenkins job exceeded a threshold of 30 seconds.
+    expr: jenkins_job_duration_seconds{job="backup"} > 30
+    for: 1m
+    labels:
+      severity: warning
+```
+
+
+```shell
+sudo vim /etc/prometheus/prometheus.yml
+```
+
+**prometheus.yml**
+
+```shell
+# my global config
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - localhost:9093
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - dead-mans-snitch-rule.yml
+  - batch-job-rules.yml
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+    basic_auth:
+      username: admin
+      password: 1234tyo
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: node_export
+    static_configs:
+      - targets: ["localhost:9100"]
+
+  - job_name: pushgateway
+    honor_labels: true
+    static_configs:
+      - targets: ["localhost:9091"]
+```
+
+
+```shell
+promtool check config /etc/prometheus/prometheus.yml
+```
+
+**Çıktı:**
+
+```shell
+Checking /etc/prometheus/prometheus.yml
+  SUCCESS: 1 rule files found
+ SUCCESS: /etc/prometheus/prometheus.yml is valid prometheus config file syntax
+
+Checking /etc/prometheus/batch-job-rules.yml
+  SUCCESS: 1 rules found
+
+```
+
+
+```shell
+curl -v -X POST -u admin http://192.168.1.129:9090/-/reload
+```
+
+**Curl Çıktısı:**
+
+```shell
+*   Trying 192.168.1.129:9090...
+* Connected to 192.168.1.129 (192.168.1.129) port 9090 (#0)
+* Server auth using Basic with user 'admin'
+> POST /-/reload HTTP/1.1
+> Host: 192.168.1.129:9090
+> Authorization: Basic YWRtaW46MTIzNHR5bw==
+> User-Agent: curl/7.81.0
+> Accept: */*
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Date: Mon, 21 Jul 2025 15:22:27 GMT
+< Content-Length: 0
+<
+* Connection #0 to host 192.168.1.129 left intact
+```
+
+
+
+```shell
+echo "jenkins_job_duration_seconds 31.87" | curl --data-binary @- http://localhost:9091/metrics/job/backup
+```
+
+
+
+![slack_notification](./Pictures/slack_notification.png)
+
 ## Kaynak:
 1. [How to Install Prometheus and Grafana on Ubuntu? (Node Exporter & Alertmanager & Pushgateway](https://www.youtube.com/watch?v=Z7GxBf6us8Y)
-	1. 
+2. 

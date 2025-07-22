@@ -56,45 +56,17 @@
             }
           },
           {
-            "id": "5d9978daabe25074",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Veri Günceleme - UPDATE"
-            }
-          },
-          {
             "id": "662249ca13d2c476",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Database/PostgreSQL/PostgreSQL Giriş.md",
+                "file": "DevOps/Prometheus/Prometheus Giriş.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "PostgreSQL Giriş"
-            }
-          },
-          {
-            "id": "57957cd91f40b016",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "DevOps/Grafana/Grafana ve Promethous.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Grafana ve Promethous"
+              "title": "Prometheus Giriş"
             }
           },
           {
@@ -128,9 +100,51 @@
               "icon": "lucide-file",
               "title": "PHP 8"
             }
+          },
+          {
+            "id": "7c3695645b9f4b9b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Database/Sqlite/Sqlite Giriş.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Sqlite Giriş"
+            }
+          },
+          {
+            "id": "2089c373dc0b543e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DevOps/Grafana/Grafana Giriş.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Grafana Giriş"
+            }
+          },
+          {
+            "id": "401e714c48bec3ef",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DevOps/Grafana/Grafana ve Promethous.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Grafana ve Promethous"
+            }
           }
         ],
-        "currentTab": 5
+        "currentTab": 8
       }
     ],
     "direction": "vertical"
@@ -187,7 +201,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 275.5
+    "width": 200
   },
   "right": {
     "id": "1413189cf439f38e",
@@ -275,150 +289,54 @@
       "command-palette:Open command palette": false
     }
   },
-  "floating": {
-    "id": "971144b64e8f17b8",
-    "type": "floating",
-    "children": [
-      {
-        "id": "764e527aead2fb3a",
-        "type": "window",
-        "children": [
-          {
-            "id": "efcc3afb96038336",
-            "type": "tabs",
-            "dimension": 71.6796875,
-            "children": [
-              {
-                "id": "1e3e5ba187899cca",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "Linux Command/tmux.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "tmux"
-                },
-                "group": "42647b8c56c913ca"
-              },
-              {
-                "id": "40f71ed1532e2843",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "DevOps/Grafana/Grafana ve Promethous.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "Grafana ve Promethous"
-                },
-                "group": "7d67359cfc5d294f"
-              }
-            ],
-            "currentTab": 1
-          },
-          {
-            "id": "8f1bfb8ed137d96f",
-            "type": "tabs",
-            "dimension": 28.3203125,
-            "children": [
-              {
-                "id": "394237d7fa751be8",
-                "type": "leaf",
-                "state": {
-                  "type": "outline",
-                  "state": {
-                    "file": "DevOps/Grafana/Grafana ve Promethous.md",
-                    "followCursor": false,
-                    "showSearch": false,
-                    "searchQuery": ""
-                  },
-                  "icon": "lucide-list",
-                  "title": "Outline of Grafana ve Promethous"
-                },
-                "group": "7d67359cfc5d294f"
-              },
-              {
-                "id": "87e328dddd2fcfff",
-                "type": "leaf",
-                "state": {
-                  "type": "outline",
-                  "state": {
-                    "file": "Linux Command/tmux.md",
-                    "followCursor": false,
-                    "showSearch": false,
-                    "searchQuery": ""
-                  },
-                  "icon": "lucide-list",
-                  "title": "Outline of tmux"
-                },
-                "group": "42647b8c56c913ca"
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 115,
-        "y": 28,
-        "width": 1251,
-        "height": 876,
-        "maximize": true,
-        "zoom": 0
-      }
-    ]
-  },
-  "active": "f36ea74e416a148d",
+  "active": "401e714c48bec3ef",
   "lastOpenFiles": [
-    "DevOps/Grafana/Pictures/prometheus_target.png",
-    "DevOps/Grafana/Pictures/prometheus.png",
-    "DevOps/Grafana/Pictures",
+    "DevOps/Grafana/Pictures/slack_notification.png",
+    "DevOps/Grafana/Pictures/slack_copy_URL.png",
+    "DevOps/Grafana/Pictures/slack_select_alerts.png",
+    "DevOps/Grafana/Pictures/slack_active_incoming_webhooks.png",
+    "DevOps/Grafana/Pictures/slack_Incoming_Webhooks.png",
+    "DevOps/Grafana/Pictures/slack_Name_app.png",
+    "DevOps/Grafana/Pictures/slack_create_an_app.png",
+    "DevOps/Grafana/Pictures/slack_Build.png",
+    "DevOps/Grafana/Pictures/slack_apps.png",
+    "DevOps/Grafana/Grafana Giriş.md",
     "DevOps/Grafana/Grafana ve Promethous.md",
-    "Linux Command/tmux.md",
+    "DevOps/Grafana/Pictures/slack.png",
+    "DevOps/Grafana/Pictures/Alertmanager_DeadMansSnitch.png",
+    "DevOps/Prometheus/Prometheus Giriş.md",
+    "Untitled.md",
+    "DevOps/Prometheus",
+    "Database/Sqlite/Sqlite Giriş.md",
+    "Database/PostgreSQL/PostgreSQL Giriş.md",
+    "Web Servers/html/HTML.md",
+    "Database/Welcome.md",
+    "Database/Sqlite",
+    "Pictures/grafana.md",
+    "Pictures",
+    "K8s/K8s Kurulumu.md",
+    "().md",
+    "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
     "Programlama/PHP/PHP 8.md",
+    "Linux Command/tmux.md",
+    "DevOps/Grafana/Pictures",
     "Linux Command/Linux komutları.md",
     "Windows Commands/PowerShell.md",
     "Programlama/PHP/PHP 8 Apps.md",
     "Windows Commands/CMD.md",
     "Linux Command/Vim.md",
-    "Database/PostgreSQL/PostgreSQL Giriş.md",
     "DevOps/Grafana",
-    "K8s/K8s Kurulumu.md",
-    "Database/PostgreSQL/Veri Günceleme - UPDATE.md",
     "Programlama/PHP/Laravel/Into to Laravel.md",
     "Programlama/Bash_Script/Bash Script Apps.md",
     "Web Servers/css/CSS.md",
     "Programlama/Python/Python Giriş.md",
     "Programlama/perl/Perl Giriş.md",
     "create a link.md",
-    "Web Servers/html/HTML.md",
-    "Untitled.md",
-    "Windows Commands/WSL2.md",
-    "Web Servers/Nginx/Nginx Config File.md",
-    "Programlama/Bash_Script/Bash Script.md",
-    "Windows Commands/Kısayollar.md",
-    "Windows Commands/Çalıştır.md",
     "Programlama/PHP/Laravel",
     "Programlama/perl",
-    "Database/PostgreSQL/Veri Girişi - INSERT.md",
-    "Web Servers/html/images/form_date.png",
-    "Database/PostgreSQL/Pictures/inner_join.png",
-    "Database/PostgreSQL/Pictures/if-modified-since.png",
-    "Database/PostgreSQL/Pictures/employee_table.png",
-    "Database/PostgreSQL/Pictures/department_table.png",
     "Database/PostgreSQL/SQL İstemcileri",
-    "Web Servers/html/images/form_write_file.png",
-    "Web Servers/html/images/form.png",
-    "Web Servers/html/images/iframe2.png",
-    "Web Servers/html/images/iframe.png",
     "Web Servers/css",
     "Web Servers/html/images",
-    "Web Servers/html",
-    "Programlama/PHP",
-    "Programlama/Python/Sqlalchemy",
     "Untitled.canvas"
   ]
 }
