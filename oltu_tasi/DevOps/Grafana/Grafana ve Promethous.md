@@ -2007,8 +2007,8 @@ sudo mkdir -p /alertmanager-data /etc/alertmanager
 > + Varsayılan olarak Alertmanager şunları bu klasöre yazar:
 > ```shell
 > data/
-  ├── notification.log
-  └── silences.json
+>  ├── notification.log
+>  └── silences.json
 > ```
 > + Hangi alarmlar tetiklendi ve ne zaman gönderildi?
 > + Hangi susturmalar aktif?
