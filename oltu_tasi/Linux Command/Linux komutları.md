@@ -1,44 +1,55 @@
 #linux_commands
-### 1. curl
-###### 1.1`-I` parametresi:
+## 1. curl
+##### 1.1`-I` parametresi:
 ```bash
 $ curl -I http://192.168.1.125/assets/images/clients/c3.png
 ```
 > **Explanation:**
 
-###### 1.2. `-X` parametresi:
+##### 1.2. `-X` parametresi:
 ```shell
 $ curl -X GET www.example.com
 ```
 > **Explanation:**
 
-###### 1.3. `-L` parametresi:
+##### 1.3. `-L` parametresi:
 ```shell
 curl -L http://192.168.1.132
 ```
 
-###### 1.3. ISO indir
+### 1.3. ISO indir
+
+#### Örnek 1:
 
 ```shell
-$  curl https://mirror.pseudoform.org/iso/2024.12.01/archlinux-2024.12.01-x86_64.iso -o archlinux-2024.12.01-x86_64.iso
+curl https://mirror.pseudoform.org/iso/2024.12.01/archlinux-2024.12.01-x86_64.iso -o archlinux-2024.12.01-x86_64.iso
 ```
+
 > **Explanation:**
 > + `https://mirror.pseudoform.org/iso/2024.12.01/archlinux-2024.12.01-x86_64.iso` sitesinden `-o` parametresi ile `archlinux-2024.12.01-x86_64.iso` adında indiriyoruz.
 > + `-o` parametresini uzun yazılışı: `--output` 
 
-### 2. update-alternative
+#### Örnek 2:
+
++ `curl` ile bir ISO dosyası indirirken bağlantı kesildiğinde kaldığınız yerden devam etmek için `-C -` (continue) parametresini kullanabilirsiniz.
+
+```shell
+
+```
+
+## 2. update-alternative
 ```shell
 $ sudo update-alternative --config python
 ```
 > **Explanation:**  ==ubuntu==, ==rocky linux==
 > python versiyon arasında geçiş yapmamıza izin veriyor.
 
-### 3. openssl
+## 3. openssl
 ```shell
 $ openssl rand -base64 10
 ```
 
-### 4. shutdown
+## 4. shutdown
 ###### Örnek 1: +dakika
 ```shell
 $ shutdown +10 "10 dakika sonra makine kapanacak"
@@ -60,13 +71,13 @@ $ shutdown -k 22:30:25
 > **Explanation:**
 > Yukarıdaki komut gibi çalışır ama burada belirlen zaman verilmiştir. Uyarı mesajı tüm terminaller 22:30:24 sadece kapanacağı uyarısı verir.
 
-### 5. echo
+## 5. echo
 ```shell
 $ echo "Linux is Awesome"
 ```
 > **Explanation:**
 
-### 6. find
+## 6. find
 #### Örnek 1: Temel Kullanımı
 ```shell
 $ find /usr -name words
@@ -125,7 +136,7 @@ find . -type f ! -name "*.tar" -delete
 ls    # Çıkıt: bash_achive.tar
 ```
 
-### 7. grep
+## 7. grep
 ###### Örnek 1: 
 ```shell
 $ cat /usr/share/dict/words | grep "Ankara"
@@ -154,7 +165,7 @@ $ grep -v "ankara" /usr/share/dict/words
 $ grep -n "Istanbul" /usr/share/dict/words
 ```
 
-### 8. who
+## 8. who
 ```
 $ who
 ```
@@ -162,13 +173,13 @@ $ who
 > + Sistemde oturum açmış kullanıcılar hakkında bilgi almak için kullanılır.
 > + Komut, hangi kullanıcıların sistemde aktif olduğunu, hangi terminal oturumlarında bulunduklarını ve oturum açma zamanlarını gösterir.
 > +  Kullanıcı adı  - Terminal - Oturum açma zamanı - Kullanıcının bağlı olduğu IP adresi
-### 9. tty
+## 9. tty
 ```bash
 $ tty
 ```
 > **Explanation:**
 
-### 10. trash-cli
+## 10. trash-cli
 ###### Komutun Yüklenmesi
 ```bash
 $ sudo apt install trash-cli
@@ -182,7 +193,7 @@ $ trash-put [dosya_yolu]
 > genellikle dosyaları **`~/.local/share/Trash`** klasörüne taşır.
 
 
-### 11. useradd
+## 11. useradd
 ###### 1. Temel Kullanımı:
 ```shell
 $ useradd -m -d /home/linus -s /usr/bin/bash -c "Linus Torvalds" linus
@@ -200,7 +211,7 @@ $ useradd -m -d /home/linus -s /usr/bin/bash -c "Linus Torvalds" linus
 > [!CAUTION]
 > + `useradd` komutu linux distro'lar göre farklı davranabilir.  
 
-### 12. ps
+## 12. ps
 + Linux/Unix sistemlerinde çalışan süreçleri (process) listelemek için kullanılır.
 
 ```bash
@@ -208,9 +219,9 @@ $ ps -ef
 ```
 > **Explanation:**
 > 
-### 13.ctop
+## 13.ctop
 
-### 14. scp
+## 14. scp
 + **Amaç:** `scp` (Secure Copy Protocol), Linux ve diğer Unix tabanlı sistemlerde dosyaları güvenli bir şekilde bir bilgisayardan diğerine kopyalamak için kullanılan bir komuttur.
 + SSH protokolünü kullanarak veri aktarımı yapar, bu da verilerin şifrelenmiş bir şekilde iletilmesini sağlar.
 + Bu sayede dosyaların başka bir cihaza güvenli bir şekilde aktarılması mümkün olur.
@@ -250,7 +261,7 @@ $ scp username@source_IP:/source/folder/file_name /target/folder/
 ###### `-P` parametresi:
 
 
-### 15. tree
+## 15. tree
 
 ###### 1. Temel Kullanımı:
 ```
@@ -274,7 +285,7 @@ $ tree -L 2
 > **Explanation:**
 > + 
 
-### 16. rsync:
+## 16. rsync:
 
 ```sh
 $ rsync -av --delete ~/Dropbox/oltu_tasi ~/Documents/my_documantion_on_obsidian
@@ -286,12 +297,12 @@ $ rsync -av --delete --dry-run ~/Dropbox/oltu_tasi \
  ~/Documents/my_documantion_on_obsidian
 ```
 
-### 17. id:
+## 17. id:
 ```shell
 $ id
 ```
 
-### 18. Journalctl:
+## 18. Journalctl:
 
 #### `-u` parametresi:
 + `-u` paramtresi ile belirtilen bir hizmetin (unit) **systemd günlüklerini** görmek için kullanılır.
@@ -311,7 +322,7 @@ $ sudo journalctl -u <unit_name>
 1. **Unit Log'larını görmek:** Bir unit'ün neden çalışmadığını veya hata verildiğini anlamanıza yardımcı olur.
 2. **Hata Analizi:** Hizmet başlatıldığında oluşan hataların detaylarını gösterir.
 
-### 19. lsof:
+## 19. lsof:
 + `lsof` (_**Li**st **O**pen **F**iles_**), Unix ve Unix benzeri işletim sistemlerinde (Linux, macOS, BSD vb.) **açık dosyaları** listelemek için kullanılan bir komuttur.
 
 
@@ -470,7 +481,7 @@ nginx   29189     root    2w    REG      253,0    88818 1049333 /var/log/nginx/e
 | `NODE`     | Dosya veya bağlantının düğüm numarası                                                       |
 | `NAME`     | Açık dosyanın veya ağ bağlantısının adı                                                     |
 
-### tar Komutu:
+## 20. tar Komutu:
 
 + `tar` komutu, Linux ve Unix tabanlı sistemlerde **dosya ve dizinleri arşivlemek** için kullanılan bir komuttur.
 + Genellikle `.tar`, `.tar.gz` veya `.tgz` uzantılı dosyalar oluşturmak ya da açmak için kullanılır.
@@ -542,7 +553,7 @@ total 24
 6. **Güvenlik ve Arşivleme Uyumluluğu:**
 	- Bazı durumlarda arşiv dosyaları şifrelenerek güvenli şekilde saklanır veya uzun vadeli yasal arşivleme yapılır.
 
-### ipcalc Komutu:
+## 21. ipcalc Komutu:
 
 + `ipcalc`, IP adresleriyle ilgili çeşitli hesaplamaları kolayca yapmanı sağlayan bir komut satırı aracıdır.
 + Özellikle ağ (network) yöneticileri ve sistem yöneticileri tarafından sıkça kullanılır.
@@ -654,7 +665,7 @@ Used network: 192.168.0.0/24
 Unused:
 192.168.0.224/27
 ```
-### sipcalc Komutu:
+## 22. sipcalc Komutu:
 
 #### Kurulum:
 
@@ -678,8 +689,11 @@ sudo pacman -S sipcalc
 
 #### Örnek 1: 
 
-### netdiscover Komutu:
+## 24. netdiscover Komutu:
 
 ```shell
 sudo netdiscover -i eth0 -r 192.168.1.0/24 -c 5
 ```
+
+## 25. install Komutu:
+

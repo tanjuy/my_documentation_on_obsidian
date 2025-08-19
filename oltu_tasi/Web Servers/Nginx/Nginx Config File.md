@@ -3227,6 +3227,7 @@ ab -n 1000 -c 100 http://192.168.1.132
 > + `-c` parametresi(concurrency: eşzamanlılık): Aynı anda gerçekleştirilecek birden fazla istek sayısı. Varsayılan olarak bir seferde bir istek yapılır.
 
 **ab çıktısı: `sendfile on`**
+
 ```shell
 This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/

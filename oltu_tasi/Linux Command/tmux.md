@@ -369,6 +369,11 @@ tmux attach -t $SESSION
 > tmux source-file ~/.tmux.conf
 > ```
 
+
+```tmux
+set-option -g status-position top
+set -g mouse on
+```
 # Tmux Eklentileri(Plug-in):
 
 ## TPM (Tmux Plugin Manager):

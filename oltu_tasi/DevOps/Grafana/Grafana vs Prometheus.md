@@ -28,7 +28,7 @@
 
 ## 1. Adım:
 
-### Promethous Kurulumu:
+### Prometheus Kurulumu:
 
 ```shell
 sudo useradd \
@@ -2267,7 +2267,7 @@ scrape_configs:
   - job_name: "prometheus"
 	basic_auth:            
 	  username: admin
-	  password: 1234tyo
+	  password: 12345
 
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
@@ -2395,6 +2395,8 @@ sudo vim /etc/alertmanager/alertmanager.yml
 
 **alertmanager.yml**
 
++ Aşağıdaki yapı Prometheus'un **Alertmanager** yapılandırma dosyasından bir bölümdür ve alarmların nasıl gruplandırılacağı, hangi alıcılara (receiver) gönderileceği ve hangi kurallarla bastırılacağı (inhibit) gibi ayarları içerir.
+
 ```yaml
 route:
   group_by: ['alertname']
@@ -2424,6 +2426,102 @@ inhibit_rules:
       severity: 'warning'
     equal: ['alertname', 'dev', 'instance']
 ```
+
+
+> [!NOTE]
+> #### 1.`route` Bölümü:
+> + Bu bölüm alarmların ilk karşılandığı yerdir. Burada hangi alarmların *nereye gönderileceği* ve *nasıl gruplanacağı* tanımlanır.
+> ```yaml
+>route:
+>  group_by: ['alertname']
+>  group_wait: 30s
+>  group_interval: 5m
+>  repeat_interval: 6m
+>  receiver: 'web.hook'
+> ```
+> ##### Açıklamalar:
+> + `group_by: ['alertname']`: 
+> 	- Aynı **alertname**'e sahip alarmlar bir grup olarak değerlendirilir.
+> 	- **Örneğin:** 3 farklı sunucuda `HighCPU` uyarısı varsa, bunlar tek bildirimde birleştirilir.
+> + `group_wait: 30s`: 
+> 	- İlk alarm geldikten sonra 30 saniye beklenir, bu sürede başka alarmlar gelirse aynı grupla gönderilir.
+> + `group_interval: 5m`:
+> 	- Aynı gruptan yeni bir alarm gelirse en az 5 dakika beklenir, sonra tekrar gönderilir.
+> + `repeat_interval: 6m`:
+> 	- Aynı alarm hala aktifse 6 dakika sonra tekrar bildirim gönderilir (örnek: Slack).
+> + `receiver: 'web.hook'`:
+> 	- Yukarıdaki kurallar bu **web.hook** adlı alıcıya (receiver) yönlendirilir.
+
+
+> [!NOTE]
+> #### routes
+> ```yaml
+>  routes:
+>  - receiver: slack-notifications
+>    match:
+>      severity: warning
+> ```
+> + Bu bölüm, yukarıdaki ana route içinde özel bir eşleşme (match) durumunu belirtir:
+> 	- Eğer bir alarm `severity: warning` ise, bu alarm `slack-notifications` alıcısına gönderilir.
+> 	- Diğer tüm alarmlar varsayılan olarak `web.hook` alıcısına gider.
+
+
+> [!NOTE]
+> #### 2. `receivers` Bölümü:
+> + Alarmları nereye göndereceğimizi burada tanımlıyoruz.
+> ```yaml
+>  receivers:
+>  - name: 'web.hook'
+>    webhook_configs:
+>      - url: 'http://127.0.0.1:5001/'
+> ```
+> + Bu alıcıya gelen alarmlar HTTP üzerinden belirtilen URL'ye POST isteğiyle gönderilir. (örneğin, kendi yazdığınız bir webhook servisine).
+
+
+> [!NOTE]
+> ```yaml
+>   - name: slack-notifications
+>    slack_configs:
+>    - channel: "#alerts"
+>      send_resolved: true
+>      api_url: "https://hooks.slack.com/services/..."
+>      title: "{{ .GroupLabels.alertname }}"
+>      text: "{{ range .Alerts }}{{ .Annotations.message }}\n{{ end }}"
+> ```
+> + `slack-notifications`:
+> 	- Bu alıcıya gelen alarmlar Slack kanalına gönderilir. 
+> + `channel: "#alerts"`:
+> 	- Slack mesajı bu kanala gönderilir.
+> + `send_resolved: true`:
+> 	- Alarm durumu normale döndüğünde (çözülünce) bir bildirim daha gönderilir.
+> + `title`:
+> 	- Slack mesaj başlığı; alarmın adı (`alertname`).
+> + `text`:
+> 	- Slack mesajının içeriği; alarm mesajları (`.Annotations.message`) listelenir.
+
+
+> [!NOTE]
+> #### `inhibit_rules` (Bastırma Kuralları):
+> ```yaml
+>inhibit_rules:
+ >  - source_match:
+>     severity: 'critical'
+>    target_match:
+>      severity: 'warning'
+>    equal: ['alertname', 'dev', 'instance']
+> ```
+> + Eğer bir `critical` alarm aktifse ve aynı: `alertname`, `dev`, `instance`
+> + etiketlerine sahip bir `warning` alarm varsa, bu `warning` alarm gösterilmez.
+> + **Örnek:**
+> 	- Aynı sunucuda hem kritik hem uyarı düzeyinde alarm varsa, sadece kritik olan gösterilir. Bu da gereksiz bildirimleri azaltır.
+
+
+> [!NOTE]
+> #### Özet:
+> - Alarmlar `alertname` bazlı gruplanır ve ilgili alıcılara gönderilir.
+> - `severity: warning` olanlar Slack'e gider.
+> - Diğer alarmlar `web.hook` adlı webhook'a gönderilir.
+> - Eğer bir kritik alarm varsa, onunla aynı kaynakta çıkan uyarı düzeyindekiler bastırılır (gönderilmez).
 
 
 ```shell
@@ -2481,7 +2579,7 @@ scrape_configs:
   - job_name: "prometheus"
     basic_auth:
       username: admin
-      password: 1234tyo
+      password: 12345
 
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
@@ -2499,6 +2597,7 @@ scrape_configs:
       - targets: ["localhost:9091"]
 ```
 
++ `prometheus.yml` dosyasının söz dizimi doğru olup olmadığını doğruluyoruz.
 
 ```shell
 promtool check config /etc/prometheus/prometheus.yml
@@ -2517,9 +2616,14 @@ Checking /etc/prometheus/batch-job-rules.yml
 ```
 
 
+
 ```shell
 curl -v -X POST -u admin http://192.168.1.129:9090/-/reload
 ```
+
+> + Bu, Prometheus’un dinamik olarak **yapılandırma dosyasını (prometheus.yml)** yeniden okumasını sağlar.
+> + Eğer Prometheus’a yeni bir yapılandırma eklediysen (örneğin: yeni bir target, rule, vs.), servisi **yeniden başlatmadan** bu URL'ye `POST` isteği göndererek değişiklikleri uygulayabilirsin.
+> + `/-/reload` çağrıldığında Prometheus `prometheus.yml` dosyasını tekrar yükler.
 
 **Curl Çıktısı:**
 
@@ -2541,15 +2645,33 @@ curl -v -X POST -u admin http://192.168.1.129:9090/-/reload
 * Connection #0 to host 192.168.1.129 left intact
 ```
 
+---
 
++ Yeni metriği(`jenkins_job_duration_seconds`), Prometheus Pushgateway'e göndererek uyarıyı tetikleyin.
++ Bu komut, **Prometheus Pushgateway** kullanarak Prometheus'a **manuel metrik gönderimi** yapar.
++ Eğer dikkat ederseniz; `batch-job-rules.yml` dosyasında `expr` değerinde yazılan şarttan daha büyük bir metrik veri gönderiyoruz.
 
 ```shell
 echo "jenkins_job_duration_seconds 31.87" | curl --data-binary @- http://localhost:9091/metrics/job/backup
 ```
 
 
++ Bir dakika kadar veya sonra, Slack'te bir mesaj alacaksınız.
++ `batch-job-rules.yml` dosyasında `expr` ifadesinde verilen şarttan daha büyük olduğu için `slack` uygulamasına mesaj düşmüştür.
 
 ![slack_notification](./Pictures/slack_notification.png)
+
+---
+
++ 30 saniyeden kısa süreli yeni bir metrik gönderirsek Prometheus uyarıyı çözecektir.
++ Yani, Eğer `jenkins_job_duration_seconds` metrik verisini 30'un altında verirsek `slack` uygulamasına uyarı mesajları duracaktır.
+
+```shell
+curl "jenkins_job_duration_seconds 10.87" | curl --data-binary @- http://localhost:9091/metrics/job/backup
+```
+
+![slack_curl](./Pictures/slack_curl.png)
+
 
 ## Kaynak:
 1. [How to Install Prometheus and Grafana on Ubuntu? (Node Exporter & Alertmanager & Pushgateway](https://www.youtube.com/watch?v=Z7GxBf6us8Y)

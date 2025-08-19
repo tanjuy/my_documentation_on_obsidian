@@ -1,4 +1,38 @@
 #docker 
+
+
+## docker-compose.yml
+
+
+> [!NOTE]
+> + `docker-compose.yml` dosyası üç ana bölümden oluşabilir:
+> ##### 1. version:
+> + Compose dosyasının biçim sürümü (`3.8`, `3.9`, vb.)
+> ##### 2. services:
+> + Burada tek veya birden fazla container tanımı yapılır.
+> ```yaml
+> services:
+>   web:
+>     image: nginx
+>   db:
+>     image: postgres
+> ```
+> + Bu durumda `web` ve `db` adında **iki farklı container** çalışır.
+> ##### 3. volumes:/networks:/configs:
+> + İsteğe bağlı altyapı tanımları. 
+
+### 1. version:
+
+### 2. services:
+
++ **services:** başlığı altında, çalıştırmak istediğin her bir `container` (yani servis) tanımlanır.
++ Her servis için hangi imajın kullanılacağı, hangi portların açılacağı, hangi volume’lerin bağlanacağı, hangi ortam değişkenlerinin verileceği gibi ayarlar yapılır.
+
+### 3. volumes:/networks:/configs:
+
+
+
+
 ## Compose Deploy Specification:
 
 ##### environment:

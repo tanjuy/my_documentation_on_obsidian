@@ -287,6 +287,7 @@ RUN ["<komut>", "<arg1>", "<arg2>"]
 
 ---
 ### CMD(Command):
+
 + **Amaç**: Konteyner çalıştırıldığında varsayılan olarak çalıştırılacak komutu tanımlar.
 + **Esneklik**: `docker run` komutu ile konteyner çalıştırılırken CMD ile belirtilen komut, kullanıcı tarafından geçersiz kılınabilir.
 + **Kullanım Senaryosu**: Genellikle konteynerin temel işlevini tanımlamak için kullanılır ve esnekliği sayesinde farklı komutlar çalıştırmak istendiğinde idealdir.

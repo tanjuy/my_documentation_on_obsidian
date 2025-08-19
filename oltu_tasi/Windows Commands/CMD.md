@@ -37,3 +37,13 @@ netsh interface ipv4 show config
 netsh wlan show profiles
 ```
 
+### shutdown Komutu:
+
+#### Yeniden Başlatma:
+
+```cmd
+shutdown /r /t 0
+```
+
+> + **`/r`** → Yeniden başlatma işlemi yapar.
+> + **`/t 0`** → Bekleme süresi olmadan hemen yeniden başlatır (saniye cinsinden, örn. `/t 5` 5 saniye bekler).

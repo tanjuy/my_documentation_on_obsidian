@@ -1098,7 +1098,55 @@ $ docker info --format "{{json Plugins}}"
 > **Explanation:**
 > + docker engine ile birlikte gelen eklentileri(plugins) listeler.
 
+# Docker ve DNS
+
++ Docker'da DNS (Domain Name System), konteynerlerin birbirleriyle ve dış dünya ile iletişim kurabilmesi için hayati öneme sahiptir.
++ Docker, varsayılan olarak kendi iç DNS sistemini kullanır ve bu sistem otomatik olarak konteyner isimlerini IP adreslerine çevirir.
+
+
+> [!NOTE]
+> #### Docker'ın Varsayılan DNS Davranışı:
+> Docker, bir konteyner başlattığında otomatik olarak:
+> + `/etc/resolv.conf` dosyasını oluşturur.
+> + Bu dosyaya bir DNS sunucusu (genellikle Docker’ın yerleşik DNS server'ı) ekler.
+> + Bu DNS sunucusu, konteynerlerin isim çözümlemesini yapar.
+> 
+> **Docker DNS sunucusu:** `127.0.0.11` (bridge network için)
+
+# `docker.sock`:
+
++ **`/var/run/docker.sock`**, Docker Engine'ın REST API'sine erişim sağlayan bir Unix soket dosyasıdır.
++ Bu soket, Docker daemon (Docker Engine) ile iletişim kurmak için kullanılır.
+
+
+> [!NOTE]
+> **Docker API Erişimi:**
+> + Bu soket üzerinden Docker CLI (`docker` komutu) veya diğer uygulamalar (örneğin, Portainer, Docker SDK kullanan uygulamalar) Docker Engine ile iletişim kurar.
+> + Örneğin, `docker ps` komutu çalıştırıldığında, Docker CLI bu soket üzerinden Docker Engine'a istek gönderir.
+
+
+> [!CAUTION]
+> **Güvenlik Riskleri:**
+> - Bu sokete erişimi olan bir kullanıcı veya uygulama, **root yetkileriyle** Docker üzerinde işlem yapabilir (container oluşturma, silme, host sistemine erişim vb.).
+> - Bu nedenle, `/var/run/docker.sock`'i container'lara bağlamak (`docker run -v /var/run/docker.sock:/var/run/docker.sock`) **potansiyel bir güvenlik riskidir**. Kötü niyetli bir container, host sistemini ele geçirebilir.
+
+
+
+> [!TIP]
+> **Alternatif Kullanım:**
+> + Eğer bir uygulamanın Docker API'ye erişmesi gerekiyorsa, daha güvenli yöntemler (Docker'in TLS özellikleri veya API erişim kısıtlamaları) kullanılmalıdır.
+
+```shell
+curl --unix-socket /var/run/docker.sock http://localhost/containers/json
+```
+
+> + Bu komut, Docker Engine'dan çalışan container'ların listesini döndürür (Docker API üzerinden).
+
+# /etc/docker/daemon.json nedir?
+
+https://docs.docker.com/reference/cli/dockerd/#daemon-configuration-file
 
 ## Kaynak:
 [Ayti Tech](https://www.youtube.com/watch?v=ACr92yZF0bg)
 [Hızlandırılmış Docker Eğitimi - Part 2/2](https://www.youtube.com/watch?v=ty3s47TDjo4)
+
