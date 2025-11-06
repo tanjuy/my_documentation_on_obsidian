@@ -314,7 +314,7 @@ $ docker inspect --format='{{.HostConfig.CpusetCpus}}' web_limit_cpus-cpus
 ```
 
 ---
-##### E. Ortam Değişkenleri:
+##### 6. Ortam Değişkenleri:
 + Ortam değişkenleri(environment variables), konteyner içinde çalışan uygulamalar için yapılandırma bilgileri sağlamak, gizli anahtarları saklamak veya uygulamaların davranışını kontrol etmek gibi çeşitli amaçlarla kullanılabilir.
 + Ortam değişkenleri *bash script* de değişkenler olarak geçmektedir!
 ###### I. --env KEY=Value:
@@ -362,7 +362,7 @@ packageManager=pacman
 $ docker inspect --format '{{.Config.Env}}' env_file_test
 ```
 
-##### F. Port Açma:
+##### 7. Port Açma:
 ###### -p parametresi:
 ```shell
 $ docker run --name port_publish -d -p 8081:80 nginx
@@ -391,6 +391,20 @@ $ docker inspect --format='{{.HostConfig.PortBindings}}' port_publish
 
 
 ---
+
+##### 8. restart politikası:
+
+###### 8.1. restart=unless-stopped:
+
++ Konteyner her durduğunda otomatik olarak yeniden başlatılır.
++ **Tek istisna**: Kullanıcı tarafından manuel olarak durdurulmuşsa (`docker stop` komutuyla)
++ Docker daemon'ı yeniden başlatıldığında, konteyner de otomatik olarak başlatılır.
+
+
+> [!TIP]
+> **Best-Practise:**
+> + `unless-unstopped` politikası container'ın bakım durumları için en uygundur.
+
 ### exec:
 ###### Syntax:
 + **Usage:** `docker exec [OPTIONS] CONTAINER COMMAND [ARG...]`
@@ -976,6 +990,41 @@ $ docker network inspect none -f '{{json .Containers}}' | jq
 > + Bu komut ile hangi container'ların `none` sürücüsüne(driver) bağlı olduğunu görebiliriz.
 
 #### 5.Macvlan Network:
+
+#### 6. Ipvlan Network:
+
+##### 🔹 IPvlan Nedir?
+
++ Linux çekirdeğinin sağladığı bir ağ özelliğidir.
++ Bir **fiziksel ağ arayüzü** (ör. `eth0`) üzerinden **birden fazla sanal arabirim** oluşturmanıza izin verir.
++ Bu arabirimler **aynı MAC adresini paylaşır**, ama **farklı IP adresleri** alabilir.
+
+
+> [!CAUTION]
+> + **macvlan** gibi her konteyner için ayrı bir **MAC adresi** oluşturmaz. 
+> + Bunun yerine tek bir MAC kullanır ve sadece IP seviyesinde ayrışır.
+
+
+> [!NOTE]
+> ##### IPvlan Çalışma Modları
+> IPvlan’ın 2 modu vardır:
+> 1. **L2 Mode (Layer 2)**
+> 	- Klasik switch mantığıyla çalışır.
+> 	- Konteynerler doğrudan fiziksel ağda, aynı subnet’te görünür.
+> 	- MAC adresleri **aynıdır**, IP farklıdır.
+> 2. **L3 Mode (Layer 3)**
+> 	- Konteynerler arasında **routing** yapılır.
+> 	- Her konteyner farklı subnet’te olabilir, host yönlendirme yapar.
+
+##### 🔹 Macvlan vs IPvlan
+
+| Özellik        | Macvlan                                                | IPvlan                                 |
+| -------------- | ------------------------------------------------------ | -------------------------------------- |
+| **MAC adresi** | Her konteyner için ayrı MAC                            | Hepsi tek MAC (host’unki)              |
+| **Performans** | Daha fazla overhead                                    | Daha az overhead                       |
+| **Destek**     | Bazı switch/router cihazları MAC sayısına takılabilir  | Daha uyumlu çünkü tek MAC var          |
+| **Kullanım**   | Ağda her konteyneri ayrı cihaz gibi göstermek istersen | Basitlik, performans, büyük ölçek için |
+
 
 ### Docker network komutları:
 #### 1.Network ls:

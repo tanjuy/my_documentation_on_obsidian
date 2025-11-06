@@ -102,35 +102,21 @@
             }
           },
           {
-            "id": "f1b8a1eac36cbdae",
+            "id": "e693118b95d15f24",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DevOps/Grafana/Grafana vs Prometheus.md",
+                "file": "Programlama/Python/Python Giriş.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Grafana vs Prometheus"
+              "title": "Python Giriş"
             }
           },
           {
-            "id": "e9a2308aadcbe523",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Terminal/zsh kabuğu.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "zsh kabuğu"
-            }
-          },
-          {
-            "id": "7cd123a3132a0d81",
+            "id": "3e7f5dc8d3279042",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -144,21 +130,49 @@
             }
           },
           {
-            "id": "9d1372b2cdcb6795",
+            "id": "854b9cf4da78bd46",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Docker/Docker Compose.md",
+                "file": "Programlama/Rust/🦀 Rust Pratikleri.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Docker Compose"
+              "title": "🦀 Rust Pratikleri"
+            }
+          },
+          {
+            "id": "c3277e963cc32fd0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/Rust/🦀 Rust'a Giriş.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "🦀 Rust'a Giriş"
+            }
+          },
+          {
+            "id": "988de77ffc72022f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Linux Command/Vim.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Vim"
             }
           }
         ],
-        "currentTab": 8
+        "currentTab": 7
       }
     ],
     "direction": "vertical"
@@ -215,7 +229,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 235.5
+    "width": 211.5
   },
   "right": {
     "id": "1413189cf439f38e",
@@ -291,10 +305,11 @@
       }
     ],
     "direction": "horizontal",
-    "width": 288.5
+    "width": 273.5
   },
   "left-ribbon": {
     "hiddenItems": {
+      "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -303,54 +318,55 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "7cd123a3132a0d81",
+  "active": "3e7f5dc8d3279042",
   "lastOpenFiles": [
-    "DevOps/Grafana/Pictures/docker_compose_metrics.png",
-    "Docker/Docker Compose.md",
-    "Windows Commands/Winget Komutları.md",
+    "Programlama/Rust/🦀 Rust'a Giriş.md",
+    "Linux Command/Vim.md",
+    "Programlama/Rust/🦀 Rust Pratikleri.md",
     "DevOps/Grafana/Grafana - Prometheus ve Docker Compose.md",
-    "Docker/Dockerfile.md",
-    "Docker/Docker Giriş.md",
-    "DevOps/Grafana/Grafana vs Prometheus.md",
-    "DevOps/Grafana/Grafana - Prometheus ve Docker.md",
-    "Linux Command/SSH.md",
-    "Terminal/zsh kabuğu.md",
-    "Programlama/PHP/PHP 8.md",
-    "DevOps/Grafana/Pictures/docker_prometheus_relabeling.png",
-    "Windows Commands/CMD.md",
-    "Linux Command/Linux komutları.md",
-    "DevOps/Grafana/Pictures/service_discovery.png",
-    "Web Servers/Nginx/Nginx Config File.md",
-    "DevOps/Grafana/Pictures/docker_grafana_prometheus_bağlama.png",
-    "Untitled.md",
+    "Terminal/File Manager/Yazi File Manager.md",
     "K8s/K8s Kurulumu.md",
-    "Database/Sqlite/Sqlite Giriş.md",
-    "Linux Command/Linux Paket Komutları.md",
-    "DevOps/Grafana/Pictures/docker_grafana_prometheus_URL.png",
-    "DevOps/Grafana/Pictures/docker_grafana_data_source_prometheus.png",
-    "DevOps/Grafana/Pictures/docker_grafana_data_source.png",
-    "DevOps/Grafana/Pictures/docker_prometheus.png",
-    "Pictures/grafana.md",
+    "Git/Git Dersi.md",
+    "Linux Command/SSH.md",
+    "Programlama/PHP/PHP 8.md",
+    "Terminal/File Manager",
+    "Programlama/PHP/PHP 8 Apps.md",
+    "Windows Commands/Winget Komutları.md",
+    "Programlama/Rust",
+    "Docker/Dockerfile.md",
+    "Programlama/Python/Python Giriş.md",
+    "Programlama/Python/Python Projeler/Mail Gönderme.md",
+    "Web Servers/html/HTML.md",
+    "Windows Commands/PowerShell.md",
+    "Programlama/Python/Python Projeler/Pictures/app_password_final.png",
+    "Programlama/Python/Python Projeler/Pictures/app_password_google.png",
+    "Programlama/Python/Python Projeler/Pictures",
+    "Programlama/Python/Python Projeler",
+    "DevOps/Grafana/README.md",
+    "DevOps/Grafana/Pictures/grafana_slack_bot_7.png",
+    "DevOps/Grafana/Pictures/Grafana_slack_bot_6.png",
+    "DevOps/Grafana/Pictures/Grafana_slack_bot_5.png",
+    "DevOps/Grafana/Pictures/Grafana_slack_bot_4.png",
+    "DevOps/Grafana/Pictures/Grafana_slack_bot_3.png",
+    "Web Servers/Nginx/Nginx Config File.md",
+    "DevOps/Grafana/Pictures/grafana_slack_bot_2.png",
+    "DevOps/Grafana/Pictures/grafana_slack_bot_1.png",
+    "Docker/Docker Giriş.md",
+    "README.md",
+    "DevOps/Grafana/Pictures/docker_compose_grafana_dashboard4.png",
+    "Terminal/zsh kabuğu.md",
+    "DevOps/Grafana/Grafana vs Prometheus.md",
+    "Windows Commands/WSL2.md",
+    "Pictures/docker_compose_.md",
+    "Pictures",
+    "Archlinux/Untitled.base",
+    "Untitled.md",
+    "Archlinux/Untitled.canvas",
+    "Docker/Docker Compose.md",
     "Terminal",
-    "Linux Command/Pictures/SOCKS_1.png",
-    "Linux Command/Pictures/SOCKS_2.png",
-    "Linux Command/Pictures/2025-07-31_19-02.png",
     "Linux Command/Pictures",
     "Linux Command/Yeni klasör",
-    "Linux Command/tmux.md",
-    "Web Servers/html/HTML.md",
-    "DevOps/Grafana/Grafana Giriş.md",
-    "DevOps/Prometheus/Prometheus Giriş.md",
     "DevOps/Prometheus",
-    "Database/PostgreSQL/PostgreSQL Giriş.md",
-    "Database/Welcome.md",
-    "Database/Sqlite",
-    "Pictures",
-    "().md",
-    "DevOps/Grafana/Pictures",
-    "DevOps/Grafana",
-    "Programlama/PHP/Laravel",
-    "Programlama/perl",
     "Untitled.canvas"
   ]
 }

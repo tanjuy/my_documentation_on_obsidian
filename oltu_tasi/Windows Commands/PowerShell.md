@@ -164,3 +164,19 @@ PingReplyDetails (RTT) : 18 ms
 
 #### 2.Port Kontrolü:
 
+## Rename-
+
+### Rename-Item:
+
++ Tek bir dosyayı yeniden adlandırma
+
+```powershell
+Rename-Item -Path "eski_dosya.txt" -NewName "yeni_dosya.txt"
+```
+
+
+> [!NOTE] Title
+> **Kısa kullanım:**
+> ```powershell
+> Rename-Item "C:\temp\eski.txt" "yeni.txt"
+> ```

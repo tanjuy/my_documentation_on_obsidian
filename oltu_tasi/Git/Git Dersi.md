@@ -1226,6 +1226,48 @@ $ git push
 > [!TIP]
 > `git pull` eş değeri `git fetch` ve `git merge` ikisinin birleşimidir. 
 
+#### Git tag:
+
++ Git'te **tag (etiket)**, bir depo (repository) içindeki **belirli bir commit’e isim vermek** için kullanılır.
++ En basit haliyle: **“Bu commit önemli, ona bir etiket yapıştırayım ki kolayca bulayım”** demektir.
+
+> [!TIP]
+> ##### Ne işe yarar?
+> + Genellikle **sürüm numarası** vermek için kullanılır (ör. `v1.0`, `v2.3.1`).
+> + Kodun o anki halini **sabit bir referans noktası** yapar. Branch gibi değişmez, sabittir.
+
+
+> [!NOTE]
+> ##### Sürüm Numaralandırma Mantığı (SemVer)
+> + Yaygın olarak **Semantic Versioning (SemVer)** kullanılır:
+> + `MAJOR.MINOR.PATCH` (örn. `1.2.3`)
+> 	1. **MAJOR (Büyük sürüm)**: Geriye uyumsuz değişiklikler (ör. yapı tamamen değişti, config formatı değişti).
+> 	2. **MINOR (Küçük sürüm)**: Yeni özellikler eklendi ama uyumluluk bozulmadı (örn. yeni servis ekledin: Node Exporter).
+> 	3. **PATCH (Yama)**: Hata düzeltmeleri, küçük iyileştirmeler (örn. bir volume ismini düzelttin).
+> + Başlangıç için ilk sürüm genelde:
+> ```shell
+> v0.1.0 (deneme/geliştirme aşaması)
+> v1.0.0 (ilk stabil sürüm)
+> ```
+
+##### Yöntem 1:
+
+1. Dosyalarda değişiklik yap.
+2. `git add` ile değişiklikleri ekle.
+3. `git commit -m "mesaj"` ile commit oluştur.
+4. Commit kararlı hale gelince, **o commit'e** bir tag var:
+
+```shell
+git tag -a v0.1.0 -m "Initial Release"
+```
+
+```shell
+git push origin main --tags
+```
+
+> + `commit` → değişiklikleri kaydeder.
+> + `tag` → kaydedilmiş bir commit’e “sürüm etiketi” yapıştırır.
+
 ## Github GUI
 
 ###### 1. Contributors Ekleme:

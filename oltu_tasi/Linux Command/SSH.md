@@ -55,6 +55,11 @@ vim ~/.ssh/known_hosts
 + Hedef ana bilgisayarın (host) satırını bulun ve silin.
 + Kaydedin ve çıkın.
 
+# Private Key ve Public Key:
+
+
+
+
 # 🔒 SSH Tünelleme (SSH Tunneling):
 
 + Yerel makinadaki bir port, **uzak makinadaki bir hedefe yönlendirilir**.

@@ -48,7 +48,6 @@
 mkdir grafana-prometheus; cd grafana-prometheus
 ```
 
-
 ```shell
 vim docker-compose.yml
 ```
@@ -98,6 +97,40 @@ services:
 > 	- `ro` → Sadece okunabilir (read-only).
 > 	- `rslave` → Bind mount için "propagation" modu; alt mount değişiklikleri container’a yansır ama tersi olmaz.
 > 	- Bu, özellikle sistemde yeni diskler takıldığında Node Exporter’ın görmesini sağlar.
+
++ `docker-compose.yml` dosyası ile varsayılan olarak oluşturulmuş ağ aşağıdaki çıktıda görülmektedir.
+
+```shell
+docker network ls
+```
+
+**docker network Çıktısı:**
+
+```shell
+NETWORK ID     NAME                         DRIVER    SCOPE
+ba40dbe38f73   bridge                       bridge    local
+84c593bda56d   grafana-prometheus_default   bridge    local
+3f1accc84fb6   host                         host      local
+4bff012255f4   none                         null      local
+```
+
+> `grafana-prometheus_default` ağı varsayılan  olarak `docker-compose.yml` dosyası tarafından oluşturulmuştur.
+
+> [!CAUTION]
+> + Eğer `docker-compose.yml` dosyanda **hiçbir özel network tanımı yapmazsan**, Docker Compose otomatik olarak bir network oluşturur.
+> ```yaml
+> <proje_adı>_default
+> ```
+> + projenin adı `grafana-prometheus` olduğu için network adı `grafana-prometheus_default` olmuştur.
+> + **Driver:** 
+> 	- Varsayılan olarak `bridge` network sürücüsünü kullanır. Bu, konteynerlerin aynı host üzerinde izole bir ağ ortamında birbirleriyle haberleşebilmesini sağlar.
+> + **Amaç:**
+> 	- Compose içindeki tüm servislerin (Grafana, Prometheus vb.) aynı network üzerinde olmasını sağlar, böylece birbirlerine container adları üzerinden erişebilirler.
+> 	- Örneğin Grafana, Prometheus’a `http://prometheus:9090` şeklinde ulaşabilir.
+> + **Oluşma zamanı:**
+> 	- `docker compose up` veya `docker-compose up` komutu çalıştırıldığında network varsa kullanılır, yoksa otomatik olarak oluşturulur.
+> + **Silinmesi:**
+> 	- `docker compose down` komutunu verdiğinde bu varsayılan network de kaldırılır (eğer başka bir container kullanmıyorsa).
 
 #### Node Exporter Çalışma Mantığı:
 
@@ -281,6 +314,8 @@ docker run -d \
 > + Burada dikkat etmen gereken şey, `docker run` komutunda:
 > 	- Compose’daki **`command:`** kısmındaki parametreler (`--path.rootfs=/host`) **imaj adından sonra** yazılır.
 > 	- Compose’daki **`volumes:`**, **`network_mode:`**, **`pid:`**, **`restart:`** gibi ayarlar doğrudan `docker run` parametreleriyle karşılanır.
+
+
 
 #### Node Exporter Metrik Verileri:
 
@@ -534,3 +569,539 @@ services:
 > + Tek fark **açıklık ve stil farkı**:
 > 	- `{}` → açıkça “boş bir ayar sözlüğü” olduğunu gösterir, gelecekte ayar eklenebilir.
 > 	- Boş bırakmak → kısa ve sade, ama ayar eklemek istersen altına indent ile eklemen gerekir.
+
+### docker run Komutuna Çevirme:
+
+```shell
+docker run -d \
+  --name prometheus \
+  -p 9091:9090 \
+  --restart unless-stopped \
+  -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
+  -v prometheus-data:/prometheus \
+  prom/prometheus:latest \
+  --web.enable-lifecycle \
+  --config.file=/etc/prometheus/prometheus.yml
+```
+
+> + `-d` → arka planda çalıştırır.
+> + `--name prometheus` → Container’ın adını `prometheus` yapar.
+> + `-p 9091:9090` → host:container port eşleştirir.
+> + `--restart unless-stopped` → Eğer manual olarak durdurulmadıysa otomatik olarak yeniden başlatılır.
+> + `-v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml` → bind mount (config dosyasını host’tan container’a bağlıyoruz).
+> + `-v prometheus-data:/prometheus` → named volume (Prometheus metrik verilerini kalıcı depolama için).
+> + `prom/prometheus:latest` → kullanılacak image.
+> + `--web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml` → container içindeki Prometheus’a geçilecek parametreler.
+
+
+```shell
+docker volume create prometheus-data
+```
+
+## 4. URL ile Yeniden Yükleme:
+
++ Prometheus’te gördüğün `--web.enable-lifecycle` parametresi, **Prometheus’un HTTP üzerinden yeniden yükleme (reload) ve kapatma (shutdown) gibi yaşam döngüsü (lifecycle) işlemlerine izin vermesini** sağlar.
++ Normalde Prometheus başlatıldıktan sonra `prometheus.yml` dosyasında yaptığın değişiklikler otomatik olarak yüklenmez. 
++ Bunun için iki yöntem vardır:
+	1. Prometheus’u tamamen yeniden başlatmak → Eski yöntem ama kesinti yaratır.
+	2. HTTP endpoint üzerinden yeniden yükleme (`reload`) yapmak → Daha modern ve kesintisiz yöntem.
+
+
+> [!NOTE]
+> `--web.enable-lifecycle` parametresi aktif edilirse, Prometheus şu endpointleri açar:
+> 1. `POST /-/reload` → Konfigürasyon dosyalarını (ör. `prometheus.yml`) Prometheus’u yeniden başlatmadan **yeniden yükler**.
+> ```shell
+> curl -X POST http://localhost:9090/-/reload
+> ```
+>
+> 2. `POST /-/quit` → Prometheus sürecini **düzgün bir şekilde sonlandırır**.
+> 3. `POST /-/quit?graceful=true` → Hedeflere bağlanmayı sonlandırır, metrikleri diske yazar ve ardından kapanır. 
+
++ `POST /-/reload` isteği atığımızda **işlemin başarılı** olup olmadığını aşağıdaki çıktıdan görebiliriz:
+
+![docker_compose_prometheus_reload](./Pictures/docker_compose_prometheus_reload.png)
+
++ Eğer `timedatectl` komut çıktısını `Last Successful Configuration Reload` ile karşılaştırdığımızda aynı olduğunu görebiliriz:
+
+```shell
+timedatectl status
+```
+
+`timedatectl` çıktısı: 
+
+```shell
+               Local time: Thu 2025-08-21 15:53:02 +03
+           Universal time: Thu 2025-08-21 12:53:02 UTC
+                 RTC time: Thu 2025-08-21 12:51:58
+                Time zone: Asia/Istanbul (+03, +0300)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+```
+
+## 5. Grafana Kurulumu:
+
++ Prometheus'un tüm bu metrikleri toplaması güzel ve hoş ama bunları daha sunulabilir formatlarda görmek istiyoruz.
++ Bunları bir gösterge panelinde görmek istiyoruz ve  bunların grafiklerini görmek istiyoruz vb. ve işte Grafana tam da bu noktada devreye giriyor.
++ Bunu Docker'da başka bir konteyner olarak kuracağız.
+
+```yaml
+# version: '3.8'
+
+volumes:
+  prometheus-data:
+  grafana-data: {}
+
+services:
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro.rslave'
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - '9091:9090'
+    restart: unless-stopped
+    volumes:
+      # Bind Mount
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      # Named Volume
+      - prometheus-data:/prometheus
+    command:
+      - '--web.enable-lifecycle'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - '3001:3000'
+    restart: unless-stopped
+    volumes:
+      - grafana-data:/var/lib/grafana
+```
+
+> 1. `grafana` → 
+> 	- `docker-compose.yml` dosyasında bir servis tanımlıyor.
+> 	- Servisin adı **grafana** olacak. Bu isim, ağda DNS host adı gibi de davranır (örneğin, diğer servisler `http://grafana:3000` şeklinde erişebilir).
+> 2. `image: grafana/grafana:latest` → 
+> 	- Kullanılacak Docker imajı: **grafana/grafana**.
+> 	- `latest` etiketi her zaman en güncel sürümü çeker. Ancak genelde prod ortamda **sabit bir sürüm etiketi** (örn. `grafana/grafana:10.4.3`) kullanmak önerilir.
+> 	- Çünkü `latest` sürüm güncelleme sonrası beklenmedik değişikliklere yol açabilir.
+> 3. `container_name: grafana` → 
+> 	- Konteynerin adını **grafana** olarak sabitler.
+> 	- Eğer bu parametre kullanılmazsa Docker Compose otomatik olarak proje_adı-servis_adı-1 gibi bir isim verir (örn. `myproject_grafana_1`).
+> 	- Sabit isim, elle komut verirken veya başka bir konteynerden bağlanırken işleri kolaylaştırır.
+> 4. `'3001:3000'` → 
+> 	- **Host makinedeki 3001 portunu**, konteyner içindeki **3000 portuna** yönlendirir.
+> 	- Grafana'nın varsayılan portu 3000 olduğu için tarayıcıdan erişmek için `http://localhost:3001` veya `http://192.168.1.133:3001` yazılır.
+> 	- Soldaki kısım (3001) host portu, sağdaki kısım (3000) container içindeki port.
+> 5. `Yeniden başlatma politikası:`
+> 	- Konteyner durursa, hata verirse veya sistem yeniden başlarsa otomatik tekrar başlatır.
+> 	- **unless-stopped**: Manuel olarak durdurmadığın sürece hep yeniden çalışır.
+> 	- Alternatifler:
+> 		- `no` (varsayılan): Otomatik başlatmaz.
+> 		- `always`: Her durumda yeniden başlatır, manuel stop sonrası bile.
+> 		- `on-failure`: Sadece hata koduyla çıkarsa başlatır.
+> 6. **Volume bağlama:**
+> 	- Host üzerinde **grafana-data** adlı oluşturulmuş **Docker volume**'u ve konteyner içindeki `/var/lib/grafana` dizinine bağlar.(`Named Volume`)
+> 	- Grafana’nın tüm ayarları, dashboardlar, kullanıcı bilgileri ve verileri `/var/lib/grafana` altında tutulur. Volume sayesinde:
+> 		- Konteyner silinse bile veriler korunur.
+> 		- Güncelleme sırasında veri kaybı yaşanmaz.
+> 7. **Volume Oluşturma:**
+> 	```yaml
+> 	volumes:
+> 	  grafana-data: {}
+> 	```
+> 	+ `grafana-data` adında volume oluşturacaktır
+> 	+ CLI ile: `docker volume create grafana-data` komutu ile oluşturulur.
+
+## 6. Grafana Yapılandırılması:
+
++ Şimdiki adımda grafana'yı yapılandırıp Prometheus'a yönlendirmesini yapacağız.
+
+![docker_compose_prometheus_DS](./Pictures/docker_compose_prometheus_DS.png)
+
++ Kesinlikle yapmamız gereken şey grafana'yı Prometheus örneğimize yönlendirmektir.
+
+![docker_compose_grafana_DS](./Pictures/docker_compose_grafana_DS.png)
+
+
+> [!TIP]
+> + Eğer dikkat ederseniz Prometheus server URL `http://prometheus:9090` verildiğini görebilirsiniz.
+> + docker-compose tarafında varsayılan olarak `brigde` sürücüde `grafana-prometheus_default` ağ oluşturulmuştu.
+> + Yeni oluşturulan `bridge` ağlarda container adların üzerinde DNS çözümlenmesi yapılabiliyor. Hata container'ın iç IP adresi değişse bile container adları üzerinde ulaşabiliyoruz.
+
+### 6.1. Dashboard Ekleme:
+
+#### 6.1.1. Hazır Dashboard Ekleme:
+
+![docker_compose_grafana_dashboard1](./Pictures/docker_compose_grafana_dashboard1.png)
+
+![docker_compose_grafana_dashboard3](./Pictures/docker_compose_grafana_dashboard3.png)
+
+ ![docker_compose_grafana_dashboard](./Pictures/docker_compose_grafana_dashboard.png)
+
+
+![docker_compose_dashboard_ID](./Pictures/docker_compose_dashboard_ID.png)
+
+
+## Bildirim Alma(Notification):
+### 7.1.  Mailrise Kurulumu:
+
++ BT cihazlarından uyarı göndermek ve almak son derece önemlidir.
++ Bir şeylerin ters gittiğini veya kapasite sınırına ulaşılıp ulaşılmadığını bilmek ve harekete geçmek istersiniz.
++ Ancak bir laboratuvarınız veya ev ağınız varsa, dahili bir e-posta sunucusu kurmak pek pratik olmayabilir ve `Mailrise` gibi bir SMTP ağ geçidi tam da bu noktada yardımcı olacaktır. 
++ E-postalarınızı yine sunucuya gönderirsiniz, ancak sunucu bunları Discord, Pushover, Slack vb. mesajlaşma servislerine dönüştürüp iletir ve bu çok faydalı olabilir çünkü uyarı göndermesi gereken tüm cihazlarınızda herkese açık kimlik bilgilerini(`public credentials`) depolamanıza gerek kalmaz. 
++ Peki, örneğin Docker'da MailRise'ı nasıl kurar ve Slack'e uyarı gönderecek şekilde nasıl yapılandırırsınız? Eğer bu konuda bilgi edinmek istiyorsanız, okumaya devam ediniz!
++ MailRise'ı kurmanın birçok farklı yolu var, ancak biz Docker'ı, özellikle Docker Compose'u kullanacağız.
++ So what I need to do is to edit the YAML file for that.
++ Zaten bizim çalışan `prometheus` ve `grafana`'mız vardı.
+
+
+> [!NOTE]
+> #### Mailrise Nedir?
+> + **Mailrise**, bir **SMTP gateway (SMTP köprüsü)** yazılımıdır.
+> ##### 📌 Yani ne yapıyor?
+> 1. Normalde e-posta gönderebilen herhangi bir uygulaman veya cihaz (örneğin: NAS, router, IoT cihazı, monitoring aracı vb.) vardır.
+> 2. Bu cihaz/uygulamalar sadece **SMTP protokolü** üzerinden mail göndermeyi bilir.
+> 3. Ama sen aslında bu bildirimleri **e-posta olarak almak istemiyor**, mesela **Discord, Slack, Telegram, Matrix, Pushover, Gotify** gibi modern mesajlaşma servislerine iletilmesini istiyor olabilirsin.
+> ##### 👉 İşte burada **Mailrise devreye giriyor**:
+> + Sen cihazından/uygulamandan **SMTP üzerinden Mailrise’a e-posta gönderiyorsun.**
+> + *Mailrise bu e-postayı alıyor, parse ediyor ve **Apprise** adlı bir kütüphane aracılığıyla yüzlerce farklı notification servisine dönüştürüp gönderiyor.*
+> ##### 📖 Teknik olarak:
+> + Mailrise kendi içinde gerçek bir mail sunucusu (MTA) gibi çalışmaz.
+> + Hafif bir **SMTP endpoint** açar.
+> + Oraya gönderilen mailleri **hemen dönüştürüp başka bir servise yollar.**
+> ##### 🔧 Örnek kullanım senaryosu:
+> + Elinde eski bir yazıcı veya NAS cihazı var. Bu cihaz sana sadece **SMTP ile uyarı maili** atabiliyor.
+> + Sen gerçek bir mail server kurmak istemiyorsun.
+> + Mailrise’ı çalıştırıyorsun → Cihazından gelen maili alıyor → Mesajı Discord/Telegram gibi uygulamana gönderiyor.
+>##### Özet:
+> - Mailrise = SMTP giriş noktası + Apprise üzerinden bildirim yönlendirici.
+> - Yani eski “mail gönderen cihazları” modern bildirim kanallarına bağlayan bir köprü. 🚀
+
+
+
+**docker-compose.yml**
+
+```yaml
+# version: '3.8'
+
+volumes:
+  prometheus-data:
+  grafana-data: {}
+
+services:
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    privileged: true
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro.rslave'
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - '9091:9090'
+    restart: unless-stopped
+    volumes:
+      # Bind Mount
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      # Named Volume
+      - prometheus-data:/prometheus
+    command:
+      - '--web.enable-lifecycle'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - '3001:3000'
+    restart: unless-stopped
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+  mailrise:
+    image: yoryan/mailrise:latest
+    container_name: mailrise
+    ports:
+      - '8026:8025'
+    restart: unless-stopped
+    volumes:
+      # Bind Mount
+      - ./mailrise/mailrise.conf:/etc/mailrise.conf
+```
+
+
+### 7.2. Slack Bot
+
+ + Mailrise'ın Slack ile iletişim kurabilmesi için bir yola ihtiyacımız var.
+ + Bu durumda bunun için bir uygulama(`apps`) kurmamız gerekiyor, bunu yapmak için [api.slack.com/apps](https://api.slack.com/apps) adresine gidin.
+
+![grafana_slack_bot_1](./Pictures/grafana_slack_bot_1.png)
+
+
+![Grafana_slack_bot_2](./Pictures/Grafana_slack_bot_2.png)
+
+> 5. Bunun hangi çalışma alanına(`workspace`) gireceğini söylemeniz gerekiyor.
+
+![](./Pictures/Grafana_slack_bot_3.png)
+
+> 7.  Bot oluşturmak ve Bot Token alabilmek için `OAuth & Permissions` sekmesi tıklıyoruz.
+
+![Grafana_slack_bot_4](./Pictures/Grafana_slack_bot_4.png)
+
+
+> 8. mailrise ile iletişim kuracak `slack bot`'a gereken izinleri bu alanda vereceğiz.
+> 	- `chat:write` → Bot’un mesaj gönderebilmesi için.
+
+![Grafana_slack_bot_5](./Pictures/Grafana_slack_bot_5.png)
+
+![Grafana_slack_bot_5](./Pictures/Grafana_slack_bot_6.png)
+
+> 10. Bize verdiği şey artık mailrise için kullanabileceğimiz gerçek bir token.
+
+![](./Pictures/Grafana_slack_bot_7.png)
+
++ Karşınıza çıkan  `add them` tıklayınız.
++ Artık bu kanalda kendimiz ve gerçek botumuz var.
+
+### 7.3. mailrise.conf Hazırlama:
+
++ Yapılacak bir sonraki şey mailrise'ı Slack kullanacak şekilde yapılandırmak.
+
+```shell
+mkdir mailrise
+```
+
+```shell
+vim mailrise/mailrise.conf
+```
+
+
+> [!NOTE]
+> + `mailrise` dizini ve `mailrise.conf` dosyasını oluşturduktan sonraki dosya veya dizin yapısı aşağıdaki gibi oluyor:
+> ```shell
+> grafana-prometheus
+>├── docker-compose.yml
+>├── mailrise
+>│   └── mailrise.conf
+>└── prometheus
+>   └── prometheus.yml
+>
+>3 directories, 3 files
+> ```
+
+**mailrise.conf:**
+
+```conf
+configs:
+  slack@mailrise.xcv:
+    urls:
+      - slack://mailrise@xoxb-************/#alerts-docker
+```
+
+
+> [!TIP]
+> + *mailrise.conf* dosyası hakkında daha fazla bilgi için Mailrise [resmi sitesini](https://github.com/YoRyan/mailrise?tab=readme-ov-file) ziyaret ediniz.
+
+#### 7.3.1. SMPT Clients(Göndericileri):
+
+##### 7.3.1.1. Telnet:
+
+```shell
+telnet localhost 8026
+```
+
+```shell
+Trying 192.168.1.133...
+Connected to 192.168.1.133.
+Escape character is '^]'.
+220 f163124e2861 Mailrise 0.0.post1.dev1+gee40be5
+HELO homelab.local
+250 f163124e2861
+MAIL FROM: admin@homelab.local
+250 OK
+RCPT TO: slack@mailrise.xcv
+250 OK
+DATA
+354 End data with <CR><LF>.<CR><LF>
+FROM: admin@homelab.local
+SUBJECT: Linux Test
+Test Message
+.
+250 OK
+quit
+221 Bye
+Connection closed by foreign host.
+```
+
+> ##### 🟦 1. Bağlantı Kuruluyor:
+> + `telnet localhost 8025`
+> 	- Bu komut, `localhost` (yani kendi makinen) üzerindeki **8025 numaralı TCP portuna** Telnet protokolü ile bağlanmayı dener.
+> 	- Bu portta SMTP sunucusu (Mailrise) dinliyor.
+> + `Trying 192.168.1.133...`
+> 	- Telnet bağlantıyı deniyor (localhost bu IP’ye çözümlenmiş).
+> + `Connected...`
+> 	- TCP bağlantısı kuruldu.
+> + `Escape character is '^]'`
+> 	- Telnet oturumunu bırakmak için kullanılacak özel karakter.
+> + `220 f163124e2861 Mailrise 0.0.post1.dev1+gee40be5`
+> 	- `220` → SMTP standardına göre “hizmet hazır” kodudur.
+> 	- `f163124e2861` → Sunucunun host adı veya container ID'si.
+> 	- `Mailrise 0.0.post1.dev1+gee40be5` → Çalışan yazılım ve sürümü.
+> ##### 🟦 2. HELO Komutu (SMTP oturum açılışı):
+> + `HELO homelab.local`
+> 	- `HELO` komutu, istemcinin (senin) kendi alan adını tanıtmak için kullanılır.
+> 	- `homelab.local` → İstemcinin kimliği olarak sunucuya gönderiliyor.
+> + `250 f163124e2861`
+> 	- `250` kodu “komut başarıyla kabul edildi” anlamına gelir.
+> 	- Yani sunucu seni tanıdı ve devam etmeni bekliyor.
+> + Modern SMTP'de genelde `HELO` yerine `EHLO` kullanılır. `EHLO`, ek özellikleri (AUTH, STARTTLS vb.) bildirir ama basit sistemlerde `HELO` yeterlidir.
+> ##### 🟦 3. Gönderen Adresinin Belirlenmesi (MAIL FROM):
+> + `MAIL FROM: admin@homelab.local`
+> 	- Bu komutla, gönderilecek e-postanın **gönderen adresi** belirleniyor.
+> 	- `admin@homelab.local` → Gönderen e-posta adresi.
+> 	- `250 OK` → Sunucu bu adresi kabul etti.
+> ##### 🟦 4. Alıcı Adresinin Belirlenmesi (RCPT TO):
+> + `RCPT TO: slack@mailrise.xcv`
+> 	- Bu komutla, e-postanın kime gideceği (alıcı) belirleniyor.
+> 	- `slack@mailrise.xcv` → Mailrise’ın Slack kanalına yönlendirme için tanımladığın “alias” adres.
+> 	- `250 OK` → Sunucu alıcıyı kabul etti. (Yani Mailrise bu adresi tanıyor.)
+> + Dikkat: 📌 Eğer burada “550 No such user” gibi bir hata alsaydın, alıcı adresi yapılandırılmamış olurdu.
+> #####  🟦 5. Mesaj İçeriğinin Gönderilmesi (DATA):
+> + `DATA`
+> 	- SMTP’ye artık e-posta gövdesini göndermeye başlayacağını bildirir.
+> + `354`
+> 	- Sunucu “devam et, bitirdiğinde tek bir nokta (.) koy ve Enter’a bas” diyor.
+> + Ardından mesaj içeriğini yazıyorsun:
+> ```sql
+> FROM: admin@homelab.local
+> SUBJECT: Linux Test
+> Test Message
+> ```
+> 	- Bu bölüm aslında e-postanın başlıkları ve gövdesi.
+> 	- `FROM:` ve `SUBJECT:` satırları e-posta başlıklarıdır.
+> 	- “Test Message” kısmı gövde.
+> + `.` satırı
+> 	- Mesajın bittiğini SMTP’ye bildiriyor.
+> + `250 OK`
+> 	- Mesaj sunucu tarafından başarıyla kabul edildi.
+> + **Dikkat:** 📌 Bu noktada mesaj Mailrise tarafından işlenmek üzere sıraya alınmış durumda. Eğer Slack entegrasyonu düzgünse, bu mesaj Slack kanalına iletilmeli.
+> ##### 🟦 6. Oturumu Sonlandırma (QUIT):
+> + `quit`
+> 	- SMTP oturumunu düzgün kapatma komutu.
+> + `221 Bye`
+> 	- Sunucu oturumu düzgün kapattığını onaylıyor.
+> 	- Telnet bağlantısı kapanıyor.
+
+| Adım | Komut             | Amaç                                  | Durum |
+| ---- | ----------------- | ------------------------------------- | ----- |
+| 1    | Telnet bağlantısı | SMTP sunucusuna TCP bağlantısı kurmak | ✅     |
+| 2    | HELO              | Kendini sunucuya tanıtmak             | ✅     |
+| 3    | MAIL FROM         | Gönderen adresi belirtmek             | ✅     |
+| 4    | RCPT TO           | Alıcı adresi belirtmek                | ✅     |
+| 5    | DATA              | Mesaj içeriğini göndermek             | ✅     |
+| 6    | QUIT              | Oturumu kapatmak                      | ✅     |
+
+##### 7.3.1.2. Python:
+
+```python
+import smtplib
+
+try:
+    sender = 'admin@homelab.local'
+    reciever = input('Alıcı: ')
+    message = 'Linux is awesome'
+
+    if not reciever:
+        reciever = 'slack@mailrise.xcv'
+
+    server = smtplib.SMTP("localhost", 8026)
+    server.sendmail(sender, reciever, message)
+    server.quit()
+except Exception as e:
+    print("Hata oldu!", e)
+print("Mesaj başarı ile gönderildi.")
+```
+
+# Final Config:
+
+## docker-compose.yaml
+
+```yaml
+# version: '3.8'
+
+volumes:
+  prometheus-data:
+  grafana-data: {}
+
+services:
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    privileged: true
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro.rslave'
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - '9091:9090'
+    restart: unless-stopped
+    volumes:
+      # Bind Mount
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      # Named Volume
+      - prometheus-data:/prometheus
+    command:
+      - '--web.enable-lifecycle'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - '3001:3000'
+    restart: unless-stopped
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+  mailrise:
+    image: yoryan/mailrise:latest
+    container_name: mailrise
+    ports:
+      - '8026:8025'
+    restart: unless-stopped
+    volumes:
+      # Bind Mount
+      - ./mailrise/mailrise.conf:/etc/mailrise.conf
+```

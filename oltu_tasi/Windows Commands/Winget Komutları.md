@@ -17,6 +17,25 @@ pgAdmin 4 PostgreSQL.pgAdmin 9.3     Moniker: pgadmin winget
 winget.exe install --id "PostgreSQL.pgAdmin" -e
 ```
 
+# App Güncelleme:
+
+```powershell
+winget.exe list flameshot
+```
+
+**list Çıktısı:**
+
+```powershell
+Name      Id                  Version Available Source
+------------------------------------------------------
+Flameshot Flameshot.Flameshot 12.1.0  13.1.0    winget
+```
+
+
+```powershell
+winget.exe upgrade --id "Flameshot.Flameshot" -e
+```
+
 # App Kaldırma:
 
 
