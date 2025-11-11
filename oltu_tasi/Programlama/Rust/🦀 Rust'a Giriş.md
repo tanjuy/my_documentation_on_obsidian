@@ -130,6 +130,43 @@ hello_world
 > [!CAUTION]
 > +  Dikkat ederseniz `cargo new` komutu bize ayrıca `git` dizini de oluşturmaktadır.
 
+
+> [!NOTE]
+> ```shell
+> cargo new hello-world --vcs none
+> ```
+> + 🧰 `--vcs none`:
+> 	- **VCS (Version Control System)** → sürüm kontrol sistemi (örneğin Git).
+> 	- Normalde `cargo new` çalıştırıldığında **otomatik olarak bir Git deposu (`git init`) oluşturur**.
+> 	- Ama `--vcs none` dersen, **Git deposu oluşturulmaz** (yani `.git` klasörü eklenmez).
+> #### Örnek Fark:
+> + **Varsayılan(`cargo new hello-world`)**
+> ```shell
+> hello-world/
+> ├── .git/                ← otomatik oluşturulur
+> ├── .gitignore           ← otomatik eklenir
+> ├── Cargo.toml
+> └── src/
+>     └── main.rs
+> ```
+> + **`--vcs` parametresi(`cargo new hello-world --vcs none`)**
+> ```shell
+> hello-world/
+> ├── Cargo.toml
+> └── src/
+>     └── main.rs
+> ```
+
++ **`--vcs` Parametresi Seçenekleri:**
+
+| Seçenek        | Açıklama                                                                           |
+| -------------- | ---------------------------------------------------------------------------------- |
+| `--vcs git`    | Git deposu oluşturur (`.git` klasörü, `.gitignore` dosyası). Bu **varsayılandır.** |
+| `--vcs hg`     | **Mercurial (hg)** deposu oluşturur (`.hg` klasörü, `.hgignore` dosyası).          |
+| `--vcs pijul`  | **Pijul** adlı daha yeni bir sürüm kontrol sistemiyle başlatır.                    |
+| `--vcs fossil` | **Fossil SCM** adlı sistemi kullanır (`.fossil-settings` klasörü ekler).           |
+| `--vcs none`   | Hiçbir sürüm kontrol sistemi oluşturmaz (sadece kaynak dosyaları).                 |
+
 # Programı Derle ve Çalıştır:
 
 + `cargo new` komut ile oluşturduğumuz `hello_world` klasörüne giriş yapalım:
@@ -859,8 +896,10 @@ fn main() {
 ```
 
 
+# 5. İlişkili Verileri Düzenlemek için Struct’ları Kullanmak:
 
-# Struct(Structure):
+
+## 5.1. Struct’ları Tanımlama ve Örneklerini (Nesnelerini) Oluşturma:
 
 + Rust’ta **`struct` (structure)**, kendi veri türünü (custom data type) tanımlamak için kullanılır.
 + Yani, birden fazla veriyi tek bir mantıksal varlık altında toplamanı sağlar -- tıpkı C, C++ veya Go'daki `struct` yada python'daki sınıf(`class`) yapısında benzer şeklinde.
@@ -869,7 +908,7 @@ fn main() {
 + `Tuple`'lar gibi, bir struct'ın parçaları da farklı tiplerde olabilir.
 + Demetlerden(`Tuple`) farklı olarak, bir struct'da her veri parçasına isim verirsiniz, böylece değerlerin ne anlama geldiği açık olur.
 
-## A. Temel Tanım
+### A. Temel Tanım
 
 ```rust
 struct User {
@@ -1022,7 +1061,7 @@ fn main() {
 > + Fonksiyon parametrelerini yapı alanlarıyla(struct field) aynı isimle adlandırmak mantıklıdır, ancak `mail` ve `username` alan(filed) adlarını ve değişkenlerini tekrarlamak biraz sıkıcıdır.
 > + Eğer yapı(`struct`) daha fazla alana(field) sahip olsaydı, her ismi tekrarlamak daha da can sıkıcı olurdu.
 
-## B. Field Init Kısaltması:
+### B. Field Init Kısaltması:
 
 + Parametre adları ve yapı alanı(struct field) adları aşağıdaki koda tam olarak aynı olduğundan, build_user'ı yeniden yazmak için `field init shorthand` sözdizimini kullanabiliriz.
 + Aşağıdaki koda gösterildiği gibi, tam olarak aynı şekilde davranır ancak `username` adı ve `email` tekrarı yoktur.
@@ -1056,7 +1095,7 @@ fn main() {
 > + `email` alanının(`field`) değerini `build_user` fonksiyonunun `email` parametresindeki değere ayarlamak istiyoruz.
 > + `email` alanı(`field`) ve `email` parametresi aynı ada sahip olduğundan `email: email` yerine sadece `email` yazmamız yeterli olacaktır.
 
-## C. `Struct Update` Sözdizimiyle Diğer Örneklerden Örnekler Oluşturma:
+### C. `Struct Update` Sözdizimiyle Diğer Örneklerden Örnekler Oluşturma:
 
 + Aynı tipteki başka bir örneğin(`instance`) değerlerinin çoğunu içeren, ancak bazılarını değiştiren bir yapının(`struct`) yeni bir örneğini(`instance`) oluşturmak genellikle yararlıdır.
 + Bunu `struct update` sözdizimini kullanarak yapabilirsiniz.
@@ -1128,10 +1167,544 @@ fn main() {
 > + Hem `active` hem de `sign_in_count`, Kopyalama özelliğini(`Copy trait`) uygulayan türlerdir, bu nedenle ["Yığın-Yalnızca Veriler: Kopyalama"](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#stack-only-data-copy) bölümünde tartıştığımız davranış geçerli olacaktır.
 > + Bu örnekte `user1.email`'i de kullanabiliriz çünkü değeri `user1`'den dışarı taşınmadı.
 
-## E. Farklı Tipler Oluşturmak İçin `Named Fields` Olmadan `Tuple Structs` Kullanma:
+### D. Farklı Tipler Oluşturmak İçin `Named Fields` Olmadan `Tuple Structs` Kullanma:
 
 + Rust ayrıca tuple'lara benzeyen yapıları da destekler, bunlara `tuple yapıları` denir.
-+ Tuple struct’lar, alanlarıyla (`field`) ilişkilendirilmiş isimlere sahip değildir; bunun yerine sadece alanların türlerinden (type) oluşurlar. Yine de, struct adı sayesinde ek bir anlam kazandırırlar.
++ `Tuple struct`’lar, alanlarıyla (`field`) ilişkilendirilmiş isimlere sahip değildir; bunun yerine sadece alanların türlerinden (type) oluşurlar. Yine de, struct adı sayesinde ek bir anlam kazandırırlar.
++ `Tuple struct`’ları, tüm `tuple`'a bir isim vermek ve tuple'ı diğer tuple'lardan farklı bir tipte(`type`) yapmak istediğinizde ve her alanı(`field`) normal bir yapıda(`struct`) olduğu gibi adlandırmanın ayrıntılı veya gereksiz olacağı durumlarda kullanışlıdır.
++ Bir `tuple struct `tanımlamak için, `struct` anahtar kelimesiyle başlayıp `struct` adını ve ardından `tuple` içindeki türleri yazarsınız. 
++ Örneğin, burada `Color` ve `Point` adında iki tuple struct tanımlayıp kullanıyoruz:
+
+```rust
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+fn main() {
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+}
+```
+
+
+> [!CAUTION]
+> + `black` ve `origin` değerlerinin farklı türler(`types`) olduğunu unutmayın çünkü bunlar farklı `tuple struct`'larının örnekleridir(`instance`).
+> + Tanımladığınız her `struct`, `struct` içindeki alanlar(`field`) aynı tipte(`type`) olsa bile, kendi tipine(`type`) sahiptir.
+> + Örneğin, `Color` türünde(`Color type`) bir parametre alan bir fonksiyon, her iki tür de üç `i32` değerinden oluşmasına rağmen, bir `Point`'i argüman olarak alamaz.
+> + Bunun dışında, tuple struct örnekleri (instance’ları), tıpkı tuple’larda olduğu gibi parçalara ayrılarak (destructure edilerek) tek tek bileşenlerine ayrılabilir ve ayrıca belirli bir değere erişmek için nokta (`.`) operatöründen sonra indeks kullanabilirsiniz.
+> ```rust
+> // Tuple struct tanımları
+> struct Color(i32, i32, i32);
+> struct Point(f32, f32, f32);
+>
+> fn main() {
+>    let red = Color(255, 0, 0);
+>    let point = Point(3.5, 7.2, 1.0);
+>
+>    // .indeks ile erişim
+>    println!("Red color: {}, {}, {}", red.0, red.1, red.2);
+>    println!("Point x: {}", point.0);
+>
+>    // Destructuring (parçalama)
+>    let Color(r, g, b) = red;
+>    println!("Destructured color: {}, {}, {}", r, g, b);
+>}
+> ```
+> + **Kodu Açıklaması:**
+> 	- `Color` ve `Point` isimlerinde `tuple struct`'lar tanımlandı.
+> 	- `field` adları yok; sadece türleri var.
+> 	- `.0`, `.1`, `.2` şeklinde indeks numarasıyla erişim yapılabilir.
+> 	- `let Color(r, g, b) = red;` kısmında olduğu gibi **destructure edilerek** parçalara ayrılabilir.
+
+
+> [!CAUTION]
+> + Demetlerin(`tuple`) aksine, demet yapıları(`tuple struct`), yapıyı parçalara ayırırken(`destucture`) yapının türünü belirtmenizi gerektirir.
+> + Örneğin, `origin` içindeki değerleri `x`, `y` ve `z` adlı değişkenlere ayırmak için `let Point(x, y, z) = origin;` şeklinde yazmalıyız.
+> ```rust
+> // Tuple struct tanımı
+> struct Point(i32, i32, i32);
+> 
+> fn main() {
+>    let origin = Point(10, 20, 30);
+>
+>    // Destructuring yapılırken struct adı belirtilmeli
+>    let Point(x, y, z) = origin;
+>
+>    println!("x: {}, y: {}, z: {}", x, y, z);
+> }
+> ```
+> + **Tuple Stuct vs Tuple**
+> + Normal tuple'da şöyle yazabiliriz:
+> ```rust
+> let (a, b, c) = (1, 2, 3);
+> ```
+> + Ama tuple struct'ta tür ismi belirtmenden olmaz:
+> ```rust
+> let Point(x, y, z) = origin; // ✅ Doğru
+> // let (x, y, z) = origin;   // ❌ Hatalı
+> ```
+
+### E. Herhangi Bir Alanı Olmayan Birim Benzeri Yapılar(Unit-Like Structs):
+
++ Ayrıca hiçbir alanı(`field`) olmayan yapıları(`struct`) da tanımlayabilirsiniz!
++ Bunlara `unit-like struct` denir çünkü ["Tuple Türü"](https://doc.rust-lang.org/book/ch03-02-data-types.html#the-tuple-type) bölümünde bahsettiğimiz `unit type` olan `()`'ne benzer şekilde davranırlar.
++ Unit benzeri (unit-like) struct’lar, bir tür üzerinde `trait` (özellik) uygulamak istediğinizde ancak bu türün içinde herhangi bir veri saklamanıza gerek olmadığında faydalı olabilir. Yani, Unit-like struct’lar, içinde veri tutmanıza gerek olmayan ama yine de bir `trait`’i uygulamak istediğiniz durumlarda işe yarar.
++ `trait`'leri 10. Bölümde ele alacağız.
++ `AlwaysEqual` adında bir birim yapısının(`unit struct`) bildirilmesi ve örneklendirilmesine(`declaring and instantiating`) dair bir örnek aşağıda verilmiştir:
+
+```rust
+struct AlwaysEqual;  // declaring - bildirilmesi
+
+fn main() {
+    let subject = AlwaysEqual; // instantiating - örneklenmesi
+}
+```
+
+> + `AlwaysEqual`'ı tanımlamak için `struct` anahtar kelimesini, istediğimiz ismi(`AlwaysEqual`) ve ardından noktalı virgülü(`;`) kullanırız.
+> + Süslü parantezlere veya ayraçlara gerek yok!
+> + `AlwaysEqual` türünden bir örneği (`instance`), `subject` değişkenine benzer şekilde atayabiliriz: Tanımladığımız ismi kullanarak, süslü parantez `{}` veya normal parantez `()` olmadan. Yani, `AlwaysEqual` yapısından bir örnek oluşturmak için sadece ismini yazmamız yeterlidir; süslü veya normal parantez kullanmamıza gerek yoktur.
+> + Daha sonra bu tür (type) için bir davranış (behavior) uygulayacağımızı hayal edin; öyle ki, `AlwaysEqual` türünün her örneği, başka herhangi bir türün her örneğiyle her zaman eşit olsun — belki de test amaçlı olarak bilinen bir sonuç elde etmek için. Yani, İleride bu tür için, `AlwaysEqual`’ın her örneğinin diğer tüm türlerin örnekleriyle her zaman eşit olacağı bir davranış tanımlayacağımızı düşünün; örneğin testlerde tahmin edilebilir bir sonuç elde etmek için.
+> + Bu davranışı uygulamak için hiçbir veriye ihtiyacımız olmayacaktı!
+> + 10. bölümde, `unit-like-struct`lar da dahil olmak üzere bu türlere nasıl **`trait`’ler (özellikler)** tanımlayacağınızı ve onları nasıl **uygulayacağınızı (`implement`)** öğreneceksiniz.
+
+#### E.1. Struct Data'ların Sahipliği:
++ Liste 5-1'deki `User` struct tanımında `&str string` dilim türü yerine `owned String` türünü kullandık.
++ Bu bilinçli bir tercihtir çünkü bu `struct`’ın her örneğinin (`instance`’ının) sahip olduğu tüm verilerin mülkiyetine (`ownership`) sahip olmasını ve bu verilerin, `struct` geçerli olduğu sürece geçerli kalmasını istiyoruz.
+
+
+> [!NOTE]
+> #### Ne Anlatılmak İsteniyor:
+> Rust’ta **`String`** ve **`&str`** arasında önemli bir fark vardır:
+> + `String` → verinin sahibi olan(`owned`) bir string türüdür.
+> + `&str` → **başka bir yere ait veriye referans eden (borrowed) bir string dilimidir.**
+> ```rust
+> struct User {
+>    active: bool,
+>    username: String,
+>    email: String,
+>    sign_in_count: u64,
+>}
+> ```
+> + Burada `username` ve `email` alanları **`String`** türünde.
+> 	- ➡️ `User` nesnesi oluşturulduğunda, `username` ve `email` verilerinin **sahibi (owner)** `User`’dır.
+> 	- ➡️ Yani, `User` bellekte durduğu sürece bu string verileri de geçerli olur.
+> 	- ➡️ `User` silinince (`drop` edilince) bu veriler otomatik olarak silinir.
+> + Eğer `&str` kullansaydık:
+> ```rust
+> struct User {
+>    username: &str,   // ❌
+>    email: &str,      // ❌
+>}
+> ```
+> + bu durumda `User` sadece **başka bir yere ait string’lere referans verirdi.**
+> + Yani `User` var olsa bile, o referans ettiği string’ler silinirse program hata verir. (`dangling reference`).
+> + Bu da Rust’ın **ownership** ve **lifetime** kurallarına uymadığı için derlenmez.
+> #### Özet:
+> + `User` struct’ında `String` kullandık çünkü her kullanıcı kendi verilerinin sahibi olmalı.  
+> + Böylece o veriler, kullanıcı nesnesi (struct) var olduğu sürece güvenli bir şekilde bellekte kalır.
+
++ Struct’ların, başka bir şeye ait olan verilere referans (gönderme) yapacak şekilde veri tutması da mümkündür; ancak bunu yapabilmek için, Rust’ın 10. bölümde ele alacağımız _lifetime_ (ömür) özelliğini kullanmak gerekir.
++ Lifetimes, bir struct’ın referans verdiği verilerin, struct geçerli olduğu sürece geçerli kalmasını garanti eder.
++ Diyelim ki, bir struct içinde yaşam sürelerini (lifetimes) belirtmeden bir referans depolamaya çalışıyorsunuz; aşağıdaki örnekte olduğu gibi. Bu işe yaramaz.
+
+**Dosya adı: `src/main.rs`**
+
+```rust
+struct User {
+    active: bool,
+    username: &str,
+    email: &str,
+    sign_in_count: u64,
+}
+
+fn main() {
+    let user1 = User {
+        active: true,
+        username: "someusername123",
+        email: "someone@example.com",
+        sign_in_count: 1,
+    };
+}
+```
+
++ Derleyici, yaşam süresi belirteçlerine (`lifetime specifiers`) ihtiyaç duyduğunu belirterek hata verecektir.
++ Yani, bu struct bir **referans** tutuyor ama ben bu referansın **ne kadar süre geçerli olacağını** bilmiyorum.  Lütfen bana bir **lifetime (örneğin `'a`)** belirt.
++ Bu uyarı, Rust’ın **bellek güvenliği** mekanizmasının bir parçasıdır.
++ Derleyici lifetime olmadan referansın **geçerliliğini garanti edemez**, o yüzden kodu derlemez.
+
+```rust
+$ cargo run
+   Compiling structs v0.1.0 (file:///projects/structs)
+error[E0106]: missing lifetime specifier
+ --> src/main.rs:3:15
+  |
+3 |     username: &str,
+  |               ^ expected named lifetime parameter
+  |
+help: consider introducing a named lifetime parameter
+  |
+1 ~ struct User<'a> {
+2 |     active: bool,
+3 ~     username: &'a str,
+  |
+
+error[E0106]: missing lifetime specifier
+ --> src/main.rs:4:12
+  |
+4 |     email: &str,
+  |            ^ expected named lifetime parameter
+  |
+help: consider introducing a named lifetime parameter
+  |
+1 ~ struct User<'a> {
+2 |     active: bool,
+3 |     username: &str,
+4 ~     email: &'a str,
+  |
+
+For more information about this error, try `rustc --explain E0106`.
+error: could not compile `structs` (bin "structs") due to 2 previous errors
+```
+
+> + 10. bölümde, bu hataları nasıl düzelteceğimizi ve struct’lar içinde referansların nasıl saklanabileceğini tartışacağız. Ancak şimdilik, bu tür hataları düzeltmek için `&str` gibi referanslar yerine `String` gibi sahip olunan (owned) türleri kullanacağız.
+> + Yani şunu söylüyor:
+> 	- Şimdilik `&str` (referans) kullanmaya çalışmak yerine, doğrudan `String` (sahip olunan veri) kullan.
+> 	- Çünkü `String` veriyi **kendisi sahiplenir** ve **lifetime belirtmeye gerek kalmaz**.
+> 	- İleride (10. bölümde) Rust’ta **lifetime** konusunu öğrenince, struct içinde `&str` gibi referansları güvenli şekilde kullanmayı da öğreneceksin.
+
+> [!NOTE]
+> #### Ne Anlatılmak İsteniyor?
+> + Burada Rust'ın **lifetime**(ömür) kavramına giriş yapılyor.
+> + Yani, bir struct’ın içindeki veriler **kendisinin sahibi değilse** (örneğin sadece bir `&str` referansı tutuyorsa), Rust bu referansın **geçerlilik süresini (lifetime)** takip eder.
+> + Amaç şudur👇:
+> 	- Struct geçerli olduğu sürece, o struct’ın referans verdiği veriler de geçerli olmalı.
+> 	- Eğer veri önce silinirse, struct “boş referans” (dangling reference) tutmuş olur — Rust bunu engeller.
+> #### 📘 Basit Örnek (ilerideki konudan fikir vermesi için):
+> ```rust
+> struct User<'a> {
+>    username: &'a str, // referans (borrowed data)
+>}
+>
+>fn main() {
+>    let name = String::from("Tanju");
+>    let user = User { username: &name };
+>    println!("{}", user.username);
+>}
+> ```
+> + Burada `'a` lifetime parametresi sayesinde Rust şunu anlar:
+> 	- `user` yapısı, `name` değişkeni geçerli olduğu sürece geçerlidir.
+> + Yani `user`'ın ömrü, `name`'in ömründen uzun olamaz.
+> + Bu da bellek güvenliğini sağlar. ✅
+
+
+> [!NOTE] Title
+> #### `String` vs `&str` farkıyla:
+> #####  1. `String` kullanan struct (verinin sahibi)
+> ```rust
+> struct User {
+ >   username: String, // User bu verinin sahibi
+>}
+>
+>fn main() {
+>    let name = String::from("Tanju");
+>    let user = User { username: name }; // sahiplik transfer edilir
+>
+>    // println!("{}", name); ❌ artık name geçersiz (move oldu)
+>    println!("{}", user.username); // ✅ user verinin sahibi, kullanabilir
+>} // burada user scope dışına çıkar ve String otomatik olarak silinir
+> ```
+> + `User` struct’ı `username` verisinin **sahibidir (owner)**.
+> + `name` değişkeni artık verinin sahibi değildir (ownership `user`’a geçti).
+> + `user` silindiğinde `String` verisi de bellekte otomatik temizlenir.
+> + Bu yüzden **`lifetime`** belirtmeye gerek yoktur.
+> ```rust
+> struct User<'a> {
+>    username: &'a str, // Bu struct veriyi sadece ödünç alıyor (borrow)
+>}
+>
+>fn main() {
+>    let name = String::from("Tanju");
+>    let user = User { username: &name }; // name'den ödünç alındı
+>
+>    println!("{}", user.username);
+>} // name ve user aynı anda scope dışına çıktığı için sorun yok
+> ```
+> + `User` struct'ı verinin sahibi değildir, sadece referansını (`&str`)  tutar.
+> + Bu nedenle Rust, `User`’ın ömrü (`'a`) ile `name`’in ömrünü **eşleştirmemizi ister**.  (`'a` lifetime parametresi bunu yapar.)
+> + Böylece Rust, `user` geçerli olduğu sürece `name`’in de geçerli olmasını **garanti eder**.
+> #### Sonuç:
+> + Eğer struct içindeki veri **struct’a ait olacaksa** → `String` kullan.
+> + Eğer veri **başka bir yerde tanımlanmışsa ve sadece referans tutmak istiyorsan** → `&str` kullan, ama **lifetime belirtmeyi unutma**.
+
+| Özellik              | `String`                      | `&str`                        |
+| -------------------- | ----------------------------- | ----------------------------- |
+| Sahiplik (Ownership) | Struct sahip olur             | Struct sadece referans tutar  |
+| Bellek yönetimi      | Struct silinince veri silinir | Veri başka yerde tutulur      |
+| Lifetime gerekliği   | Gerekmez                      | Gerekir (`'a` ile belirtilir) |
+| Bellek güvenliği     | Rust otomatik halleder        | Rust lifetime ile denetler    |
+
+## 5.2. Struct’ları Kullanan Örnek Bir Program:
+
++ Struct’ları ne zaman kullanmak isteyebileceğimizi anlamak için, bir dikdörtgenin alanını hesaplayan bir program yazalım.
++ Önce tek değişkenler kullanarak başlayacağız, ardından programı **struct** kullanacak şekilde yeniden düzenleyeceğiz (refactor edeceğiz).
+	- Başlangıçta **her değeri ayrı değişkenlerde** tutacağız.
+	- Sonrasında, bu ilişkili verileri **struct içine toplayarak daha düzenli ve anlamlı** bir hale getireceğiz.
++ Cargo ile piksel cinsinden belirtilen bir dikdörtgenin genişliğini ve yüksekliğini alacak ve dikdörtgenin alanını hesaplayacak **rectangles** adında yeni bir ikili (binary) proje oluşturalım.
+	- **Binary project** → Çalıştırılabilir bir program (komut satırından çalıştırabileceğimiz).
+	- **Cargo** → Rust’ın proje yönetim ve derleme aracı.
+	- Proje adı: **rectangles**
+	- Amaç: Genişlik ve yükseklik değerlerini alıp alanı hesaplamak.
++ Liste 5-8, projemizin `src/main.rs` dosyasında tam olarak bunu yapmanın bir yolunu gösteren kısa bir program göstermektedir.
+
+**Dosya adı: `src/main.rs`**
+
+```rust
+fn main() {
+    let width1 = 30;
+    let height1 = 50;
+
+    println!(
+        "The area of the rectangle is {} square pixels.",
+        area(width1, height1)
+    );
+}
+
+fn area(width: u32, height: u32) -> u32 {
+    width * height
+}
+```
+
+**Çıktı:**
+
+```bash
+The area of the rectangle is 1500 square pixels.
+```
+
+> + liste 5-8: Ayrı genişlik ve yükseklik değişkenleriyle belirtilen bir dikdörtgenin alanının hesaplanması
+
++ Şimdi bu programı `cargo run` kullanarak çalıştıralım:
+
+```shell
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.42s
+     Running `target/debug/rectangles`
+The area of the rectangle is 1500 square pixels.
+```
+
+> + Bu kod, her bir boyutu (genişlik ve yükseklik) ile `area` fonksiyonuna göndererek dikdörtgenin alanını hesaplamayı başarıyor, ancak bu kodu daha **açık** ve **okunabilir** hale getirmek için daha fazlasını yapabiliriz.
+
++ Bu koddaki sorun, `area` fonksiyonunun imzasında (tanım satırında) açıkça görülmektedir.
+
+```rust
+fn main() {
+    let width1 = 30;
+    let height1 = 50;
+
+    println!(
+        "The area of the rectangle is {} square pixels.",
+        area(width1, height1)
+    );
+}
+
+fn area(width: u32, height: u32) -> u32 {
+    width * height
+}
+```
+
+> + `area` fonksiyonu, **bir** dikdörtgenin alanını hesaplamak için tasarlanmıştır; ancak yazdığımız fonksiyonun **iki parametresi** vardır ve bu parametrelerin **birbirleriyle ilişkili** olduğu programımızın hiçbir yerinde açıkça belli değildir.
+> + Genişlik (**width**) ve yükseklik (**height**) değerlerini **bir arada gruplamak**, kodu hem **daha okunabilir** hem de **daha kolay yönetilebilir** hale getirecektir.
+> + Bunu yapmanın bir yolunu aslında 3. bölümdeki **"[Tuple Türü](https://doc.rust-lang.org/book/ch03-02-data-types.html#the-tuple-type)"** başlığı altında konuşmuştuk:  bunu **tuple’lar** kullanarak yapabiliriz.
+
+### 5.2.1. Tuple’lar ile Yeniden Düzenleme (Refactoring):
+
++ `Liste 5-9`, **tuple’ları kullanan** programımızın başka bir versiyonunu göstermektedir.
+
+**Dosya Adı: `src/main.rs`**
+
+```rust
+fn main() {
+    let rect1 = (30, 50);
+
+    println!(
+        "The area of the rectangle is {} square pixels.",
+        area(rect1)
+    );
+}
+
+fn area(dimensions: (u32, u32)) -> u32 {
+    dimensions.0 * dimensions.1
+}
+```
+
+> + `Liste 5-9`: Dikdörtgenin genişliğini ve yüksekliğini bir tuple ile belirtme
+
+**Çıktı:**
+
+```bash
+The area of the rectangle is 1500 square pixels.
+```
+
+
+> + Bir bakıma, bu program daha iyidir. Tuple’lar bize biraz yapı kazandırır ve artık sadece **tek bir argüman** geçiriyoruz.
+> + Ancak diğer yandan, bu versiyon daha az açıktır: Tuple’lar öğelerine isim vermez, bu yüzden tuple’ın bölümlerine **indeks** ile erişmemiz gerekir ve bu da hesaplamayı **daha az anlaşılır** hale getirir.
+> 	- Yani `(width, height)` gibi bir tuple kullanıldığında, `width` ve `height` isimleriyle değil, **sıra numaralarıyla** (`rect.0`, `rect.1`) erişilir.
+> + Genişlik ve yüksekliği karıştırmak, alan hesabı için önemli olmayabilir; ancak dikdörtgeni ekranda **çizmek istersek**, bu durum önemli hale gelir!
+> 	- Yani Tuple kullanıldığında `rect.0` ve `rect.1` gibi isimler belirsizdir; hangisi genişlik, hangisi yükseklik karışabilir.
+> 	- Alan hesabında (`width * height`) fark etmez ama **grafiksel çizimde** (örneğin koordinat belirlerken) **doğru alanın ne olduğunu bilmek gerekir**.
+> + Genişliğin 0 dizini, yüksekliğin ise 1 dizini olduğunu aklımızda tutmalıyız.
+> + Başka birinin bizim kodumuzu kullanması durumunda bunu anlaması ve aklında tutması daha da zor olacaktır.
+> + Verilerimizin anlamını kodumuzda aktarmadığımız için artık hata yapmak daha kolay.
+
+### 5.2.2. Yapılarla (Struct’larla) Yeniden Düzenleme: Daha Fazla Anlam Katmak:
+
++ Verileri etiketleyerek anlama kazandırmak için `struct` kullanıyoruz.
++ Kullandığımız tuple’ı, tamamı için bir isim ve bölümleri için de isimler içeren bir struct’a dönüştürebiliriz; bu, 5-10 numaralı listede gösterilmiştir.
+	- Yani burada deniyor ki: elimizdeki tuple’ı daha anlamlı hale getirmek için, hem tüm yapıya bir isim (örneğin `Rectangle`) hem de içindeki parçalara (örneğin `width`, `height`) isimler verebiliriz.
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!(
+        "The area of the rectangle is {} square pixels.",
+        area(&rect1)
+    );
+}
+
+fn area(rectangle: &Rectangle) -> u32 {
+    rectangle.width * rectangle.height
+}
+```
+
+> + `Liste 5-10`: Bir `Rectangle` struct tanımlanması
+
+**Çıktı:**
+
+```shell
+The area of the rectangle is 1500 square pixels.
+```
+
+> + Burada bir **struct** tanımladık ve ona `Rectangle` adını verdik. Küme parantezleri içinde, alanları `width` ve `height` olarak tanımladık; her ikisinin de türü `u32`.
+> + Sonra, `main` içinde genişliği 30 ve yüksekliği 50 olan özel bir `Rectangle` örneği (instance) oluşturduk.
+> + Artık `area` fonksiyonumuz **bir parametre** ile tanımlandı; bu parametreye `rectangle` adını verdik ve türü, bir `Rectangle` struct örneğinin **değiştirilemez (immutable) referansı**dir. ⚠️
+> + 4. bölümde de bahsedildiği gibi, struct’ın sahipliğini almak yerine **ödünç almak (borrow)** istiyoruz.
+> + Böylece `main` fonksiyonu sahipliğini korur ve `rect1`’i kullanmaya devam edebilir. İşte bu yüzden fonksiyon imzasında ve fonksiyonu çağırdığımız yerde `&` kullanıyoruz.
+> 	- Burada anlatılmak istenen;
+> 		- `rectangle: &Rectangle` → **Rectangle örneğine referans (borrow)** alır, sahipliğini almaz.
+> 		- `&rect1` → `rect1`’in adresini gönderir, böylece fonksiyon sadece **okuma izni** kazanır.
+> 	- Bu sayede:
+> 		- `main` hala `rect1`'i kullanabilir.
+> 		- Rust'ın **ownership ve borrowing kuralları** korunmuş olur.
+> + `area` fonksiyonu, `Rectangle` örneğinin `width` ve `height` alanlarına erişir (dikkat edin, ödünç alınmış bir struct örneğinin alanlarına erişmek **alan değerlerini taşımaz (move etmez)**; bu yüzden struct’ların sıklıkla ödünç alındığını görürsünüz).
+> 	- `rectangle.width` ve `rectangle.height` → alanlara **sadece erişiyoruz**, sahipliği(`ownership`) almıyoruz.
+> 	- Bu, Rust’ta **borrow (ödünç alma) ile veri güvenliği** sağlamak için önemlidir.
+> 	- Eğer struct yerine alanları doğrudan fonksiyona gönderseydik, değerler **move** olur ve orijinal değişken artık kullanılamazdı.
+> + Artık `area` fonksiyonumuzun imzası tam olarak demek istediğimizi ifade ediyor: `Rectangle`’ın alanını, onun `width` ve `height` alanlarını kullanarak hesapla.
+> 	- Fonksiyonun imzası (`fn area(rectangle: &Rectangle) -> u32`) açıkça şunu söylüyor:
+> 	- Bir `Rectangle` al (ödünç olarak) ve onun alanını hesapla.
+> + Bu, genişlik (`width`) ve yüksekliğin (`height`) birbiriyle ilişkili olduğunu ifade eder ve 0 ile 1 gibi tuple indeksleri kullanmak yerine değerlere açıklayıcı isimler verir. Bu da kodun **anlaşılırlığı açısından bir kazançtır.**
+> 	- Struct kullanmak, tuple’a göre daha okunaklıdır çünkü:
+> 		- `rectangle.width` demek `tuple.0` demekten daha anlamlıdır.
+> 		- Böylece kodun **ne yaptığını anlamak** kolaylaşır, hata yapma olasılığı da azalır.
+
+#### HATIRLATMA:
+
+###### 1. `&rect1` nedir?
+
++ `&rect1` ifadesi, **`rect1` değişkenine ait verinin kendisini değil, ona bir “referans”ı (yani adresini)** gönderir.
++ Yani, `rect1` değişkeninin sahipliğini (`ownership`) **başka bir fonksiyona devretmeden**, sadece **ona erişim izni** verir.
++ ➡️ Rust’ta bu, **borrowing (ödünç alma)** olarak bilinir.
++ Bu sayede:
+	- `area` fonksiyonu `rect1`’in değerini kullanabilir,
+	- ama `rect1`’in sahipliği (`ownership`) `main` fonksiyonunda kalır,
+	- dolayısıyla `rect1`’i sonradan tekrar kullanabilirsin (Rust bunu güvenli kılar).
+###### 2. `&Rectangle` nedir?
+
++ `&Rectangle`, fonksiyonun parametre türüdür.
++ Yani `area` fonksiyonu, **Rectangle yapısına ait bir referans** (adres) bekler.
+
+```rust
+fn area(rectangle: &Rectangle) -> u32
+```
+
+> + Bu şu anlama gelir:
+> 	- Bu fonksiyon, bir `Rectangle`’a ait **referansı** alır ama onun sahipliğini almaz.
+
+###### 3. Neden referans kullanılıyor?
+
++ Rust’ta eğer biz fonksiyona doğrudan `rect1` gönderseydik (yani `area(rect1)` deseydik), `area` fonksiyonu **rect1’in sahipliğini alırdı**, ve `main` fonksiyonu artık `rect1`’i kullanamazdı.
++ Ama biz sadece **değerini okumak** istiyoruz, değiştirmek değil.
++ Bu nedenle referans (`&`) kullanarak hem güvenli hem verimli bir şekilde erişim sağlıyoruz.
+
+| İfade        | Anlamı            | Açıklama                                            |
+| ------------ | ----------------- | --------------------------------------------------- |
+| `rect1`      | Değerin kendisi   | `Rectangle` yapısının bir örneği                    |
+| `&rect1`     | Değerin referansı | `rect1`’in adresini (referansını) gönderir          |
+| `&Rectangle` | Parametre tipi    | Bir `Rectangle` referansı kabul eden fonksiyon türü |
+###### 1️⃣ Referans Kullanmazsak (Ownership taşınır):
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle { width: 30, height: 50 };
+
+    println!("Alan: {}", area(rect1)); // ❌ burası hata verir
+
+    println!("Genişlik: {}", rect1.width); // ❌ rect1 artık geçersiz
+}
+
+fn area(rectangle: Rectangle) -> u32 {
+    rectangle.width * rectangle.height
+}
+```
+
+> + `area` fonksiyonu parametre olarak **sahipliği** alıyor (`rectangle: Rectangle`).
+> + Dolayısıyla `rect1` artık `main` içinde kullanılamaz.
+> + Rust bunu **çift serbest bırakmayı önlemek için** engeller.
+
+###### 2️⃣ Referans Kullanırsak (Borrowing):
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle { width: 30, height: 50 };
+
+    println!("Alan: {}", area(&rect1)); // ✅ &rect1 ile referans gönderiyoruz
+    println!("Genişlik: {}", rect1.width); // ✅ rect1 hala geçerli
+}
+
+fn area(rectangle: &Rectangle) -> u32 {
+    rectangle.width * rectangle.height
+}
+```
+
+> + `&rect1` → `rect1`’in **adresini** gönderiyoruz, sahipliğini vermiyoruz.
+> + `area` fonksiyonu, parametre olarak `&Rectangle` alıyor → sadece ödünç alıyor.
+> + Böylece `rect1` hâlâ `main` içinde kullanılabiliyor.
+> + **Hafıza güvenliği** ve **ownership kuralları** korunmuş oluyor.
+
+
+## 5.3. Türetilmiş (derived) trait’lerle kullanışlı işlevler ekleme:
+
+
+
+
 # Packages, Crates ve Modules:
 
 ## A. Paketler ve Crates:
