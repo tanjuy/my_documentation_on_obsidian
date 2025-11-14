@@ -1700,10 +1700,277 @@ fn area(rectangle: &Rectangle) -> u32 {
 > + **Hafıza güvenliği** ve **ownership kuralları** korunmuş oluyor.
 
 
-## 5.3. Türetilmiş (derived) trait’lerle kullanışlı işlevler ekleme:
+### 5.2.3. Türetilmiş (derived) trait’lerle kullanışlı işlevler ekleme:
+
++ Programımızı hata ayıklarken (`debugging` yaparken), bir `Rectangle` örneğini ekrana yazdırabilmek ve tüm alanlarının değerlerini görebilmek faydalı olurdu.
++ Listeleme 5-11, önceki bölümlerde kullandığımız gibi `println!` makrosunu kullanmayı dener. Ancak bu, **çalışmayacaktır.**
+	- Yani, Normalde `println!` makrosuyla değişkenleri yazdırabiliyoruz, ama bir `struct` (örneğin `Rectangle`) doğrudan yazdırılamaz.
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!("rect1 is {rect1}");
+}
+```
+
+> + Liste 5-11: Bir `Rectangle` örneğini ekrana yazdırmayı girişimi
+
++ Bu kodu derlediğimizde, şu temel mesajla birlikte bir hata alırız:
+
+```shell
+error[E0277]: `Rectangle` doesn't implement `std::fmt::Display`
+```
+
+> + `println!` makrosu birçok farklı biçimlendirme türü yapabilir ve varsayılan olarak süslü parantezler (`{}`), `println!`’a **Display** olarak bilinen biçimlendirmeyi kullanmasını söyler: yani çıktının, doğrudan son kullanıcıya gösterilmesi amaçlanan bir biçimde üretilmesini sağlar.
+> 	- Rust’ta `println!("{}", value)` yazdığında `Display` biçimlendirmesi kullanılır.  
+> 	- Bu, genellikle **insan tarafından okunabilir** bir çıktı içindir.
+> + Şu ana kadar gördüğümüz ilkel (primitive) türler, varsayılan olarak `Display` özelliğini (trait’ini) uygular; çünkü bir `1` sayısını veya başka bir ilkel türü kullanıcıya göstermek için yalnızca tek bir mantıklı yol vardır
+> 	- Rust’ta `i32`, `u32`, `bool`, `char` gibi **temel türler**, `println!` ile doğrudan yazdırılabilir çünkü `Display` trait’i onlar için zaten tanımlıdır.
+> 	- Ama `struct` gibi özel türlerde bu yoktur; yani, Rust onların **nasıl gösterileceğini** bilemez.
+> + Ancak `struct`’larda, `println!` makrosunun çıktıyı nasıl biçimlendirmesi gerektiği o kadar açık değildir, çünkü birden fazla gösterim olasılığı vardır: Virgüller olsun mu olmasın mı? Süslü parantezler yazdırılsın mı? Tüm alanlar gösterilsin mi?
+> + Bu belirsizlik nedeniyle Rust, ne istediğimizi tahmin etmeye çalışmaz ve bu yüzden `struct` türleri için `println!` ve `{}` yer tutucusuyla kullanılabilecek bir **`Display`** uygulaması (uyarlaması) varsayılan olarak sağlanmaz.
+
++ Hataları okumaya devam edersek, şu faydalı notu göreceğiz:
++ Yani derleyicinin verdiği hata mesajının devamında, Rust bize **neden hata olduğunu** ve **nasıl çözülebileceğini** açıklayan bir ek bilgi (not) gösterecektir.
+
+```
+   = help: the trait `std::fmt::Display` is not implemented for `Rectangle`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+```
+
++ Hadi deneyelim!
++ `println!` makrosu artık şöyle görünecek: `println!("rect1 is {rect1:?}");`
++ Süslü parantezlerin içine `:?` belirtecini eklemek, `println!`’a **Debug** adı verilen bir çıktı biçimini kullanmak istediğimizi söyler.
++ **Debug** trait’i, `struct`’ımızı geliştiriciler için faydalı bir biçimde ekrana yazdırmamızı sağlar; böylece kodumuzu hata ayıklarken (debug yaparken) değerini görebiliriz.
++ Bu değişikliği yaptıktan sonra kodu derleyelim. Tüh! Hâlâ bir hata alıyoruz:
+
+```
+error[E0277]: `Rectangle` doesn't implement `Debug`
+```
+
++ Ama derleyici yine de bize yardımcı olacak bir not veriyor:
+
+```
+   = help: the trait `Debug` is not implemented for `Rectangle`
+   = note: add `#[derive(Debug)]` to `Rectangle` or manually `impl Debug for Rectangle`
+```
+
+> + Rust, hata ayıklama (debug) bilgilerini ekrana yazdırmak için gerekli işlevselliği içerir, ancak bu özelliğin `struct`’ımız için kullanılabilir hale gelmesi için bunu açıkça etkinleştirmemiz gerekir.
+> + Bunu yapmak için, `struct` tanımının hemen öncesine `#[derive(Debug)]` adlı dış özniteliği (outer attribute) ekleriz; bu, 5-12 numaralı listede gösterilmiştir.
+
+**Dosya Adı: `scr/main.rs`**
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!("rect1 is {rect1:?}");
+}
+```
+
+> + `Liste 5-12`: `Debug` özelliğini (trait’ini) türetmek için özniteliğin eklenmesi ve `Rectangle` örneğinin (`instance`’ının) debug biçimlendirmesi kullanılarak yazdırılması.
+> + Yani, Bu ifade, “`#[derive(Debug)]` ekleyerek `Debug` trait’ini etkinleştiriyoruz ve ardından `println!("{:?}", rect1)` ile `Rectangle` yapısını ekrana yazdırıyoruz.” anlamına gelir.
+
+**Çıktı:**
+
+```bash
+rect1 is Rectangle { width: 30, height: 50 }
+```
+
++ Artık programı çalıştırdığımızda herhangi bir hata almayacağız ve aşağıdaki çıktıyı göreceğiz:
+
+```
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running `target/debug/rectangles`
+rect1 is Rectangle { width: 30, height: 50 }
+```
+
+> + Güzel! Çıktı çok estetik görünmüyor ama bu örnekteki tüm alanların (field’ların) değerlerini gösteriyor ve bu da kesinlikle hata ayıklama sırasında faydalı olur.
+> + Daha büyük struct’larımız olduğunda, çıktının biraz daha okunabilir olması faydalıdır; bu durumlarda, `println!` string’inde `{:?}` yerine `{:#?}` kullanabiliriz.
+> 	- `{:?}` → tek satırda ve ham biçimde debug çıktısı verir.
+> 	- `{:#?}` → **pretty-print** denilen, daha okunabilir bir biçimde (satır satır ve girintili) debug çıktısı sağlar.
+> + Bu örnekte, `{:#?}` stilinin kullanılması aşağıdaki çıktıyı verecektir:
+
+```
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running `target/debug/rectangles`
+rect1 is Rectangle {
+    width: 30,
+    height: 50,
+}
+```
+
+> + **Debug** (hata ayıklama) formatını kullanarak bir değeri yazdırmanın bir diğer yolu da **`dbg!`** makrosunu kullanmaktır. Bu makro, bir ifadenin **sahipliğini alır** (bu, bir referans alan `println!`'den farklıdır), kodunuzda bu `dbg!` makro çağrısının bulunduğu **dosya ve satır numarasını** ve ayrıca o ifadenin **sonuç değerini** yazdırır ve ardından **değerin sahipliğini geri döndürür**.
 
 
+> [!NOTE]
+> #### `println!`
+> + Bir değeri veya ifadeyi **ekrana yazdırmak** için kullanılır.
+> + Genellikle kullanıcıya yönelik **temiz ve formatlı çıktı** üretir.
+> ```
+> let x = 5;
+> println!("x: {}", x);  // x: 5
+> ```
+> + **Referans alır**: Eğer bir struct veya değişken gönderiyorsak, genellikle `&` ile referans göndeririz (`println!("{:?}", &my_struct)`).
+> #### `dbg!`
+> + Daha çok **hata ayıklama(debugging)** amacıyla kullanılır.
+> + Gönderilen ifadeyi değerlendirir, **sahipliğini alır** (ownership), dosya adı ve satır numarasıyla birlikte ekrana yazdırır.
+> + Çıktıyı **geliştiriciye yönelik** gösterir (Debug formatı varsayılan).
+> + Ayrıca, ifadenin **değerini geri döndürür**, bu yüzden değişkene atayabilirsiniz.
+> ```rust
+> let x = 5;
+> let y = dbg!(x * 2); // [src/main.rs:3] x * 2 = 10
+> ```
 
+| Özellik           | `println!`          | `dbg!`                           |
+| ----------------- | ------------------- | -------------------------------- |
+| Amaç              | Kullanıcıya çıktı   | Geliştirici/debug için çıktı     |
+| Referans/Sahiplik | Referans alır (`&`) | Sahipliği alır (ownership)       |
+| Ek bilgi          | Yok                 | Dosya ve satır numarası gösterir |
+| Geri dönüş        | Yok                 | İfadenin değerini döndürür       |
+| Format            | Display veya Debug  | Debug (`{:?}`) varsayılan        |
+
+
+> [!CAUTION]
+> + `dbg!` makrosunu çağırmak, çıktıyı **standart hata (stderr) akışına** yazdırır; oysa `println!`, çıktıyı **standart çıktı (stdout) akışına** yazar.
+> 	- **stdout** → normal program çıktıları için kullanılır (ekrana yazdırılır veya yönlendirilir).
+> 	- **stderr** → hata mesajları veya debug bilgileri için ayrılmıştır.
+> + `stderr` ve `stdout` hakkında daha fazla bilgiyi, 12. bölümdeki “[Hata Mesajlarını Standart Çıktı Yerine Standart Hata Akışına Yazmak](https://doc.rust-lang.org/book/ch12-06-writing-to-stderr-instead-of-stdout.html)” başlıklı bölümde ele alacağız.
+
++ İşte genişlik alanına atanan değerin yanı sıra rect1'deki tüm yapının değeriyle ilgilendiğimiz bir örnek:
++ Yani, verilen kod örneğinde, sadece **`width`** değişkeninin son değerini değil, aynı zamanda **`rect1`** adındaki **tüm yapı nesnesinin** (örneğin bir dikdörtgenin genişlik, yükseklik ve alan gibi tüm bilgilerinin) değerini de incelemek istiyoruz.
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let scale = 2;
+    let rect1 = Rectangle {
+        width: dbg!(30 * scale),
+        height: 50,
+    };
+
+    dbg!(&rect1);
+}
+```
+
+> + `30 * scale` ifadesinin etrafına `dbg!` koyabiliriz ve `dbg!`, ifadenin değerinin sahipliğini(`ownership`) geri verdiği için, `width` alanı `dbg!` çağrısı olmasaydı ne değer alacaktıysa yine aynı değeri alacaktır.
+> 	- `dbg!` makrosunu 30 * scale ifadesine uygulasak bile, `dbg!` ifadenin değerini geri verdiğinden `width` alanı normalde alacağı değeri almaya devam eder.
+> 	- Yani, `dbg!` makrosunun ifadeyi _değiştirmediği_, sadece onu ekrana bastığıdır. `dbg!` kullanmak programın değerlerini bozmaz.
+> + `dbg!` makrosunun `rect1`’in sahipliğini(`ownership`) almasını istemediğimiz için, sonraki çağrıda `rect1`’e bir referans kullanıyoruz. Bu örneğin çıktısı şöyle görünür:
+> 	-  Bu cümleyi aşağıdaki "`dbg!(&rect1)` ile `dbg!(rect1)` arasındaki fark" Notu açıklamaktadır.
+
+
+> [!NOTE]
+> #### `dbg!(&rect1)` ile `dbg!(rect1)` arasındaki fark:
+> ##### Sahiplik (Ownership) farkı:
+>  + `dbg!(rect1)`
+> 	- → `dbg!` makrosu **ifadenin sahipliğini alır (takes ownership)**.
+> 	- Yani `rect1` değeri `dbg!` içine **taşınır (moved)**.
+> 	- Bu yüzden `dbg!` çağrısından **sonra `rect1` artık kullanılamaz**.
+> + `dbg!(&rect1)`
+> 	- → Burada `rect1`’in **referansını (borrow)** geçiriyorsun.
+> 	- Yani `rect1` hâlâ **main fonksiyonunda kullanılabilir durumda kalır**.
+> 	- Çünkü sadece **ödünç verilmiştir**, taşınmamıştır.
+
+| Kullanım       | Anlamı                        | Sonrasında `rect1` kullanılabilir mi? |
+| -------------- | ----------------------------- | ------------------------------------- |
+| `dbg!(rect1)`  | Sahipliği taşır (move)        | ❌ Hayır                               |
+| `dbg!(&rect1)` | Referansla borç alır (borrow) | ✅ Evet                                |
+
+```
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running `target/debug/rectangles`
+[src/main.rs:10:16] 30 * scale = 60
+[src/main.rs:14:5] &rect1 = Rectangle {
+    width: 60,
+    height: 50,
+}
+```
+
+> + İlk çıktının, `30 * scale` ifadesini debug ettiğimiz `src/main.rs` dosyasındaki 10. satırdan geldiğini görebiliyoruz ve bu ifadenin sonucu 60’tır (tamsayılar için uygulanmış Debug biçimlendirmesi yalnızca değerlerini yazdırır).
+> 	- Yani, İlk çıktının `src/main.rs` dosyasının 10. satırından geldiğini görüyoruz. Burada `30 * scale` ifadesini debug ediyoruz ve sonuç değeri 60 olarak görünüyor. (Tamsayılar için Debug formatı sadece sayısal değerlerini gösterecek şekilde uygulanmıştır.
+> + `src/main.rs` dosyasının 14. satırındaki dbg! çağrısı `&rect1` değerini, yani `Rectangle` yapısını çıktı olarak verir.
+> + Bu çıktı, `Rectangle` türü için uygulanmış **`pretty Debug`** biçimlendmesini kullanır.
+> + `dbg!` makrosu, kodunun ne yaptığını anlamaya çalışırken gerçekten çok yardımcı olabilir!
+
+
+> [!NOTE]
+> #### 📌 Pretty Debug Nedir?
+> + Rust’ta **Debug trait**, bir değerin ekrana yazdırılabilmesini sağlar.
+> 	- Normal `Debug` → basit, tek satır, minimal bilgi
+> 	- Pretty Debug (`{:#?}`) → daha okunabilir, **güzel formatlanmış**, **çok satırlı** çıktı
+> ```rust
+> #[derive(Debug)]
+> struct Rectangle {
+>    width: u32,
+>    height: u32,
+>}
+>
+> fn main() {
+>    let rect1 = Rectangle { width: 60, height: 50 };
+>
+>    // Normal Debug
+>    println!("{:?}", rect1);
+>
+>    // Pretty Debug
+>    println!("{:#?}", rect1);
+>}
+> ```
+> #### Çıktı:
+> **Normal Çıktı:**
+> ```
+> Rectangle { width: 60, height: 50 }
+> ```
+> **Pretty Debug (`{:#?}`)**
+> ```
+> Rectangle {
+>    width: 60,
+>    height: 50,
+>}
+> ```
+
+> + Debug trait’ine ek olarak, Rust, `derive` özniteliği ile kullanabileceğimiz ve özel (custom) türlerimize faydalı davranışlar ekleyebilen bir dizi trait sağlamıştır.
+> + Bu trait’ler ve davranışları  [Appendix C](https://doc.rust-lang.org/book/appendix-03-derivable-traits.html)’de listelenmiştir. Bu trait’leri kendi özel davranışlarımızla nasıl uygulayacağımızı ve kendi trait’lerimizi nasıl oluşturacağımızı Bölüm 10’da ele alacağız.
+> + `derive` dışında da birçok öznitelik vardır; daha fazla bilgi için [Rust Reference’taki ‘Attributes’ bölümüne](https://doc.rust-lang.org/reference/attributes.html) bakabilirsiniz.
+
+> + `Area` (alan) fonksiyonumuz oldukça spesifik: yalnızca dikdörtgenlerin alanını hesaplar. 
+> + Bu davranışı `Rectangle` yapımıza(`struct`) daha sıkı bağlamak faydalı olur, çünkü başka bir türle çalışmaz. 
+> + Şimdi, bu kodu nasıl yeniden düzenleyebileceğimize ve `area` fonksiyonunu `Rectangle` türü üzerinde tanımlanmış bir alan (`area`) **metodu** haline nasıl getirebileceğimize bakalım.
+
+
+## 5.3. Metot Sözdizimi:
+
++ Metotlar (methods), fonksiyonlara benzer: `fn` anahtar kelimesi ve bir isimle tanımlanırlar, parametreleri ve bir dönüş değeri olabilir, ve metot başka bir yerden çağrıldığında çalıştırılacak bazı kodları içerirler.
++ Fonksiyonların aksine, metotlar bir struct (veya enum ya da trait nesnesi, bunları sırasıyla Bölüm 6 ve Bölüm 18’de ele alacağız) bağlamı içinde tanımlanır ve ilk parametreleri her zaman `self`’tir; bu `self`, metot çağrısının yapıldığı struct örneğini(`struct instance`) temsil eder.
 
 # Packages, Crates ve Modules:
 

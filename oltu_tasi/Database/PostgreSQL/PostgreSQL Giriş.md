@@ -1719,8 +1719,19 @@ host    linus_d         tanju           192.168.1.106/32        scram-sha-256
 #### Örnek 4: md5
 
 
-### B. SQL Komutları ile:
+### B. SQL ile Veritabanı Oluşturma:
 
+#### Söz Dizimi:
+
+```sql
+CREATE DATABASE database_name;
+```
+
+#### Örnek 1: 
+
+```sql
+CREATE DATABASE rust_backend;
+```
 
 
 ## c. Database Silme:
