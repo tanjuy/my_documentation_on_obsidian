@@ -1972,6 +1972,807 @@ $ cargo run
 + Metotlar (methods), fonksiyonlara benzer: `fn` anahtar kelimesi ve bir isimle tanımlanırlar, parametreleri ve bir dönüş değeri olabilir, ve metot başka bir yerden çağrıldığında çalıştırılacak bazı kodları içerirler.
 + Fonksiyonların aksine, metotlar bir struct (veya enum ya da trait nesnesi, bunları sırasıyla Bölüm 6 ve Bölüm 18’de ele alacağız) bağlamı içinde tanımlanır ve ilk parametreleri her zaman `self`’tir; bu `self`, metot çağrısının yapıldığı struct örneğini(`struct instance`) temsil eder.
 
+### 5.3.1. Metotları Tanımlama:
+
++ Parametre olarak bir `Rectangle` örneği alan `area` fonksiyonunu değiştirelim ve bunun yerine, `Rectangle` struct’ı üzerinde tanımlanmış bir `area` metodu haline getirelim; bunun nasıl yapılacağını 5-13 numaralı listede görebilirsiniz.
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!(
+        "The area of the rectangle is {} square pixels.",
+        rect1.area()
+    );
+}
+```
+
+> + Liste 5-13: Rectangle yapısı üzerinde bir area (alan) metodu tanımlamak
+
++ Fonksiyonu `Rectangle` bağlamında tanımlamak için, `Rectangle` için bir `impl` (`implementation`) bloğu başlatırız. 
++ Bu `impl` bloğunun içindeki her şey `Rectangle` türüyle ilişkilendirilecektir. 
++ Daha sonra `area` fonksiyonunu bu `impl` bloğunun süslü parantezleri içine taşırız ve fonksiyonun imzasındaki ilk (ve bu durumda yalnızca) parametreyi `self` olarak değiştiririz; ayrıca fonksiyonun gövdesindeki tüm kullanımları da buna göre güncelleriz.
++ `main` fonksiyonunda, daha önce `area` fonksiyonunu çağırıp `rect1`’i argüman olarak geçtiğimiz yerde, bunun yerine `Rectangle` örneğimiz üzerinde `area` metodunu çağırmak için metot sözdizimini kullanabiliriz.
++ Metot sözdizimi bir örnekten(`instance`) sonra gelir: örneğin sonuna bir nokta ekleriz, ardından metot adı, parantezler ve varsa argümanlar gelir.
++ `area` metodunun imzasında, `rectangle: &Rectangle` yerine `&self` kullanıyoruz.
++ Aslında `&self`, `self: &Self` ifadesinin kısaltmasıdır.
+	- `fn area(&self) -> u32 {...}` ile `fn area(self: &Self) -> u32 {...}` aynıdır.
++ Bir `impl` bloğunun içinde `Self` türü, o `impl` bloğunun tanımlandığı tür için bir takma addır.
++ Metotların ilk parametresi, türü `Self` olan `self` adında bir parametre olmalıdır, bu yüzden Rust size ilk parametre konumunda yalnızca `self` yazarak bunu kısaltma imkânı verir.
++ Ancak, bu metodun `Self` örneğini ödünç aldığını belirtmek için kısaltmanın önüne hâlâ `&` koymamız gerekir; tıpkı `rectangle: &Rectangle` yazdığımız gibi.
++ Metotlar, tıpkı diğer parametrelerde olduğu gibi, `self`’in sahipliğini(`ownership`) alabilir, `self`’i değiştirilemez (`immutably`) ödünç alabilir — burada yaptığımız gibi — veya `self`’i değiştirilebilir (`mutably`) ödünç alabilir.
++ Burada **&self** kullanmayı, fonksiyon versiyonunda **&Rectangle** kullanmamızla aynı sebepten seçtik: **sahipliği almak istemiyoruz** ve **yapı içindeki veriyi sadece okumak istiyoruz, yazmak değil**.
++ Eğer metodun yaptığı işlemin bir parçası olarak, üzerinde çağrıldığı örneği (instance’ı) değiştirmek isteseydik, ilk parametre olarak **&mut self** kullanırdık.
++ Sadece **self** kullanan (yani sahipliği alan) bir metod ise **nadiren kullanılır**; bu teknik genellikle metodun `self`i başka bir şeye dönüştürdüğü ve dönüşümden sonra çağıranın orijinal örneği kullanmasını engellemek istediğiniz durumlarda tercih edilir.
++ Bir türün bir örneğiyle (instance’ıyla) yapabileceğimiz tüm işlemleri tek bir **impl bloğu** içine yerleştiririz; böylece kodumuzu kullanan kişiler, `Rectangle` ile ilgili yetenekleri (neler yapabileceğini) kütüphanemizin farklı yerlerinde aramak zorunda kalmazlar.
++ Dikkat edin: Bir metoda, yapının alanlarından (`field`) biriyle aynı ismi vermeyi seçebiliriz.  
++ Örneğin, `Rectangle` üzerinde `width` adıyla bir alan olmasına rağmen, aynı zamanda `width` adında bir metot da tanımlayabiliriz.
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn width(&self) -> bool {
+        self.width > 0
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    if rect1.width() {
+        println!("The rectangle has a nonzero width; it is {}", rect1.width);
+    }
+}
+```
+
+> + Burada, `width` metodunun, örneğin(`instance`) `width` alanındaki(`width field`) değer 0’dan büyükse `true`, 0 ise `false` döndürmesini seçiyoruz: aynı isme sahip bir metodun içinde o alanı (`field`) istediğimiz amaçla kullanabiliriz.  
+> + `main` fonksiyonunda `rect1.width` ifadesinden sonra parantez kullanırsak, Rust bunun `width` metodu olduğunu anlar.
+> + Parantez kullanmazsak, Rust bunun `width` alanı (`field`) olduğunu anlar.
+
+> + Çoğu zaman (ama her zaman değil), bir metoda bir alanla (field) aynı ismi verdiğimizde, yalnızca o alandaki değeri döndürmesini ve başka hiçbir şey yapmamasını isteriz.
+> + Bu tür metotlara _getter_ denir ve bazı dillerin aksine Rust, struct alanları için getter metotlarını otomatik olarak oluşturmaz.
+> + `Getter`'lar faydalıdır çünkü alanı (`field`) `private` yapabilir, metodu ise `public` yapabilirsiniz. Böylece bu alan için yalnızca okuma (`read-only`) erişimi sağlayarak türün `public API`’sine dahil etmiş olursunuz.
+> + Alanların ve metotların `public` veya private olmasının ne anlama geldiğini ve bunların nasıl belirtileceğini **7. bölümde** tartışacağız.
+	- Aşağıdaki Not yukarıdaki paragrafları açıklamaktadır(chatGPT):
+
+> [!NOTE]
+> + Rust’ta bir `impl` bloğunun içinde yazdığın **Self** kelimesi aslında **o struct’ın adıyla aynı şeyi ifade eder**.
+> + Yani;
+> 	- Struct’ın adı: `Rectangle`
+> 	- `impl Rectangle` içinde `Self` yazarsan → **`Rectangle` ile tamamen aynı anlamdadır.**
+> 	- `Self` = `Rectangle`
+> + Bu, sadece yazımı kolaylaştırmak ve okunabilirliği arttırmak için kullanılır.
+> ```rust
+> struct Rectangle {
+ >   width: u32,
+>    height: u32,
+>}
+>
+>impl Rectangle {
+>    fn new(width: u32, height: u32) -> Self {
+>        Self { width, height }
+>    }
+>}
+> ```
+> + Burada:
+> 	- `fn new(...) -> Self` aslında **`-> Rectangle`** demektir.
+> 	- `Self { width, height }` aslında **`Rectangle { width, height }`** demektir.
+> + Yani aşağıdaki iki kod tamamen aynıdır:
+> ```rust
+> fn new(width: u32, height: u32) -> Self { ... }
+> ```
+> ve
+> ```rust
+> fn new(width: u32, height: u32) -> Rectangle { ... }
+> ```
+
+
+> [!NOTE]
+> #### Neden `Self` kullanılır?
+> + ✔ Kod daha okunabilir olur.
+> 	- Özellikle generic yapılarda veya uzun struct isimlerinde çok işine yarar.
+> + ✔ Refactoring kolaylaşır.
+> 	- Struct’ın adı değişse bile `Self` olduğundan kod bozulmaz.
+> + ✔ Rust topluluğunda **standart yazım şeklidir**
+
+#### 5.3.1.1. `Self` ile `self` arasında fark:
+
+**🟥 1. **Self (büyük S)** → Türün kendisi**
+
++ `Self` bir tip(type) anlamına gelir. Yani, `struct` adının yerine kullanılır.
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn new(w: u32, h: u32) -> Self {
+        Self { width: w, height: h }
+    }
+}
+```
+
+🟦 2. **self (küçük s)** → Metotun aldığı örnek (instance)
+
++ `self`,  metodu çağıran nesnenin kendisidir.
+
+```rust
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+```
+
+> + Buradaki:
+> 	- `self` → `rect1`, `rect2` gibi bir örnektir.
+> 	- Yani **`Self`’in örneğidir.**
+
+**Örneğini Oluşturma:**
+
+```rust
+let rect1 = Rectangle { width: 10, height: 20 };
+rect1.area();
+```
+
+> + Burada `rect1.area()` çağrıldığında:
+> 	- `self` = `rect1`
+
+|Yazım|Anlam|Açıklama|
+|---|---|---|
+|**Self**|Tür|`Rectangle` demek|
+|**self**|Nesne (instance)|`rect1`, `rect2` gibi|
+**Self = Tür, self = Nesne**
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    // Self → Tür (Rectangle)
+    fn new(width: u32, height: u32) -> Self {
+        Self { width, height }
+    }
+
+    // self → nesne (örnek)
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle::new(10, 20); // Self burada Rectangle
+
+    println!("Area: {}", rect1.area()); // self burada rect1
+}
+```
+
+#### 5.3.1.2. self sahiplenme (ownership)
+
++ `self` sahipliği alır
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+
+	// Self ile constructor gibi fonksiyon
+    fn new(w: u32, h: u32) -> Self {
+        Self {width: w, height: h}
+    }
+
+    fn area(self: &Self) -> u32 {
+        self.width * self.height
+    }
+
+    fn destory(self) {
+        println!(
+            "Rectangle yok edildi: {}x{}", self.width, self.height
+            );
+    }
+}
+
+fn main() {
+
+    let rect1 = Rectangle::new(10,20);
+    println!("{}",rect1.area());
+
+    rect1.destory();  // self burada rect (tüm ownership geçti)
+    println!("{}",rect1.area());  // HATA verir.
+}
+```
+
+> + Bu metot `self` alıyor → yani **nesnenin sahipliğini alıyor**.
+> + `&self` değil → artık rect kullanılamaz.
+
+#### 5.3.1.3. self mut olarak borrow
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+
+    fn new(w: u32, h: u32) -> Self {
+        Self {width: w, height: h}
+    }
+
+    fn area(self: &Self) -> u32 {
+        self.width * self.height
+    }
+
+    fn destory(self) {
+        println!(
+            "Rectangle yok edildi: {}x{}", self.width, self.height
+            );
+    }
+
+    fn grow(&mut self, amount: u32) {
+        self.width += amount;
+        self.height += amount;
+    }
+}
+
+
+fn main() {
+
+    let mut rect1 = Rectangle::new(10,20);
+    rect1.grow(5); // +5
+    println!("+5 Ek: {} {}", rect1.width, rect1.height);
+}
+```
+
+**Çıktı:**
+
+```
++5 Ek: 15x25
+```
+
+> + `&mut self` → nesne üzerinde değişiklik yapma izni
+
+| Yazım         | Anlam                          | Ne için kullanılır?               |
+| ------------- | ------------------------------ | --------------------------------- |
+| **Self**      | Türün kendisi                  | `Rectangle` oluşturmak, döndürmek |
+| **&self**     | Nesnenin borçlanmış hali       | Okuma işlemleri                   |
+| **&mut self** | Nesnenin değiştirilebilir hali | Alan değiştirme                   |
+| **self**      | Nesnenin sahipliğini alan hali | Nesneyi tüketen işlemler          |
+
++ Metotları fonksiyonlar yerine kullanmanın temel nedeni — metot söz dizimini sağlamanın ve her metodun imzasında self türünü tekrar tekrar yazmak zorunda olmamanın yanı sıra — **düzen sağlamaktır**.
+	1. Bu yüzden `Rectangle` türünü **tekrar tekrar yazmak zorunda kalmazsın**.
+	2. **Her defasında `&Rectangle` yazmak yerine sadece `&self` yazarsın.**
+
+> [!NOTE]
+> ##### Her metodun imzasında self türünü tekrar tekrar yazmak zorunda olmamak
+> + Eğer metot değil de **fonksiyon** yazarak devam etseydin, her fonksiyonun imzasında Rectangle türünü yazmak zorundaydın:
+> ```rust
+> fn area(rect: &Rectangle) -> u32
+> fn width(rect: &Rectangle) -> u32
+> fn height(rect: &Rectangle) -> u32
+> fn can_hold(rect1: &Rectangle, rect2: &Rectangle) -> bool
+> ```
+> + Her defasında **&Rectangle** yazmak zorundaydın.
+> + Ama **metot** kullandığında:
+> ```rust
+> impl Rectangle {
+ >   fn area(&self) -> u32
+>    fn width(&self) -> u32
+>    fn height(&self) -> u32
+>    fn can_hold(&self, other: &Rectangle) -> bool
+>}
+> ```
+> + Burada
+> 	- `self` → zaten Rectangle türüdür (Self)
+> 	- `&self` → `&Rectangle` yazmanın kısa hali
+> + Bu yüzden `Rectangle` türünü **tekrar tekrar yazmak zorunda kalmazsın**.
+
+---
+
+> [!NOTE]
+> #### `->` operatörü nerede? Rust’ta neden yok?
+> + C ve C++’ta, metot çağırmak için iki farklı operatör kullanılır:
+> 	- **nesnenin kendisi üzerinde** bir metot çağırıyorsanız `.` kullanırsınız,
+> 	- **nesnenin bir pointer’ı üzerinde** metot çağırıyorsanız ve önce pointer’ı dereference etmeniz gerekiyorsa `->` kullanırsınız.
+> + Başka bir deyişle, eğer `object` bir pointer ise, **`object->something()` ifadesi, `(*object).something()` ifadesine benzer.**
+> + Rust’ta `->` operatörüne eşdeğer bir şey yoktur; onun yerine Rust’ta **otomatik referans ve dereference** (automatic referencing and dereferencing) adı verilen bir özellik vardır.
+> + Metot çağırmak(`->` benzer şekilde), Rust’ta bu davranışın görüldüğü nadir durumlardan biridir.
+> + Here’s how it works: when you call a method with `object.something()`, Rust automatically adds in `&`, `&mut`, or `*` so `object` matches the signature of the method. Tıpkı aşağıdaki kod gibi;
+> ```rust
+> #![allow(unused)]
+> fn main() {
+> #[derive(Debug,Copy,Clone)]
+> struct Point {
+>    x: f64,
+>    y: f64,
+>}
+>
+> impl Point {
+>   fn distance(&self, other: &Point) -> f64 {
+>       let x_squared = f64::powi(other.x - self.x, 2);
+>       let y_squared = f64::powi(other.y - self.y, 2);
+>
+>       f64::sqrt(x_squared + y_squared)
+>   }
+>}
+>let p1 = Point { x: 0.0, y: 0.0 };
+>let p2 = Point { x: 5.0, y: 6.5 };
+>p1.distance(&p2);  // 1. Yöntem
+>(&p1).distance(&p2); // 2. Yöntem
+>} 
+> ```
+> + İlk yöntem çok daha temiz görünüyor.
+> + Bu otomatik referans ekleme davranışı, metodların net bir alıcıya (receiver) sahip olmasından dolayı çalışır—yani `self` tipi.
+> + Bir metodun alıcısı ve adı bilindiğinde, Rust metodun **okuma yaptığını (`&self`)**, **değişiklik yaptığını (`&mut self`)** veya **sahipliği devraldığını (`self`)** kesin olarak belirleyebilir.
+> + Rust’ın metod alıcıları için `borrowing`’i (ödünç alma) otomatik yapması, `ownership` (sahiplik) kavramını pratikte kullanışlı ve rahat hale getiren önemli bir etkendir.
+
+
+> [!NOTE]
+> #### Rust’ta `->` operatörü yok çünkü
+> + Rust, **pointer ve referansları otomatik olarak dereference eder**. Yani, C/C++’taki gibi elle `*` veya `->` yazmana gerek yoktur.
+> #### Örnek: C++
+> ```Cpp
+> struct Rectangle {
+>    int width;
+>    int height;
+>    int area() { return width * height; }
+>};
+>
+>Rectangle rect;
+>Rectangle* ptr = &rect;
+>
+>rect.area();     // . ile çağır
+>ptr->area();     // -> ile pointer üzerinden çağır
+>(*ptr).area();   // veya dereference ederek çağırabilirsin
+> ```
+> #### Aynı Örnek Rust
+> ```rust
+> struct Rectangle {
+>    width: u32,
+>    height: u32,
+>}
+>
+>impl Rectangle {
+>    fn area(&self) -> u32 {
+>        self.width * self.height
+>    }
+>}
+>
+>fn main() {
+>    let rect = Rectangle { width: 10, height: 20 };
+>    let rect_ref = &rect;
+>
+>    println!("{}", rect.area());      // doğrudan nesne
+>    println!("{}", rect_ref.area());  // referans üzerinden çağrı, Rust otomatik deref yapar
+>}
+>```
+>+ `rect_ref.area()` çağrısı **`&rect`** bir referans olmasına rağmen sorunsuz çalışır.
+>+ Rust otomatik olarak `*rect_ref` yapar ve metodu çağırır.
+>+ Bu yüzden **C++’taki `->` operatörüne gerek yoktur.**
+
+| Dil   | Pointer üzerinden metot çağırma        |
+| ----- | -------------------------------------- |
+| C/C++ | `ptr->method()` veya `(*ptr).method()` |
+| Rust  | `&instance.method()` (otomatik deref)  |
+#### 5.3.1.4 Rust otomatik olarak `&`, `&mut` veya `*` ekler:
+
++ Rust’ta bir metot bir **referans**, **mutable referans** veya **owned değer** alacak şekilde tanımlanabilir:
+
+```rust
+struct MyStruct {
+    value: i32,
+}
+
+impl MyStruct {
+    // self referansı immutable
+    fn read(&self) -> i32 {
+        self.value
+    }
+
+    // self referansı mutable
+    fn increment(&mut self) {
+        self.value += 1;
+    }
+
+    // self'i sahiplenir (move)
+    fn consume(self) -> i32 {
+        self.value
+    }
+}
+```
+
++ Metot çağırırken Rust sizin yerinize uygun işareti ekler:
+
+```rust
+fn main() {
+    let mut obj = MyStruct { value: 10 };
+
+    // read() metodu &self alıyor, Rust otomatik olarak &obj koyar
+    println!("{}", obj.read()); // -> Rust bunu obj.read() yerine (&obj).read() gibi yorumlar
+
+    // increment() metodu &mut self alıyor, Rust otomatik olarak &mut obj koyar
+    obj.increment(); // -> Rust bunu (&mut obj).increment() gibi yorumlar
+
+    // consume() metodu self alıyor, yani obj'in sahipliğini alır
+    let v = obj.consume(); // -> obj artık kullanılamaz, çünkü sahipliği consume() aldı
+}
+```
+
+> + **Özet:** Rust, metot çağrılarında sizin yerinize `&`, `&mut` veya `*` ekleyerek çağırdığınız objeyi metot imzasına uydurur. Yani sizin `&obj` ya da `&mut obj` yazmanız çoğu zaman gerekmez.
+### 5.3.2 Daha Fazla Parametreler ile Metotlar:
+
++ Metotları kullanma pratiği yapalım: Rectangle yapısında ikinci bir metot daha implemente edeceğiz.
++ Bu sefer `Rectangle`’ın bir örneğinin(`instance`), başka bir `Rectangle` örneğini(`instance`) alıp, ikinci `Rectangle`’ın tamamen `self` (birinci `Rectangle`) içine sığıp sığamayacağını kontrol etmesini istiyoruz.
++ Eğer sığıyorsa `true`, aksi halde `false` döndürmeli.
++ Yani `can_hold` metodunu tanımladıktan sonra, `Listing 5-14`’te gösterilen programı yazabilmek istiyoruz.
+
+**Dosya Adı:`src/main.rs`**
+
+```rust
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+    let rect2 = Rectangle {
+        width: 10,
+        height: 40,
+    };
+    let rect3 = Rectangle {
+        width: 60,
+        height: 45,
+    };
+
+    println!("Can rect1 hold rect2? {}", rect1.can_hold(&rect2));
+    println!("Can rect1 hold rect3? {}", rect1.can_hold(&rect3));
+}
+```
+
+> + `Listing 5-14`: Henüz yazılmamış olan `can_hold` metodunu kullanmak
+
++ Beklenen çıktı aşağıdaki gibi olacaktır; çünkü `rect2`’nin her iki boyutu da `rect1`’in boyutlarından küçüktür, ancak rect3 rect1’den daha geniştir.
+
+```shell
+Can rect1 hold rect2? true
+Can rect1 hold rect3? false
+```
+
++ Bir metot tanımlamak istediğimizi biliyoruz, bu yüzden `impl Rectangle` bloğu içinde olacak.
++ Metot adı `can_hold` olacak ve parametre olarak başka bir `Rectangle`’ın değiştirilemez bir ödünç(`immutable borrow`) alacak.
++ Parametrenin türünün(type) ne olacağını, metodu çağıran koda bakarak anlayabiliriz: `rect1.can_hold(&rect2)` ifadesi, `Rectangle` örneği olan `rect2`’nin değiştirilemez bir ödünç(`immutable borrow`) alımını (`&rect2`) geçiriyor.
++ Bu mantıklıdır çünkü `rect2`’yi sadece okumamız gerekiyor (eğer yazmamız gerekseydi değiştirilebilir bir borç—`mutable borrow`—gerekirdi) ve `can_hold` metodunu çağırdıktan sonra `main` fonksiyonunun `rect2`’nin sahipliğini elinde tutmasını istiyoruz, böylece onu tekrar kullanabiliriz.
+	- Yani `rect2`, `can_hold` metoduna **geçici olarak ödünç verilsin**,  ama sonra **hala main fonksiyonunda kullanılabilir kalsın**.
++ `can_hold` metodunun dönüş değeri `Boolean (bool)` olacak ve `implementasyonu`, `self`’in genişlik ve yüksekliğinin, diğer `Rectangle`’ın genişlik ve yüksekliğinden büyük olup olmadığını kontrol edecek.
++ Şimdi `Listing 5-13`’teki `impl` bloğuna yeni `can_hold` metodunu ekleyelim; bu, `Listing 5-15`’te gösterilmiştir
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+    let rect2 = Rectangle {
+        width: 10,
+        height: 40,
+    };
+    let rect3 = Rectangle {
+        width: 60,
+        height: 45,
+    };
+
+    println!("Can rect1 hold rect2? {}", rect1.can_hold(&rect2));
+    println!("Can rect1 hold rect3? {}", rect1.can_hold(&rect3));
+}
+```
+
+> + `Listing 5-15`: Parametre olarak başka bir `Rectangle` örneği(`Rectangle instance`) alan `can_hold` metodunun `Rectangle` üzerinde uygulanması
+
+```shell
+Can rect1 hold rect2? true  
+Can rect1 hold rect3? false
+```
+
+> + Bu kodu` Listing 5-14’`teki main fonksiyonuyla birlikte çalıştırdığımızda istediğimiz çıktıyı elde ederiz.
+> + Metotlar, self parametresinden sonra imzaya eklediğimiz birden fazla parametre alabilir ve bu parametreler, fonksiyonlardaki parametreler gibi çalışır.
+> 	- **Rust'ta bir metot (method) tanımlarken, ilk parametre her zaman `self` olur.**  
+> 	- Bu, metodun **hangi nesne üzerinde çalıştığını** gösterir.
+> 	- Ama **`self`'ten sonra** metota **istediğin kadar ek parametre** yazabilirsin.
+> 	- Ve bu parametreler, normal bir fonksiyondaki parametreler gibi çalışır:
+
+
+> [!NOTE]
+> #### İmza(Signature) nedir?
+> + Rust, C, C++, Java, Python gibi birçok dilde bir fonksiyonun veya metodun:
+> 	- adı
+> 	- parametre listesi
+> 	- parametre tipleri
+> 	- dönüş tipi
+> + gibi tanımlayıcı özelliklerinin tamamına "signature" yani imza denir.
+> + Yani Bir fonksiyonun/metodun **nasıl çağrılacağını belirleyen bölüm demektir.**
+> ```rust
+> fn can_hold(&self, other: &Rectangle) -> bool
+> ```
+> + Buradaki satır komple **metodun imzasıdır.**
+> 
+> **İçerisinde:**
+> + metodun adı: `can_hold`
+> + parametreler:
+> 	- `&self`
+> 	- `other: &Rectangle`
+> + dönüş tipi: `bool`
+> + Bunların hepsi bir arada → **imza (signature)**
+> #### Neden "imza" deniyor?
+> + Çünkü bir fonksiyonu tanımlayan şey budur.
+> + Bir insanı nasıl imzasıyla tanıyorsan, bir fonksiyonu da "signature" yani imzasıyla tanırsın.
+> + Derleyici de fonksiyonları bu imza üzerinden ayırt eder.
+
+### 5.3.3. Associated Fonksiyonlar:
+
++ Bir `impl` bloğu içinde tanımlanan tüm fonksiyonlara, `impl` anahtar sözcüğünden sonra adı yazılan türle ilişkili oldukları için ‘ilişkili fonksiyonlar’ (`associated functions`) denir.
++ Bu fonksiyonların ilk parametreleri `self` olmak zorunda değildir (dolayısıyla metot değildirler); çünkü çalışmak için o türe ait bir örneğe ihtiyaç duymazlar.
++ Daha önce buna bir örnek kullandık: `String` türü üzerinde tanımlanmış olan `String::from` fonksiyonu.
++ Metot olmayan ilişkili fonksiyonlar (`associated functions`) genellikle `struct`’ın yeni bir örneğini(`instance`) döndürecek `constructor` olarak kullanılır.
++ Bunlara genellikle `new` adı verilir, ancak `new` özel bir isim değildir ve dilin içine gömülü değildir.
++ Örneğin, bir ilişkili fonksiyon(`associated function`) olarak `square` adını seçebiliriz; bu fonksiyon tek bir boyut parametresi alır ve hem genişlik hem yükseklik için kullanır.
++ Böylece kare bir `Rectangle` oluşturmak, aynı değeri iki kez belirtmek zorunda kalmaktan daha kolay hale gelir
+
+**Dosya Adı:`scr/main.rs`**
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn square(size: u32) -> Self {
+        Self {
+            width: size,
+            height: size,
+        }
+    }
+}
+
+fn main() {
+    let sq = Rectangle::square(3);
+}
+```
+
+> + Fonksiyonun dönüş tipinde ve gövdesinde kullanılan `Self` anahtar kelimesi, `impl` anahtar kelimesinden sonra yazılan türün takma adıdır; bu örnekte bu tür `Rectangle`’dır.
+
+> + Bu ilişkili fonksiyonu çağırmak için struct adıyla birlikte `::` sözdizimini kullanırız; örneğin `let sq = Rectangle::square(3);`.
+> + Bu fonksiyon `struct` tarafından isim alanına (`namespace`) alınmıştır: `::` sözdizimi hem ilişkili fonksiyonlar(`associated function`) hem de modüller tarafından oluşturulan isim alanları(`namespace`) için kullanılır.
+> + **Modülleri Bölüm 7’de tartışacağız.**
+
+
+> [!NOTE]
+> + Rust’ta bir **associated function** (ilişkili fonksiyon) doğrudan bir struct’a bağlıdır. Yani:
+> 	- Fonksiyon **`global scope`**’ta değil, `struct`’ın “isim alanı” (`namespace`) içinde tanımlanır.
+> 	- Bu yüzden fonksiyonu çağırırken **struct adını** kullanmak zorundayız.
+> + `square` fonksiyonu **Rectangle struct’ının namespace’inde** yer alır.
+> + Bu nedenle çağırırken:
+> ```rust
+> let sq = Rectangle::square(3);
+> ```
+> + Sadece `square(3)` yazamayız, çünkü `global scope`’ta böyle bir fonksiyon yoktur.
+> + Rust, fonksiyonun hangi struct’a ait olduğunu **namespace aracılığıyla** bilir.
+
+
+> [!NOTE]
+> + Rust’ta `::` operatörü **bir öğenin hangi isim alanına (namespace) ait olduğunu belirtmek için kullanılır**.
+> 
+> **Associated Fonksiyonlarda**
+> ```rust
+> Rectangle::square(3)
+> ```
+> + Burada `square` fonksiyonu `Rectangle` `struct`’ına ait. `::` operatörü ile “bu fonksiyon `Rectangle` isim alanının(`Rectangle namespace`) içinde” deniyor.
+> 
+>  **Modüllerde**
+>  ```rust
+>  std::io::stdin()
+>  ```
+>  + Burada `stdin` fonksiyonu `std::io` modülünün içinde. Yani modüller de kendi isim alanlarını oluşturur ve `::` ile erişilir.
+
+
+
+### 5.3.4 Method ve Associated Fonksiyonlar:
+
++ Rust’ta **`associated function` (bağlı fonksiyon)** ve **method (metot)** birbirine benzeyen ama önemli farklara sahip iki kavramdır.
++ Bunlar `impl` blokları içinde tanımlanır ama kullanım şekilleri farklıdır.
+#### 5.3.4.1. 🟦 Associated Function (Bağlı Fonksiyon) Nedir?
+
++ **Associated function**, bir **struct**, **enum** veya **trait** ile ilişkilendirilmiş fonksiyondur ama **self parametresi almaz**.
++ Yani bir nesne üzerinde çalışmaz.
+
+
+> [!NOTE]
+> ✔ **Özellikler**
+> + `self`, `&self` veya `&mut self` ALMAZ.
+> + Genelde **yapıcı fonksiyon (constructor)** gibi kullanılır.
+> + Çağrılırken **tip adı üzerinden çağrılır**: `Type::function()`
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    // Associated function -> çünkü self almıyor
+    fn new(width: u32, height: u32) -> Rectangle {
+        Rectangle { width, height }
+    }
+}
+
+fn main() {
+    let rect = Rectangle::new(30, 50);
+}
+```
+
+> + `new()` bir associated function’dır, metot değildir.
+
+#### 5.3.4.2. 🟩 Method (Metot) Nedir?
+
++ **Method**, bir struct örneği (instance) üzerinde çalışan fonksiyondur.
++ Bu yüzden mutlaka **self**, `&self` veya `&mut self` parametresi alır.
+
+> [!NOTE]
+> ✔ Özellikler
+> + Bir **örnek** üzerinde çalışır.
+> + Çağrılırken **nokta kullanılır**: `instance.method()`
+
+```rust
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let rect = Rectangle { width: 30, height: 50 };
+    println!("Alan: {}", rect.area());
+}
+```
+
+> + `area()` bir metottur, çünkü `&self` alıyor.
+
+🟥 **Associated Function ve Method Arasındaki Fark**
+
+|Özellik|Associated Function|Method|
+|---|---|---|
+|**self alır mı?**|❌ Hayır|✔ Evet|
+|**Nereden çağrılır?**|Tip adıyla: `Type::function()`|Örnek ile: `value.method()`|
+|**Ne işe yarar?**|Genelde constructor, yardımcı fonksiyon|Nesne üzerinde işlem yapar|
+|**Instance gerekir mi?**|❌ Hayır|✔ Evet|
+#### 5.3.4.3. 🟧 Son Kıyas Örneği
+
+```rust
+impl Rectangle {
+    // associated function
+    fn square(size: u32) -> Rectangle {
+        Rectangle { width: size, height: size }
+    }
+
+    // method
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let sq = Rectangle::square(10);  // Associated function çağrısı
+    println!("{}", sq.area());       // Method çağrısı
+}
+```
+
+### 5.3.5. Birden Fazla impl Bloğu:
+
++ Her struct’ın birden fazla `impl` bloğuna sahip olmasına izin verilir.
++ `Liste 5-15`, her metodu kendi `impl` bloğunda bulunduran `Liste 5-16`'da gösterilen koda eşdeğerdir.
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+    let rect2 = Rectangle {
+        width: 10,
+        height: 40,
+    };
+    let rect3 = Rectangle {
+        width: 60,
+        height: 45,
+    };
+
+    println!("Can rect1 hold rect2? {}", rect1.can_hold(&rect2));
+    println!("Can rect1 hold rect3? {}", rect1.can_hold(&rect3));
+}
+```
+
+> + `Liste 5-16`: Birden fazla `impl` bloğu kullanarak `Liste 5-15`'i yeniden yazma
+
+> + Buradaki metotları birden fazla `impl` bloğuna ayırmak için bir sebep yok, ancak bu geçerli bir sözdizimidir. 
+> + Birden fazla `impl` bloğunun işe yaradığı bir durumu, genel tipler (`generics`) ve `trait`’leri ele aldığımız **10. Bölümde** göreceğiz.
+
+#### 5.3.6. Özet:
+
++ Struct’lar, alanınıza (problem alanınıza - domain) uygun, anlamlı özel türler oluşturmanıza olanak tanır.
++ Struct kullanarak birbirleriyle ilişkili veri parçalarını bir arada tutabilir ve her parçaya bir isim vererek kodunuzu daha anlaşılır hale getirebilirsiniz.
++ `impl` bloklarında, türünüzle ilişkili fonksiyonlar tanımlayabilirsiniz;
++ metotlar ise struct örneklerinin(`instance`) nasıl davranacağını belirlemenizi sağlayan bir tür ilişkili fonksiyondu.
++ Ancak özel türler(`custom types`) oluşturmanın tek yolu struct’lar değildir; alet çantamıza(`toolbox`) bir başka araç eklemek için şimdi Rust’ın `enum` özelliğine bakalım.
+
+# 6. Enum’lar ve Desen Eşleme (Pattern Matching):
+
+
+
+
 # Packages, Crates ve Modules:
 
 ## A. Paketler ve Crates:
