@@ -2770,7 +2770,634 @@ fn main() {
 
 # 6. Enum’lar ve Desen Eşleme (Pattern Matching):
 
++ Bu bölümde, **enumeration**'ları (numaralandırmalar) inceleyeceğiz, kısaca **enum**'lar olarak adlandırılırlar.
++ Enum’lar, bir türün sahip olabileceği olası varyantları sıralayarak bir tür tanımlamanıza olanak tanır.
++ Önce bir enum tanımlayıp kullanarak enum’ların nasıl hem anlam hem de veri içerebildiğini göstereceğiz.
+	- Rust enum’ları sadece bir isimden ibaret değildir; bir varyantın içinde ekstra veri tutabilir ve böylece hem **ne** olduğunu (anlam), hem de **ilgili bilgiyi** (veri) tek bir yapıda taşıyabilir.
++ Ardından, bir değerin ya bir şey olabileceğini ya da hiçbir şey olmayabileceğini ifade eden, Option adı verilen özellikle kullanışlı bir enum’u inceleyeceğiz.
++ Daha sonra, `match` ifadesindeki **pattern matching** (desen eşleme) özelliğinin, bir `enum`'un farklı değerleri için farklı kodlar çalıştırmayı nasıl kolaylaştırdığına bakacağız.
++ Son olarak, `if let` yapısının kodunuzdaki enum'ları yönetmek için mevcut olan başka bir kullanışlı ve özlü ifade biçimi olduğunu ele alacağız.
 
+## 6.1. Bir `enum` tanımlama:
+
++  Struct’lar, bir Rectangle’ın genişliği ve yüksekliği gibi birbiriyle ilişkili alanları ve verileri bir araya getirmenizi sağlarken, enum’lar bir değerin belirli olası değerlerden biri olduğunu ifade etmenize olanak tanır.
++ **Örneğin, Rectangle’ın Circle (daire) ve Triangle (üçgen) gibi çeşitli şekillerden biri olduğunu söylemek isteyebiliriz. Bunu yapmak için Rust, bu olasılıkları bir enum olarak ifade etmemize izin verir.**
+	- Bu cümleyi aşağıdaki Note açıklamıştır.
+
+
+> [!NOTE]
+> #### 1. Struct ve Enum Arasındaki Fark Ne?
+> ##### 1. Struct → Birbiriyle ilişkili verileri gruplayan yapı
+> + Struct; bir nesnenin **özelliklerini** bir araya toplamak için kullanılır.
+> ```rust
+> struct Rectangle {
+>    width: u32,
+>    height: u32,
+>}
+> ```
+> 
+> Burada Rectangle, **iki parçadan oluşan bir veri paketidir**:
+> + genişlik
+> + yükseklik
+> Burada Rectangle, **iki parçadan oluşan bir veri paketidir**:
+> ---
+> ##### 2. Enum → Bir değerin birden fazla mümkün durumdan biri olduğunu söyleyen yapı
+> + Enum ise bir nesnenin **hangi türde/şekilde/durumda olduğunu** belirtmek içindir.
+> 
+> Örneğin;
+> + Rectangle
+> + Circle
+> + Triangle
+> bunların hepsi birer şekildir
+> ```rust
+> enum Shape {
+>    Rectangle,
+>    Circle,
+>    Triangle,
+>}
+> ```
+> + Yani **enum = bir değerin bir seçenekler kümesinden biri olduğu**.
+
++ Kodla ifade etmek isteyebileceğimiz bir duruma bakalım ve bu durumda neden `enum`’ların yararlı ve `struct`’lara göre daha uygun olduğunu görelim.
++ Diyelim ki IP adresleriyle çalışmamız gerekiyor. Günümüzde IP adresleri için iki ana standart kullanılıyor: sürüm dört ve sürüm altı.
++ Programımızın karşılaşacağı bir IP adresi için tek olasılıklar bunlar olduğundan, tüm olası varyantları sıralayabiliriz; numaralandırmanın adı da buradan gelir.
+	- Yani, Programımızın karşılaşabileceği IP adresleri yalnızca bu iki olasılıktan oluştuğu için, tüm olası varyantları tek tek sıralayabiliriz; işte `enumeration` (enumerasyon) adı da buradan gelir.
++ Her IP adresi ya sürüm dört ya da sürüm altı olabilir, ancak aynı anda ikisi birden olamaz.
++ IP adreslerinin bu özelliği, enum veri yapısını uygun hâle getirir çünkü bir enum değeri yalnızca kendi varyantlarından biri olabilir.
++ Hem sürüm dört hem de sürüm altı adresler temelde birer IP adresidir; bu nedenle, kod herhangi bir IP adresi türü için geçerli durumu ele alırken, bunlar aynı tür olarak değerlendirilmelidir.
+
+
+
+> [!NOTE]
+> #### 2. Struct ve Enum Arasındaki Fark Ne?
+> + IP adreslerinin iki türü vardır:
+> 	- IPv4
+> 	- IPv6
+> + Bir IP adresi **aynı anda ikisi birden olamaz** — ya IPv4’tür ya da IPv6.
+> 
+> Bu özellik tam olarak enum’ların çalışma şekline uyar:
+> - Bir enum değeri **bir seçenekler kümesinden sadece bir tanesi** olabilir.
+> 
+> Bu yüzden Rust’ta IP adreslerini şöyle bir enum ile ifade etmek **doğru ve mantıklı** olur:
+> ```rust
+> enum IpAddrKind {
+>    V4,
+>    V6,
+>}
+> ```
+> ##### Peki neden struct değil?
+> + Struct birden fazla veriyi aynı anda tutmak içindir.
+> + Ama burada IP adresi **aynı anda hem IPv4 hem IPv6 olamaz**, dolayısıyla struct doğru model olmaz.
+> + Enum ise **“bu seçeneklerden biridir”** demek için tasarlanmıştır.
+
++ Bu kavramı kodda ifade etmek için bir `IpAddrKind enum`’u tanımlayıp bir IP adresinin alabileceği olası türleri — V4 ve V6 — listeleyebiliriz. Bunlar `enum`’un varyantlarıdır.
+
+```rust
+enum IpAddrKind {               // <---
+    V4,                         // <--- 
+    V6,                         // <---
+}                               // <---
+
+fn main() {
+    let four = IpAddrKind::V4;
+    let six = IpAddrKind::V6;
+
+    route(IpAddrKind::V4);
+    route(IpAddrKind::V6);
+}
+
+fn route(ip_kind: IpAddrKind) {}
+```
+
+> + `IpAddrKind` artık kodumuzun başka yerlerinde kullanabileceğimiz özel bir veri türüdür.
+
+### 6.1.1. Enum Değerleri:
+
++ `IpAddrKind`’in iki varyantının her birinden örnekleri(`instances`) şu şekilde oluşturabiliriz:
+
+```rust
+enum IpAddrKind {
+    V4,
+    V6,
+}
+
+fn main() {
+    let four = IpAddrKind::V4;     // <---  1. instance
+    let six = IpAddrKind::V6;      // <---  2. instance
+
+    route(IpAddrKind::V4);
+    route(IpAddrKind::V6);
+}
+
+fn route(ip_kind: IpAddrKind) {}
+```
+
+
+> [!CAUTION]
+> + Enum’un varyantlarının kendi tanımlayıcısı (ismi) altında ad alanına(`namespace`) alındığını ve ikisini ayırmak için çift iki nokta (`::`) kullandığımızı unutmayın
+> 	- Yani, Enum içindeki seçenekler (varyantlar), enum’un adıyla bir ad alanı(`namespace`) içinde bulunur ve bunlara erişirken `::` kullanırız.
+> + Bu, kullanışlıdır çünkü artık `IpAddrKind::V4` ve `IpAddrKind::V6` değerlerinin her ikisi de aynı türdendir: `IpAddrKind`.
+> + Böylece, örneğin, herhangi bir `IpAddrKind` alan bir fonksiyon tanımlayabiliriz.
+
+```rust
+enum IpAddrKind {
+    V4,
+    V6,
+}
+
+fn main() {
+    let four = IpAddrKind::V4;
+    let six = IpAddrKind::V6;
+
+    route(IpAddrKind::V4);
+    route(IpAddrKind::V6);
+}
+
+fn route(ip_kind: IpAddrKind) {}   // <--- 
+```
+
++ Ve bu fonksiyonu şu iki varyanttan biriyle çağırabiliriz:
+
+```rust
+enum IpAddrKind {
+    V4,
+    V6,
+}
+
+fn main() {
+    let four = IpAddrKind::V4;
+    let six = IpAddrKind::V6;
+
+    route(IpAddrKind::V4); // 1. Varyant
+    route(IpAddrKind::V6); // 2. Varyant
+}
+
+fn route(ip_kind: IpAddrKind) {}
+```
+
+> + Enum kullanmanın daha da fazla avantajı vardır.
+> + IP adresi türümüz hakkında biraz daha düşündüğümüzde, şu anda gerçek IP adresi verisini saklayabileceğimiz(depolayabileceğimiz) bir yolumuz olmadığını fark ediyoruz; sadece hangi türde olduğunu biliyoruz.
+> + 5. bölümde yeni öğrendiğiniz yapıları (_struct_) düşündüğünüzde, bu problemi 6-1 numaralı listede gösterildiği gibi struct kullanarak çözmeye çalışmak isteyebilirsiniz.
+
+```rust
+fn main() {
+    enum IpAddrKind {
+        V4,
+        V6,
+    }
+
+    struct IpAddr {
+        kind: IpAddrKind,
+        address: String,
+    }
+
+    let home = IpAddr {
+        kind: IpAddrKind::V4,
+        address: String::from("127.0.0.1"),
+    };
+
+    let loopback = IpAddr {
+        kind: IpAddrKind::V6,
+        address: String::from("::1"),
+    };
+}
+```
+
+> + `Liste 6-1:` Bir IP adresinin verisini ve `IpAddrKind` varyantını bir struct kullanarak saklamak
+
+> Burada iki alanı olan bir **IpAddr** struct’ı tanımladık:
+> + **kind** alanı, daha önce tanımladığımız **IpAddrKind** enum türündedir.
+> + **address** alanı ise **String** türündedir.
+> 
+> Bu struct’tan iki örnek oluşturduk.
+> + İlk örnek **`home`**’dur ve **`IpAddrKind::V4`** değerini `kind` olarak taşır; buna karşılık gelen adres verisi **`"127.0.0.1"`**’dir.
+> + İkinci örnek **loopback**’tir. Bu örnekte `kind` değeri olarak `enum`’ın diğer varyantı olan **V6** kullanılmıştır ve buna karşılık gelen adres verisi **"::1"** şeklindedir.
+> + Bu şekilde, bir struct kullanarak **IP adresinin türünü** ve **adres değerini** bir arada tutmuş olduk; yani artık tür (V4 veya V6) ile adres verisi birlikte saklanıyor.
+
++ Ancak aynı kavramı yalnızca bir **`enum`** kullanarak ifade etmek çok daha sade bir yapıdır:
+	- Bir `struct` içinde `enum` kullanmak yerine, veriyi doğrudan `enum` varyantlarının içine koyabiliriz.
+	- **`IpAddr`** `enum`’ının bu yeni tanımı, hem **`V4`** hem de **`V6`** varyantlarının kendilerine bağlı birer **`String`** değeri taşıyacağını belirtmektedir.
+
+```rust
+fn main() {
+    enum IpAddr {
+        V4(String),
+        V6(String),
+    }
+
+    let home = IpAddr::V4(String::from("127.0.0.1"));
+
+    let loopback = IpAddr::V6(String::from("::1"));
+}
+```
+
+> + Verileri her bir `enum` varyantına doğrudan ekliyoruz, bu yüzden ekstra bir `struct`’a ihtiyaç kalmıyor.
+> + Ayrıca burada `enum`’ların nasıl çalıştığıyla ilgili başka bir detayı da görmek daha kolay: tanımladığımız her enum varyantının adı, aynı zamanda `enum`’ın bir örneğini oluşturan bir fonksiyon hâline gelir.
+> + Yani, `IpAddr::V4()` bir `String` argümanı alan ve `IpAddr` türünün bir örneğini döndüren bir fonksiyon çağrısıdır.
+> + **Bu kurucu fonksiyonu (`constructor`) `enum`’ı tanımladığımız anda otomatik olarak elde ederiz.**
+> 	- Yani, Enum'u tanımlamamızın sonucunda bu constructor fonksiyonunu otomatik olarak elde ederiz.
+
+
+
+> [!NOTE]
+> #### 📌 Enum Varyantları Nasıl Fonksiyon Oluyor?
+> Aşağıdaki enum’ı ele alalım:
+> ```rust
+> enum IpAddr {
+>    V4(String),
+>    V6(String),
+>}
+> ```
+> Burada
+> + `V4` **bir fonksiyon gibi davranır**.
+> + `V6` **bir fonksiyon gibi davranır**.
+> 
+> Rust derleyicisi, sen bu enum’ı tanımladığın anda otomatik olarak şu imzaları üretmiş olur:
+> ```rust
+> fn V4(arg: String) -> IpAddr
+> fn V6(arg: String) -> IpAddr
+> ```
+> 
+> Tabii bunlar `IpAddr` ad alanı (namespace) altındadır, yani tam hâli:
+> ```rust
+> IpAddr::V4(String) -> IpAddr
+> IpAddr::V6(String) -> IpAddr
+> ```
+> ---
+> #### Örnek Kullanım:
+> ```rust
+> fn main() {
+>    let home = IpAddr::V4(String::from("127.0.0.1"));
+>    let loopback = IpAddr::V6(String::from("::1"));
+>
+>    println!("IPv4: {:?}", home);
+>    println!("IPv6: {:?}", loopback);
+>}
+> ```
+> 
+> Burada olan
+> + `IpAddr::V4("127.0.0.1".to_string())`
+> 	→ bir **fonksiyon çağrısıdır**, ve `IpAddr::V4` varyantını içeren bir `IpAddr` döndürür.
+> + `IpAddr::V6("::1".to_string())`
+> 	→ yine bir **fonksiyon çağrısıdır**, ve `IpAddr` döndürür.
+
++ `Enum` kullanmanın, `struct` kullanmaya göre başka bir avantajı daha vardır: her bir varyant farklı türlerde ve farklı miktarlarda veri içerebilir. 
++ Örneğin, IPv4 adresleri her zaman 0 ile 255 arasında değer alan dört sayısal bileşenden oluşur. 
++ IPv4 adreslerini dört adet `u8` değeri olarak saklamak, ancak IPv6 adreslerini tek bir `String` olarak ifade etmek isteseydik, bunu bir `struct` ile yapamazdık. 
++ `Enum`’lar ise bu durumu kolayca çözebilir:
+
+```rust
+fn main() {
+    enum IpAddr {
+        V4(u8, u8, u8, u8),
+        V6(String),
+    }
+
+    let home = IpAddr::V4(127, 0, 0, 1);
+
+    let loopback = IpAddr::V6(String::from("::1"));
+}
+```
+
+> + Dördüncü ve altıncı versiyon IP adreslerini saklamak için veri yapıları tanımlamanın birkaç farklı yolunu gösterdik.
+> + Ancak görünen o ki, IP adreslerini saklamak ve hangi türden olduklarını kodlamak o kadar yaygın bir ihtiyaç ki, [standart kütüphanede kullanabileceğimiz hazır bir tanım var!](https://doc.rust-lang.org/std/net/enum.IpAddr.html)
+> + Gelin standart kütüphanenin `IpAddr`'ı nasıl tanımladığına bakalım: bizim tanımlayıp kullandığımız `enum` ve varyantların tıpatıp aynısına sahip, ancak adres verisini varyantların içine, her varyant için farklı şekilde tanımlanmış iki ayrı `struct` biçiminde gömüyor:
+
+```rust
+#![allow(unused)]
+fn main() {
+struct Ipv4Addr {
+    // --snip--
+}
+
+struct Ipv6Addr {
+    // --snip--
+}
+
+enum IpAddr {
+    V4(Ipv4Addr),
+    V6(Ipv6Addr),
+}
+}
+```
+
+> + Bu kod, bir `enum` varyantının içine her türlü veriyi koyabileceğinizi gösteriyor: örneğin `string`'ler, sayısal tipler veya `struct`'lar. 
+> + Hatta başka bir `enum` bile ekleyebilirsiniz! Ayrıca, standart kütüphane tipleri çoğu zaman sizin aklınıza gelebilecek çözümlerden çok daha karmaşık değildir.
+
+
+> [!CAUTION]
+> + Standart kütüphane `IpAddr` için bir tanım içerse bile, standart kütüphanenin tanımını kendi kapsamımıza(`scope`) dahil etmediğimiz için çakışma olmadan kendi tanımımızı(`scope`) oluşturup kullanabileceğimizi unutmayın. 
+> + Türleri kapsama(`scope`) dahil etme konusunu 7. Bölüm'de daha ayrıntılı ele alacağız.
+
++ `Liste 6-2`'deki başka bir `enum` örneğine bakalım: bu örnekte varyantların içine gömülmüş çok çeşitli tipler bulunuyor.
+
+```rust
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+fn main() {}
+```
+
+> Liste 6-2: Varyantlarının her biri farklı miktarda ve tipte değer saklayan bir `Message` `enum`'u
+
+> Bu `enum`'un farklı tiplere sahip dört varyantı var:
+> + `Quit`: Kendisiyle ilişkili hiçbir veri yok
+> + `Move`: Tıpkı bir `struct` gibi isimlendirilmiş alanlara sahip
+> + `Write`: Tek bir `String` içeriyor.
+> + `ChangeColor`: Üç adet `i32` değeri içeriyor
+
++ `Liste 6-2`'deki gibi varyantlara sahip bir `enum` tanımlamak, farklı türde `struct` tanımlamaya benzer; tek fark `enum`'un `struct` anahtar kelimesini kullanmaması ve tüm varyantların `Message` tipi altında bir arada gruplanmış olmasıdır. 
++ Aşağıdaki `struct`'lar, önceki `enum` varyantlarının tuttuğu verilerin aynısını tutabilir:
+
+```rust
+struct QuitMessage; // unit struct
+struct MoveMessage {
+    x: i32,
+    y: i32,
+}
+struct WriteMessage(String); // tuple struct
+struct ChangeColorMessage(i32, i32, i32); // tuple struct
+
+fn main() {}
+```
+
++ Ancak her biri kendi tipine sahip farklı `struct`'lar kullansaydık, `Liste 6-2`'de tanımlanan ve tek bir tip olan `Message` `enum`'u ile yapabildiğimiz kadar kolay bir şekilde bu mesaj türlerinden herhangi birini alan bir fonksiyon tanımlayamazdık.
+	- Yani `enum`'un avantajı: farklı veri yapılarını tek bir tip altında toplayarak, hepsini aynı fonksiyona parametre olarak geçirebilmeni sağlaması.
+
++ `Enum`'lar ve `struct`'lar arasında bir benzerlik daha var: tıpkı `impl` kullanarak `struct`'lar üzerinde metodlar tanımlayabildiğimiz gibi, `enum`'lar üzerinde de metodlar tanımlayabiliriz.
+
+```rust
+fn main() {
+    enum Message {
+        Quit,
+        Move { x: i32, y: i32 },
+        Write(String),
+        ChangeColor(i32, i32, i32),
+    }
+
+    impl Message {
+        fn call(&self) {
+            // method body would be defined here
+        }
+    }
+
+    let m = Message::Write(String::from("hello"));
+    m.call();
+}
+```
+
+> + Metodun gövdesi, metodu çağırdığımız değeri almak için `self`'i kullanacaktır.
+> + Bu örnekte, `Message::Write(String::from("hello"))` değerine sahip `m` adında bir değişken oluşturduk ve `m.call()` çalıştığında `call` metodunun gövdesindeki `self` işte bu değer olacaktır.
+> + Standart kütüphanede çok yaygın ve kullanışlı olan başka bir `enum`'a bakalım: `Option`.
+
+### 6.1.2. `Option` Enum'u ve Null Değerlere Göre Avantajları:
+
++ Bu bölüm, standart kütüphane tarafından tanımlanan başka bir `enum` olan `Option`'ın bir vaka çalışmasını inceler. 
++ `Option` tipi, bir değerin bir şey olabileceği veya hiçbir şey olamayacağı çok yaygın senaryoyu kodlar.
+	- Yani, _Option_ türü, bir değerin bazen bir şey olabileceği bazen ise hiç olmayabileceği çok yaygın senaryoyu ifade eder.
+
+
+> [!CAUTION]
+> + Örneğin, boş olmayan bir listeden ilk elemanı isterseniz bir değer elde edersiniz. Boş bir listeden ilk elemanı isterseniz hiçbir şey elde etmezsiniz.
+> + Bu konsepti tip sistemi açısından ifade etmek, derleyicinin ele almanız gereken tüm durumları ele alıp almadığınızı kontrol edebileceği anlamına gelir; bu işlevsellik, diğer programlama dillerinde son derece yaygın olan hataları önleyebilir.
+> + ❌ **Diğer dillerde (ör: Python, Java, JS…)**
+> + Eğer liste boşsa:
+> ```text
+> NullPointerException
+> IndexError
+> undefined erişimi
+> runtime error
+> ```
+> + Hata program çalışırken patlar.
+
++ Programlama dili tasarımı genellikle hangi özellikleri dahil ettiğiniz açısından düşünülür, ancak hariç tuttuğunuz özellikler de önemlidir.
++ Rust, birçok diğer dilin sahip olduğu `null` özelliğine sahip değildir. `Null`, orada hiçbir değer olmadığı anlamına gelen bir değerdir.
++ `Null` olan dillerde, değişkenler her zaman iki durumdan birinde olabilir: `null` veya null-olmayan.
+
+
+> [!NOTE]
+> Tony Hoare, null'ın mucidi, 2009'daki "Null Referanslar: Milyar Dolarlık Hata" sunumunda şunları söyledi:
+> 
+> Buna benim milyar dolarlık hatam diyorum. O zamanlar, nesne yönelimli bir dilde referanslar için ilk kapsamlı tip sistemini tasarlıyordum. Amacım, tüm referans kullanımlarının kesinlikle güvenli olmasını sağlamak ve kontrolün derleyici tarafından otomatik olarak yapılmasını sağlamaktı. Ancak null referans ekleme cazibesine karşı koyamadım, çünkü uygulaması çok kolaydı. Bu, son kırk yılda muhtemelen milyar dolarlık acıya ve hasara neden olan sayısız hataya, güvenlik açığına ve sistem çökmesine yol açtı.
+
++ `Null` değerlerle ilgili sorun şu ki, bir `null` değeri null-olmayan(`not-null`) bir değer olarak kullanmaya çalışırsanız, bir tür hata alırsınız.
++ Bu `null` veya null-olmayan(`not-null`) özellik her yerde olduğu için, bu tür bir hatayı yapmak son derece kolaydır.
++ Ancak, `null`'ın ifade etmeye çalıştığı konsept hala faydalı bir konsepttir: `null`, bir nedenden ötürü şu anda geçersiz veya mevcut olmayan bir değerdir.
++ Sorun aslında konseptin kendisiyle değil, özel implementasyonla(uygulanmasıyla) ilgilidir.
++ Bu nedenle, Rust'ta `null`'lar yoktur, ancak bir değerin mevcut olması veya olmaması konseptini kodlayabilen bir `enum` vardır.
++ Bu enum `Option<T>`'dir ve [standart kütüphane tarafından](https://doc.rust-lang.org/std/option/enum.Option.html) şu şekilde tanımlanır:
+
+```rust
+#![allow(unused)]
+fn main() {
+enum Option<T> {
+    None,
+    Some(T),
+}
+}
+```
+
++ `Option<T>` `enum`'u o kadar kullanışlıdır ki prelude'a bile dahil edilmiştir; onu açıkça kapsama dahil etmenize gerek yoktur. Varyantları da prelude'a dahildir: `Some` ve `None`'ı doğrudan `Option::` öneki olmadan kullanabilirsiniz.`Option<T>` enum'u yine de sadece normal bir `enum`'dur ve `Some(T)` ile `None`, hala `Option<T>` tipinin varyantlarıdır.
++ Yani, `Option<T>` enum'u o kadar faydalıdır ki, Rust'ın prelude'una (otomatik olarak her programa dahil edilen standart kütüphane bölümüne) dahil edilmiştir; yani onu açıkça içe aktarmanıza (import etmenize) gerek yoktur. Varyantları da prelude'a dahildir: `Some` ve `None`'ı `Option::` öneki koymadan doğrudan kullanabilirsiniz. Bununla birlikte, `Option<T>` enum'u yine de sıradan bir enum'dur ve `Some(T)` ile `None` hala `Option<T>` tipine ait varyantlardır.
++ **Yani kısaca:** Normalde bir enum'u kullanmak için önce `use` ile içe aktarman gerekir. Ama `Option` o kadar yaygın kullanılır ki, Rust onu otomatik olarak her programa dahil ediyor. Bu yüzden direkt `Some(5)` veya `None` yazabiliyorsun, `Option::Some(5)` yazmana gerek kalmıyor.
+
+> [!NOTE]
+> #### Prelude Nedir?
+> + **Prelude**, Rust'ın her programa otomatik olarak dahil ettiği standart kütüphane öğelerinin bir koleksiyonudur.
+> + Yani, Normalde bir kütüphaneden bir şey kullanmak istediğinde önce onu içe aktarman gerekir:
+> ```rust
+> use std::collections::HashMap; // Bunu yazmak zorundasın
+>
+> fn main() {
+>    let map = HashMap::new();
+>}
+> ```
+> + Ama bazı şeyler o kadar sık kullanılır ki, Rust der ki "bunları her seferinde `use` ile yazmana gerek yok, ben otomatik olarak dahil ediyorum." 
+> + İşte bu otomatik dahil edilen şeylere **prelude** denir.
+> ##### Prelude'da neler var?
+> - `Option<T>` ve varyantları (`Some`, `None`)
+> - `Result<T, E>` ve varyantları (`Ok`, `Err`)
+> - `Vec<T>` (vektör)
+> - `String`
+> - Yaygın trait'ler (`Clone`, `Copy`, `Debug`, vb.)
+> - Makrolar (`println!`, `vec!`, vb.)
+> ```rust
+> fn main() {
+>    // Bunların hiçbirini import etmene gerek yok:
+>    let x = Some(5);        // Option prelude'da
+>    let y = None;           // None prelude'da
+>    let v = vec![1, 2, 3];  // vec! makrosu prelude'da
+>    println!("Merhaba");    // println! prelude'da
+>}
+> ```
+> + Yani **prelude = Rust'ın "bunları çok kullanacaksın, hep hazır olsun" dediği temel araç seti.**
+
++ `<T>` sözdizimi, henüz bahsetmediğimiz bir Rust özelliğidir. Bu, jenerik tip parametresidir ve jenerikleri 10. Bölüm'de daha detaylı inceleyeceğiz.
++ Şimdilik bilmeniz gereken tek şey, `<T>` ifadesinin Option enum’undaki `Some` varyantının herhangi bir türden bir adet veri tutabileceği anlamına geldiğidir.
++ Ayrıca, `T` yerine kullanılan her somut türün, ortaya çıkan `Option<T>`yi tamamen farklı bir tür yaptığıdır.
+
+> [!NOTE]
+> + Her somut tip, farklı bir `Option` tipi oluşturur:
+> ```rust
+> let x: Option<i32> = Some(5);      // Bu Option<i32> tipi
+> let y: Option<String> = Some(String::from("hey"));  // Bu Option<String> tipi
+> ```
+> + `Option<i32>` ile `Option<String>` **farklı tiplerdir**. Birbirinin yerine kullanamazsın:
+> ```rust
+> let x: Option<i32> = Some(5);
+> let y: Option<String> = x;  // HATA! Tipler uyuşmuyor
+> ```
+
++ Aşağıda sayı ve karakter türlerini tutmak için `Option` değerlerinin nasıl kullanılacağına dair örnekler bulunmaktadır.
+
+```rust
+fn main() {
+    let some_number = Some(5);
+    let some_char = Some('e');
+
+    let absent_number: Option<i32> = None;
+}
+```
+
+> + `some_number`'ın tipi `Option<i32>`'dir. `some_char`'ın tipi `Option<char>`'dır, bu da farklı bir tiptir. 
+> + Rust bu tipleri çıkarım yapabilir(Rust'ın tipi otomatik olarak anlayabilmesi demektir.) çünkü `Some` varyantının içinde bir değer belirttik. 
+> + `absent_number` için ise Rust, genel `Option` tipini belirtmemizi ister: 
+> + derleyici, sadece bir `None` değerine bakarak karşılık gelen `Some` varyantının tutacağı tipi çıkarım yapamaz. 
+> + Burada Rust'a `absent_number`'ın `Option<i32>` tipinde olmasını kastettiğimizi söylüyoruz.
+
+
+> [!NOTE]
+> **Rust'ın tipi otomatik olarak anlayabilmesi**
+> ```rust
+> let some_number = Some(5);
+> ```
+> + Burada 5 yazdığımızda Rust der ki: "5 bir `i32` sayısı, o halde `some_number`'ın tipi `Option<i32>` olmalı." Biz açıkça `: Option<i32>` yazmasak bile Rust bunu **kendisi anlar veya çıkarım yapar.**
+> 
+> **Çıkarım Yapma Durumu(tip belirtmeye gerek yok)**
+> ```rust
+> let some_number = Some(5);        // Rust: "5 gördüm, demek ki Option<i32>"
+> let some_char = Some('z');        // Rust: "'z' gördüm, demek ki Option<char>"
+> ```
+> 
+>  **Çıkarım Yapamama Durumu(tip belirtme gerekir)**
+>  ```rust
+>  let absent_number = None;  // HATA! Rust: "None görüyorum ama ne tipi?"
+>  ```
+>  + `None` içinde değer yok, bu yüzden Rust "bu `Option<i32>` mi, `Option<String>` mi, yoksa başka bir şey mi?" bilemez. Geliştiricin söylemesi gerekir:
+>  ```rust
+>  let absent_number: Option<i32> = None;  // Şimdi Rust anladı: Option<i32>
+>  ```
+
+
+> [!NOTE]
+> **Option türünü _manuel olarak_ belirleme:**
+> 
+> ```rust
+> let a: Option<i32> = Some(5);
+> let b: Option<String> = Some(String::from("hello"));
+> let c: Option<f64> = None;
+> ```
+
++ Bir `Some` değerine sahip olduğumuzda, bir değerin mevcut olduğunu ve bu değerin `Some` içinde tutulduğunu biliriz.
++ Bir `None` değerine sahip olduğumuzda, bir anlamda bu `null` ile aynı şey demektir: geçerli bir değerimiz yoktur.
++ Peki `Option<T>`'ye sahip olmak, `null`'a sahip olmaktan neden daha iyidir?
++ Kısacası, `Option<T>` ve `T` (burada `T` herhangi bir tip olabilir) farklı tipler olduğu için, derleyici bir `Option<T>` değerini kesinlikle geçerli bir değermiş gibi kullanmamıza izin vermez.
++ Örneğin, bu kod derlenmeyecektir, çünkü bir `i8`'i bir `Option<i8>`'e eklemeye çalışıyor:
+
+```rust
+fn main() {
+    let x: i8 = 5;
+    let y: Option<i8> = Some(5);
+
+    let sum = x + y;
+}
+```
+
+> Bu kodu çalıştırdığımızda aşağıdaki gibi bir hata mesajı alırız:
+
+```
+$ cargo run
+   Compiling enums v0.1.0 (file:///projects/enums)
+error[E0277]: cannot add `Option<i8>` to `i8`
+ --> src/main.rs:5:17
+  |
+5 |     let sum = x + y;
+  |                 ^ no implementation for `i8 + Option<i8>`
+  |
+  = help: the trait `Add<Option<i8>>` is not implemented for `i8`
+  = help: the following other types implement trait `Add<Rhs>`:
+            `&i8` implements `Add<i8>`
+            `&i8` implements `Add`
+            `i8` implements `Add<&i8>`
+            `i8` implements `Add`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `enums` (bin "enums") due to 1 previous error
+```
+
++ **Yoğun bir durum!** Aslında bu hata mesajı bize şunu söylüyor: Rust, bir `i8` ile bir `Option<i8>` toplamanın nasıl yapılacağını anlamıyor, çünkü bunlar **farklı türler**.
++ Rust’ta elimizde `i8` gibi bir türden bir değer varsa, derleyici her zaman geçerli (valid) bir değere sahip olduğumuzu garanti eder.
++ Bu nedenle, bu değeri kullanmadan önce “acaba null mı?” diye kontrol etmemiz gerekmez.
++ Ancak elimizde bir `Option<i8>` (veya hangi türle çalışıyorsak onun `Option`’ı) varsa, **değerin bulunmama ihtimali** vardır ve işte bu durumda derleyici, değeri kullanmadan önce bu olasılığı doğru şekilde ele almanızı zorunlu kılar.
+
+
+> [!NOTE]
+> Paragrafı **çok net bir örnekle** açıklayayım.
+> #### 📌 Option ile i8’in Farkı — Yukarıdaki Kod
+> Temel fikir:
+> - `i8` → **Her zaman bir sayı vardır.**
+> - `Option<i8>` → **Ya bir sayı vardır (`Some`), ya da hiç yoktur (`None`).**
+> - Rust, bu iki türü karıştırmaz ve karıştırmanı da engeller. Yani, `i8` ile `Option<i8>` toplayamazsın.
+> - Çünkü;
+> 	+ `x` → kesin bir sayı (i8).
+> 	+ `y` → sayı olabilir ama olmayabilir; Rust bunu **sana zorla kontrol ettiriyor.**
+> #### ✔️ Doğru kullanım:
+> ```rust
+> fn main() {
+>    let x: i8 = 5;
+>    let y: Option<i8> = Some(5);
+>
+>    let result = match y {
+>        Some(value) => x + value,
+>        None => x, // ya da başka bir işlem
+>    };
+>
+>    println!("{}", result);
+>}
+> ```
+>  + **Dikkat:** `match` anahtar kelimesi sonraki konuda anlatılacaktır.
+> #### 🔍 Ne oluyor burada?
+> - Eğer `y = Some(3)` → sonuç `5 + 5 = 10`
+> - Eğer `y = None` → sayı yok, Rust seni bunu düşünmeye zorluyor
+
++ **Başka bir deyişle,** bir `Option<T>` üzerinde çalışmadan önce onu mutlaka bir `T` türüne dönüştürmen gerekir; ancak ondan sonra `T` türüne ait işlemleri yapabilirsin.
++ Genel olarak bu, null ile ilgili en yaygın sorunlardan birini yakalamaya yardımcı olur:  **Bir şeyin null olmadığını varsaymak ama aslında null olması.**
+
+
+> [!NOTE]
+> **Cümlede anlatılmak istenen şey tam olarak şu:**
+> + Rust, seni `Option<T>` değerini önce işleyip içindeki gerçek `T` değerini _güvenli şekilde çıkarmaya_ zorluyor.
+> + Böylece diğer dillerdeki şu klasik hatayı engelliyor:
+> 	- "Ben burada değer vardır diye düşündüm ama aslında yokmuş! (`null` hatası)"
+> + Rust buna asla izin vermiyor.
+
++ Null olmayan(`not-null`) bir değeri yanlışlıkla `null` olarak varsayma riskinin ortadan kaldırılması, kodunuzda daha emin olmanızı sağlar.
++ Bir değerin **muhtemelen null olabileceğini** ifade etmek istiyorsanız, bunu açıkça belirtmeniz gerekir: yani değerin türünü `Option<T>` olarak tanımlamalısınız.
++ Sonra bu değeri kullandığınızda, derleyici sizi **değerin null olabileceği durumu açıkça ele almaya** zorlar.
++ Bir değerin türü `Option<T>` değilse, o değerin **null olmadığını güvenle varsayabilirsiniz**.
+
++ **Peki, elinizde bir `Option<T>` değeri olduğunda ve bu değer `Some` varyantındaysa, içindeki `T` değerini nasıl çıkarıp kullanabilirsiniz?**
++ `Option<T>` `enum`’unun, farklı durumlarda çok kullanışlı olabilecek **birçok metodu** vardır; bunları [belgelerinde](https://doc.rust-lang.org/std/option/enum.Option.html) inceleyebilirsiniz.
++ `Option<T>` üzerindeki metodlara hakim olmak, Rust ile yolculuğunuzda **son derece faydalı** olacaktır.
+
++ Genel olarak, bir `Option<T>` değerini kullanabilmek için, `enum`’un **her iki varyantını da ele alan** bir koda ihtiyacınız vardır.
+	- **`Some(T)`** olduğu durumda çalışacak bir koda ihtiyaç duyarsınız ve bu kod, içindeki **T değerini** kullanabilir.
+	- **`None`** olduğu durumda çalışacak farklı bir koda ihtiyaç duyarsınız ve bu durumda kullanabileceğiniz bir **T değeri yoktur**.
++ `match` ifadesi, özellikle `enum`’larla birlikte kullanıldığında, tam olarak bunu yapan bir kontrol akışı yapısıdır: Hangi `enum` varyantının kullanıldığına bağlı olarak **farklı kodların çalışmasını sağlar** ve eşleşen varyantın içindeki veriyi kullanmanıza olanak tanır.
 
 
 # Packages, Crates ve Modules:
