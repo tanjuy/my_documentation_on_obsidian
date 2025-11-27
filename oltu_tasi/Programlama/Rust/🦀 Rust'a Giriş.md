@@ -3400,6 +3400,280 @@ error: could not compile `enums` (bin "enums") due to 1 previous error
 + `match` ifadesi, özellikle `enum`’larla birlikte kullanıldığında, tam olarak bunu yapan bir kontrol akışı yapısıdır: Hangi `enum` varyantının kullanıldığına bağlı olarak **farklı kodların çalışmasını sağlar** ve eşleşen varyantın içindeki veriyi kullanmanıza olanak tanır.
 
 
+
+## 6.2. `match` Kontrol Akışı Yapısı
+
++ Rust, bir değeri çeşitli desenlerle (`pattern`) karşılaştırmanıza ve hangi desenle eşleştiğine göre kod çalıştırmanıza imkân tanıyan **son derece güçlü bir kontrol akışı yapısı** olan `match` ifadesine sahiptir.
++ Desenler; **sabit değerlerden**, **değişken isimlerinden**, **joker karakterlerden (`wildcards`)** ve daha birçok şeyden oluşabilir.
++ Bu desen çeşitlerinin tamamı ve ne işe yaradıkları **Bölüm 19'da** ayrıntılı şekilde ele alınmaktadır.
++ `match` ifadesini güçlü yapan şey, desenlerin ifade gücü ve **derleyicinin tüm olası durumların ele alındığını doğrulamasıdır**.
+
+> [!NOTE]
+> #### Match neden güçlü?
+> + Tüm enum varyantlarını **ele almanı** zorunlu kılar.
+> + Rust garantiler: "Her olasılığı kontrol etmiş misin?"
+> 
+> Bu da daha güvenli kod demektir.
+
++ Bir `match` ifadesini, **bozuk para ayırma makinesi** gibi düşünebilirsiniz:
+	- Paralar, çeşitli boyutlarda deliklerin bulunduğu bir kanaldan kayar ve her para, karşılaştığı ilk deliğe uyarak içinden düşer.
++ Aynı şekilde, bir `match` ifadesinde değerler de her deseni sırayla kontrol eder ve **değerin “uyduğu” ilk desende**, değer ilgili kod bloğuna düşer ve çalıştırma sırasında o blokta kullanılır.
++ Bozuk paralardan söz etmişken, **`match`** kullanımını göstermek için onları örnek olarak kullanalım!
++ Bilinmeyen bir ABD bozuk parasını alan ve tıpkı bozuk para sayma makinesi gibi, **bu paranın hangi tür olduğunu belirleyip değerini sent cinsinden döndüren** bir fonksiyon yazabiliriz. Bu, **`Liste 6-3`**’te gösterilmiştir.
+
+```rust
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => 1,   // return 1
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter => 25,
+    }
+}
+
+fn main() {}
+```
+
+> Liste 6-3: Bir enum ve enum'un varyantlarını desen olarak kullanan bir match ifadesi
+
+> + **`value_in_cents`** fonksiyonundaki **`match`** ifadesini parçalara ayıralım.
+> + Önce **match** anahtar kelimesini ve ardından bir ifade yazarız; bu örnekte ifade **coin** değeridir.
+> + Bu, `if` ile kullanılan koşullu ifadeye çok benziyor gibi görünür, ancak büyük bir fark var:
+> 	- **`if`** ifadesinde koşulun `Boolean (true/false)` bir değeri değerlendirilmesi gerekir,
+> 	- **ama `match` ifadesinde koşul herhangi bir tür olabilir.**
+> + Bu örnekteki `coin`'in tipi, ilk satırda tanımladığımız `Coin enum`'udur.
+
+> + Sırada **`match` kolları (arms)** vardır.  Bir kolun iki parçası bulunur: **bir desen (`pattern`)** ve **bazı kodlar**.
+> + Buradaki ilk kolun deseni **`Coin::Penny`** değeridir ve ardından, deseni çalıştırılacak koddan ayıran **`=>`** operatörü gelir.
+> 	- Bu durumda kod sadece `1` değeridir.
+> + Her bir kol, bir sonrakinden **virgül** ile ayrılır.
+
+
+> [!NOTE]
+> #### Bir match kolu (arm) nedir?
+> Bir kol iki parçadan oluşur:
+> ```rust
+> Coin::Penny => 1,
+   ^ desen       ^ kod
+> ```
+> 
+> + **Desen (pattern)**: `Coin::Penny`
+> 	→ Eğer `coin` değişkeni Penny ise…
+> + **Kod (expression/block)**: `1`
+> 	→ Bu kol seçilir ve `1` değeri return edilir.
+> 
+> Her match kolu, bir eşleştirme deseni (Penny, Nickel, Dime...) ve bu eşleşme gerçekleştiğinde çalıştırılacak koddan (1, 5, 10...) oluşur.
+
++ `Match` ifadesi çalıştığında, ortaya çıkan değer her bir kolun (`arm`’ın) deseniyle sırayla karşılaştırılır.
++ Eğer bir desen değerle eşleşirse, o desenle ilişkili kod çalıştırılır.
++ Eğer desen değerle eşleşmezse, tıpkı bir bozuk para ayıklama makinesinde olduğu gibi yürütme bir sonraki kola geçmeye devam eder.
++ İhtiyacımız olduğu kadar çok `match` kolu kullanabiliriz: 6-3 numaralı listede, `match` ifademizde dört tane kol bulunmaktadır.
++ Her kol ile ilişkili kod bir **ifadedir (`expression`)** ve eşleşen kolun ifadesinin **oluşan değeri**, tüm `match` ifadesinin döndürdüğü değer olur.
+	- `match`’in her kolundaki kod bir ifade olup, o kol eşleştiğinde o ifade çalışır ve `match`’in **sonucu olarak döner**.
+
+
+> [!NOTE]
+> Burada **ifade (expression)** kısmı **`1`**’dir, yani match kolunun sağ tarafındaki değer veya kod bloğu.
+> 
+> - `Coin::Penny` → Bu **desen (pattern)**’dir, yani eşleşme için kontrol edilen kısmı gösterir.
+> - `1` → Bu **ifade (expression)**’dir, yani eşleşme gerçekleşirse çalıştırılan ve match’in sonucu olan kısımdır.
+> ```rust
+> Coin::Penny => 1,
+> ```
+> 
+> Yani özetle:
+> + **`Coin::Penny`** → desendir (hangi duruma uyduğunu kontrol eder)
+> + **1** → ifadedir (eşleşirse döndürülecek değer)
+
++ Genellikle, `match` kolundaki kod kısa ise süslü parantez `{}` kullanmayız; tıpkı **6-3 numaralı listede** olduğu gibi, her kol sadece bir değer döndürüyorsa.
++ Eğer bir `match` kolunda **birden fazla satır kod çalıştırmak** istiyorsanız, süslü parantez kullanmanız gerekir ve bu durumda kolun sonundaki virgül isteğe bağlıdır.
++ Örneğin, aşağıdaki kod, her `Coin::Penny` ile çağrıldığında **“Lucky penny!”** yazdırır, ancak yine de bloğun son değerini, yani **1**’i döndürür.
+
+```rust
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => {
+            println!("Lucky penny!");
+            1 // return 1;
+        }
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter => 25,
+    }
+}
+
+fn main() {}
+```
+
+### 6.2.1. Değerlere Bağlanan Desenler:
+
++ `Match` kollarının bir diğer yararlı özelliği, desenle eşleşen değerlerin parçalarına bağlanabilmeleridir. Enum varyantlarından değerleri bu şekilde çıkarabiliriz.
++ Örnek olarak, enum varyantlarımızdan birini içinde veri tutacak şekilde değiştirelim. 1999'dan 2008'e kadar, Amerika Birleşik Devletleri bir yüzünde 50 eyaletin her biri için farklı tasarımlara sahip çeyreklik paralar bastı. Başka hiçbir madeni para eyalet tasarımı almadı, bu yüzden sadece çeyrekliklerin bu ekstra değeri var. Bu bilgiyi `Quarter` varyantını, içinde saklanan bir `UsState` değeri içerecek şekilde değiştirerek `enum`'umuza ekleyebiliriz; bunu Liste 6-4'te yaptık.
+
+```rust
+#[derive(Debug)] // so we can inspect the state in a minute
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+fn main() {}
+```
+
+> Liste 6-4: `Quarter` varyantının aynı zamanda bir `UsState` değeri de tuttuğu bir `Coin enum`'u
+
+
+> [!NOTE]
+> #### Örnek: ABD eyalet çeyreklik paraları
+> + 1999-2008 yılları arasında ABD, her eyalet için özel tasarımlı çeyreklik paralar basmıştı. Diyelim ki Quarter paralarının hangi eyalete ait olduğunu saklamak istiyoruz:
+> ```rust
+> #[derive(Debug)] // println! ile yazdırabilmek için
+>enum UsState {
+>    Alabama,
+>    Alaska,
+>    // ... diğer eyaletler
+>}
+>
+>enum Coin {
+>    Penny,
+>    Nickel,
+>    Dime,
+>    Quarter(UsState),  // Quarter'ın içinde eyalet bilgisi var!
+>}
+>
+>fn value_in_cents(coin: Coin) -> u8 {
+>    match coin {
+>        Coin::Penny => 1,
+>        Coin::Nickel => 5,
+>        Coin::Dime => 10,
+>        Coin::Quarter(state) => {  // state değişkenine eyalet bilgisi bağlanır
+>            println!("Bu quarter {:?} eyaletinden!", state);
+>            25
+>        }
+>    }
+>}
+>
+>fn main() {
+>    let coin = Coin::Quarter(UsState::Alaska);
+>    let value = value_in_cents(coin);
+>    println!("Değer: {} cent", value);
+>}
+>```
+>
+>**Çıktı:**
+>```
+>Bu quarter Alaska eyaletinden!
+>Değer: 25 cent
+> ```
+> #### Ne oldu burada?
+> 1. `Quarter(UsState::Alaska)` oluşturduk - içinde Alaska bilgisi var
+> 2.  `Match`'te `Coin::Quarter(state)` yazdık
+> 3.  `state` değişkeni otomatik olarak `UsState::Alaska` değerini aldı
+> 4. Artık `state`'i kullanabiliyoruz!
+
++ Arkadaşımızın tüm 50 eyalet quarters(çeyreklik) koleksiyonunu tamamlamaya çalıştığını hayal edelim. Bozukluklarımızı madeni para türüne göre ayırırken, aynı zamanda her quarter’ın üzerinde yazan eyaletin adını da söyleyelim ki eğer arkadaşımızın koleksiyonunda olmayan bir eyalet varsa, onu koleksiyonuna ekleyebilsin.
++ Bu kod için yazdığımız `match` ifadesinde, `Coin::Quarter` varyantıyla eşleşen desene `state` adında bir değişken ekliyoruz. Bir `Coin::Quarter` değeri eşleştiğinde, `state` değişkeni o quarter’ın(çeyrekliğin) temsil ettiği eyalet değerine bağlanır. Daha sonra bu `state` değişkenini ilgili kolun (arm) içindeki kodda kullanabiliriz. Aşağıdaki gibi:
+
+```rust
+#[derive(Debug)]
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter(state) => {
+            println!("State quarter from {state:?}!");
+            25
+        }
+    }
+}
+
+fn main() {
+    value_in_cents(Coin::Quarter(UsState::Alaska));
+    // Çıkısı: State quarter from Alaska!
+}
+```
+
+> + Eğer `value_in_cents(Coin::Quarter(UsState::Alaska))` çağrısını yapsaydık, `coin` değeri `Coin::Quarter(UsState::Alaska)` olurdu.
+> + Bu değeri her bir `match` koluyla karşılaştırdığımızda, `Coin::Quarter(state)` koluna gelene kadar hiçbiri eşleşmez.
+> + Bu noktada `state` değişkenine bağlanacak olan değer `UsState::Alaska` olur.
+> + Ardından bu bağlamayı `println!` ifadesinde kullanabiliriz, böylece `Quarter` için `Coin` `enum` varyantının içindeki eyalet değerini çıkarmış oluruz.
+> 	- Yani, Rust, `match` ile bir `Coin::Quarter` değerinin içindeki eyalet bilgisini çıkarıp kullanmamıza izin verir.
+
+
+> [!NOTE]
+> #### Kodda olan durum:
+> ```rust
+> enum Coin {
+>    Penny,
+>    Nickel,
+>    Dime,
+>    Quarter(UsState),
+>}
+> ```
+> + `Quarter` varyantı bir değer taşır: `UsState`.
+> + Yani bir çeyrek (Quarter) paranın hangi eyalete ait olduğunu içerir.
+> ```rust
+> Coin::Quarter(UsState::Alaska)
+> ```
+> + Bu, “Alaska eyaletine ait bir Quarter” demektir.
+> #### `match` içerisindeki şu kısım:
+> ```rust
+> Coin::Quarter(state) => {
+>    println!("State quarter from {:?}", state);
+>    25
+>}
+> ```
+> Burada `state` adlı değişken **Quarter varyantının içindeki veriye bağlanıyor**.
+> + Eğer gelen değer `Coin::Quarter(UsState::Alaska)` ise 
+> 	- → `state` değişkenine `UsState::Alaska` atanır.
+> 
+> Böylece:
+> ```rust
+> println!("State quarter from {:?}", state);
+> ```
+> + satırında artık **Quarter içindeki gerçek değere**, yani `UsState::Alaska`'ya erişmiş oluruz.
+> 
+> Rust, `match` ile bir `Coin::Quarter` değerinin içindeki eyalet bilgisini çıkarıp kullanmamıza izin verir.
+
+### 6.2.2. `Option<T>` ile Eşleştirme
+
+
 # Packages, Crates ve Modules:
 
 ## A. Paketler ve Crates:
