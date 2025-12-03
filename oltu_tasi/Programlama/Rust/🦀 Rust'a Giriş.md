@@ -3441,7 +3441,7 @@ fn value_in_cents(coin: Coin) -> u8 {
 fn main() {}
 ```
 
-> Liste 6-3: Bir enum ve enum'un varyantlarını desen olarak kullanan bir match ifadesi
+> Liste 6-3: Bir `enum` ve `enum`'un varyantlarını desen olarak kullanan bir match ifadesi
 
 > + **`value_in_cents`** fonksiyonundaki **`match`** ifadesini parçalara ayıralım.
 > + Önce **match** anahtar kelimesini ve ardından bir ifade yazarız; bu örnekte ifade **coin** değeridir.
@@ -3673,6 +3673,754 @@ fn main() {
 
 ### 6.2.2. `Option<T>` ile Eşleştirme
 
++ Önceki bölümde, `Option<T>` kullanırken `Some` durumunun içindeki `T` değerini almak istemiştik; `Option<T>`‘yi de tıpkı `Coin enum`’unda yaptığımız gibi `match` kullanarak ele alabiliriz! Madeni paraları karşılaştırmak yerine `Option<T>` varyantlarını karşılaştıracağız, ancak `match` ifadesinin çalışma şekli aynı kalır.
++ Diyelim ki bir `Option<i32>` alan bir fonksiyon yazmak istiyoruz ve eğer içinde bir değer varsa, bu değere 1 eklesin. Eğer içinde bir değer yoksa, fonksiyon `None` döndürsün ve herhangi bir işlem yapmaya kalkışmasın.
++ Bu fonksiyonu yazmak match sayesinde çok kolaydır ve 6-5 numaralı listede gösterildiği gibi görünecektir.
+
+```rust
+fn main() {
+    fn plus_one(x: Option<i32>) -> Option<i32> {
+        match x {
+            None => None,
+            Some(i) => Some(i + 1),
+        }
+    }
+
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+}
+```
+
+> Liste 6-5: `Option<i32>` üzerinde bir `match` ifadesi kullanan bir fonksiyon.
+
++ `plus_one` fonksiyonunun ilk çalışmasını daha ayrıntılı inceleyelim.
++ `plus_one(five)` çağrısını yaptığımızda, `plus_one` fonksiyonunun içindeki `x` değişkeni `Some(5)` değerine sahip olacaktır.
++ Daha sonra bunu her bir `match` koluyla karşılaştırırız:
+
+```rust
+fn main() {
+    fn plus_one(x: Option<i32>) -> Option<i32> {
+        match x {
+            None => None,     // <=======================
+            Some(i) => Some(i + 1),
+        }
+    }
+
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+}
+```
+
++ `Some(5)` değeri `None` desenine (`pattern`’ine) uymadığı için bir sonraki kola geçeriz:
+
+```rust
+fn main() {
+    fn plus_one(x: Option<i32>) -> Option<i32> {
+        match x {
+            None => None,
+            Some(i) => Some(i + 1),  // <=======================
+        }
+    }
+
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+}
+```
+
++ Peki `Some(5)`, `Some(i)` desenine uyar mı? Uyar! Aynı varyanta sahibiz.  `i` değişkeni, `Some` içindeki değere bağlanır, yani `i` değeri 5 olur.  Ardından bu kola ait kod çalıştırılır; böylece `i` değerine 1 ekleriz ve içinde toplam 6 olan yeni bir `Some` değeri oluştururuz.
++ Şimdi de `Liste 6-5`’teki `plus_one` fonksiyonunun ikinci çağrısını ele alalım; burada `x` değeri `None`’dır.  `match` ifadesine gireriz ve ilk kola göre karşılaştırma yaparız:
+
+```rust
+fn main() {
+    fn plus_one(x: Option<i32>) -> Option<i32> {
+        match x {
+            None => None,     // <=======================
+            Some(i) => Some(i + 1),
+        }
+    }
+
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+}
+```
+
++ Eşleşti!(`None` ile eşleştiğini bahis etmektedir!) Ekleyebileceğimiz bir değer olmadığı için program durur ve `=>` işaretinin sağındaki `None` değerini döndürür.
++ `Match` ile `enum`’ları birleştirmek birçok durumda faydalıdır. Rust kodunda bu deseni sıkça göreceksiniz: bir `enum` ile `match` yapılır, içindeki verilere bir değişken bağlanır ve ardından buna göre kod çalıştırılır. 
++ İlk başta biraz karmaşık gelebilir, ama alıştıktan sonra keşke tüm dillerde bu özellik olsaydı diyeceksiniz. Kullanıcılar arasında sürekli favori bir yöntemdir.
+
+### 6.2.3. `Match`’ler Tüm Olasılıkları Kapsar:
+
++ `Match` ifadesiyle ilgili ele almamız gereken bir diğer konu: kolların desenleri (`patterns`) tüm olasılıkları kapsamalıdır.
++ Aşağıdaki `plus_one` fonksiyonunun bu sürümünü ele alalım; bu sürümde bir hata var ve derlenmeyecektir:
+
+```rust
+fn main() {
+    fn plus_one(x: Option<i32>) -> Option<i32> {
+        match x {
+            Some(i) => Some(i + 1),
+        }
+    }
+
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+}
+```
+
++ None durumunu ele almadık, bu yüzden bu kod bir hataya yol açacaktır. Neyse ki, bu Rust’un yakalayabileceği bir hata. 
++ Bu kodu derlemeye çalışırsak, şu hatayı alırız:
+
+```
+$ cargo run
+   Compiling enums v0.1.0 (file:///projects/enums)
+error[E0004]: non-exhaustive patterns: `None` not covered
+ --> src/main.rs:3:15
+  |
+3 |         match x {
+  |               ^ pattern `None` not covered
+  |
+note: `Option<i32>` defined here
+ --> /rustc/4eb161250e340c8f48f66e2b929ef4a5bed7c181/library/core/src/option.rs:572:1
+ ::: /rustc/4eb161250e340c8f48f66e2b929ef4a5bed7c181/library/core/src/option.rs:576:5
+  |
+  = note: not covered
+  = note: the matched value is of type `Option<i32>`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern or an explicit pattern as shown
+  |
+4 ~             Some(i) => Some(i + 1),
+5 ~             None => todo!(),
+  |
+
+For more information about this error, try `rustc --explain E0004`.
+error: could not compile `enums` (bin "enums") due to 1 previous error
+```
+
+> + Rust, tüm olası durumları kapsamadığımızı ve hatta hangi deseni unuttuğumuzu bile bilir! 
+> + Rust’taki `match` ifadeleri kapsayıcıdır (`exhaustive`): Kodun geçerli olabilmesi için tüm olasılıkları tüketmemiz gerekir. 
+> + Özellikle `Option<T>` durumunda, Rust’ın `None` durumunu açıkça ele almayı unutmamıza izin vermemesi, elimizde bir değer olduğunu varsayıp aslında `null` olabileceği durumlara düşmemizi engeller 
+> 	- Yani, Rust seni yanlış varsayımlardan koruyor. Bir değerin her zaman var olduğunu sanmana izin vermiyor; `None` ihtimalini mutlaka düşünmeni sağlıyor.
+> + ve böylece daha önce bahsedilen milyar dolarlık hatanın ortaya çıkmasını imkânsız hâle getirir.
+
+
+### 6.2.4. `Catch-All` Desenler ve `_` Placeholder(Yer Tutucusu)
+
++ Enum’ları kullanarak yalnızca birkaç özel değer için özel işlemler yapabilir, fakat diğer tüm değerler için de varsayılan bir işlem gerçekleştirebiliriz.
++ Bir oyun geliştirdiğimizi hayal edin: Eğer zar attığınızda 3 gelirse oyuncu ilerlemez, bunun yerine yeni ve havalı bir şapka kazanır. Eğer 7 gelirse oyuncu havalı bir şapkasını kaybeder.
++ Diğer tüm değerlerde ise oyuncu zarın gösterdiği sayı kadar oyun tahtası üzerinde ilerler. Aşağıdaki `match` ifadesi bu mantığı uygular.
++ Zar sonucu rastgele bir değer yerine doğrudan sabit bir sayı olarak verilmiştir ve diğer tüm işlemler, örneğin fonksiyonlar, örnek dışında kalması için gövdesiz olarak temsil edilmiştir:
+	- Yani, Bu örnekte zar atma gerçek değil; sabit bir sayı yazıldı. Ayrıca fonksiyonların içi doldurulmadı çünkü örneğin amacı sadece `match` kullanımını göstermek.
+
+```rust
+fn main() {
+    let dice_roll = 9;
+    match dice_roll {
+        3 => add_fancy_hat(),
+        7 => remove_fancy_hat(),
+        other => move_player(other),
+    }
+
+    fn add_fancy_hat() {}
+    fn remove_fancy_hat() {}
+    fn move_player(num_spaces: u8) {}
+}
+```
+
+> + İlk iki kolda (arm) kullanılan desenler, 3 ve 7 olan literal (doğrudan yazılmış) değerlerdir. Diğer tüm olası değerleri kapsayan son kolda ise desen olarak _other_ adını verdiğimiz bir değişken kullanılır. Bu son kolda çalışan kod, bu _other_ değişkenini alıp `move_player` fonksiyonuna göndererek kullanır.
+
+> + Bu kod derlenir, çünkü her ne kadar bir `u8`’in alabileceği tüm olası değerleri tek tek yazmamış olsak da, son desen (catch-all) özel olarak listelenmeyen tüm değerlerle eşleşir. Bu _catch-all_ deseni, `match` ifadesinin kapsamlı (`exhaustive`) olma zorunluluğunu karşılar.
+
+> + Dikkat edilmelidir ki, bu _catch-all_ kolunu en sona koymak zorundayız; çünkü desenler sırayla değerlendirilir. Eğer _catch-all_ kolunu daha önce koyarsak, diğer kollar asla çalıştırılamaz. Bu nedenle, Rust eğer bir _catch-all_ kolundan sonra başka kollar eklemeye çalışırsak bize uyarı verir!
+
+
+> [!CAUTION]
+> ```rust
+> fn main() {
+>    let dice_roll = 9;
+>    match dice_roll {
+>        3 => add_fancy_hat(),
+>        7 => remove_fancy_hat(),
+>        // other => move_player(other),
+>    }
+>
+>    fn add_fancy_hat() {}
+>    fn remove_fancy_hat() {}
+>    // fn move_player(num_spaces: u8) {}
+>}
+> ```
+> + Eğer `other` kolunu kapatıp derlenirse konu daha net anlarsınız:
+> ```shell
+> cargo clippy
+> ```
+> + Çıktısı:
+> ```
+>     Checking hello-world v0.1.0 (/home/veritabani/rustDersleri/hello-world)
+>error[E0004]: non-exhaustive patterns: `i32::MIN..=2_i32`, `4_i32..=6_i32` and `8_i32..=i32::MAX` not covered
+> --> src/main.rs:6:10
+>   |
+>6 |    match dice_roll {
+>   |          ^^^^^^^^^ patterns `i32::MIN..=2_i32`, `4_i32..=6_i32` and `8_i32..=i32::MAX` not covered
+>   |
+>   = note: the matched value is of type `i32`
+>help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern, a match arm with multiple or-patterns as shown, or mul
+>tiple match arms
+>   |
+>8 ~        7 => remove_fancy_hat(),
+>9 ~        i32::MIN..=2_i32 | 4_i32..=6_i32 | 8_i32..=i32::MAX => todo!(),
+>   |
+>
+>For more information about this error, try `rustc --explain E0004`.
+>error: could not compile `hello-world` (bin "hello-world") due to 1 previous error
+> ```
+
+> + Rust’ta, bir _catch-all_ (her şeyi yakalayan) desen kullanmak istediğimizde fakat bu desende eşleşen değeri kullanmak istemediğimizde kullanabileceğimiz özel bir desen daha vardır: `_`.
+> + `_` özel bir desendir; herhangi bir değerle eşleşir ancak bu değeri bir değişkene bağlamaz.
+> + Bu, Rust’a o değeri kullanmayacağımızı söyler; bu nedenle Rust bize “kullanılmayan değişken” uyarısı vermez.
+
+> + Oyunun kurallarını değiştirelim: artık, zar atıp 3 veya 7 dışında bir şey gelirse tekrar zar atmanız gerekiyor.
+> + Artık catch-all (her şeyi yakalayan) değeri kullanmamıza gerek yok, bu yüzden other adlı değişkeni kullanmak yerine kodumuzu `_` kullanacak şekilde değiştirebiliriz:
+
+```rust
+fn main() {
+    let dice_roll = 9;
+    match dice_roll {
+        3 => add_fancy_hat(),
+        7 => remove_fancy_hat(),
+        _ => reroll(),
+    }
+
+    fn add_fancy_hat() {}
+    fn remove_fancy_hat() {}
+    fn reroll() {}
+}
+```
+
++ Bu örnek aynı zamanda kapsamlılık (`exhaustiveness`) gereksinimini de karşılar çünkü son kolda (arm) diğer tüm değerleri açıkça görmezden geliyoruz; hiçbir şeyi unutmamış olmuyoruz.
++ Son olarak, oyunun kurallarını bir kez daha değiştireceğiz; artık 3 veya 7 dışında bir şey atarsanız, sıranızda(sıra sizdeyken) başka hiçbir şey olmayacak.
++ Bunu, `_` koluna (arm) karşılık gelen kod olarak birim değeri (boş tuple türü, "[Tuple Türü](https://doc.rust-lang.org/book/ch03-02-data-types.html#the-tuple-type)" bölümünde bahsetmiştik) kullanarak ifade edebiliriz.
+
+```rust
+fn main() {
+    let dice_roll = 9;
+    match dice_roll {
+        3 => add_fancy_hat(),
+        7 => remove_fancy_hat(),
+        _ => (),
+    }
+
+    fn add_fancy_hat() {}
+    fn remove_fancy_hat() {}
+}
+```
+
+> + Burada Rust’a açıkça şunu söylemiş oluyoruz: Önceki kollarda (arm) eşleşmeyen herhangi bir değeri kullanmayacağız ve bu durumda hiçbir kod çalıştırmak istemiyoruz.
+
+> + Desenler (`patterns`) ve eşleştirme (matching) ile ilgili daha öğrenecek çok şey var; bunları [19. bölümde](https://doc.rust-lang.org/book/ch19-00-patterns.html) ele alacağız.
+> + Şimdilik, match ifadesinin biraz uzun olduğu durumlarda kullanışlı olabilen `if let` sözdizimine geçeceğiz.
+
+## 6.3. if let ve let else ile Kısa ve Öz Kontrol Akışı:
+
++ `if let` sözdizimi, `if` ve `let`'i birleştirerek daha az ayrıntılı/sözcüklü bir şekilde bir desene uyan değerleri ele almanıza, diğerlerini ise görmezden gelmenize olanak tanır.
+	- Yani, Rust’ta `if let` yapısı, belirli bir desenle eşleşen değerleri kontrol etmek ve o duruma özgü kodu çalıştırmak için kullanılır. Normalde `match` ile bütün varyantları tek tek kontrol etmeniz gerekirken, `if let` sayesinde yalnızca ilgilendiğiniz varyant için kısa ve okunaklı bir kod yazabilirsiniz. Geri kalan varyantları yok sayabilirsiniz; onları ayrıca belirtmenize gerek yok.
++ Liste 6-6’daki programı düşünün: `config_max` değişkenindeki `Option<u8>` değerine bakıyor, ancak yalnızca değer `Some` varyantı olduğunda kodu çalıştırmak istiyor.
+
+```rust
+fn main() {
+    let config_max = Some(3u8);
+    match config_max {
+        Some(max) => println!("The maximum is configured to be {max}"),
+        _ => (),
+    }
+}
+```
+
+> `Liste 6-6`: Yalnızca değer Some olduğunda kodu çalıştıran bir `match` ifadesi
+
+> + Eğer değer `Some` ise, desendeki değeri `max` değişkenine bağlayarak `Some` içindeki değeri yazdırıyoruz. `None` değeri ile ilgili herhangi bir işlem yapmak istemiyoruz.
+> + Ancak `match` ifadesini geçerli kılmak için, yalnızca bir varyantı işledikten sonra `_ => ()` eklememiz gerekiyor; bu da eklenmesi zorunlu ve can sıkıcı bir tekrar kodu oluşturuyor.
+
++ Bunun yerine, bunu **`if let`** kullanarak daha kısa bir şekilde yazabiliriz.  Aşağıdaki kod, `Liste 6-6`’daki `match` ifadesiyle aynı şekilde davranır.
+
+```rust
+fn main() {
+    let config_max = Some(3u8);
+    if let Some(max) = config_max {
+        println!("The maximum is configured to be {max}");
+    }
+}
+```
+
+**Kod Çıktııs:**
+
+```shell
+The maximum is configured to be 3
+```
+
+
+> [!CAUTION]
+> + `match config_max { ..` ile çalıştırdığımızda rust derleyicisi bize uyarı vermektedir:
+> ```shell
+> cargo clippy
+> ```
+> + Çıktısı:
+> ```
+>     Checking hello-world v0.1.0 (/home/veritabani/rustDersleri/hello-world)
+>warning: you seem to be trying to use `match` for destructuring a single pattern. Consider using `if let`
+>  --> src/main.rs:6:5
+>   |
+> 6 | /     match config_max {
+> 7 | |         Some(max) => {
+> 8 | |             println!("The maximum is configured to be {max}");
+> 9 | |         },
+>10 | |         _ => (),
+>11 | |     }
+>   | |_____^
+>   |
+>   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.91.0/index.html#single_match
+>   = note: `#[warn(clippy::single_match)]` on by default
+>help: try
+>   |
+> 6 ~     if let Some(max) = config_max {
+> 7 +         println!("The maximum is configured to be {max}");
+> 8 +     }
+>   |
+>
+>warning: `hello-world` (bin "hello-world") generated 1 warning (run `cargo clippy --fix --bin "hello-world"` to apply 1 suggestion)
+>    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.32s
+> ``` 
+
+> + **`if let` sözdizimi**, bir kalıp (`pattern`) ve bir ifadeyi (`expression`) eşittir işaretiyle ayırır.  
+> + Bu yapı, bir ifadeyi `match`’e vermek ve kalıbı da `match`’in ilk kolu (`arm`’ı) olarak kullanmakla aynı şekilde çalışır.(`liste: 6-6`)
+> + Bu durumda kalıp **`Some(max)`**’tir ve **`max`**, `Some` içindeki değere(`3u8`) bağlanır. 
+>+ Daha sonra, tıpkı `match` ifadesindeki ilgili kolda yaptığımız gibi, `if let` bloğunun içinde `max` değişkenini kullanabiliriz.
+>+ `if let` bloğundaki kod yalnızca değer kalıpla eşleştiğinde çalışır.
+
+> + **`if let` kullanmak**, daha az yazım, daha az girinti (`indentation`) ve daha az gereksiz (`boilerplate`) kod demektir.
+> + Ancak, `match` ifadesinin sağladığı _tüm olasılıkları kapsama_ (`exhaustive checking`) kontrolünü kaybedersiniz; yani herhangi bir durumu ele almayı unutmamanızı garanti eden kontrol ortadan kalkar.
+> + **`match` ve `if let` arasında seçim yapmak**, bulunduğunuz duruma göre değişir.  Daha kısa ve temiz bir sözdizimi kazanmak adına _tüm durumları kapsama kontrolünü kaybetmenin_ uygun bir değiş-tokuş olup olmadığına bağlıdır.
+	- **Hangi yapıyı kullanacağınız**, ihtiyacınıza göre değişir.  Kısalık uğruna, `match`’in sağladığı **tüm durumların ele alındığından emin olma** güvencesini bırakmaya hazır olup olmadığınıza bakmalısınız.
+
+> + **Başka bir deyişle, `if let`’i; değerin bir desene uyduğu durumda kod çalıştıran ve diğer tüm değerleri yok sayan bir `match` ifadesinin sözdizimsel şekeri (kolaylaştırılmış hali) olarak düşünebilirsiniz.**
+
+>+ Bir `if let` ifadesine bir `else` bloğu ekleyebiliriz. 
+>+ `else` ile birlikte gelen kod bloğu,` if let` ve `else` yapısına eşdeğer olan `match` ifadesindeki `_` durumu ile ilişkili kod bloğuyla aynıdır.
+>	- `else` ifadesi `match` ifadesi de olan `_` ile aynı görevi yapabilir.
+>+ `Liste 6-4`’teki `Coin enum` tanımını hatırlayın; *Quarter(Çeyreklik)* çeşidi aynı zamanda bir `UsState` değeri de içeriyordu.
+>+ Eğer gördüğümüz tüm *quarter* olmayan paraları saymak ve aynı zamanda *quarter* olanların eyaletini duyurmak isteseydik, bunu aşağıdaki gibi bir `match` ifadesiyle yapabilirdik:
+
+```rust
+#[derive(Debug)]
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+fn main() {
+    let coin = Coin::Penny;
+    let mut count = 0;
+    match coin {
+        Coin::Quarter(state) => println!("State quarter from {state:?}!"),
+        _ => count += 1,
+    }
+}
+```
+
++ Veya bunu bir `if let` ve `else` ifadesi kullanarak da yapabiliriz, şöyle:
+
+```rust
+#[derive(Debug)]
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+fn main() {
+    let coin = Coin::Penny;
+    let mut count = 0;
+    if let Coin::Quarter(state) = coin {
+        println!("State quarter from {state:?}!");
+    } else {
+        count += 1;
+    }
+}
+```
+
+###  6.3.1 `let...else` ile “Mutlu Yol”da Kalmak
+
++ Yaygın kullanım deseni, bir değer mevcut olduğunda bazı hesaplamalar yapmak ve aksi takdirde varsayılan bir değer döndürmektir.
++ `UsState` değerine sahip madeni paralar örneğimize devam edecek olursak, quarter'ın (çeyreğin) üzerindeki eyaletin ne kadar eski olduğuna bağlı olarak eğlenceli bir şey söylemek veya yapmak isteseydik, bir eyaletin yaşını kontrol etmek için `UsState` üzerinde şu şekilde bir metot tanımlayabiliriz:
+
+```rust
+#[derive(Debug)] // so we can inspect the state in a minute
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+impl UsState {                                    // <========= metot
+    fn existed_in(&self, year: u16) -> bool {     // <========= metot
+        match self {                              // <========= metot
+            UsState::Alabama => year >= 1819,     // <========= metot
+            UsState::Alaska => year >= 1959,      // <========= metot
+            // -- snip --                         // <========= metot
+        }                                         // <========= metot
+    }                                             // <========= metot
+}                                                 // <========= metot
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+fn describe_state_quarter(coin: Coin) -> Option<String> {
+    if let Coin::Quarter(state) = coin {
+        if state.existed_in(1900) {
+            Some(format!("{state:?} is pretty old, for America!"))
+        } else {
+            Some(format!("{state:?} is relatively new."))
+        }
+    } else {
+        None
+    }
+}
+
+fn main() {
+    if let Some(desc) = describe_state_quarter(Coin::Quarter(UsState::Alaska)) {
+        println!("{desc}");
+    }
+}
+```
+
++ Daha sonra madeni paranın türü üzerinde eşleştirme yapmak için `if let` kullanabiliriz ve `Liste 6-7`'de olduğu gibi koşulun gövdesi içinde bir `state` değişkeni tanıtabiliriz.
+
+```rust
+#[derive(Debug)] // so we can inspect the state in a minute
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+impl UsState {
+    fn existed_in(&self, year: u16) -> bool {
+        match self {
+            UsState::Alabama => year >= 1819,
+            UsState::Alaska => year >= 1959,
+            // -- snip --
+        }
+    }
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+// if let - state -------------------------------------------
+fn describe_state_quarter(coin: Coin) -> Option<String> {        
+    if let Coin::Quarter(state) = coin {
+        if state.existed_in(1900) {
+            Some(format!("{state:?} is pretty old, for America!"))
+        } else {
+            Some(format!("{state:?} is relatively new."))
+        }
+    } else {
+        None
+    }
+}
+// if let - state --------------------------------------------
+
+fn main() {
+    if let Some(desc) = describe_state_quarter(Coin::Quarter(UsState::Alaska)) {
+        println!("{desc}");
+    }
+}
+```
+
+> `Liste 6-7`: `if let` içine iç içe yerleştirilmiş koşullarla bir eyaletin 1900'de mevcut olup olmadığını kontrol etme.
+
++ Bu işimizi görür, ancak yapılacak işi `if let` ifadesinin gövdesine taşımış olur ve yapılacak iş daha karmaşık olursa, üst düzey dalların (`branch`'lerin) birbiriyle nasıl ilişkili olduğunu takip etmek zor olabilir.
+	- Üst düzey dallar (Top-level branches) → kodun en üst seviyedeki büyük karar noktalarıdır.
++ Ayrıca, ifadelerin bir değer ürettiği gerçeğinden faydalanarak, `if let`’ten eyaleti (`state`) elde etmek veya erken dönmek için bunu kullanabiliriz; bunun bir örneği `Liste 6-8`’de gösterilmiştir. (Benzer bir şeyi `match` ile de yapabilirsiniz.)
+
+> [!NOTE]
+> #### Bu Cümle Ne Anlatıyor?
+> ##### 1. `if let` içinde işlem yapmak kodu karmaşıklaştırabilir:
+> + Eğer `if let` bloğunun içi çok dolu olursa:
+> ```rust
+> if let Coin::Quarter(state) = coin {
+> 	// Burada çok iş yapılırsa
+> } else {
+> 	// Başka bir yol
+> }
+> ```
+> 
+> Bu çoğaldıkça:
+> - Mantık dalları (branch’ler) _gizlenir_
+> - Kodun “üst seviyedeki mantığını” okumak zorlaşır.
+> - Dizayn dağılır
+> 
+> Yani,
+> + `if let` içindeki iş büyüdükçe kodun akışı bozulur, okunabilirlik azalır.
+
+
+```rust
+#[derive(Debug)] // so we can inspect the state in a minute
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+impl UsState {
+    fn existed_in(&self, year: u16) -> bool {
+        match self {
+            UsState::Alabama => year >= 1819,
+            UsState::Alaska => year >= 1959,
+            // -- snip --
+        }
+    }
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+// bu değer(coin: Coin) fonksiyona move edilerek veriliyor
+fn describe_state_quarter(coin: Coin) -> Option<String> {       // <==
+    let state = if let Coin::Quarter(state) = coin {            // <==
+        state // ← if bloğunun dönüş değeri                     // <==
+    } else {
+	    return None; // → Fonksiyondan çık, None döndür ✓       // <==
+    };                                                          // <==
+
+    if state.existed_in(1900) {                                 // <==
+        Some(format!("{state:?} is pretty old, for America!"))  // <==
+    } else {                                                    // <==
+        Some(format!("{state:?} is relatively new."))           // <==
+    }
+}
+
+fn main() {
+					// bu değer(coin: Coin) fonksiyona move edilerek veriliyor
+    if let Some(desc) = describe_state_quarter(Coin::Quarter(UsState::Alaska)) {
+        println!("{desc}");
+    }
+}
+```
+
+> `Liste 6-8`: `if let` kullanarak ya bir değer üretmek ya da erken dönmek(Fonksiyondan erken çıkış).
+
+> [!NOTE]
+> ##### 2. Rust’ta ifadeler (`expressions`) değer üretebildiği için, bu özellik daha temiz kod yazmamızı sağlar:
+> + Rust’ta `if`, `match`, blok `{}` hepsi **değer üretebilir**.
+> + Bu yüzden şöyle yapabiliriz:
+> 	- ❌ İş yükünü `if let` içinde yapmak yerine
+> 	- ✔️ `if let` bir değer (`state`) üretsin
+> 	- ✔️ Geri kalan iş blok dışında yapılsın
+> ```rust
+> let state = if let Coin::Quarter(state) = coin {
+>     state
+> } else {
+> 	return None;
+> }
+> ```
+> ##### Bu Kod Ne Yapıyor?
+> + Eğer `coin` bir `Quarter` ise, içindeki `state` değerini çıkart
+> + Eğer `Quarter` **değilse** (örneğin `Penny`, `Nickel`, `Dime` ise), fonksiyondan hemen `None` döndür ve çık.
+> + Bu bir **erken dönüş** (`early return`) örneğidir.
+
+
+> [!tip]
+> + `state` yazınca **`if` bloğundan değer döner** ve `let state = ...` atamasına gider.
+> + `return state` yazarsak **fonksiyondan çıkış** yapar, `let` ataması hiç gerçekleşmez!
+
+
+> [!NOTE]
+> + **Eğer borrowing olsaydı şöyle olurdu:**
+> ```rust
+> ...
+> ...
+> ...
+> fn describe_state_quarter(coin: &Coin) -> Option<String> {  // <== Borrowing
+>    let state = if let Coin::Quarter(state) = coin {
+>        state
+>    } else {
+>        return None;
+>    };
+>
+>    if state.existed_in(1900) {
+>        Some(format!("{state:?} is pretty old, for America!"))
+>    } else {
+>        Some(format!("{state:?} is relatively new."))
+>    }
+>}
+>
+>fn main() {
+>    if let Some(desc) = describe_state_quarter(&Coin::Quarter(UsState::Alaska)) {  // <==
+>        println!("{desc}");
+>    }
+>}
+> ```
+
+> + Bu da kendine özgü bir şekilde biraz can sıkıcı! `if let`'in bir dalı değer döndürürken, diğeri fonksiyonun tamamından çıkıyor.
+
+> + Bu yaygın deseni daha güzel ifade edebilmek için Rust, `let...else` yapısını sunar.
+> + `let...else` sözdizimi, sol tarafında bir desen (`pattern`) ve sağ tarafında bir ifade (`expression`) alır; `if let`’e çok benzer, ancak bir `if` dalı yoktur, yalnızca bir `else` dalı vardır.
+> + Eğer desen eşleşirse, desendeki değer dıştaki kapsamda bağlanır (`bind` edilir).
+> + Eğer desen eşleşmezse, program `else` dalına girer ve bu dal mutlaka fonksiyondan dönüş yapmak zorundadır.
+
+> + `Liste 6-9`’da, `Liste 6-8`’in `if let` yerine `let...else` kullanıldığında nasıl göründüğünü görebilirsiniz.
+
+```rust
+#[derive(Debug)] // so we can inspect the state in a minute
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+impl UsState {
+    fn existed_in(&self, year: u16) -> bool {
+        match self {
+            UsState::Alabama => year >= 1819,
+            UsState::Alaska => year >= 1959,
+            // -- snip --
+        }
+    }
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+fn describe_state_quarter(coin: Coin) -> Option<String> {
+    let Coin::Quarter(state) = coin else {
+        return None;
+    };
+
+    if state.existed_in(1900) {
+        Some(format!("{state:?} is pretty old, for America!"))
+    } else {
+        Some(format!("{state:?} is relatively new."))
+    }
+}
+
+fn main() {
+    if let Some(desc) = describe_state_quarter(Coin::Quarter(UsState::Alaska)) {
+        println!("{desc}");
+    }
+}
+```
+
+> `Liste 6-9` : `let...else` ile fonksiyon akışını daha anlaşılır hale getirmek.
+
+> + Dikkat edersen, bu şekilde fonksiyonun ana gövdesinde ‘mutlu yol’da (happy path) kalıyor; `if let` kullanıldığında olduğu gibi iki dal arasında önemli ölçüde farklı bir kontrol akışı oluşturmuyor.
+
+
+> [!info]
+> + Yukarıdaki cümle ne demek istiyor:
+> + **"Happy path" (mutlu yol)** yazılımda çok sık kullanılan bir terimdir.
+> #### Happy Path nedir?
+> Bir fonksiyonun, işlemin veya algoritmanın en ideal, en sorunsuz, beklendiği gibi ilerleyen akışına "happy path" denir.
+> Yani,
+> + Hiç hata yoktur.
+> + İstenmeyen durumlarla karşılaşılmaz.
+> + Mantık akışı düzgün şekilde ilerler.
+> + Kod _esas yapılmak istenen işlemi_ kesintisiz yapar.
+> 
+> Buna karşılık, hata durumları, beklenmeyen durumlar, boş değerler, başarısızlıklar vs. **“unhappy path”** veya **“error path”** olarak geçer.
+
++ Eğer programınızdaki mantık `match` kullanarak ifade etmek için fazla karmaşıksa, `if let` ve `let...else`'in de Rust alet çantanızda olduğunu aklınızda tutun.
+
+
+> [!info]
+> #### Domain (Etki Alanı / İş Alanı) Nedir?
+> + Yazılım dünyasında, bir uygulamanın üzerine kurulduğu ve modellemeye çalıştığı özel uzmanlık alanıdır.
+> + Örneğin:
+> 	- **E-ticaret domain'i:** Sipariş, Ürün, Sepet, Ödeme, Kargo gibi kavramları içerir.
+> 	- **Oyun domain'i:** Oyuncu, Can Puanı, Silah, Seviye, Skor gibi kavramları içerir.
+> 	- **Muhasebe domain'i:** Hesap, Bilanço, Gelir/Gider, Fatura gibi kavramları içerir.
+> #### Cümlenin anlamı:
+> + Artık Rust programlarınız, **çalıştığınız özel iş alanındaki** kavramları (örneğin: 'Müşteri', 'Fatura', 'Stok' gibi) `struct` ve `enum` yapıları kullanarak temsil edebilirsiniz.
+> #### Örnek:
+> + Diyelim ki bir **okul yönetim sistemi** yazıyorsunuz (domain: eğitim yönetimi).
+> + Bu domain'deki kavramları Rust'ta şöyle ifade edersiniz:
+> ```rust
+> // Domain kavramlarını struct ve enum ile modellemek:
+>enum DersTipi {
+>    Zorunlu,
+>    Secmeli,
+>}
+>
+>struct Ogrenci {
+>    id: u32,
+>    ad: String,
+>    kayitli_dersler: Vec<Ders>,
+>}
+>
+>struct Ders {
+>    kod: String,
+>    ad: String,
+>    tip: DersTipi,
+>}
+> ```
+> 
+> Yani **domain**, programınızın dilini ve mantığını şekillendiren **gerçek hayat bağlamıdır**. Rust'ın güçlü tür sistemi sayesinde bu kavramları güvenli ve anlaşılır bir şekilde kodlayabilirsiniz.
+
+
+> [!info]
+> #### API nedir?
+>  + **Dikkat:** Burada bahsedilen **API**, web API'si değil, çok daha genel bir kavram
+> + API = Application Programming Interface
+> + **Yani:** Bir programcının sizin yazdığınız kodu kullanırken **etkileşime girdiği kısım**.
+> + **API = Kodunuzun "dışarıya açık" kısmı**
+> 	- ✅ `pub` ile işaretlenmiş fonksiyonlar, `struct`'lar, `enum`'lar
+> 	- ✅ Başka programcıların kullanabileceği şeyler
+> 	- ❌ Private/gizli implementasyon detayları **API değil**
+
+> [!summary]
+> + Şimdi `enum`'ları kullanarak, numaralandırılmış bir değerler kümesinden biri olabilen özel tipler oluşturmayı ele aldık. 
+> 	- `Enum`'lar, kendi tanımladığınız yeni bir veri türüdür (custom type).
+> 	- Bu özel tür, **önceden tanımlanmış sabit seçenekler kümesinden** yalnızca birini alabilir.
+> 	- "Enumerated values" = "Numaralandırılmış değerler" = Sabit, belirli seçenekler.
+> + Standart kütüphanenin `Option<T>` tipinin, hataları önlemek için tip sistemini nasıl kullanmanıza yardımcı olduğunu gösterdik.
+> 	- Yani, `Option<T>` sayesinde "değer olmayabilir" durumunu Rust derleyici seviyesinde kontrol eder. Diğer dillerdeki `null` hatalarını önler çünkü `None` durumunu **mutlaka** ele almanız gerekir.
+> + `Enum` değerlerinin içinde veri olduğunda, kaç durumu ele almanız gerektiğine bağlı olarak bu değerleri çıkarmak ve kullanmak için `match` veya `if let` kullanabilirsiniz.
+> ---
+> + Rust programlarınız artık alan adınızdaki (domain) kavramları `struct`'lar ve `enum`'lar kullanarak ifade edebilir. API'nizde kullanmak üzere özel tipler oluşturmak tip güvenliğini sağlar: derleyici, fonksiyonlarınızın yalnızca her bir fonksiyonun beklediği tipteki değerleri almasını garanti eder.
+> ---
+> + Kullanıcılarınıza kullanımı kolay olan ve tam olarak kullanıcılarınızın ihtiyaç duyacağı şeyleri ortaya koyan, iyi organize edilmiş bir API sunmak için, şimdi Rust'ın modüllerine geçelim.
 
 # Packages, Crates ve Modules:
 
