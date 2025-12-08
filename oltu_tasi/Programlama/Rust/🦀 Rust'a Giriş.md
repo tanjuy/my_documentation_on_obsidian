@@ -4422,42 +4422,462 @@ fn main() {
 > ---
 > + Kullanıcılarınıza kullanımı kolay olan ve tam olarak kullanıcılarınızın ihtiyaç duyacağı şeyleri ortaya koyan, iyi organize edilmiş bir API sunmak için, şimdi Rust'ın modüllerine geçelim.
 
-# Packages, Crates ve Modules:
+# 7. Büyüyen Projeleri Paketler, Crate’ler ve Modüller ile Yönetmek:
 
-## A. Paketler ve Crates:
++ Büyük programlar yazdıkça, kodunuzu düzenlemek giderek daha önemli hale gelecektir. İlgili işlevleri gruplayarak ve farklı özelliklere sahip kodları ayırarak, belirli bir özelliği uygulayan kodun nerede bulunacağını ve bir özelliğin nasıl çalıştığını değiştirmek için nereye gidileceğini daha net hale getireceksiniz.
++ Şu ana kadar yazdığımız programlar tek bir dosyada, tek bir modül içindeydi. Bir proje büyüdükçe, kodu birden fazla modüle ve ardından birden fazla dosyaya bölerek düzenlemelisiniz.
++ Bir paket, birden fazla `binary crate` ve isteğe bağlı olarak bir `library crate` içerebilir.
 
-+ Modül sisteminin ilk olarak ele alacağımız kısımları `packages`(paketler) ve `crates`'dır. (kasalardır).
-+ `Crate`, Rust derleyicisinin bir seferde dikkate aldığı en küçük kod miktarıdır.
-+ Cargo yerine rustc çalıştırsanız ve tek bir kaynak kod dosyası geçirseniz bile (Bölüm 1'deki "Rust Programı Yazma ve Çalıştırma"da yaptığımız gibi), derleyici bu dosyayı bir kasa olarak kabul eder.
-+ Bir `crate` iki biçimde olabilir: `binary crate` veya `library crate`.
-### A.1. Binary crate:
-
-
-
-### A.2. Library crate:
-
-
-### Crate Nedir?
-
-+ **Crate**, Rust’ta **derlenebilir en küçük birimdir**.
-+ “Crate”, Rust derleyicisinin **tek seferde derlediği tüm kod birimidir.**  Bu bir **dosya** olabilir (`main.rs`) veya bir **dosyalar kümesi** (modüllerle birlikte).
 
 > [!NOTE]
-> Bir crate şunlardan biri olabilir:
-> 1. **İkili (binary) crate:** Çalıştırılabilir bir program üretir (örnek: `main.rs` dosyası içeren projeler).
-> 2. **Kütüphane (library) crate:** Başka projeler tarafından kullanılabilen bir kütüphane üretir (örnek: `lib.rs` içeren projeler).
+> #### ✔️ Bir Rust paketi, aynı anda:
+> + Birden fazla binary crate içerebilir
+> 	- Yani bir paketten birden fazla çalıştırılabilir program (örneğin birden fazla `main.rs`) üretebilirsin.
+> + İsteğe bağlı olarak bir tane library crate içerebilir
+> 	- Yani paket isterse bir kütüphane (`lib.rs`) da sağlayabilir. Ama bu zorunlu değildir.
+> #### 🎯 Ne demek oluyor?
+> Bir Rust projesi (package):
+> + Hem birden fazla “uygulama / komut satırı aracı” üretebilir 
+> 	-  (örneğin: `cargo run --bin server`, `cargo run --bin client`)
+> + Hem de tüm bu uygulamaların ortak kullandığı bir kütüphane sunabilir (`src/lib.rs`)
+> #### 📌 Örnek senaryo:
+> Diyelim ki bir proje yapıyorsun:
+> + `server` adında bir program
+> + `client` adında bir program
+> + Ortak kullanılan veri yapıları ve fonksiyonlar için bir kütüphane (`lib.rs`)
+> 
+> Bunların hepsi **tek bir package içinde bulunabilir**.
+
++ Bir paket büyüdükçe, bazı bölümleri ayırıp harici bağımlılık haline gelen ayrı crate’lere dönüştürebilirsiniz.
+
+> [!NOTE]
+> #### ✔️ Proje büyüdükçe, bazı bölümleri ayırıp **ayrı crate’ler** haline getirebilirsin
+> Yani başlangıçta tek bir package içinde yazılan kodlar zamanla çok büyürse veya daha karmaşık hale gelirse:
+> + Bazı parçaları **ayrı projelere (crate’lere)** bölebilirsin.
+> + Bu yeni crate’ler artık **harici bağımlılık (external dependency)** olur.
+> + Ana proje bu yeni crate’leri `Cargo.toml` içinde **dependency** olarak kullanır.
+> #### 🧪 Örnek açıklama
+> Başta tek bir projede her şeyi yazıyorsun:
+> ```shell
+> my_project/
+>  src/
+>    main.rs
+>    utils.rs
+>    parser.rs
+>    network.rs
+> ```
+> + Projede `parser` çok büyüdü ve başka projelerde de kullanmak istiyorsun.
+> #### 🔽 Ne yaparsın?
+> + `parser` modülünü alıp **ayrı bir crate** olarak dışarı çıkarırsın:
+> ```shell
+> my_parser/
+>   src/lib.rs
+> ```
+> + Sonra ana projende bunu bağımlılık yaparsın:
+> ```toml
+> # my_project/Cargo.toml
+>[dependencies]
+>my_parser = "1.0"
+> ```
+> Artık `parser` kodu:
+> + Ayrı bir crate’tir
+> + Ana proje için **harici bağımlılık** haline gelmiştir
+
++ Bu bölüm tüm bu teknikleri kapsar. Birlikte gelişen birbiriyle ilişkili paketler kümesinden oluşan çok büyük projeler için Cargo, workspace'ler sağlar; bunu Bölüm 14'teki "[Cargo Workspace'leri](https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html)" kısmında ele alacağız.
+
++ Ayrıca, uygulama detaylarını kapsüllemeyi (`encapsulation`) de ele alacağız. Bu sayede kodu daha üst seviyede yeniden kullanabilirsiniz: Bir işlemi bir kez uyguladıktan sonra, diğer kodlar, bu işlemin nasıl çalıştığını bilmeden, sizin oluşturduğunuz herkese açık (public) arayüz üzerinden bu kodu çağırabilir.Kodunuzu yazma şekliniz, hangi bölümlerin başka kodların kullanması için herkese açık olacağını, hangi bölümlerin ise yalnızca size ait olup değişiklik yapma hakkını saklı tuttuğunuz özel (private) uygulama detayları olacağını belirler. Bu da zihninizde tutmanız gereken detayların miktarını azaltmanın başka bir yoludur.
++ İlgili bir kavram da scope'tur (kapsam): kodun yazıldığı iç içe geçmiş bağlamın, "scope içinde/scope da" olarak tanımlanmış bir dizi ismi vardır. Kod okurken, yazarken ve derlerken, programcıların ve derleyicilerin belirli bir yerdeki belirli bir ismin bir değişkene, fonksiyona, struct'a, enum'a, modüle, sabite veya başka bir öğeye mi atıfta bulunduğunu ve bu öğenin ne anlama geldiğini bilmesi gerekir. Scope'lar oluşturabilir ve hangi isimlerin scope içinde veya dışında olduğunu değiştirebilirsiniz. Aynı scope içinde aynı isme(değişken) sahip iki öğeye sahip olamazsınız; isim(değişken) çakışmalarını çözmek için araçlar mevcuttur.
++ Rust, kodunuzun organizasyonunu yönetmenize olanak tanıyan bir dizi özelliğe sahiptir; bunlar arasında hangi detayların açığa çıkarıldığı, hangi detayların private olduğu ve programlarınızdaki her scope'ta hangi isimlerin bulunduğu yer alır. Bazen toplu olarak modül sistemi olarak adlandırılan bu özellikler şunları içerir:
+	- **Packages (Paketler)** - Cargo özelliği, crate'leri oluşturmanıza, test etmenize ve paylaşmanıza olanak tanır.
+	- **Crates (Sandıklar)** - Bir kütüphane veya çalıştırılabilir dosya üreten modül ağacı
+	- **Modules (Modüller)** ve **use** anahtar kelimesi - Kodun organizasyonunu, kapsamını (scope) ve yolların (paths) gizliliğini kontrol etmenizi sağlar
+	- **Paths (Yollar)** - Bir öğeyi (`struct`, fonksiyon, modül vb.) isimlendirme yolu
 
 
+> [!NOTE] Title
+> #### Modül ağacı" ne demek?
+> + Bir crate, içinde birden fazla modülün (kod dosyalarının) hiyerarşik olarak düzenlendiği bir yapıdır. Tıpkı bir ağaç gibi:
+> ```bash
+> crate (kök)
+>  ├── modül1
+>  │   ├── alt_modül1
+>  │   └── alt_modül2
+>  └── modül2
+> ```
 
-```rust
++ Bu bölümde, tüm bu özellikleri ele alacağız, nasıl etkileşime girdiklerini tartışacağız ve `scope`'u (kapsamı) yönetmek için bunları nasıl kullanacağınızı açıklayacağız. Sonunda, modül sistemi hakkında sağlam bir anlayışa sahip olmalı ve `scope`'larla bir profesyonel gibi çalışabilmelisiniz!
 
+## 7.1. Package'ler and Crate'ler
 
++ Ele alacağımız modül sisteminin ilk kısımları paketler ve crate'lerdir.
++ Crate, Rust derleyicisinin bir seferde dikkate aldığı en küçük kod miktarıdır. Cargo yerine `rustc`'yi çalıştırsanız ve tek bir kaynak kod dosyası geçseniz bile (Bölüm 1'deki "Bir Rust Programı Yazma ve Çalıştırma" kısmında yaptığımız gibi), derleyici o dosyayı bir crate olarak kabul eder. Crate'ler modüller içerebilir ve modüller, ilerleyen bölümlerde göreceğimiz gibi, crate ile birlikte derlenen diğer dosyalarda tanımlanmış olabilir.
++ Bir crate iki biçimden birinde olabilir: binary crate veya library crate.
++ Binary crate'ler, komut satırı programı veya sunucu gibi, çalıştırılabilir bir dosyaya derleyebileceğiniz programlardır.
+	- Yani, Binary crate’ler, bir çalıştırılabilir dosyaya derlenebilen ve çalıştırabileceğiniz programlardır; örneğin bir komut satırı uygulaması veya bir sunucu üzerinde.
++ Her birinin, çalıştırılabilir dosya çalıştığında ne olacağını tanımlayan **main** adında bir fonksiyonu olmalıdır.
+	- Her **binary crate**, çalıştırılabilir dosya çalıştığında ne olacağını tanımlayan `main` adlı bir fonksiyona sahip olmalıdır.
++ Şimdiye kadar oluşturduğumuz tüm crate'ler binary crate'ler olmuştur.
+---
++ Library crate'lerin main fonksiyonu yoktur ve çalıştırılabilir bir dosyaya derlenmezler. Bunun yerine, birden fazla projeyle paylaşılması amaçlanan işlevselliği(fonksiyonilite) tanımlarlar. Örneğin, Bölüm 2'de kullandığımız rand crate'i, rastgele sayılar üreten işlevsellik sağlar. Rustacean'lar "crate" dediklerinde çoğu zaman library crate'i kastederler ve "crate" kelimesini genel programlama kavramı olan "library" (kütüphane) ile birbirinin yerine kullanırlar.
+
++ Crate root, Rust derleyicisinin başladığı ve crate'inizin kök modülünü oluşturan bir kaynak dosyadır (modülleri "Kapsam ve Gizliliği Kontrol Etmek İçin Modülleri Tanımlama" bölümünde derinlemesine açıklayacağız).
+	- Yani, Crate kökü (crate root), Rust derleyicisinin derlemeye başladığı kaynak dosyasıdır ve crate’inizin kök modülünü oluşturur.
+
+> [!NOTE]
+> + **Crate root**, bir Rust projesinde derleyicinin işe başladığı **ana kaynak dosyadır**.
+> + **Hangi dosya crate root'tur?**
+> ##### 1. **Binary crate için:** `src/main.rs`
+> + Derleyici buradan başlar
+> + `main()` fonksiyonu burada olmalıdır.
+> ##### 2. Library crate için: `src/lib.rs`
+> - Derleyici buradan başlar
+> - Kütüphanenin genel yapısı burada tanımlanır
+> ##### Neden root(kök) denir?
+> + Çünkü bu dosya, crate'inizin **modül ağacının kökünü** oluşturur. Tıpkı bir ağacın kökünden dalların çıkması gibi, diğer tüm modüller bu ana dosyadan türetilir veya buradan referans edilir.
+> ```shell
+> my_project/
+>  └── src/
+>      ├── main.rs      # ← Binary crate'in root'u
+>      ├── lib.rs       # ← Library crate'in root'u (varsa)
+>      └── helper.rs    # ← Alt modül (root değil)
+> ```
+
++ Bir package (paket), bir dizi işlevsellik sağlayan bir veya daha fazla crate'in bir araya getirilmesidir.
++ Bir package, bu crate'lerin nasıl oluşturulacağını açıklayan bir Cargo.toml dosyası içerir.
+	- **Bir paket, içindeki crate’lerin nasıl derleneceğini tanımlayan bir _Cargo.toml_ dosyası içerir.**
++ Cargo aslında, kodunuzu oluşturmak için kullandığınız komut satırı aracı için binary crate içeren bir package'dir.
+	- **Aslında Cargo’nun kendisi de bir pakettir:**
++ Cargo package'i ayrıca binary crate'in bağımlı olduğu bir library crate de içerir.
++ Diğer projeler, Cargo komut satırı aracının kullandığı mantığı kullanmak için Cargo library crate'ine bağımlı olabilir.
+
+---
++ Bir package istediğiniz kadar binary crate içerebilir, ancak en fazla yalnızca bir library crate içerebilir. Bir package, ister library ister binary crate olsun, en az bir crate içermelidir.
++ Bir package oluşturduğumuzda ne olduğunu inceleyelim. Önce `cargo new my-project` komutunu giriyoruz:
+
+```shell
+$ cargo new my-project
+     Created binary (application) `my-project` package
+$ ls my-project
+Cargo.toml
+src
+$ ls my-project/src
+main.rs
 ```
 
-## B.  Modüller(Modules):
+> + `cargo new my-project` komutunu çalıştırdıktan sonra, Cargo’nun neler oluşturduğunu görmek için `ls` komutunu kullanırız.
+> + Proje dizininde, bize bir paket sağlayan bir `Cargo.toml` dosyası bulunur. Ayrıca içinde `main.rs` dosyasının yer aldığı bir `src` dizini vardır.
 
-+ Modüller ve modül sisteminin diğer parçaları hakkında konuşacağız, özellikle de öğelere(items) isim vermenizi sağlayan yollar(paths); kapsama(scope) bir yol getiren `use` anahtar sözcüğü; ve öğeleri(items) herkese açık hale getiren `pub` anahtar sözcüğü.
-+ Ayrıca as anahtar sözcüğünü, harici paketleri ve glob operatörünü de ele alacağız.
+
+> [!CAUTION]
+> + Metin düzenleyicinizde `Cargo.toml` dosyasını açın; `src/main.rs` dosyasından bahsedilmediğini fark edeceksiniz.
+> + Cargo bir geleneği takip eder:
+> 	- `src/main.rs`, paketin ismiyle aynı isme sahip **binary crate**’in _crate root_ dosyasıdır.
+> 	- Aynı şekilde, paket dizininde `src/lib.rs` varsa, paket yine ismiyle aynı isme sahip bir **library crate** içerir ve `src/lib.rs` onun _crate root_’udur.
+> + Cargo, bu crate root dosyalarını **rustc** derleyicisine göndererek ilgili library veya binary crate’i oluşturur.
+> ```toml
+> [package]
+> name = "my-project"  ← Bu crate'in adıdır
+> version = "0.1.0"
+> edition = "2021"
+> ```
+> + Crate'in adı `Cargo.toml` dosyasındaki `[package]` bölümündeki `name` alanında tanımlıdır. `main.rs` veya `lib.rs` sadece dosya adlarıdır, crate'in kendisinin adı değildir.
+
++ Burada, yalnızca `src/main.rs` içeren bir `package`'imiz var, bu da yalnızca `my-project` adında bir *binary crate* içerdiği anlamına gelir.
++ Bir package `src/main.rs` ve `src/lib.rs` içeriyorsa, iki crate'e sahiptir: bir *binary* ve bir *library*, her ikisi de package(paket) ile aynı ada sahiptir.
++ Bir package(paket), `src/bin` dizinine dosyalar yerleştirerek birden fazla *binary crate*'e sahip olabilir: her dosya ayrı bir *binary crate* olacaktır.
+
+## 7.2. Scope ve Privacy'yi Kontrol Etmek İçin Modülleri Tanımlama:
+
++ Bu bölümde modüllerden ve modül sisteminin diğer parçalarından bahsedeceğiz; özellikle, öğelere (items) isim vermenizi sağlayan yolları (paths), bir yolu kapsam(`scope`) içine almak için kullanılan `use` anahtar kelimesini ve öğeleri herkese açık yapmak için kullanılan `pub` anahtar kelimesini ele alacağız. Ayrıca `as` anahtar kelimesini, harici paketleri ve `glob` operatörünü de inceleyeceğiz.
+
+### 7.2.1. Modüller Hızlı Rehberi
+
++ Modüller ve yolların (paths) ayrıntılarına geçmeden önce, burada modüllerin, yolların(path'lerin), `use` anahtar sözcüğünün ve `pub` anahtar sözcüğünün derleyicide nasıl çalıştığına ve çoğu geliştiricinin kodunu nasıl organize ettiğine dair hızlı bir referans sunuyoruz. Bu kuralların her birinin örneklerini bu bölüm boyunca inceleyeceğiz, ancak modüllerin nasıl çalıştığını hatırlamak için burası harika bir başvuru noktasıdır.
++ **Modül bildirme:** Crate root dosyasında yeni modüller bildirebilirsiniz; diyelim ki `mod garden;` ile bir **"garden"** modülü bildirdiniz. Derleyici modülün kodunu şu yerlerde arayacaktır:
+	- Satır içi (inline), `mod garden`'ı takip eden noktalı virgülün yerine geçen süslü parantezler içinde
+	- `src/garden.rs` dosyasında
+	- `src/garden/mod.rs` dosyasında
+
+
+> [!NOTE]
+> #### Noktalı virgülle vs Süslü parantezle:
+> ##### 1. Noktalı Virgülle(Ayrı Dosyalarda):
+> ```rust
+> mod garden;  // ← Noktalı virgül var
+> ```
+> + Bu durumda derleyici `garden` modülünün kodunu **başka bir dosyada** arar (`src/garden.rs` veya `src/garden/mod.rs`)
+> ##### 2. Süslü Parantezle(Satır içi/inline):
+> ```rust
+> mod garden {  // ← Noktalı virgül YOK, süslü parantez VAR
+>    // Modülün kodu buraya yazılır
+>    pub fn plant() {
+>        println!("Bitki ektim!");
+>    }
+>}
+> ```
+> + Bu durumda modülün kodu **aynı dosyanın içinde**, süslü parantezler arasında yazılır.
+
++ **Alt modül bildirme:** Crate kök dosyası dışındaki herhangi bir dosyada alt modüller tanımlayabilirsiniz. Örneğin `src/garden.rs` dosyasında `mod vegetables;` yazdığınızı düşünelim. Bu durumda derleyici alt modülün kodunu, üst modülün adına sahip klasör içinde şu yerlerde arar:
+	- Noktalı virgül yerine süslü parantez içinde doğrudan `mod vegetables` satırının hemen altında (**inline**)
+	- `src/garden/vegetables.rs` dosyasında
+	- `src/garden/vegetables/mod.rs` dosyasında
+
+
+> [!NOTE]
+> Ama **crate kök dosyası dışında** olduğunuz için (yani `src/main.rs` veya `src/lib.rs` içinde değil, örneğin `src/garden.rs` içindeyseniz):
+> + Yazdığınız `mod vegetables;` satırı **alt modül (submodule)** oluşturur.
+> + Bu alt modülün kodu, **üst modülün klasörü içinde** aranır.
+> #### 🔍 Örnek ile açıklayalım:
+> + Diyelim ki dosya yapınız şöyle:
+> ```css
+> src/
+>  main.rs         (crate root)
+>  garden.rs       (buradayız)
+> ```
+> + `garden.rs` içinde şunu yazdınız:
+> ```rust
+> mod vegetables;
+> ```
+> Bu durumda derleyici şunu düşünür:
+> + "Bu `vegetables` bir **alt modül**, o halde kodu _garden_ modülünün klasöründe olmalı."
+> Ve şu yerlerde arar:
+> 1. `src/garden/vegetables.rs`
+> 2. `src/garden/vegetables/mod.rs`
+> 3. Inline(Süslü parantezle yazılmış mod)
+> 
+> **Inline nedir?**
+> ```rust
+> // src/garden.rs
+> mod vegetables {
+> 	// Kod burada
+> }
+> ``` 
+> **Dosya Yapısı:**
+> ```shell
+> src/ 
+> ├── main.rs 
+> ├── garden.rs           ← garden modülü 
+> └── garden/             ← garden için dizin 
+> 	└── vegetables.rs   ← vegetables alt modülü
+> ```
+
++ **Modüllerdeki koda giden yollar:**  Bir modül crate’inizin parçası olduktan sonra, gizlilik (privacy) kuralları izin verdiği sürece, crate’in herhangi bir yerinden o modüldeki koda modül yolunu kullanarak erişebilirsiniz. Örneğin, `garden::vegetables` modülindeki bir `Asparagus` tipi şu yolda bulunur: 
+
+```rust
+crate::garden::vegetables::Asparagus
+```
+
+> [!NOTE]
+> #### Mutlak ve Göreceli Yol:
+> Rust'ta bir path yazarken **nereden başladığınızı** belirtmeniz gerekir:
+> ##### 1. `crate::`- Mutlak Yol(Absolute Path):
+> ```rust
+> crate::garden::vegetables::Asparagus
+> ```
+> + Mevcut crate'in kökünden başla
+> + `src/main.rs` veya `src/lib.rs`'den başlar
+> + Her yerden aynı şekilde çalışır
+> + `crate::` kelimesi, "bu crate'in en başından (root'undan) başlayarak şu yolu takip et" demektir. Bu sayede kodunuzun nerede olduğuna bakmaksızın her yerden aynı yolu kullanabilirsiniz.
+> ##### 2. Göreceli Yol(Relative Path):
+> ```rust
+> garden::vegetables::Asparagus
+> ```
+> - Bulunduğum yerden başla
+> - Hangi dosyada olduğuna bağlı olarak değişir.
+> ```shell
+> src/ 
+> ├── main.rs 
+> └── garden/ 
+> 	└── vegetables.rs
+> ```
+> `main.rs`'den `Asparagus`'a ulaşmak için:
+> ```rust
+> // Mutlak yol (her zaman aynı)
+>use crate::garden::vegetables::Asparagus;
+>
+>// Veya göreceli yol (main.rs'deyseniz)
+>use garden::vegetables::Asparagus;
+> ```
+
++ **Özel (private) ve genel (public):** Bir modül içindeki kod, varsayılan olarak üst modüllerinden gizlidir (private).
++ Bir modülü public yapmak için, mod yerine pub mod ile bildirin. Public bir modül içindeki öğeleri de public yapmak için, bildirimlerinin önünde pub kullanın.
+	- Yani, Bir modülü public(genel) yapmak için `mod` yerine `pub mod` yazmanız gerekir. Benzer şekilde, public(genel) bir modül içindeki elemanları da public(genel) yapmak istiyorsanız bildirimlerinin başına `pub` eklemeniz gerekir.
++ **`use` anahtar kelimesi:** Bir scope içinde, use anahtar kelimesi uzun path'lerin tekrarını azaltmak için öğelere kısayollar oluşturur.
++ `crate::garden::vegetables::Asparagus`'a başvurabilen veya erişilebilen herhangi bir scope'ta, `use crate::garden::vegetables::Asparagus`; ile bir kısayol oluşturabilirsiniz ve bundan sonra o scope'ta bu türü kullanmak için sadece Asparagus yazmanız yeterlidir.
++ Burada, bu kuralları gösteren backyard adında bir binary crate oluşturuyoruz. Yine backyard adındaki crate'in dizini, şu dosya ve dizinleri içerir:
+
+```shell
+backyard
+├── Cargo.lock
+├── Cargo.toml
+└── src
+    ├── garden
+    │   └── vegetables.rs
+    ├── garden.rs
+    └── main.rs
+```
+
++ Bu durumda crate root dosyası src/main.rs'dir ve şunları içerir:
+
+**Dosya Adı:** `src/main.rs`
+
+```rust
+use crate::garden::vegetables::Asparagus;
+
+pub mod garden;
+
+fn main() {
+    let plant = Asparagus {};
+    println!("I'm growing {plant:?}!");
+}
+```
+
++ `pub mod garden;` satırı, derleyiciye `src/garden.rs` dosyasında bulduğu kodu dahil etmesini söyler; bu dosyanın içeriği ise şudur:
+
+**Dosya Adı:** `src/garden.rs`
+
+```rust
+pub mod vegetables;
+```
+
++ Burada, `pub mod vegetables;` ifadesi `src/garden/vegetables.rs` içindeki kodun da dahil edildiği anlamına gelir. Bu dosyanın içeriği ise şöyledir:
+
+```rust
+#[derive(Debug)]
+pub struct Asparagus {}
+```
+
++ Şimdi bu kuralların detaylarına girelim ve onları uygulamalı olarak gösterelim!
+
+### 7.2.2. İlişkili Kodu Modüllerde Gruplandırma:
+
++ Modüller, okunabilirlik ve kolayca yeniden kullanım için bir crate içindeki kodu düzenlememize olanak tanır. Modüller ayrıca öğelerin gizliliğini kontrol etmemizi de sağlar çünkü bir modül içindeki kod varsayılan olarak **private**'tır. **Private** öğeler, dışarıdan kullanıma açık olmayan dahili(iç) uygulama detaylarıdır. Modülleri ve içlerindeki öğeleri public(genel) yapmayı seçebiliriz, bu da onları harici kodun kullanmasına ve onlara bağımlı olmasına izin verecek şekilde açığa çıkarır.
++ Örnek olarak, bir restoranın işlevselliğini sağlayan bir library crate yazalım. Fonksiyonların imzalarını tanımlayacağız ancak gövdelerini boş bırakacağız, böylece bir restoranın uygulamasından ziyade kodun organizasyonuna odaklanacağız.
++ Restoran endüstrisinde, bir restoranın bazı bölümleri front of house (ön bölüm), diğerleri ise back of house (arka bölüm) olarak adlandırılır. Front of house, müşterilerin bulunduğu yerdir; bu, ev sahiplerinin müşterileri oturttuğu, garsonların sipariş ve ödeme aldığı ve barmenların içki hazırladığı yerleri kapsar. Back of house, şeflerin ve aşçıların mutfakta çalıştığı, bulaşıkçıların temizlik yaptığı ve yöneticilerin idari işleri yaptığı yerdir.
+---
++ Crate’imizi bu şekilde yapılandırmak için, fonksiyonlarını **iç içe (nested) modüller** içine organize edebiliriz.
++ `cargo new restaurant --lib` komutunu çalıştırarak **restaurant** adlı yeni bir kütüphane (library) oluşturun.
++ Ardından, modülleri ve fonksiyon imzalarını tanımlamak için Liste 7-1’deki kodu **src/lib.rs** dosyasına ekleyin; bu kod, restoranın **front of house** (müşteri alanı) kısmını temsil eder.
+
+```rust
+mod front_of_house {
+    mod hosting {
+        fn add_to_waitlist() {}
+
+        fn seat_at_table() {}
+    }
+
+    mod serving {
+        fn take_order() {}
+
+        fn serve_order() {}
+
+        fn take_payment() {}
+    }
+}
+```
+
+> `Liste 7-1`: Diğer modülleri ve onların içinde fonksiyonları barındıran bir `front_of_house` modülü
+
++ Bir modülü, `mod` anahtar sözcüğünü ve ardından modülün adını (bu örnekte `front_of_house`) yazarak tanımlarız. Modülün gövdesi ise süslü parantezler içine yazılır. Modüllerin içinde başka modüller de koyabiliriz; bu örnekte `hosting` ve `serving` modüllerinde olduğu gibi. Modüller ayrıca `struct`, `enum`, sabit (`constant`), `trait` ve `Liste 7-1`’de olduğu gibi fonksiyon tanımları gibi başka öğeleri de barındırabilir.
++ Modülleri kullanarak ilgili tanımları bir araya toplayabilir ve neden ilişkili olduklarını ifade eden bir isim verebiliriz. Bu kodu kullanan programcılar, tüm tanımları tek tek okumak zorunda kalmadan sadece ilgili gruplara bakarak kod içerisinde kolayca gezinebilir; bu da aradıkları tanımları bulmalarını kolaylaştırır. Koda yeni işlev ekleyecek programcılar da düzeni bozmadan bu işlevleri nereye koymaları gerektiğini bilirler.
+
+
+> [!NOTE]
+> #### 1. İlgili tanımları bir araya gruplandırmak:
+> + Birbiriyle ilişkili kod parçalarını (fonksiyonlar, struct'lar vb.) aynı modül altında toplayabilirsiniz.
+> + Burada:
+> 	- `add_to_waitlist` ve `seat_at_table` → müşteri karşılama ile ilgili → `hosting` modülünde
+> 	- `take_order` ve `serve_order` → servis ile ilgili → `serving` modülünde
+> #### 2. Neden ilişkili olduklarını isimlendirmek:
+> + Modül adı, içindeki kodların **neden bir arada olduğunu** açıklar.
+> 	- `hosting` → "Bu fonksiyonlar müşteri karşılama (`hosting`) işleriyle ilgili"
+> 	- `serving` → "Bu fonksiyonlar servis işleriyle ilgili"
+> 
+> **Özetle:** Modüller hem ilgili kodları **bir araya toplar** hem de onlara **anlamlı bir isim vererek** neden birlikte olduklarını belirtir. Böylece kod daha düzenli ve anlaşılır olur.
+
++ Daha önce `src/main.rs` ve `src/lib.rs`'nin *crate root*'ları olarak adlandırıldığından bahsetmiştik. İsimlerinin nedeni, bu iki dosyadan herhangi birinin içeriğinin, modül ağacı(`module tree`) olarak bilinen crate'in modül yapısının kökünde crate adında bir modül oluşturmasıdır.
++ Listeleme 7-2, Listeleme 7-1'deki yapıya ait modül ağacını göstermektedir.
+
+```shell
+crate
+ └── front_of_house
+     ├── hosting
+     │   ├── add_to_waitlist
+     │   └── seat_at_table
+     └── serving
+         ├── take_order
+         ├── serve_order
+         └── take_payment
+```
+
+> `Liste 7-2`: `Liste 7-1`’deki kodun modül ağacı
+
+> [!NOTE]
+> + Bu iki dosyadan birinin içeriği, otomatik olarak **`crate` adında bir modül** oluşturur ve bu modül **modül ağacının en üstünde** (kökünde) bulunur.
+> #### Modül Ağacı nedir?
+> + Rust'taki tüm modüller bir **ağaç yapısı** oluşturur:
+> ```shell
+> crate  ← Kök (root), src/lib.rs veya src/main.rs
+> └── front_of_house
+>      ├── hosting
+>      │    ├── add_to_waitlist
+>      │    └── seat_at_table
+>      └── serving
+>           ├── take_order
+>           └── serve_order
+> ```
+> #### Neden "crate root" denir?
+> Çünkü:
+> 1. `src/main.rs` veya `src/lib.rs` dosyasının içeriği → `crate` modülünü oluşturur
+> 2. Bu `crate` modülü → ağacın kökü (root) konumundadır
+> 3. Diğer tüm modüller bu kökün altında dallanır
+
+
+> [!NOTE]
+> #### Crate Modülü Soyut Bir Kavram mı?
+> + Rust derleyicisi, `src/main.rs` veya `src/lib.rs` dosyasını okurken **otomatik olarak** şu modül ağacını oluşturur:
+> ```rust
+> // src/lib.rs dosyası
+>  mod front_of_house { 
+> 	 mod hosting {} 
+> }
+> ```
+> + **Derleyicinin gördüğü yapı:**
+> ```shell
+> crate ← Rust bunu otomatik ekler (görünmez ama var)
+>  └── front_of_house 
+> 	 └── hosting
+> ```
+> + `crate` modülü kodda yazılmasa da, Rust derleyicisi onu **arka planda otomatik olarak oluşturur**.
+> #### Kanıt: `crate::` kullanımı:
+> + Kodda `crate::` yazdığınızda, bu gerçekten çalışır:
+> ```rust
+> // src/lib.rs
+> mod front_of_house {
+>    pub mod hosting {
+>        pub fn add_to_waitlist() {}
+>    }
+>}
+>
+>pub fn eat_at_restaurant() {
+>    // crate:: kullanarak başlıyoruz
+>    crate::front_of_house::hosting::add_to_waitlist();
+>}
+> ```
+> + Eğer `crate` sadece soyut bir kavram olsaydı, bu kod çalışmazdı. Ama çalışıyor çünkü **Rust gerçekten `crate` adında bir kök modül oluşturuyor**.
+> #### Sonuç:
+> + Eğer `crate` sadece soyut bir kavram olsaydı, bu kod çalışmazdı. Ama çalışıyor çünkü **Rust gerçekten `crate` adında bir kök modül oluşturuyor**.
+> +  **Görünmez ama var:** Kodda yazmıyoruz ama `crate::` ile erişebiliyoruz.
+> + **"Crate root" ifadesi:** Hem fiziksel dosyayı hem de derleyicinin oluşturduğu kök modülü ifade eder.
+
++ Bu ağaç, bazı modüllerin diğer modüllerin içinde nasıl iç içe geçtiğini gösterir; örneğin, hosting, front_of_house'un içinde iç içe geçmiştir. Ağaç ayrıca bazı modüllerin kardeş (sibling) olduğunu da gösterir, yani aynı modül içinde tanımlanmışlardır; hosting ve serving, front_of_house içinde tanımlanmış kardeşlerdir. Eğer A modülü B modülünün içinde yer alıyorsa, A modülünün B modülünün çocuğu (child) olduğunu ve B modülünün A modülünün ebeveyni (parent) olduğunu söyleriz. Tüm modül ağacının, crate adlı örtük (implicit) modülün altında köklendiğine dikkat edin.
++ Modül ağacı size bilgisayarınızdaki dosya sisteminin dizin ağacını hatırlatabilir; bu çok uygun bir karşılaştırmadır! Tıpkı bir dosya sistemindeki dizinler gibi, kodunuzu düzenlemek için modülleri kullanırsınız. Ve tıpkı bir dizindeki dosyalar gibi, modüllerimizi bulmak için bir yola ihtiyacımız vardır.
+	- Yani, Tıpkı bilgisayarınızda bir dosyayı bulmak için yolunu bilmeniz gerektiği gibi, Rust'ta da bir fonksiyonu veya yapıyı kullanmak için **hangi modülde olduğunu** (yolunu) bilmeniz gerekir.
+	- Modüllere erişmek için onların *adresini* (path'ini) yazmamız gerekir, tıpkı dosya sisteminde dosyalara erişmek gibi.
+
+## 7.3. Modül ağacındaki öğelere erişim yolları:
+
 
 ## Kaynak:
 
