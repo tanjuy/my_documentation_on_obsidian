@@ -4878,7 +4878,439 @@ crate
 
 ## 7.3. Modül ağacındaki öğelere erişim yolları:
 
++ Rust’a, modül ağacında bir öğenin (item’ın) nerede olduğunu göstermek için, bir dosya sisteminde gezinirken kullandığımız yola (path’e) benzer bir yol kullanırız. Bir fonksiyonu çağırmak için onun yolunu bilmemiz gerekir.
++ Bir yol iki biçimde olabilir:
+1. **Mutlak yol (absolute path)**, Kök krate’ten(`crate root`) başlayan tam yoldur; harici bir crate'ten gelen kod için mutlak yol, crate adıyla başlar ve mevcut crate'ten gelen kod için literal crate(`crate::`) ile başlar.
 
+
+> [!NOTE]
+> Rust’ta bir fonksiyon, struct veya modüle erişirken **mutlak yol (absolute path)** kullanıyorsan
+> #### 1. Eğer erişeceğin kod _başka bir crate_ içindeyse:
+> + Mutlak yol **crate’in kendi adıyla** başlar.
+> ```rust
+> rand::thread_rng();
+> ```
+> + Burada `rand` dış bir crate’dir → mutlak yol `rand` ile başlar.
+> #### 2. Eğer erişeceğin kod *kendi crate’inin* içindeyse:
+> + Mutlak yol **crate** kelimesiyle başlar (literal “crate”).
+> ```rust
+> crate::front_of_house::hosting::add_to_waitlist();
+> ```
+> + Burada `crate` → "bu projedeki crate’in kökü" anlamına gelir.
+> + Yani `crate::` = `src/lib.rs` veya `src/main.rs` dosyasının kök modülü.
+
+
+2. **Göreceli yol (relative path)**, mevcut modülden başlar ve `self`, `super` veya mevcut modüldeki bir tanımlayıcı (identifier) kullanır.
+
+> [!NOTE]
+> Göreceli yol, "bulunduğunuz yerden" başlar ve üç farklı şekilde yazılabilir:
+> #### 1. `self` - mevcut modül:
+> + Bulunduğunuz modülün içindeki bir şeye erişmek için:
+> ```rust
+> mod front_of_house {
+>    pub mod hosting {
+>        pub fn add_to_waitlist() {}
+>        
+>        pub fn seat() {
+>            // self = bu modül (hosting)
+>            self::add_to_waitlist();
+>        }
+>    }
+>}
+> ``` 
+> + `self` = "bulunduğum modül" (`hosting`)
+> #### 2. `super` - bir üst modül (parent):
+> + Bir üst seviyedeki modüle erişmek için:
+> ```rust
+> mod front_of_house {
+>    pub fn greet() {}
+>    
+>    pub mod hosting {
+>        pub fn welcome() {
+>            // super = bir üst modül (front_of_house)
+>            super::greet();
+>        }
+>    }
+>}
+> ```
+> + `super` = "bir üst modül" (parent), tıpkı dosya sistemindeki `../` gibi
+> #### 3. Doğrudan tanımlayıcı(identifier):
+> + Mevcut seviyede veya alt modülde bir şeyi direkt adıyla çağırma:
+> ```rust
+> mod front_of_house {
+>    pub mod hosting {
+>        pub fn add_to_waitlist() {}
+>    }
+>    
+>    pub fn eat() {
+>        // "hosting" tanımlayıcısını doğrudan kullanıyoruz
+>        hosting::add_to_waitlist();
+>    }
+>}
+> ```
+
+| Rust       | Dosya Sistemi       |
+| ---------- | ------------------- |
+| `crate::`  | `/` (kök dizin)     |
+| `self::`   | `./` (mevcut dizin) |
+| `super::`  | `../` (üst dizin)   |
+
++ Hem mutlak hem de göreceli yollar, çift iki nokta üst üste (::) ile ayrılmış bir veya daha fazla tanımlayıcı ile takip edilir.
+
+
+> [!NOTE]
+> Hem mutlak hem de göreceli yollarda **modül/fonksiyon adları `::` ile birbirinden ayrılır**.
+> ##### Mutlak Yol:
+> ```rust
+> crate::front_of_house::hosting::add_to_waitlist()
+>  ↑       ↑            ↑         ↑
+>  └───────┴────────────┴─────────┴─ Bunlar "tanımlayıcılar" (identifiers)
+>      └──────┴──────┴─── Bunlar :: ile ayrılıyor
+> ```
+> ##### Göreceli Yol:
+> ```rust
+> front_of_house::hosting::add_to_waitlist()
+>     ↑           ↑           ↑
+>     └───────────┴───────────┴─ Tanımlayıcılar
+>         └──────┴─── :: ile ayrılıyor
+> ```
+
++ `Liste 7-1`’e geri dönersek, diyelim ki `add_to_waitlist` fonksiyonunu çağırmak istiyoruz.  Bu, şu soruyu sormakla aynıdır: **`add_to_waitlist` fonksiyonunun yolu (path’i) nedir?**  `Liste 7-3`, `Liste 7-1`’in bazı modül ve fonksiyonlarının çıkarılmış hâlini içerir.
++ `add_to_waitlist` fonksiyonunu, **crate root**’ta tanımlanan yeni bir fonksiyon olan `eat_at_restaurant` içinden çağırmanın iki yolunu göstereceğiz. Bu yollar doğrudur, ancak bu örneğin olduğu gibi derlenmesini engelleyecek başka bir sorun daha vardır. Bu sorunun nedenini birazdan açıklayacağız.
++ `eat_at_restaurant` fonksiyonu, kütüphane crate’imizin **herkese açık API’sinin** bir parçasıdır; bu yüzden onu `pub` anahtar sözcüğüyle işaretliyoruz.  `pub` hakkında daha fazla detaya Exposing Paths with the pub Keyword (`pub` Anahtar Kelimesi ile Path'leri Herkese Açma) bölümünde gireceğiz.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+mod front_of_house {
+    mod hosting {
+        fn add_to_waitlist() {}
+    }
+}
+
+pub fn eat_at_restaurant() {
+    // Absolute path
+    crate::front_of_house::hosting::add_to_waitlist();
+
+    // Relative path
+    front_of_house::hosting::add_to_waitlist();
+}
+```
+
+> `Liste 7-3:` Mutlak ve göreceli yollar kullanarak `add_to_waitlist` fonksiyonunu çağırma
+
++ `eat_at_restaurant` fonksiyonu içinde `add_to_waitlist` fonksiyonunu ilk çağırışımızda **mutlak (absolute) bir yol** kullanıyoruz.
++ `add_to_waitlist` fonksiyonu, `eat_at_restaurant` ile **aynı crate içinde** tanımlandığı için mutlak bir yol başlatmak amacıyla `crate` anahtar kelimesini kullanabiliriz.  Daha sonra, `add_to_waitlist` fonksiyonuna ulaşana kadar sırayla tüm modülleri ekleriz.
++ Aynı yapıya sahip bir dosya sistemi hayal edebilirsiniz: `add_to_waitlist` adlı bir programı çalıştırmak için şu yolu belirtirdik:
+
+```shell
+/front_of_house/hosting/add_to_waitlist
+```
+
++ Crate kökünden (crate root) başlamak için `crate` adını kullanmak, dosya sistemi kökünden başlamak için `/` kullanmaya benzer.
+---
++ `eat_at_restaurant` fonksiyonu içinde `add_to_waitlist` fonksiyonunu ikinci kez çağırdığımızda, bu sefer **göreceli (relative) bir yol** kullanıyoruz. Yol, `eat_at_restaurant` ile modül ağacında aynı seviyede tanımlanmış olan `front_of_house` modülünün adıyla başlıyor.
++ Dosya sistemi benzetmesine göre, burada kullanılan yol şu şeklinde olurdu;
+
+```bash
+front_of_house/hosting/add_to_waitlist
+```
+
++ Bir yolun bir modül adıyla başlaması, o yolun **göreceli bir yol** olduğunu gösterir.
+---
++ Göreceli (relative) ya da mutlak (absolute) yol kullanmayı seçmek, projenize göre vereceğiniz bir karardır ve bir öğenin tanımını, o öğeyi kullanan koddaki yerinden ayrı mı yoksa birlikte mi taşıma olasılığınıza bağlıdır.
++ Örneğin, `front_of_house` modülünü ve `eat_at_restaurant` fonksiyonunu `customer_experience` adında bir modülün içine taşırsak, `add_to_waitlist` için kullandığımız **mutlak yolu** güncellememiz gerekir; ancak **göreceli yol** hâlâ geçerli olur.
++ Buna karşılık, `eat_at_restaurant` fonksiyonunu tek başına `dining` adında bir modüle taşırsak, `add_to_waitlist` için kullandığımız **mutlak yol aynı kalır**, fakat **göreceli yolu** güncellememiz gerekir.
+
+> [!NOTE]
+>  ##### Durum 1: İlk Hali
+>  ```rust
+>  crate
+> ├── front_of_house
+> │    └── hosting (fn add_to_waitlist)
+> └── eat_at_restaurant  ← buradayız
+>  ```
+>  ##### Durum 2: eat_at_restaurant başka bir modüle taşınıyor
+>  ```rust
+>  crate
+> ├── front_of_house
+> │    └── hosting (fn add_to_waitlist)
+> └── dining
+>      └── eat_at_restaurant  ← artık buradayız!
+>  ```
+
++ Hadi 7-3 numaralı listeyi derlemeyi deneyelim ve henüz neden derlenmediğini öğrenelim! Alacağımız hatalar 7-4 numaralı listede gösterilmiştir.
+
+```rust
+$ cargo build
+   Compiling restaurant v0.1.0 (file:///projects/restaurant)
+error[E0603]: module `hosting` is private
+ --> src/lib.rs:9:28
+  |
+9 |     crate::front_of_house::hosting::add_to_waitlist();
+  |                            ^^^^^^^  --------------- function `add_to_waitlist` is not publicly re-exported
+  |                            |
+  |                            private module
+  |
+note: the module `hosting` is defined here
+ --> src/lib.rs:2:5
+  |
+2 |     mod hosting {
+  |     ^^^^^^^^^^^
+
+error[E0603]: module `hosting` is private
+  --> src/lib.rs:12:21
+   |
+12 |     front_of_house::hosting::add_to_waitlist();
+   |                     ^^^^^^^  --------------- function `add_to_waitlist` is not publicly re-exported
+   |                     |
+   |                     private module
+   |
+note: the module `hosting` is defined here
+  --> src/lib.rs:2:5
+   |
+2  |     mod hosting {
+   |     ^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0603`.
+error: could not compile `restaurant` (lib) due to 2 previous errors
+```
+
+> `Liste 7-4`: `Liste 7-3`’teki kodu derlerken alınan derleyici hataları
+
++ Hata mesajları, hosting modülünün private olduğunu söylüyor. Başka bir deyişle, `hosting` modülü ve `add_to_waitlist` fonksiyonu için doğru yollara sahibiz, ancak Rust bunları kullanmamıza izin vermiyor çünkü private bölümlere erişimi yok. Rust'ta, tüm öğeler (fonksiyonlar, metodlar, `struct`'lar, `enum`'lar, modüller ve sabitler) varsayılan olarak üst modüllere karşı private'tır. Bir fonksiyon veya `struct` gibi bir öğeyi private yapmak istiyorsanız, onu bir modüle koyarsınız.
++ Bir üst modüldeki öğeler, alt modüllerin içindeki private öğeleri kullanamaz, ancak alt modüllerdeki öğeler, ata modüllerindeki öğeleri kullanabilir. Bunun nedeni, alt modüllerin uygulama detaylarını sarıp gizlemesi, ancak alt modüllerin tanımlandıkları bağlamı görebilmeleridir. Metaforumuza devam edersek, gizlilik kurallarını bir restoranın arka ofisi gibi düşünün: orada olan şeyler restoran müşterileri için private'tır, ancak ofis yöneticileri işlettikleri restoranda her şeyi görebilir ve yapabilir.
+
+
+> [!NOTE]
+> #### Üst Modül(Parent) ile Alt Modül(Child) Arasından Erişim:
+> ##### 1. Üst modül → Alt modüle ERİŞEMEZ (varsayılan olarak)
+> ```rust
+> mod parent {
+>    fn parent_function() {
+>        // HATA! child_function private
+>        child::child_function(); // ❌
+>    }
+>   
+>    mod child {
+>        fn child_function() {} // private
+>    }
+>}
+> ```
+> + Üst modül, alt modülün private öğelerini göremez.
+> ##### 2. Alt modül → Üst modüle ERİŞEBİLİR
+> ```rust
+> mod parent {
+>    fn parent_function() {} // private ama child erişebilir
+>    
+>    mod child {
+>        fn child_function() {
+>            // ✅ Çalışır! Üst modüldeki fonksiyona erişebildik
+>            super::parent_function();
+>        }
+>    }
+>}
+> ```
+> + Alt modül, üst modülün öğelerini görebilir.
+> #### Neden Böyle?
+> + **"alt modüller uygulama detaylarını gizler"** → Alt modül kendi içinde ne yaptığını gizler (kapsülleme)
+> + **"alt modüller tanımlandıkları bağlamı görür"** → Ama bulunduğu ortamı (üst modülü) görebilir
+
++ Rust, modül sisteminin bu şekilde işlemesini seçti, böylece iç uygulama detaylarını gizlemek varsayılan olur. Bu şekilde, dış kodu bozmadan iç kodun hangi kısımlarını değiştirebileceğinizi bilirsiniz. Ancak, Rust size `pub` anahtar kelimesini kullanarak bir öğeyi public yaparak alt modüllerin kodunun iç kısımlarını dış ata modüllere açma seçeneği sunar.
+
+### 7.3.1. `pub` Anahtar Kelimesi ile Path'leri Herkese Açma:
+
++ Hata aldığımız 7-4 numaralı listeye dönelim; bu hata bize `hosting` modülünün özel (`private`) olduğunu söylüyordu. Üst (parent) modülde bulunan `eat_at_restaurant` fonksiyonunun, alt (child) modülde bulunan `add_to_waitlist` fonksiyonuna erişebilmesini istiyoruz. Bu nedenle, 7-5 numaralı listede gösterildiği gibi `hosting` modülünü `pub` anahtar kelimesiyle işaretliyoruz (public yapıyoruz).
+
+**Dosya Adı:**
+
+```rust
+mod front_of_house {
+    pub mod hosting {
+        fn add_to_waitlist() {}
+    }
+}
+
+// -- snip --
+pub fn eat_at_restaurant() {
+    // Absolute path
+    crate::front_of_house::hosting::add_to_waitlist();
+
+    // Relative path
+    front_of_house::hosting::add_to_waitlist();
+}
+```
+
+> `Liste 7-5`: `eat_at_restaurant`'tan(`eat_at_restaurant` içerisinde) kullanmak için `hosting` modülünü `pub` olarak bildirme
+
++ Ne yazık ki, `Liste 7-5`'teki kod hala `Liste 7-6`'da gösterildiği gibi derleyici hatalarıyla sonuçlanıyor.
+
+```
+$ cargo build
+   Compiling restaurant v0.1.0 (file:///projects/restaurant)
+error[E0603]: function `add_to_waitlist` is private
+  --> src/lib.rs:10:37
+   |
+10 |     crate::front_of_house::hosting::add_to_waitlist();
+   |                                     ^^^^^^^^^^^^^^^ private function
+   |
+note: the function `add_to_waitlist` is defined here
+  --> src/lib.rs:3:9
+   |
+3  |         fn add_to_waitlist() {}
+   |         ^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `add_to_waitlist` is private
+  --> src/lib.rs:13:30
+   |
+13 |     front_of_house::hosting::add_to_waitlist();
+   |                              ^^^^^^^^^^^^^^^ private function
+   |
+note: the function `add_to_waitlist` is defined here
+  --> src/lib.rs:3:9
+   |
+3  |         fn add_to_waitlist() {}
+   |         ^^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0603`.
+error: could not compile `restaurant` (lib) due to 2 previous errors
+
+```
+
+> `Liste 7-6`: Liste 7-5’teki kodu derlerken oluşan derleyici hataları
+
++ Ne oldu? mod hosting'in önüne pub anahtar kelimesini eklemek, modülü public yapar. Bu değişiklikle, front_of_house'a erişebilirsek, hosting'e de erişebiliriz. Ancak hosting'in içeriği hala private'tır; modülü public yapmak, içeriğini public yapmaz. Bir modül üzerindeki pub anahtar kelimesi, yalnızca ata modüllerindeki kodun ona başvurmasına izin verir, iç koduna erişmesine değil. Modüller birer kapsayıcı olduğundan, sadece modülü public yaparak yapabileceğimiz pek bir şey yoktur; daha ileri gitmeli ve modül içindeki öğelerden bir veya daha fazlasını da public yapmayı seçmeliyiz.
++ `Liste 7-6`'daki hatalar, `add_to_waitlist` fonksiyonunun *private* olduğunu söylüyor. Gizlilik kuralları, modüllerin yanı sıra `struct`'lar, `enum`'lar, fonksiyonlar ve metodlar için de geçerlidir.
++ Şimdi, **`Liste 7-7`’de olduğu gibi**, `add_to_waitlist` fonksiyon tanımının önüne `pub` anahtar kelimesini ekleyerek bu fonksiyonu da public (herkese açık) yapalım.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+// -- snip --
+pub fn eat_at_restaurant() {
+    // Absolute path
+    crate::front_of_house::hosting::add_to_waitlist();
+
+    // Relative path
+    front_of_house::hosting::add_to_waitlist();
+}
+```
+
+> `Liste 7-7`: `mod hosting` ve `fn  add_to_waitlist`'e `pub` anahtar kelimesini eklemek, fonksiyonu `eat_at_restaurant`'tan çağırmamıza izin verir.
+
++ Artık kod derlenecek! `pub` anahtar kelimesini eklemenin, gizlilik kurallarına göre `eat_at_restaurant` içinde bu yolları kullanmamıza neden izin verdiğini görmek için mutlak ve göreceli yollara bakalım.
++ **Mutlak yolda**, crate'imizin modül ağacının kökü olan crate ile başlarız. `front_of_house` modülü, `crate root`'ta tanımlanmıştır. `front_of_house` `public`(herkese açık) olmasa da, `eat_at_restaurant` fonksiyonu `front_of_house` ile aynı modülde tanımlandığı için (yani, `eat_at_restaurant` ve `front_of_house` kardeştir), `eat_at_restaurant`'tan `front_of_house`'a başvurabiliriz. Sıradaki, `pub` ile işaretlenmiş `hosting` modülüdür. `hosting`'in üst modülüne erişebiliriz, dolayısıyla `hosting`'e erişebiliriz. Son olarak, `add_to_waitlist` fonksiyonu `pub` ile işaretlenmiştir ve üst modülüne erişebiliriz, bu nedenle bu fonksiyon çağrısı çalışır!
++ **Göreceli yolda**, mantık mutlak yolla aynıdır, ilk adım dışında: `crate root`'tan başlamak yerine, yol `front_of_house`'tan başlar. `front_of_house` modülü, `eat_at_restaurant` ile aynı modül içinde tanımlanmıştır, dolayısıyla `eat_at_restaurant`'ın tanımlandığı modülden başlayan göreceli yol çalışır. Ardından; `hosting` ve `add_to_waitlist`, `pub` ile işaretlendiği için, yolun geri kalanı çalışır ve bu fonksiyon çağrısı geçerlidir!
++ Library crate'inizi diğer projelerin kodunuzu kullanabilmesi için paylaşmayı planlıyorsanız, public API'niz, crate'inizi kullanan kullanıcılarla yaptığınız ve kodunuzla nasıl etkileşime girebileceklerini belirleyen sözleşmedir. İnsanların crate'inize bağımlı olmasını kolaylaştırmak için public API'nizdeki değişiklikleri yönetmeyle ilgili birçok husus vardır. Bu hususlar bu kitabın kapsamı dışındadır; bu konuyla ilgileniyorsanız, [The Rust API Guidelines](https://rust-lang.github.io/api-guidelines/)'a bakın.
+
+
+> [!tip]
+> #### Binary ve Kütüphane İçeren Paketler İçin En İyi Pratikler
+> + Bir paketin hem src/main.rs binary crate root'u hem de `src/lib.rs` library crate root'u içerebileceğinden ve her iki crate'in de varsayılan olarak paket adına sahip olacağından bahsetmiştik.
+> + Tipik olarak, hem library hem de binary crate içeren bu modele sahip paketler, binary crate'te library crate'te tanımlanan kodu çağıran bir çalıştırılabilir dosyayı başlatmak için yeterli miktarda kod içerecektir.
+> + Bu, diğer projelerin paketin sağladığı işlevselliğin çoğundan faydalanmasını sağlar çünkü library crate'in kodu paylaşılabilir.
+> ---
+> + Modül ağacı **src/lib.rs** içinde tanımlanmalıdır. Bu sayede, tüm public öğeler (public items) binary crate içinde, yol isimlendirmesi paketin adıyla başlatılarak kullanılabilir. 
+> + Binary crate, kütüphane crate’in bir kullanıcısı hâline gelir; tıpkı tamamen harici bir crate’in kütüphane crate’i kullanması gibi. Binary crate yalnızca public API’ye erişebilir. Bu durum, iyi bir API tasarlamanıza yardımcı olur; çünkü hem yazar hem de müşteri siz olursunuz!
+> ---
+> + Bölüm 12'de,, hem *binary crate* hem de *library crate* içeren bir komut satırı programı üzerinden bu organizasyon yaklaşımını *uygulamalı olarak* göstereceğiz.
+
+### 7.3.2. `super` ile Göreli (Relative) Yolları Başlatmak:
+
++ Geçerli (current) modül veya crate kökü yerine, **üst (parent) modülden başlayan göreli yolları**, yolun başında `super` kullanarak oluşturabiliriz. Bu, dosya sisteminde **üst dizine çıkmak** anlamına gelen `..` söz dizimiyle bir yol başlatmaya benzer.
++ `super` kullanımı, bir öğenin üst modülde bulunduğunu bildiğimiz durumlarda ona referans vermemizi sağlar. Bu da, modül üst modülüyle yakından ilişkiliyse fakat ileride üst modülün modül ağacı içinde başka bir yere taşınması ihtimali varsa, **modül ağacını yeniden düzenlemeyi daha kolay hâle getirir**.
++ `Liste 7-8`’deki kodu ele alalım: Bu kod, bir şefin yanlış bir siparişi düzelttiği ve siparişi bizzat müşteriye götürdüğü durumu modellemektedir. `back_of_house` modülü içinde tanımlanan `fix_incorrect_order` fonksiyonu, **üst modülde** tanımlı olan `deliver_order` fonksiyonunu çağırır. Bunu yaparken, `deliver_order`’a giden yolu `super` ile başlatarak belirtir.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+fn deliver_order() {}
+
+mod back_of_house {
+    fn fix_incorrect_order() {
+        cook_order();
+        super::deliver_order();
+    }
+
+    fn cook_order() {}
+}
+```
+
+> `Liste 7-8`: `super` ile başlayan göreli(`relative`) bir yol kullanarak bir fonksiyon çağırma
+
++ `fix_incorrect_order` fonksiyonu `back_of_house` modülünün içindedir, bu yüzden `super` kullanarak `back_of_house` modülünün üst (ebeveyn) modülüne geçebiliriz. Bu durumda ebeveyn modül `crate`, yani kök modüldür. Buradan `deliver_order` fonksiyonunu ararız ve buluruz. Başarılı!
++ `back_of_house` modülü ile `deliver_order` fonksiyonunun büyük olasılıkla birbirleriyle olan bu ilişkiyi koruyacağını ve crate’in modül ağacını yeniden düzenlemeye karar verdiğimizde birlikte taşınacaklarını düşünüyoruz. Bu nedenle `super` kullandık; böylece ileride bu kod farklı bir modüle taşınırsa, güncellememiz gereken yerlerin sayısı daha az olur.
+### 7.3.3. Struct'ları ve Enum'ları Public Yapma:
+
++ `Struct` ve `enum`’ları da **pub** anahtar kelimesiyle herkese açık (public) olarak tanımlayabiliriz; ancak **struct** ve **enum**’lar için **pub** kullanımında dikkat edilmesi gereken bazı ek ayrıntılar vardır.
++ Bir **struct** tanımının başına **pub** koyarsak, struct’ın kendisi public olur; ancak **struct’ın alanları (fields) varsayılan olarak hâlâ private** kalır. Her bir alanın public olup olmayacağını **ayrı ayrı** belirleyebiliriz.
++ `Liste 7-9`’da, **`back_of_house::Breakfast`** adlı public bir `struct` tanımladık. Bu `struct` içinde **toast** alanı(field) public iken, **seasonal_fruit** alanı private’tır. Bu durum, bir restorandaki şu senaryoyu modellemektedir: Müşteri, yemeğin yanında hangi ekmeğin (toast) geleceğini seçebilir; ancak yemeğe eşlik edecek meyveye şef karar verir. Şef bu kararı, mevsime ve stok durumuna göre verir. Mevcut meyveler sık sık değiştiği için müşteriler meyveyi seçemez, hatta hangi meyvenin geleceğini önceden göremez.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+mod back_of_house {
+    pub struct Breakfast {
+        pub toast: String,
+        seasonal_fruit: String,
+    }
+
+    impl Breakfast {
+        pub fn summer(toast: &str) -> Breakfast {
+            Breakfast {
+                toast: String::from(toast),
+                seasonal_fruit: String::from("peaches"),
+            }
+        }
+    }
+}
+
+pub fn eat_at_restaurant() {
+    // Order a breakfast in the summer with Rye toast.
+    let mut meal = back_of_house::Breakfast::summer("Rye");
+    // Change our mind about what bread we'd like.
+    meal.toast = String::from("Wheat");
+    println!("I'd like {} toast please", meal.toast);
+
+    // The next line won't compile if we uncomment it; we're not allowed
+    // to see or modify the seasonal fruit that comes with the meal.
+    // meal.seasonal_fruit = String::from("blueberries");
+}
+```
+
+> `Liste 7-9:` Bazı alanları (field) public, bazı alanları `private` olan bir `struct`
+
++ `back_of_house::Breakfast` yapısındaki **`toast`** alanı (field) public olduğu için, **`eat_at_restaurant`** fonksiyonu içinde nokta gösterimi (dot notation) kullanarak **`toast`** alanını hem okuyabilir hem de yazabiliriz. Dikkat ederseniz, **`seasonal_fruit`** alanını **`eat_at_restaurant`** içinde kullanamayız; çünkü **`seasonal_fruit`** private’tır. **`seasonal_fruit`** alanının değerini değiştiren satırın yorumunu kaldırmayı deneyin; hangi hatayı aldığınızı göreceksiniz.
++ Ayrıca şuna dikkat edin: **`back_of_house::Breakfast`** yapısının private bir alanı olduğu için, bu `struct` bir **public ilişkili fonksiyon** (associated function) aracılığıyla bir **`Breakfast`** örneği oluşturmak zorundadır (biz bu fonksiyona burada **`summer`** adını verdik). Eğer **`Breakfast`** böyle bir fonksiyon sağlamasaydı, **`eat_at_restaurant`** içinde bir **`Breakfast`** örneği oluşturamazdık; çünkü **`seasonal_fruit`** alanı private olduğu için bu alanın değerini **`eat_at_restaurant`** içinde ayarlayamazdık.
++ Buna karşılık, bir **`enum`**’u public yaparsak, onun **tüm varyantları (variants)** da otomatik olarak public olur. Bunun için yalnızca **`enum`** anahtar kelimesinin önüne **`pub`** yazmamız yeterlidir; `Liste 7-10`’da gösterildiği gibi.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+mod back_of_house {
+    pub enum Appetizer {
+        Soup,
+        Salad,
+    }
+}
+
+pub fn eat_at_restaurant() {
+    let order1 = back_of_house::Appetizer::Soup;
+    let order2 = back_of_house::Appetizer::Salad;
+}
+```
+
+> `Liste 7-10`: Bir `enum`’u public olarak tanımlamak, onun tüm varyantlarını (variantlarını) da `public` yapar.
+
++ `Appetizer` `enum`'unu public yaptığımız için, `eat_at_restaurant` içinde `Soup` ve `Salad` varyantlarını kullanabiliriz.
++ `Enum`'lar, varyantları public olmadıkça pek kullanışlı değildir; her durumda tüm `enum` varyantlarını `pub` ile işaretlemek zorunda kalmak can sıkıcı olurdu, bu nedenle `enum` varyantları için varsayılan durum `public` olmaktır. `Struct`'lar genellikle alanları public olmadan da kullanışlıdır, bu nedenle `struct` alanları(fields), `pub` ile işaretlenmedikçe her şeyin varsayılan olarak private olması genel kuralını takip eder.
++ Henüz ele almadığımız `pub` ile ilgili bir durum daha var ve bu bizim son modül sistemi özelliğimizdir: `use` anahtar kelimesi. Önce `use`'u tek başına ele alacağız, ardından `pub` ve `use`'u nasıl birleştireceğimizi göstereceğiz.
 ## Kaynak:
 
 + [READ THE BOOK!](https://doc.rust-lang.org/book/ch05-01-defining-structs.html)
