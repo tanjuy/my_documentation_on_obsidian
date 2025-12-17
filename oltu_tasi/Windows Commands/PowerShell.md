@@ -116,7 +116,51 @@ PS C:\Users\tanju> Get-Location
 ### Get-NetTCPConnection:
 
 
-### Remove-Item:
+### Get-CimInstance:
+
++ **`Get-CimInstance`**, PowerShell’de **CIM (Common Information Model)** sınıflarını sorgulamak için kullanılan **modern ve önerilen** bir komuttur.
+
++ `Get-CimInstance`
+	- Windows’un sistem bilgilerini
+	- Donanım, işletim sistemi, servisler, süreçler vb.
+	- **CIM / WMI altyapısı üzerinden** 
+
+#### Örnek 1: Win32_WinSAT
+
++ `Get-CimInstance Win32_WinSAT`, **Windows işletim sisteminde Windows System Assessment Tool (WinSAT)** tarafından yapılan donanım performans değerlendirme sonuçlarını **PowerShell üzerinden sorgulamak** için kullanılan bir komuttur.
+
+```powershell
+Get-CimInstance Win32_WinSAT
+```
+
+**Komut Çıkıtısı:**
+
+```powershell
+CPUScore              : 9,2
+D3DScore              : 9,9
+DiskScore             : 8,65
+GraphicsScore         : 7,9
+MemoryScore           : 9,2
+TimeTaken             : MostRecentAssessment
+WinSATAssessmentState : 1
+WinSPRLevel           : 7,9
+PSComputerName        :
+```
+
+
+> [!NOTE]
+> #### Win32_WinSAT nedir?
+> **Win32_WinSAT**, Windows Management Instrumentation (WMI) / CIM sınıfıdır ve:
+> + CPU
+> + RAM
+> + Grafik
+> + Disk
+> 
+> bileşenlerinin **WinSAT tarafından ölçülen performans skorlarını** içerir.
+> + Bu skorlar, eski adıyla **Windows Experience Index (WEI)** verileridir.
+
+
+## Remove-Item:
 + Dosya silme ve Dosya silme işlemi yapar.
 
 ```powershell

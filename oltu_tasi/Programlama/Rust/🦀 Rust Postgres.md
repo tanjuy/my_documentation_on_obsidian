@@ -1,3 +1,6 @@
+#programlama #rust #database  #postgreSQL 
+
+## Database Bağlanma:
 
 ```rust
 use postgres::{Client, NoTls, Error};
@@ -26,4 +29,11 @@ fn main() -> Result<(), Error> {
 ```toml
 [dependencies]
 postgres = "0.19"
+```
+
+
+## Database Listeleme:
+
+```rust
+
 ```

@@ -107,12 +107,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Programlama/Python/Python Giriş.md",
+                "file": "Programlama/Python/Database_py/Python PostgreSQL.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Python Giriş"
+              "title": "Python PostgreSQL"
+            }
+          },
+          {
+            "id": "c3277e963cc32fd0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Programlama/Rust/🦀 Rust Postgres.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "🦀 Rust Postgres"
             }
           },
           {
@@ -130,21 +144,21 @@
             }
           },
           {
-            "id": "c3277e963cc32fd0",
+            "id": "29ada48141ff9b63",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Programlama/Rust/🦀 Rust Postgres.md",
+                "file": "Database/PostgreSQL/PostgreSQL Giriş.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "🦀 Rust Postgres"
+              "title": "PostgreSQL Giriş"
             }
           }
         ],
-        "currentTab": 7
+        "currentTab": 8
       }
     ],
     "direction": "vertical"
@@ -292,14 +306,16 @@
   },
   "active": "854b9cf4da78bd46",
   "lastOpenFiles": [
+    "K8s/K8s Kurulumu.md",
+    "Programlama/Rust/🦀 Rust'a Giriş.md",
     "Programlama/Rust/🦀 Rust Postgres.md",
     "Database/PostgreSQL/PostgreSQL Giriş.md",
-    "Programlama/Rust/🦀 Rust'a Giriş.md",
-    "Programlama/Python/Database_py/Postgresql_py.md",
+    "Windows Commands/PowerShell.md",
+    "Programlama/Python/Database_py/Python PostgreSQL.md",
+    "Ansible/ansible.cfg.md",
+    "Programlama/Python/Python Giriş.md",
     "Programlama/Rust/🦀 Rust Pratikleri.md",
     "Programlama/Python/Database_py",
-    "Programlama/Python/Python Giriş.md",
-    "K8s/K8s Kurulumu.md",
     "Git/Git Dersi.md",
     "Linux Command/tmux.md",
     "Linux Command/fzf.md",
@@ -317,7 +333,6 @@
     "Docker/Dockerfile.md",
     "Programlama/Python/Python Projeler/Mail Gönderme.md",
     "Web Servers/html/HTML.md",
-    "Windows Commands/PowerShell.md",
     "Programlama/Python/Python Projeler/Pictures/app_password_final.png",
     "Programlama/Python/Python Projeler/Pictures/app_password_google.png",
     "Programlama/Python/Python Projeler/Pictures",
@@ -331,7 +346,6 @@
     "Web Servers/Nginx/Nginx Config File.md",
     "DevOps/Grafana/Pictures/grafana_slack_bot_2.png",
     "DevOps/Grafana/Pictures/grafana_slack_bot_1.png",
-    "Docker/Docker Giriş.md",
     "DevOps/Grafana/Pictures/docker_compose_grafana_dashboard4.png",
     "Pictures",
     "Archlinux/Untitled.base",

@@ -1,5 +1,4 @@
-
-# Psycopg
+# Psycopg2
 ## 1. Sanal Ortam Kurulumu:
 
 ```shell
@@ -49,6 +48,46 @@ conn.close()
 ('PostgreSQL 14.20 (Ubuntu 14.20-0ubuntu0.22.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0, 64-bit',)
 ```
 
+## 4. Veritabanlarını Listeleme:
+
++ PostgreSQL’de veritabanlarını listelemek için **herhangi bir veritabanına** (genellikle `postgres`) bağlanmanız gerekir.
++ PostgreSQL veritabanları `pg_database` sistem tablosunda tutulur.
+
+```python
+import psycopg2
+
+connect = psycopg2.connect(
+        dbname = "postgres",
+        user = "postgres",
+        password = "1234tyo",
+        host = "localhost",
+        port = "5432"
+        )
+
+cursor = connect.cursor()
+
+cursor.execute("""
+               SELECT datname FROM pg_database;
+               """)
+
+databases = cursor.fetchall()
+
+for db in databases:
+    print(db[0])
+
+cursor.close()
+connect.close()
+```
+
+> + `pg_database` → PostgreSQL sistem kataloğu
+> + `fetchall()` → Tüm sonuçları alır
+
+> [!NOTE]
+> + `template0` ve `template1` hariç tutmak için aşağıdaki SQL komutunu kullanabilirsiniz:
+> ```sql
+> SELECT datname FROM pg_database
+> 	WHERE datistemplate = false;
+> ```
 
 # Psycopg - Doc
 
@@ -88,6 +127,31 @@ Bu özellikler sayesinde psycopg2, büyük ölçekli ve yoğun trafikli uygulama
 ```
 
 6. **Özelleştirilebilir**: Kendi veri tipleriniz için özel dönüştürücüler yazabilirsiniz.
+
++ Psycopg 2, hem Unicode uyumludur hem de Python 3 ile uyumludur.
+
+# Yükleme:
+
++ Psycopg, Python programlama dili için bir PostgreSQL bağdaştırıcısıdır (adapter). PostgreSQL’in resmi istemci kütüphanesi olan libpq için bir sarmalayıcıdır (wrapper).
+
+
+> [!NOTE]
+> #### Sarmalayıcı(Wrapper) nedir?
+> + Psycopg, PostgreSQL ile doğrudan kendisi konuşan bir kütüphane değildir; bunun yerine PostgreSQL’in resmi istemci kütüphanesi olan `libpq`’nin fonksiyonlarını Python’dan kullanılabilir hâle getiren bir katmandır.
+> + Biraz daha açarsak:
+> 	- **libq** : PostgreSQL’in C diliyle yazılmış, düşük seviyeli (low-level) resmi istemci kütüphanesidir.
+> 	- **Wrapper (sarmalayıcı)** : Bu düşük seviyeli C kütüphanesini “sarar” ve onun karmaşık ayrıntılarını gizleyerek, Python geliştiricisinin rahatça kullanabileceği bir API sunar.
+> 	- **Psycopg’nin yaptığı iş**
+> 		1. `libpq` fonksiyonlarını çağırır
+> 		2.  Bellek yönetimi, veri türü dönüşümleri (ör. PostgreSQL → Python), hata yönetimi gibi işleri üstlenir.
+> 		3. Python’a özgü, okunabilir ve güvenli bir arayüz sağlar.
+> + **Özet:** Psycopg, PostgreSQL ile doğrudan konuşmak yerine, PostgreSQL’in resmi C kütüphanesini kullanır ve onu Python dünyasına uygun hâle getirir.
+
++ Çoğu işletim sistemi için Psycopg’yi kurmanın en hızlı yolu, [PyPI](https://pypi.org/project/psycopg2-binary/) üzerinde bulunan wheel paketini kullanmaktır.
+
+```shell
+$ pip install psycopg2-binary
+```
 
 ## KAYNAK:
 

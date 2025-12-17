@@ -1,3 +1,4 @@
+#database #postgreSQL
 # PostgreSQL nedir?
 
 + **PostgreSQL**, açık kaynak kodlu, nesne-ilişkisel bir veritabanı yönetim sistemidir (RDBMS).
@@ -1630,9 +1631,26 @@ ALTER USER tanju WITH PASSWORD NULL;
 
 ## a. Database Listeleme:
 
+### a.1. SQL Komutu ile Listeleme:
+
+```sql
+SELECT datname FROM pg_database;
+```
+
++ Sadece kullanıcı veritabanlarını görmek için
++ Sistem veritabanlarını (`template0`, `template1`) hariç tutmak isterseniz:
+
+```sql
+SELECT datname FROM pg_database
+	WHERE datistemplate = false;
+```
+
+### a.2. psql Komut ile Listeleme:
+
 ```sql
 \l      -- \list
 ```
+
 
 ## b. Database Oluşturma:
 

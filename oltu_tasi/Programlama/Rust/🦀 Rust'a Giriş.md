@@ -1,7 +1,5 @@
-
+#programlama  #rust
 # 🦀 Rust Programlama Nedir?
-
-
 
 # Yükleme İşlemleri:
 
@@ -5311,6 +5309,646 @@ pub fn eat_at_restaurant() {
 + `Appetizer` `enum`'unu public yaptığımız için, `eat_at_restaurant` içinde `Soup` ve `Salad` varyantlarını kullanabiliriz.
 + `Enum`'lar, varyantları public olmadıkça pek kullanışlı değildir; her durumda tüm `enum` varyantlarını `pub` ile işaretlemek zorunda kalmak can sıkıcı olurdu, bu nedenle `enum` varyantları için varsayılan durum `public` olmaktır. `Struct`'lar genellikle alanları public olmadan da kullanışlıdır, bu nedenle `struct` alanları(fields), `pub` ile işaretlenmedikçe her şeyin varsayılan olarak private olması genel kuralını takip eder.
 + Henüz ele almadığımız `pub` ile ilgili bir durum daha var ve bu bizim son modül sistemi özelliğimizdir: `use` anahtar kelimesi. Önce `use`'u tek başına ele alacağız, ardından `pub` ve `use`'u nasıl birleştireceğimizi göstereceğiz.
+
+## 7.4. `use` Anahtar Kelimesi ile Yolları(Path) Kapsama(Scope) Alma:
+
++ Fonksiyonları çağırmak için yolları (path’leri) sürekli yazmak zahmetli ve tekrarlı gelebilir. Liste 7-7’de, `add_to_waitlist` fonksiyonunu çağırmak için ister mutlak (absolute) ister göreli (relative) yolu seçmiş olalım, her seferinde `front_of_house` ve `hosting` bölümlerini de belirtmek zorunda kalıyorduk. Neyse ki bu süreci basitleştirmenin bir yolu vardır: `use` anahtar sözcüğünü kullanarak bir yol için bir kez kısayol oluşturabilir ve ardından aynı kapsam (scope) içinde her yerde bu daha kısa adı kullanabiliriz.
++ Liste 7-11’de, `eat_at_restaurant` fonksiyonunun kapsamına `crate::front_of_house::hosting` modülünü dahil ediyoruz. Böylece `eat_at_restaurant` içinde `add_to_waitlist` fonksiyonunu çağırmak için yalnızca `hosting::add_to_waitlist` ifadesini kullanmamız yeterli oluyor.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+use crate::front_of_house::hosting;
+
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist();
+}
+```
+
+> `Liste 7-11`: `use` ile bir modülün kapsama(scope) alınması
+
++ Bir kapsam (scope) içinde `use` ve bir yol (path) eklemek, dosya sisteminde sembolik bir bağlantı (symbolic link) oluşturmaya benzer. Kasa (crate) kökünde `use crate::front_of_house::hosting` ifadesini eklediğimizde, `hosting` artık o kapsamda geçerli bir isim olur; sanki `hosting` modülü doğrudan crate kökünde tanımlanmış gibi davranır. `use` ile kapsama alınan yollar, diğer tüm yollar gibi gizlilik (privacy) kurallarına da tabidir.
++ Unutulmamalıdır ki `use`, yalnızca tanımlandığı kapsama özel bir kısayol oluşturur. Liste 7-12’de `eat_at_restaurant` fonksiyonu `customer` adlı yeni bir alt modüle taşınmıştır. Bu durum, `use` bildiriminin bulunduğu kapsamdan farklı bir kapsam oluşturduğu için, fonksiyon gövdesi derlenmez.
+
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+use crate::front_of_house::hosting;
+
+mod customer {
+    pub fn eat_at_restaurant() {
+        hosting::add_to_waitlist();
+    }
+}
+```
+
+
+> `Liste 7-12`: Bir `use` ifadesi yalnızca bulunduğu kapsamda(`scope`) geçerlidir.
+
++ Derleyici hatası, kısayolun artık `customer` modülü içinde geçerli olmadığını gösteriyor:
+
+```
+$ cargo build
+   Compiling restaurant v0.1.0 (file:///projects/restaurant)
+error[E0433]: failed to resolve: use of undeclared crate or module `hosting`
+  --> src/lib.rs:11:9
+   |
+11 |         hosting::add_to_waitlist();
+   |         ^^^^^^^ use of undeclared crate or module `hosting`
+   |
+help: consider importing this module through its public re-export
+   |
+10 +     use crate::hosting;
+   |
+
+warning: unused import: `crate::front_of_house::hosting`
+ --> src/lib.rs:7:5
+  |
+7 | use crate::front_of_house::hosting;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+For more information about this error, try `rustc --explain E0433`.
+warning: `restaurant` (lib) generated 1 warning
+error: could not compile `restaurant` (lib) due to 1 previous error; 1 warning emitted
+```
+
++ Ayrıca use ifadesinin artık kendi kapsamında kullanılmadığına dair bir uyarı olduğuna dikkat edin! Bu sorunu düzeltmek için, use ifadesini customer modülünün içine taşıyın veya alt modül olan customer içinde super::hosting ile üst modüldeki kısayola referans verin.
+
+
+> [!NOTE]
+> **Bu sorunu düzeltmek için**
+> ##### 1. Yöntem: `super`
+> ```rust
+>mod front_of_house {
+>    pub mod hosting {
+>        pub fn add_to_waitlist() {}
+>    }
+>}
+>
+>use crate::front_of_house::hosting;
+>
+>mod customer {
+>    pub fn eat_at_restaurant() {
+>        super::hosting::add_to_waitlist();
+>    }
+>}
+> ```
+> ##### 2. Yöntem:  `use`'u `customer` içerisine taşıma
+> ```rust
+>mod front_of_house {
+>    pub mod hosting {
+>        pub fn add_to_waitlist() {}
+>    }
+>}
+>
+>mod customer {
+>    use crate::front_of_house::hosting;
+>    pub fn eat_at_restaurant() {
+>        hosting::add_to_waitlist();
+>    }
+>}
+> ```
+
+### 7.4.1. Rust’a Özgü (İdiyomatik) `use` Path’leri Oluşturma:
+
++ `Liste 7-11`’de, aynı sonucu elde etmek için `Liste 7-13`’te olduğu gibi `use` yolunu doğrudan `add_to_waitlist` fonksiyonuna kadar belirtmek yerine, neden `use crate::front_of_house::hosting` ifadesini kullandığımızı ve ardından `eat_at_restaurant` içinde `hosting::add_to_waitlist` çağrısını yaptığımızı merak etmiş olabilirsiniz.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+use crate::front_of_house::hosting::add_to_waitlist;
+
+pub fn eat_at_restaurant() {
+    add_to_waitlist();
+}
+```
+
+> `Liste 7-13`: `use` ile `add_to_waitlist` fonksiyonunu kapsama almak (idiyomatik olmayan bir kullanım)
+
+
+> [!NOTE]
+> #### İdiyomatik nedir?
+> Programlama bağlamında **idiyomatik**, bir dilin:
+> + Topluluk tarafından **benimsenmiş**
+> + Resmî dokümantasyonlarda **önerilen**
+> + Okunabilirliği ve niyeti **en iyi yansıtan**
+> + "Bu dili bilen biri böyle yazar" denilen
+> 
+> **doğal ve doğru kullanım biçimini** ifade eder.
+> + Yani “çalışıyor mu?” sorusundan çok, **“Bu dilde doğru ve yerleşik şekilde mi yazılmış?”** sorusunun cevabıdır.
+
+
+> [!tip]
+> + Liste 7-11 ve Liste 7-13 her ikisi de aynı işi yapıyor olsa da, bir fonksiyonu `use` ile kapsama almanın idiyomatik yolu Liste 7-11’de gösterilmiştir. Fonksiyonun ait olduğu üst (parent) modülü `use` ile kapsama almak, fonksiyonu çağırırken bu üst modülü belirtmemizi gerektirir. Fonksiyon çağrısında üst modülün belirtilmesi, fonksiyonun yerel olarak tanımlanmadığını açıkça gösterirken, tam yolun tekrar edilmesini de en aza indirir. Liste 7-13’teki kodda ise `add_to_waitlist` fonksiyonunun nerede tanımlandığı net değildir.
+> + Öte yandan, `use` ile struct’lar, enum’lar ve diğer öğeler kapsama alınırken, tam yolun belirtilmesi idiyomatik kabul edilir. Liste 7-14, standart kütüphanedeki `HashMap` struct’ını bir ikili (binary) crate’in kapsamına almanın idiyomatik yolunu göstermektedir.
+
+**Dosya Adı:** `src/main.rs`
+
+```rust
+use std::collections::HashMap;
+
+fn main() {
+    let mut map = HashMap::new();
+    map.insert(1, 2);
+}
+```
+
+> `Liste 7-14`: `HashMap`’i idiyomatik bir şekilde kapsama almak
+
++ Bu deyimin arkasında güçlü bir neden yoktur: Bu sadece ortaya çıkmış bir gelenektir ve insanlar Rust kodunu bu şekilde okumaya ve yazmaya alışmışlardır.
++ Bu idiyomun bir istisnası, `use` ifadeleriyle aynı ada sahip iki öğeyi kapsama almaya çalıştığımız durumdur; çünkü Rust buna izin vermez. Liste 7-15, aynı ada sahip ancak farklı üst (parent) modüllere ait iki `Result` türünün kapsama nasıl alındığını ve bunlara nasıl referans verildiğini göstermektedir.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+use std::fmt;
+use std::io;
+
+fn function1() -> fmt::Result {
+    // --snip--
+    Ok(())
+}
+
+fn function2() -> io::Result<()> {
+    // --snip--
+    Ok(())
+}
+```
+
+> L`iste 7-15`: Aynı ada sahip iki türü aynı kapsama(scope) almak, üst (parent) modüllerinin kullanılmasını gerektirir.
+
++ Gördüğünüz gibi, üst (parent) modülleri kullanmak iki `Result` türünü birbirinden ayırt eder. Eğer bunun yerine `use std::fmt::Result` ve `use std::io::Result` ifadelerini kullansaydık, aynı kapsam içinde iki farklı `Result` türü bulunmuş olurdu ve `Result` ismini kullandığımızda Rust hangisini kastettiğimizi bilemezdi.
+
+### 7.4.2. `as` Anahtar Sözcüğü ile Yeni Adlar Verme:
+
++ `use` ile aynı ada sahip iki türü aynı kapsama alma problemine başka bir çözüm daha vardır: Yolun (path) ardından `as` anahtar sözcüğünü kullanarak tür için yeni bir yerel ad, yani bir takma ad (alias) tanımlayabiliriz. Liste 7-16, Liste 7-15’teki kodun, iki `Result` türünden birini `as` kullanarak yeniden adlandırma yoluyla yazılmış başka bir hâlini göstermektedir.
+
+```rust
+use std::fmt::Result;
+use std::io::Result as IoResult;
+
+fn function1() -> Result {
+    // --snip--
+}
+
+fn function2() -> IoResult<()> {
+    // --snip--
+}
+```
+
+> `Liste 7-16`: `as` anahtar sözcüğü ile kapsama(scope) alınırken bir türün yeniden adlandırılması
+
++ İkinci `use` ifadesinde, `std::io::Result` türü için **IoResult** adında yeni bir isim seçtik. Bu isim, kapsama aldığımız `std::fmt` içindeki `Result` ile çakışmayacaktır. Liste 7-15 ve Liste 7-16 idiyomatik kabul edilir; dolayısıyla hangisini seçeceğiniz size kalmıştır.
+
+### 7.4.3. `pub use` ile İsimlerin Yeniden Dışa Aktarılması:
+
++ Bir ismi `use` anahtar sözcüğü ile kapsama aldığımızda, bu isim yalnızca içe aktarıldığı kapsama özeldir (private). Bu kapsamın dışındaki kodun, sanki bu isim o kapsamda tanımlanmış gibi ona başvurabilmesini sağlamak için `pub` ve `use` anahtar sözcüklerini birlikte kullanabiliriz. Bu tekniğe **yeniden dışa aktarma (re-exporting)** denir; çünkü bir öğeyi kapsama alırken, aynı zamanda bu öğeyi başkalarının da kendi kapsamlarına alabilmesi için erişilebilir hâle getirmiş oluruz.
++ `Liste 7-17`, kök (root) modüldeki `use` ifadesi `pub use` olarak değiştirilmiş hâliyle `Liste 7-11`’deki kodu göstermektedir.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+pub use crate::front_of_house::hosting;
+
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist();
+}
+```
+
+> `Liste 7-17`: `pub use` kullanarak bir ismi, yeni bir kapsamdan tüm kodlar için erişilebilir kılma
+
++ Bu değişiklikten önce, dışarıdaki kodun `add_to_waitlist` fonksiyonunu çağırabilmesi için `restaurant::front_of_house::hosting::add_to_waitlist()` yolunu kullanması gerekiyordu; bu da `front_of_house` modülünün `pub` olarak işaretlenmesini zorunlu kılıyordu. Şimdi ise bu `pub use` ifadesi, `hosting` modülünü kök (root) modülden yeniden dışa aktardığı için, dışarıdaki kod `restaurant::hosting::add_to_waitlist()` yolunu kullanabilir.
+
+> [!NOTE]
+> Buradaki Örnek yukarıdaki cümleyi daha netleştirmektedir:
+> #### `pub use` ve sadece `use` arasındaki fark şöyle:
+> ##### `use` (sadece)
+> - Bir öğeyi **sadece o modül içinde** kullanılabilir hale getirir
+> - Öğe **private** (özel) kalır
+> - Dış modüller bu öğeye erişemez
+> ```rust
+> mod my_module {
+>    use std::collections::HashMap;  // Sadece my_module içinde kullanılabilir
+>    
+>    pub fn do_something() {
+>        let map = HashMap::new();  // Burada kullanılabilir
+>    }
+>}
+>
+>// Dışarıdan HashMap'e erişilemez
+> ```
+> ##### `pub use` (yeniden dışa aktarma)
+> + Bir öğeyi hem o modülde kullanılabilir yapar
+> + Hem de **dışarıya açar** (public yapar)
+> + Başka modüller bu öğeyi sizin modülünüzden alabilir
+> ```rust
+> mod my_module {
+>    pub use std::collections::HashMap;  // Hem içerde hem dışarıda kullanılabilir
+>    
+>    pub fn do_something() {
+>        let map = HashMap::new();
+>    }
+>}
+>
+> // Dışarıdan erişilebilir:
+>use my_module::HashMap;  // HashMap'i my_module'den alabiliriz
+> ```
+> ##### Özet:
+> + **`use`**: "Bunu sadece ben kullanacağım"
+> + **`pub use`**: "Bunu hem ben kullanacağım, hem başkalarına sunacağım"
+> 
+> `pub use` özellikle kütüphane yazarken çok kullanışlıdır - iç yapıyı gizleyip kullanıcılara daha basit bir API sunmak için kullanılır.
+
++ Yeniden dışa aktarma (`re-exporting`), kodunuzun iç yapısı ile kodunuzu çağıran programcıların alanı (domain) nasıl düşündüğü birbirinden farklı olduğunda oldukça faydalıdır. Örneğin bu restoran benzetmesinde, restoranı işleten kişiler "ön taraf" (*front of house*) ve "arka taraf" (*back of house*) şeklinde düşünür. Ancak restorana gelen müşteriler, restoranın bölümlerini muhtemelen bu şekilde kavramsallaştırmaz. `pub use` sayesinde, kodumuzu bir yapıyla yazıp, dışarıya farklı bir yapı sunabiliriz. Bu yaklaşım, hem kütüphane üzerinde çalışan programcılar hem de kütüphaneyi kullanan programcılar için düzenli ve anlaşılır bir yapı sağlar.
++ Bölüm 14’teki **“Kullanışlı Bir Açık API Dışa Aktarma ([Exporting a Convenient Public API](https://doc.rust-lang.org/book/ch14-02-publishing-to-crates-io.html#exporting-a-convenient-public-api))”** başlığında, `pub use`’un başka bir örneğini ve bunun crate belgelerinizi (documentation) nasıl etkilediğini inceleyeceğiz.
+
+### 7.4.4. Harici Paketleri Kullanma:
+
++ Bölüm 2'de, rastgele sayılar üretmek için **rand** adlı harici bir paketi kullanan bir tahmin oyunu (*guessing game*) projesi yazmıştık. Projemizde **rand**’i kullanabilmek için, `Cargo.toml` dosyasına aşağıdaki satırı eklemiştik:
+
+**Dosya Adı:** `Cargo.toml`
+
+```toml
+rand = "0.8.5"
+```
+
++ `Cargo.toml` dosyasına **rand**’i bir bağımlılık (dependency) olarak eklemek, Cargo’ya **rand** paketini ve onun tüm bağımlılıklarını **crates.io** üzerinden indirip projeye dahil etmesini ve **rand**’i projemiz için kullanılabilir hâle getirmesini söyler.
++ Ardından, **`rand`**’in tanımlarını paketimizin *kapsamına almak* için, crate adını (**rand**) temel alan bir `use` satırı ekleyerek kapsama almak istediğimiz öğeleri listeledik. 2. Bölüm’deki **“Rastgele Bir Sayı Üretme (Generating a Random Number)”** kısmını hatırlayacak olursak, `Rng` `trait`’ini *kapsama almış* ve `rand::thread_rng` fonksiyonunu çağırmıştık:
+
+```rust
+use std::io;
+
+use rand::Rng;
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    println!("The secret number is: {secret_number}");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}");
+}
+```
+
+
+> [!TIP]
+> ##### 1. `rand`’in tanımlarını paketimizin kapsamına almak:
+> + `rand` kütüphanesinin içindeki fonksiyonları, struct'ları, trait'leri kendi kodumuza dahil etmek anlamına gelir. Böylece onları kullanabiliriz.
+> ##### 2. crate adını (`rand`) temel alan bir `use` satırı:
+> + Şu şekilde bir satır yazdık demek:
+> ```rust
+> use rand::...;
+> ```
+> + `rand` dış pakettir (crate), önce onun adını yazıyoruz.
+> ##### 3. kapsama almak istediğimiz öğeleri listeledik:
+> + `rand` paketinin içinden sadece ihtiyacımız olan şeyleri seçtik. Örneğin:
+> ```rust
+> use rand::Rng;    // Rng trait'ini getirdik
+> ```
+
++ Rust topluluğu üyeleri, **crates.io** üzerinde pek çok paketi kullanıma sunmuştur. Bu paketlerden herhangi birini kendi paketimize dahil etmek de aynı adımları izlemeyi gerektirir: paketi, paketimizin `Cargo.toml` dosyasında listelemek ve ardından o crate içindeki öğeleri kapsama almak için `use` anahtar sözcüğünü kullanmak.
++ Standart **`std`** kütüphanesinin de paketimize **harici (external)** bir crate olduğunu unutmayın. Ancak standart kütüphane Rust diliyle birlikte dağıtıldığı için, **`std`**’yi eklemek amacıyla `Cargo.toml` dosyasında herhangi bir değişiklik yapmamıza gerek yoktur. Buna rağmen, **`std`** içindeki öğeleri paketimizin kapsamına alabilmek için `use` ile ona referans vermemiz gerekir. Örneğin, `HashMap` için şu satırı kullanırız:
+
+```rust
+#![allow(unused)]
+fn main() {
+use std::collections::HashMap;
+}
+```
+
++ Bu, standart kütüphane crate’inin adı olan `std` ile başlayan mutlak (*absolute*) bir yoldur.
+
+### 7.4.5. `use` Listelerini Sadeleştirmek için İç İçe (*Nested*) Yollar Kullanımı:
+
++ Aynı crate veya aynı modül içinde tanımlanmış birden fazla öğeyi kullanıyorsak, her bir öğeyi ayrı bir `use` satırında listelemek dosyalarımızda oldukça fazla dikey alan kaplayabilir. Örneğin, `Liste 2-4`’teki tahmin oyunu (*guessing game*) örneğinde yer alan şu iki `use` ifadesi, `std` içindeki öğeleri kapsama almaktadır:
+
+**Dosya Adı:** `src/main.rs`
+
+```rust
+use rand::Rng; 
+// --snip-- 
+use std::cmp::Ordering; 
+use std::io; 
+// --snip--
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    println!("The secret number is: {secret_number}");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    let guess: u32 = guess.trim().parse().expect("Please type a number!");
+
+    println!("You guessed: {guess}");
+
+    match guess.cmp(&secret_number) {
+        Ordering::Less => println!("Too small!"),
+        Ordering::Greater => println!("Too big!"),
+        Ordering::Equal => println!("You win!"),
+    }
+}
+```
+
++ Bunun yerine, aynı öğeleri tek bir satırda kapsama almak için iç içe (nested) yolları kullanabiliriz. Bunu, yolun ortak kısmını belirtip ardından iki nokta üst üste (`::`) koyarak ve farklılık gösteren yol kısımlarını küme parantezleri (`{}`) içinde listeleyerek yaparız. Bu kullanım, Liste 7-18’de gösterilmektedir.
+
+**Dosya Adı:** `src/main.rs`
+
+```rust
+use rand::Rng;
+// --snip--
+use std::{cmp::Ordering, io};
+// --snip--
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    println!("The secret number is: {secret_number}");
+
+    println!("Please input your guess. ");
+	
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    let guess: u32 = guess.trim().parse().expect("Please type a number!");
+
+    println!("You guessed: {guess}");
+
+    match guess.cmp(&secret_number) {
+        Ordering::Less => println!("Too small!"),
+        Ordering::Greater => println!("Too big!"),
+        Ordering::Equal => println!("You win!"),
+    }
+}
+```
+
+> `Liste 7-18`: Aynı öneke (prefix’e) sahip birden fazla öğeyi kapsama almak için iç içe (nested) bir yolun belirtilmesi
+
+
+> [!tip]
+> + `trim()`: Boşlukları ve newline karakterini temizler.
+> + `parse()`: String'i sayıya çevirir.
+> + `expect()`: Hata olursa panic yapar
+
++ Daha büyük programlarda, aynı crate veya modülden birçok öğeyi içeri almak için iç içe (nested) yollar kullanmak, gereken ayrı `use` ifadelerinin sayısını önemli ölçüde azaltabilir.
++ Bir yolun (path) herhangi bir seviyesinde iç içe yol kullanabiliriz. Bu, ortak bir alt yolu paylaşan iki `use` ifadesini birleştirirken oldukça faydalıdır. Örneğin, Liste 7-19’da iki `use` ifadesi gösterilmektedir: biri `std::io`’yu kapsama alanına getirir, diğeri ise `std::io::Write`’ı kapsama alanına getirir.
+
+**Dosya Adı:** `src/main.rs`
+
+```rust
+use std::io;
+use std::io::Write;
+```
+
+> `Liste 7-19`: Birinin diğerinin alt yolu (subpath’i) olduğu iki adet `use` ifadesi
+
++ Bu iki yolun ortak kısmı `std::io`’dur ve bu, aynı zamanda ilk yolun tamamıdır. Bu iki yolu tek bir `use` bildirimi hâline getirmek için, iç içe (*nested*) yolda `self` anahtar kelimesini kullanabiliriz; bu durum `Liste 7-20`’de gösterilmektedir.
+
+**Dosya Adı:** `src/main.rs`
+
+```rust
+use std::io::{self, Write};
+```
+
+> `Liste 7-20`: `Liste 7-19`’daki yolların tek bir `use` bildirimi içinde birleştirilmesi
+
++ Bu satır sayesinde `std::io` modülü ile `std::io::Write` türü (trait’i) mevcut kapsamda(into scope) kullanılabilir hâle gelir.
+
+### 7.4.6. `Glob` Operatörü ile Öğeleri İçe Aktarma:
+
++ İstediğimiz bir yol (path) altında tanımlanmış **tüm public öğeleri** kapsama (scope) almak istersek, bu yolun sonuna `*` **glob operatörünü** ekleyebiliriz:
+
+```rust
+#![allow(unused)]
+fn main() {
+use std::collections::*;
+}
+```
+
++ Bu `use` ifadesi, `std::collections` içinde tanımlı olan **tüm public öğeleri** mevcut kapsama alır. Ancak **glob operatörünü kullanırken dikkatli olunmalıdır**. *Glob* kullanımı, hangi isimlerin kapsamda olduğunu ve programınızda kullanılan bir ismin nerede tanımlandığını anlamayı zorlaştırabilir. Ayrıca, bağımlı olduğunuz bir crate tanımlarını değiştirirse, sizin içe aktardığınız öğeler de değişmiş olur. Örneğin, bağımlılık aynı kapsama sizin tanımlarınızla **aynı isme sahip** yeni bir tanım eklerse, bu durum bağımlılığı güncellediğinizde **derleme (compiler) hatalarına** yol açabilir.
++ Glob operatörü çoğunlukla **test yazarken** kullanılır; test edilen her şeyi `tests` modülü içine almak için tercih edilir. Bu konu, Bölüm 11’deki **["How to Write Tests"](https://doc.rust-lang.org/book/ch11-01-writing-tests.html#how-to-write-tests)** başlığında ele alınacaktır. Ayrıca glob operatörü bazen **prelude deseni**nin bir parçası olarak da kullanılır. Bu desen hakkında daha fazla bilgi için [standart kütüphane dokümantasyonuna](https://doc.rust-lang.org/std/prelude/index.html#other-preludes) bakabilirsiniz.
+
+
+> [!NOTE] Title
+> #### Prelude Nedir?
+> + **Prelude**, Rust’ta **çok sık kullanılan tür, trait ve fonksiyonların**, kullanıcı tarafından `use` yazılmasına gerek kalmadan **otomatik olarak scope’a alınması** anlamına gelir.
+> + Yani, “Rust programı yazarken neredeyse her zaman lazım olan şeyler, zahmetsizce hazır gelsin”  mantığıyla oluşturulmuş bir yaklaşımdır.
+> ##### Standart Prelude (std prelude):
+> + Rust, her crate’e otomatik olarak şu modülü ekler:
+> 	- `Option`, `Result`
+> 	- `Some`, `None`, `Ok`, `Err`
+> 	- `Vec`, `String`
+> 	- `Copy`, `Clone`
+> 	- `Drop`
+> 	- `Iterator`
+> 	- `ToString`
+> ```rust
+> std::prelude::v1
+> ```
+> + Bu yüzden şunları **hiç import etmeden** kullanabiliyoruz:
+> ```rust
+> let x: Option<i32> = Some(5);
+> let v: Vec<i32> = Vec::new();
+> ```
+> + Ama şunu yazmıyoruz:
+> ```rust
+> use std::option::Option;
+> use std::vec::Vec;
+> ```
+> + Çünkü bunlar **prelude sayesinde zaten scope’ta**.
+
+> [!NOTE]
+> #### Prelude deseni (pattern) ne demek?
+> + Prelude deseni, **kendi kütüphanende** de benzer bir yapı kurman demektir.
+> + Yani;
+> 	- Kullanıcıların **en sık ihtiyaç duyacağı şeyleri**
+> 	- Tek bir modülde toplayıp
+> 	- Kullanıcıya tek satırda import ettirmek
+> ##### Örnek: Kendi prelude’unu yazmak
+> ```rust
+> // lib.rs
+> pub mod prelude {
+>    pub use crate::config::Config;
+>    pub use crate::errors::MyError;
+>    pub use crate::utils::init;
+>}
+> ```
+> + Kütüphaneyi kullanan kişi:
+> ```rust
+> use my_crate::prelude::*;
+> ```
+> + Ve artık şunları **tek tek import etmeden** kullanabilir:
+> ```rust
+> let cfg = Config::new();
+> init();
+> ```
+> + İşte burada `*` (glob) operatörü **bilinçli ve kontrollü** kullanılmış olur.
+
+## 7.5. Modülleri Farklı Dosyalara Ayırma:
+
++ Şimdiye kadar bu bölümdeki tüm örneklerde, birden fazla modül tek bir dosya içinde tanımlanmıştı. Ancak modüller büyüdükçe, kodun okunmasını ve içinde gezinmeyi kolaylaştırmak için modül tanımlarını **ayrı bir dosyaya taşımak** isteyebilirsiniz.
++ Örneğin, birden fazla restoran modülü içeren **Liste 7-17**’deki koddan başlayalım. Bu kez tüm modülleri crate root dosyasında tanımlamak yerine, modülleri ayrı dosyalara ayıracağız. Bu durumda crate root dosyası `src/lib.rs`’dir; ancak aynı yöntem crate root dosyası `src/main.rs` olan binary crate’ler için de geçerlidir.
++ İlk olarak `front_of_house` modülünü kendi dosyasına çıkaracağız. `front_of_house` modülünün süslü parantezleri (`{}`) içindeki kodu kaldırıp yalnızca `mod front_of_house;` bildiriminin kalmasını sağlayacağız. Böylece `src/lib.rs`, **Liste 7-21**’de gösterilen kodu içerecektir. Bu noktada kod **derlenmeyecektir**, çünkü **Liste 7-22**’de gösterildiği gibi `src/front_of_house.rs` dosyasını henüz oluşturmadık.
+
+**Dosya Adı:** `src/lib.rs`
+
+```rust
+mod front_of_house;
+
+pub use crate::front_of_house::hosting;
+
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist();
+}
+```
+
+> `Liste 7-21`: Gövdesi `src/front_of_house.rs` dosyasında yer alacak olan `front_of_house` modülünün tanımlanması
+
++ Ardından, süslü parantezlerin (`{}`) içinde yer alan kodu **`src/front_of_house.rs`** adlı yeni bir dosyaya taşıyın; bu durum **Liste 7-22**’de gösterilmektedir. Derleyici, crate root dosyasında `front_of_house` adlı modül bildirimiyle karşılaştığı için, bu modülün içeriğini **bu dosyada araması gerektiğini bilir**.
+
+**Dosya Adı:** `src/front_of_house.rs`
+
+```rust
+pub mod hosting {
+    pub fn add_to_waitlist() {}
+}
+```
+
+> `liste 7-22`: `src/front_of_house.rs` dosyasındaki `front_of_house` modülü içindeki tanımlar
+
++ Şunu unutmayın: Bir dosyayı mod bildirimi (`mod`) ile **modül ağacınıza yalnızca bir kez** yüklemeniz yeterlidir. Derleyici, dosyanın projenin bir parçası olduğunu öğrendikten sonra (ve `mod` ifadesini nereye koyduğunuza bakarak kodun modül ağacında **hangi konumda** yer aldığını bildiği için), projedeki diğer dosyalar bu yüklü dosyadaki koda, **bildirildiği yere giden bir yol (path)** kullanarak erişmelidir. Bu konu, **Paths for Referring to an Item in the Module Tree(7.3. Modül ağacındaki öğelere erişim yolları)"** bölümünde ele alınmıştır. Başka bir deyişle, `mod` anahtar kelimesi, bazı diğer programlama dillerinde görmüş olabileceğiniz bir **"nclude" (dosya ekleme)** işlemi değildir.
+
+
+> [!NOTE] Title
+> #### Kritik nokta: `mod` ne yapar, ne yapmaz?
+> +  ✅ `mod` ne yapar?
+> 	- Bir dosyayı projeye **tanıtır**
+> 	- O dosyanın **modül ağacındaki yerini belirler**
+> 	- Derleyiciye “Bu modül burada” der.
+> +  ❌ `mod` ne yapmaz?
+> 	- Dosyayı kopyalayıp başka yerlere yapıştırmaz.
+> 	- C/C++’taki `#include` gibi **her kullanıldığında tekrar eklemez**
+> #### Artık başka dosyalarda ne olur?
+> + Diyelim ki `front_of_house` içinde bir fonksiyon var:
+> ```rust
+> pub mod hosting {
+>    pub fn add_to_waitlist() {}
+>}
+> ```
+> + Başka bir yerde **şunu yapmazsın:**
+> ```rust
+> mod front_of_house; // ❌ yanlış, tekrar etmiyorsun
+> ```
+> + Bunun yerine **path kullanırsın**:
+> ```rust
+> fn eat_at_restaurant() {
+>    crate::front_of_house::hosting::add_to_waitlist();
+>}
+> ```
+> + Çünkü;
+> 	- Derleyici bu modülün **zaten projede olduğunu biliyor**
+> 	- Nerede durduğunu da biliyor.
+> 	- Sen sadece **adresini söylüyorsun**
+
++ Şimdi `hosting` modülünü kendi dosyasına ayıracağız. Bu süreç biraz farklıdır; çünkü `hosting`, kök (root) modülün değil, `front_of_house` modülünün **alt (child) modülüdür**. Bu nedenle `hosting` için olan dosyayı, modül ağacındaki üst modüllerin adını taşıyan yeni bir dizin içine koyacağız; bu durumda dizin adı **`src/front_of_house`** olacaktır.
++ `hosting` modülünü taşımaya başlamak için, `src/front_of_house.rs` dosyasını yalnızca `hosting` modülünün bildirimini içerecek şekilde değiştiririz:
+
+**Dosya Adı:** `src/front_of_house.rs`
+
+```rust
+pub mod hosting;
+```
+
++ Daha sonra, `hosting` modülüne ait tanımların yer alması için `src/front_of_house` adlı bir klasör ve bu klasörün içinde `hosting.rs` adlı bir dosya oluştururuz.
+
+**Dosya Adı:** `src/front_of_house/hosting.rs`
+
+```rust
+pub fn add_to_waitlist() {}
+```
+
++ Eğer bunun yerine `hosting.rs` dosyasını `src` dizinine koysaydık, derleyici `hosting.rs` içindeki kodun crate root’ta bildirilen bir `hosting` modülüne ait olmasını beklerdi; `front_of_house` modülünün bir alt modülü olarak bildirilmiş olmasını değil. Derleyicinin hangi modülün kodu için hangi dosyalara bakacağına dair kuralları, dizin ve dosya yapısının modül ağacına daha yakından uymasını sağlar.
++ Yani, `hosting.rs` dosyasını doğrudan `src` dizinine koyarsak, derleyici bu dosyayı kök modülde tanımlı bir `hosting` modülü olarak yorumlar. Oysa burada `hosting`, `front_of_house` modülünün alt modülüdür. Rust derleyicisinin dosya–modül eşleme kuralları, klasör ve dosya yapısının modül ağacıyla uyumlu olmasını amaçlar.
+
+
+> [!NOTE]
+> #### Alternatif Dosya Yolları
+> Şimdiye kadar Rust derleyicisinin kullandığı **en yaygın (idiomatic)** dosya yollarını ele aldık; ancak Rust, **daha eski bir dosya yolu stilini** de destekler. Crate root’ta bildirilen `front_of_house` adlı bir modül için derleyici, modülün kodunu şu konumlarda arar:
+>
+> - `src/front_of_house.rs` (ele aldığımız yöntem)
+>    
+> - `src/front_of_house/mod.rs` (eski stil, hâlâ desteklenmektedir)
+>    
+>
+> `front_of_house` modülünün bir alt modülü olan `hosting` adlı bir modül için ise derleyici, modülün kodunu şu konumlarda arar:
+> 
+> - `src/front_of_house/hosting.rs` (ele aldığımız yöntem)
+>    
+> - `src/front_of_house/hosting/mod.rs` (eski stil, hâlâ desteklenmektedir)
+>    
+>
+> Aynı modül için **her iki stili birden** kullanırsanız, derleyici hatası alırsınız. Aynı proje içinde **farklı modüller için** bu iki stilin karışık şekilde kullanılması mümkündür; ancak bu durum projede gezinen kişiler için kafa karıştırıcı olabilir.
+>
+> `mod.rs` adlı dosyaları kullanan stilin temel dezavantajı şudur: Projenizde çok sayıda `mod.rs` dosyası oluşabilir ve bunları editörde aynı anda açık tuttuğunuzda hangisinin hangi modüle ait olduğunu ayırt etmek zorlaşabilir.
+
++ Her modülün kodunu ayrı bir dosyaya taşıdık ve **modül ağacı (module tree)** aynı şekilde kaldı. Tanımlar artık farklı dosyalarda bulunsa bile, `eat_at_restaurant` içindeki fonksiyon çağrıları **hiçbir değişiklik yapılmadan** çalışmaya devam eder. Bu teknik, modüller boyut olarak büyüdükçe onları yeni dosyalara taşımanıza olanak tanır.
++ Ayrıca `src/lib.rs` içindeki `pub use crate::front_of_house::hosting` ifadesi de değişmemiştir ve `use` anahtar kelimesinin, crate’in bir parçası olarak **hangi dosyaların derleneceği üzerinde hiçbir etkisi yoktur**. Modülleri tanımlayan anahtar kelime `mod`’dur ve Rust, bir modül için gerekli kodu bulmak üzere, modül ile **aynı ada sahip** dosyaya bakar.
+
+### 7.5.1. Özet:
+
++ Rust, bir paketi birden fazla crate’e(*bir veya birden fazla binary crate ve bir tane library crate* ), bir crate’i ise modüllere ayırmanıza olanak tanır(package → crate → module). Böylece bir modülde tanımlanmış öğelere başka bir modülden erişebilirsiniz. Bunu **mutlak (absolute)** veya **göreli (relative)** yollar belirterek yapabilirsiniz. Bu yollar, `use` ifadesiyle kapsama alınabilir; böylece aynı kapsam içinde bir öğeyi birden fazla kez kullanırken daha kısa yollar tercih edebilirsiniz. Modül içindeki kodlar varsayılan olarak **özel (private)**tir, ancak tanımları **public** yapmak için `pub` anahtar kelimesini ekleyebilirsiniz.
++ Bir sonraki bölümde, düzgün şekilde organize edilmiş kodunuzda(modüler, crate, `use` ve `pub` dosya yapısın düzenlenmesi) kullanabileceğiniz standart kütüphanedeki bazı **koleksiyon veri yapıları**nı inceleyeceğiz.
+
+# 8. Yaygın Koleksiyonlar
 ## Kaynak:
 
 + [READ THE BOOK!](https://doc.rust-lang.org/book/ch05-01-defining-structs.html)
