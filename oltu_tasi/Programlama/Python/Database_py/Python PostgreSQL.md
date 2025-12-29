@@ -22,6 +22,8 @@ source .venv/bin/activate
 
 ### 3.1. Temel Bağlantı Yöntemi:
 
+**Dosya Adı:** `connect_postgres.py` 
+
 ```python
 import psycopg2
 
@@ -32,20 +34,6 @@ conn = psycopg2.connect(
         host = "localhost",
         port = "5432"
         )
-
-cur = conn.cursor()
-
-cur.execute("SELECT version();")
-print(cur.fetchone())
-
-cur.close()
-conn.close()
-```
-
-**Çıktı:**
-
-```shell
-('PostgreSQL 14.20 (Ubuntu 14.20-0ubuntu0.22.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0, 64-bit',)
 ```
 
 ## 4. Veritabanlarını Listeleme:
@@ -53,16 +41,23 @@ conn.close()
 + PostgreSQL’de veritabanlarını listelemek için **herhangi bir veritabanına** (genellikle `postgres`) bağlanmanız gerekir.
 + PostgreSQL veritabanları `pg_database` sistem tablosunda tutulur.
 
-```python
-import psycopg2
+**Dizin Yapısı:**
 
-connect = psycopg2.connect(
-        dbname = "postgres",
-        user = "postgres",
-        password = "1234tyo",
-        host = "localhost",
-        port = "5432"
-        )
+```shell
+pyPostgres
+├── connect_postgres.py
+├── main.py
+├── main.py.back
+└── __pycache__
+    └── connect_postgres.cpython-310.pyc
+
+1 directory, 4 files
+```
+
+**Dosya Adı:** `main.py`
+
+```python
+from connect_postgres import connect
 
 cursor = connect.cursor()
 
@@ -88,6 +83,48 @@ connect.close()
 > SELECT datname FROM pg_database
 > 	WHERE datistemplate = false;
 > ```
+
+
+## 5. Veritabanı Oluşturma:
+
+### 5.1. Temel Kullanımı:
+
+```python
+from connect_postgres import connect 
+
+
+connect.autocommit = True
+cursor = connect.cursor()
+
+cursor.execute("""
+               CREATE DATABASE test_db_2;
+               """)
+
+cursor.close()
+connect.close()
+```
+
+### 5.2. Güvenli Oluşturma:
+
+```python
+from connect_postgres import connect
+from psycopg2 import sql
+
+connect.autocommit = True
+cursor = connect.cursor()
+
+db_name = "test_db_3"
+
+cursor.execute(
+        sql.SQL("CREATE DATABASE {}").format(
+            sql.Identifier(db_name)
+            )
+        )
+
+cursor.close()
+connect.close()
+```
+
 
 # Psycopg - Doc
 
@@ -130,7 +167,7 @@ Bu özellikler sayesinde psycopg2, büyük ölçekli ve yoğun trafikli uygulama
 
 + Psycopg 2, hem Unicode uyumludur hem de Python 3 ile uyumludur.
 
-# Yükleme:
+## 1. Yükleme:
 
 + Psycopg, Python programlama dili için bir PostgreSQL bağdaştırıcısıdır (adapter). PostgreSQL’in resmi istemci kütüphanesi olan libpq için bir sarmalayıcıdır (wrapper).
 
@@ -152,6 +189,29 @@ Bu özellikler sayesinde psycopg2, büyük ölçekli ve yoğun trafikli uygulama
 ```shell
 $ pip install psycopg2-binary
 ```
+
++ Bu işlem, aşağıda açıklanan derleme (build) veya çalışma zamanı (runtime) ön koşullarına ihtiyaç duymayan, önceden derlenmiş ikili (binary) bir modül sürümünü kuracaktır. Güncel bir pip sürümü kullandığınızdan emin olun (örneğin `pip install -U pip` komutuyla güncelleyebilirsiniz).
++ Bunun ardından `psycopg2` paketini her zamanki şekilde import edebilirsiniz.
+
+```python
+import psycopg2
+
+# Connect to your postgres DB
+conn = psycopg2.connect("dbname=test user=postgres")
+
+# Open a cursor to perform database operations
+cur = conn.cursor()
+
+# Execute a query
+cur.execute("SELECT * FROM my_data")
+
+# Retrieve query results
+records = cur.fetchall()
+```
+
+### 1.1. psycopg ile psycopg-binary arasındaki farklar:
+
+
 
 ## KAYNAK:
 

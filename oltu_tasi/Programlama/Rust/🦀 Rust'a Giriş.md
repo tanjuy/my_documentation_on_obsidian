@@ -5949,6 +5949,1356 @@ pub fn add_to_waitlist() {}
 + Bir sonraki bölümde, düzgün şekilde organize edilmiş kodunuzda(modüler, crate, `use` ve `pub` dosya yapısın düzenlenmesi) kullanabileceğiniz standart kütüphanedeki bazı **koleksiyon veri yapıları**nı inceleyeceğiz.
 
 # 8. Yaygın Koleksiyonlar
+
++ Rust’un standart kütüphanesi, **koleksiyonlar** olarak adlandırılan, son derece kullanışlı birçok veri yapısını içerir. Diğer veri türlerinin çoğu tek bir değeri temsil ederken, koleksiyonlar **birden fazla değeri** barındırabilir. 
+
+
+> [!caution]
+>
+> + Yerleşik dizi (array) ve demet (tuple) türlerinden farklı olarak, bu koleksiyonların işaret ettiği veriler **heap** üzerinde saklanır. Bu da veri miktarının derleme zamanında bilinmesini gerektirmez; program çalışırken **büyüyebilir veya küçülebilir**.
+
++ Her koleksiyon türünün kendine özgü yetenekleri ve maliyetleri vardır; bulunduğunuz duruma uygun olanı seçmek ise zamanla geliştireceğiniz bir beceridir. Bu bölümde, Rust programlarında **çok sık kullanılan üç koleksiyonu** ele alacağız:
+
+
+> [!NOTE]
+> + **Bir vektör (vector)**, değişken sayıda(yani, eleman sayısı **derleme zamanında sabit değildir**) değeri **yan yana** saklamanıza(**bellekte ardışık (contiguous)** olarak saklanma) olanak tanır.
+> + **Bir string**, karakterlerden oluşan bir koleksiyondur. Daha önce `String` türünden bahsetmiştik; ancak bu bölümde onu **ayrıntılı olarak** ele alacağız.
+> + **Bir hash map**, belirli bir anahtarla (key) bir değeri ilişkilendirmenizi sağlar. Bu yapı, **map (eşleme)** olarak adlandırılan daha genel bir veri yapısının özel bir uygulamasıdır.
+> + Yani,
+> 	- Map = genel fikir
+> 	- HashMap = bu fikrin **belirli bir teknikle** (hash) hayata geçirilmiş hâli
+> + Aynı map fikri farklı şekillerde de uygulanabilir:
+> 	- HashMap (hash tabanlı)
+> 	- TreeMap / BTreeMap (ağaç tabanlı)
+> 	- OrderedMap (sıralı)
+
++ Standart kütüphanenin sunduğu diğer koleksiyon türleri hakkında bilgi edinmek için [belgelere (dokümantasyona)](https://doc.rust-lang.org/std/collections/index.html) bakabilirsiniz.
++ Bu bölümde; vektörlerin, string’lerin ve hash map’lerin nasıl oluşturulup güncellendiğini ve her birini özel kılan özelliklerin neler olduğunu ele alacağız.
+
+## 8.1. Vektörler Kullanarak Değer Listelerinin Saklanması:
+
++ İnceleyeceğimiz ilk koleksiyon türü `Vec<T>`’dir; buna vektör de denir. Vektörler, birden fazla değeri bellekte yan yana yerleştiren tek bir veri yapısı içinde saklamanıza olanak tanır. Vektörler yalnızca aynı türdeki değerleri saklayabilir. Bir dosyadaki metin satırları ya da bir alışveriş sepetindeki ürün fiyatları gibi, bir öğe listesiniz olduğunda vektörler oldukça kullanışlıdır.
+
+### 8.1.1. Yeni bir Vektör Oluşturma:
+
++ Yeni, boş bir vektör oluşturmak için `Liste 8-1`’de gösterildiği gibi `Vec::new` fonksiyonunu çağırırız.
+
+```rust
+fn main() {
+    let v: Vec<i32> = Vec::new();
+}
+```
+
+> `Liste 8-1`: `i32` türündeki değerleri tutmak için yeni, boş bir vektör oluşturma
+
++ Burada bir **tür belirtimi (type annotation)** eklediğimize dikkat edin. Bu vektöre herhangi bir değer eklemediğimiz için, Rust hangi türden elemanlar saklamak istediğimizi bilemez. Bu önemli bir noktadır.
++ Vektörler **generic (genel)** yapılar kullanılarak uygulanmıştır; generic’lerin kendi türlerinizle nasıl kullanılacağını 10. Bölüm’de ele alacağız.
++ Şimdilik şunu bilmeniz yeterlidir: standart kütüphane tarafından sağlanan `Vec<T>` tipinin herhangi bir tipi tutabileceğini bilin.
++ Belirli bir tipi tutacak bir vector oluşturduğumuzda, tipi açılı parantezler(`<>`) içinde belirtebiliriz.
++ `Liste 8-1`’de, `v` değişkenindeki **`Vec<T>`**’nin `i32` türünde elemanlar tutacağını Rust’a söylemiş olduk.
++ Çoğu zaman, başlangıçta değerler içeren bir **`Vec<T>`** oluşturursunuz ve Rust hangi türde değer saklamak istediğinizi **kendisi çıkarır (type inference)**; bu nedenle genellikle bu tür belirtimine ihtiyaç duymazsınız. Rust, bu işi kolaylaştırmak için **`vec!` makrosunu** sağlar. Bu makro, verdiğiniz değerleri içeren yeni bir vektör oluşturur. `Liste 8-2`, 1, 2 ve 3 değerlerini tutan yeni bir **`Vec<i32>`** oluşturur. Tamsayı türü `i32`’dir çünkü 3. Bölüm’deki **"[Veri Türleri](https://doc.rust-lang.org/book/ch03-02-data-types.html#data-types)"** kısmında da bahsettiğimiz gibi, varsayılan tamsayı türü `i32`’dir.
+
+```rust
+fn main() {
+    let v = vec![1, 2, 3];
+}
+```
+
+> `Liste 8-2`: İçinde değerler bulunan yeni bir vektörün oluşturulması
+
++ Başlangıçta `i32` türünde değerler verdiğimiz için, Rust `v` değişkeninin türünün `Vec<i32>` olduğunu çıkarım yoluyla belirleyebilir ve ayrıca bir tür belirtimine gerek kalmaz. Bir sonraki adımda, bir vektörün nasıl değiştirileceğine bakacağız.
+
+### 8.1.2. Bir Vektörü Güncelleme:
+
++ Bir vektör oluşturup daha sonra içine elemanlar eklemek için, Liste 8-3’te gösterildiği gibi `push` metodunu kullanabiliriz.
+
+```rust
+fn main() {
+    let mut v = Vec::new();
+
+    v.push(5);
+    v.push(6);
+    v.push(7);
+    v.push(8);
+}
+```
+
+> `Liste 8-3`: Bir vektöre değerler eklemek için `push` metodunun kullanılması
+
++ Her değişkende olduğu gibi, değerini değiştirebilmek istiyorsak `mut` anahtar kelimesini kullanarak onu değiştirilebilir (`mutable`) yapmamız gerekir; bu konu 3. Bölümde ele alınmıştı. İçine koyduğumuz sayıların tamamı `i32` türündedir ve Rust bu bilgiyi verilerden kendisi çıkardığı için `Vec<i32>` şeklinde bir tür belirtimine `(type annotation`) ihtiyaç duymayız.
++ Bir vektörde saklanan bir değere başvurmanın (erişmenin) iki yolu vardır: indeksleme yoluyla ya da `get` metodunu kullanarak. Aşağıdaki örneklerde, daha fazla açıklık sağlamak için bu fonksiyonlardan dönen değerlerin türlerini özellikle belirtmiş bulunuyoruz.”
++ `Liste 8-4`, bir vektördeki bir değere erişmenin her iki yöntemini de göstermektedir: indeksleme sözdizimi ve `get` metodu.
+
+```rust
+fn main() {
+    let v = vec![1, 2, 3, 4, 5];
+
+    let third: &i32 = &v[2];
+    println!("The third element is {third}");
+
+    let third: Option<&i32> = v.get(2);
+    match third {
+        Some(third) => println!("The third element is {third}"),
+        None => println!("There is no third element."),
+    }
+}
+```
+
+> `Liste 8-4`: Bir vektördeki bir öğeye erişmek için indeksleme sözdizimini ve `get` metodunu kullanma
+
+**Çıktısı:**
+
+```rust
+The third element is 3  
+The third element is 3
+```
+
+
+> [!CAUTION]
+> + Burada birkaç detaya dikkat edelim.
+> + Üçüncü elemana erişmek için indeks değeri olarak **2** kullanıyoruz; çünkü vektörler sıfırdan başlayarak numaralandırılır.
+> + `&` ve `[]` kullanımı, bize verilen indeks değerindeki elemana bir **referans** verir.
+> + `get` metodunu, indeksi argüman olarak vererek kullandığımızda ise `match` ile kullanabileceğimiz bir `Option<&T>` elde ederiz
+
+
++ Rust, bir elemana referans vermek için bu iki farklı yolu sunar; böylece mevcut elemanların aralığı dışında bir indeks değeri kullanmaya çalıştığınızda programın nasıl davranacağını seçebilirsiniz. **Örnek olarak**, beş elemanlı bir vektörümüz olduğunu ve ardından her iki teknikle de indeks değeri **100** olan bir elemana erişmeye çalıştığımızda ne olacağını görelim. Bu durum, **`Liste 8-5`**’te gösterilmektedir.
+
+```rust
+fn main() {
+    let v = vec![1, 2, 3, 4, 5];
+
+    let does_not_exist = &v[100];
+    let does_not_exist = v.get(100);
+}
+```
+
+> `Liste 8-5`: Beş eleman içeren bir vektörde, indeks değeri 100 olan elemana erişmeye çalışma
+
++ Bu kodu çalıştırdığımızda, ilk yöntem olan `[]` **programın panic yapmasına** neden olur; çünkü var olmayan bir elemana referans vermektedir. Bu yöntem, vektörün sonunu aşan bir elemana erişilmeye çalışıldığında programın **çökmesini istediğiniz** durumlarda kullanmak için en uygunudur.
++ `get` metoduna ise vektörün sınırları dışında bir indeks verildiğinde, panic oluşturmadan **`None` döndürür**. Bu yöntemi, normal koşullar altında zaman zaman vektörün aralığı dışındaki bir elemana erişme ihtimali varsa kullanırsınız. Bu durumda kodunuz, **Bölüm 6’da anlatıldığı gibi**, `Some(&element)` veya `None` durumlarını ele alacak bir mantığa sahip olur.  Örneğin, indeks değeri bir kullanıcının girdiği bir sayıdan geliyor olabilir. Kullanıcı yanlışlıkla çok büyük bir sayı girerse ve program `None` değeri alırsa, kullanıcıya mevcut vektörde kaç eleman olduğunu söyleyebilir ve geçerli bir değer girmesi için ona bir şans daha verebilirsiniz. Bu yaklaşım, bir yazım hatası nedeniyle programın çökmesinden çok daha **kullanıcı dostudur**.
++ Program geçerli bir referansa sahip olduğunda, **borrow checker**, sahiplik ve ödünç alma kurallarını (**Bölüm 4’te ele alınmıştır**) uygulayarak bu referansın ve vektörün içeriğine ait diğer tüm referansların geçerli kalmasını sağlar. Aynı kapsam içinde hem **mutable** hem de **immutable** referanslara sahip olamayacağınızı belirten kuralı hatırlayın. Bu kural, **Liste 8-6**’da geçerlidir; burada bir vektörün ilk elemanına immutable bir referans tutarken, vektörün sonuna yeni bir eleman eklemeye çalışırız. Eğer fonksiyonun ilerleyen kısmında bu elemana tekrar referans vermeye çalışırsak, bu program çalışmaz.
+
+```rust
+fn main() {
+    let mut v = vec![1, 2, 3, 4, 5];
+
+    let first = &v[0];   // immutable referans
+
+    v.push(6);           // v üzerinde mutable işlem
+
+    println!("The first element is: {first}");
+}
+```
+
+> Liste 8-6: Bir elemana referans varken vektöre yeni bir eleman ekleme girişimi
+
++ Bu kodun derlenmesi şu hataya yol açacaktır:
+
+```rust
+$ cargo run
+   Compiling collections v0.1.0 (file:///projects/collections)
+error[E0502]: cannot borrow `v` as mutable because it is also borrowed as immutable
+ --> src/main.rs:6:5
+  |
+4 |     let first = &v[0];
+  |                  - immutable borrow occurs here
+5 |
+6 |     v.push(6);
+  |     ^^^^^^^^^ mutable borrow occurs here
+7 |
+8 |     println!("The first element is: {first}");
+  |                                     ------- immutable borrow later used here
+
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `collections` (bin "collections") due to 1 previous error
+```
+
+
++ **Liste 8-6’daki kod**, ilk bakışta çalışması gerekiyormuş gibi görünebilir: Vektörün ilk elemanına alınmış bir referans, neden vektörün sonundaki değişikliklerle ilgilensin ki?
++ Bu hatanın nedeni, **vektörlerin çalışma şeklidir**. Vektörler, değerleri bellekte **yan yana (ardışık)** olarak sakladıkları için, vektörün sonuna yeni bir eleman eklemek; eğer vektörün şu anda bulunduğu yerde tüm elemanları yan yana koyacak kadar alan yoksa, **yeni bir bellek alanı ayırmayı** ve eski elemanları bu yeni alana **kopyalamayı** gerektirebilir.
++ Bu durumda, ilk elemana ait referans **artık serbest bırakılmış (deallocate edilmiş) belleği** işaret ediyor olurdu. **Ödünç alma (borrowing) kuralları**, programların bu tür bir duruma düşmesini engellemek için vardır.
+
+
+> [!tip]
+> + Not: `Vec<T>` tipinin nasıl uygulandığına dair daha fazla ayrıntı için [The Rustonomicon](https://doc.rust-lang.org/nomicon/vec/vec.html) belgesine bakın.
+
+### 8.1.3. Bir vektördeki değerler üzerinde dolaşma(Iterasyon):
+
++ Bir vektördeki her bir elemana sırasıyla erişmek için, tek tek indeksler kullanmak yerine tüm elemanlar üzerinde **iterasyon (yineleme)** yaparız. **Liste 8-7**, `i32` değerlerinden oluşan bir vektördeki her elemana **immutable referanslar** alarak bunları yazdırmak için bir `for` döngüsünün nasıl kullanılacağını göstermektedir.
+
+```rust
+fn main() {
+    let v = vec![100, 32, 57];
+    for i in &v {
+        println!("{i}");
+    }
+}
+```
+
+> `Liste 8-7`: Bir vektördeki her bir elemanı, `for` döngüsü kullanarak elemanlar üzerinde iterasyon yapıp yazdırma
+
++ Ayrıca, **mutable(`mut v`)** bir vektördeki her bir elemana **mutable referanslar(`&mut v`)** üzerinden iterasyon yaparak tüm elemanlarda değişiklik de yapabiliriz. **Liste 8-8**’deki `for` döngüsü, her bir elemana 50 eklemektedir.
+
+```rust
+let mut v = vec![100, 32, 57];
+for i in &mut v {
+    *i += 50;
+}
+```
+
+> `Liste 8-8`: Bir vektördeki elemanlara mutable referanslar(`&mut v`) üzerinden iterasyon yapma
+
++ Mutable referansın işaret ettiği değeri değiştirebilmek için, `+=` operatörünü kullanmadan önce `i` içindeki değere ulaşmak amacıyla **`*` dereference (çözümleme) operatörünü** kullanmamız gerekir. *Dereference* operatörü hakkında daha fazla bilgiyi **Bölüm 15’teki "[Referansı Takip Ederek Değere Ulaşma](https://doc.rust-lang.org/book/ch15-02-deref.html#following-the-pointer-to-the-value-with-the-dereference-operator)"** başlığında ele alacağız.
++ Bir vektör üzerinde ister immutable ister mutable şekilde iterasyon yapmak, **borrow checker** kuralları sayesinde güvenlidir. **`Liste 8-7`** ve **`Liste 8-8`**’deki `for` döngülerinin gövdelerinde eleman eklemeye ya da çıkarmaya çalışsaydık, **`Liste 8-6`**’daki koda benzer bir derleyici hatası alırdık. Bunun nedeni, `for` döngüsünün vektör üzerinde tuttuğu referansın, vektörün tamamının aynı anda değiştirilmesini engellemesidir.
+
+### 8.1.4. Birden çok türü depolamak için bir enum kullanılması:
+
++ Vektörler yalnızca **aynı türden** değerleri saklayabilir. Bu durum bazen kullanışsız olabilir; çünkü **farklı türlerde öğelerden oluşan bir listeyi** saklama ihtiyacı olan pek çok kullanım senaryosu vardır. Neyse ki, bir `enum`’un varyantları **aynı enum türü** altında tanımlanır. Bu nedenle, farklı türlerde elemanları temsil etmek için tek bir türe ihtiyaç duyduğumuzda, bir `enum` tanımlayıp kullanabiliriz.
+
++ Örneğin, bir elektronik tablodaki (spreadsheet) bir satırdan değerler almak istediğimizi düşünelim. Bu satırdaki bazı sütunlar tamsayılar, bazıları kayan noktalı sayılar ve bazıları da metin (string) içerebilir. Bu farklı değer türlerini tutacak varyantlara sahip bir `enum` tanımlayabiliriz ve tüm bu varyantlar **aynı tür**, yani enum’un kendisi olarak kabul edilir. Daha sonra, bu enum’u tutan bir vektör oluşturabiliriz; böylece sonuç olarak **farklı türlerde değerleri** tek bir vektör içinde saklamış oluruz. Bu yaklaşım **Liste 8-9**’da gösterilmektedir.
+
+```rust
+fn main() {
+    enum SpreadsheetCell {
+        Int(i32),
+        Float(f64),
+        Text(String),
+    }
+
+    let row = vec![
+        SpreadsheetCell::Int(3),
+        SpreadsheetCell::Text(String::from("blue")),
+        SpreadsheetCell::Float(10.12),
+    ];
+}
+```
+
+> `Liste 8-9`: Farklı türlerdeki değerleri tek bir vektörde saklamak için bir `enum` tanımlama
+
++ Rust, bir vektörün içinde hangi türlerin bulunacağını **derleme zamanında** bilmek zorundadır; böylece her bir elemanı saklamak için **heap üzerinde tam olarak ne kadar bellek ayrılması gerektiğini** hesaplayabilir. Ayrıca, bu vektörde **hangi türlere izin verildiğini** açıkça belirtmemiz gerekir.
++ Eğer Rust, bir vektörün herhangi bir türde değeri tutmasına izin verseydi, vektör elemanları üzerinde yapılan işlemler sırasında bu türlerin bir veya birkaçının **hata üretme ihtimali** olurdu.
++ Bir `enum` ile birlikte `match` ifadesi kullanmak, **Bölüm 6’da tartışıldığı gibi**, Rust’ın tüm olası durumların derleme zamanında ele alındığından emin olmasını sağlar.,
++ Eğer bir programın çalışma zamanında bir vector'de depolamak için alacağı tiplerin tam listesini bilmiyorsanız, `enum` tekniği işe yaramayacaktır. Bunun yerine, Bölüm 18'de ele alacağımız bir `trait` nesnesi kullanabilirsiniz.
++ Artık vektörlerin en yaygın kullanım yollarından bazılarını ele aldığımıza göre, standart kütüphanenin `Vec<T>` üzerinde tanımladığı pek çok faydalı metot için **[API dokümantasyonunu](https://doc.rust-lang.org/std/vec/struct.Vec.html)** incelemeniz faydalı olacaktır. Örneğin, `push` metoduna ek olarak, `pop` metodu da son elemanı kaldırır ve geri döndürür.
+
+### 8.1.5. Bir vektör düşürüldüğünde, elemanları da düşürülür:
+
++ Diğer tüm `struct`’larda olduğu gibi, bir vektör de kapsam (scope) dışına çıktığında serbest bırakılır; bu durum `Liste 8-10`’da gösterilmektedir.
+
+```rust
+fn main() {
+    {
+        let v = vec![1, 2, 3, 4];
+
+        // do stuff with v
+    } // <- v goes out of scope and is freed here
+}
+```
+
+> `Liste 8-10`: Vektörün ve içindeki elemanların nerede düşürüldüğünü (drop edildiğini) gösterme
+
++ Vektör düşürüldüğünde (drop edildiğinde), içindeki tüm içerik de düşürülür; yani tuttuğu tamsayılar bellekten temizlenir. **Borrow checker**, bir vektörün içeriğine ait tüm referansların(*yani, içeriğine yapılan referansların*), yalnızca vektörün kendisi geçerli olduğu sürece kullanılmasını garanti eder.
++ Şimdi bir sonraki koleksiyon türüne geçelim: **String**!
+
+## 8.2. UTF-8 Kodlamalı Metinlerin Dizeler İçinde Saklanması:
+
++ 4. Bölümde string’lerden bahsetmiştik, ancak şimdi onları daha ayrıntılı olarak inceleyeceğiz.
++ Yeni Rust kullanıcıları (Rustacean’lar) genellikle string’ler konusunda zorlanır; bunun üç temel nedeni vardır:
+	1. Rust’ın olası hataları açıkça ortaya koyma eğilimi,
+	2. string’lerin birçok programcının sandığından daha karmaşık bir veri yapısı olması
+	3. ve UTF-8 kodlaması.
++ Bu faktörler bir araya geldiğinde, özellikle diğer programlama dillerinden gelenler için konu zorlayıcı hâle getirebilir.
++ String’leri koleksiyonlar bağlamında ele alıyoruz, çünkü string’ler baytların (bytes) bir koleksiyonu olarak uygulanmıştır ve bu baytlar metin olarak yorumlandığında kullanışlı işlevsellik sağlayan bazı metotlarla birlikte gelir.
++ Bu bölümde, her koleksiyon türünde bulunan `String` üzerindeki işlemleri ele alacağız; örneğin oluşturma, güncelleme ve okuma işlemleri.
++ Ayrıca `String`’in diğer koleksiyonlardan farklı olduğu noktaları da tartışacağız; özellikle insanların ve bilgisayarların string verisini yorumlama biçimleri arasındaki farklar nedeniyle, bir `String` üzerinde indeksleme yapmanın neden karmaşık olduğunu açıklayacağız.
+
+### 8.2.1. String’leri Tanımlama:
+
++ Öncelikle string terimi ile ne demek istediğimizi tanımlayalım. Rust'ın temel dilinde sadece bir string tipi vardır: genellikle ödünç alınmış formu `&str` olarak görülen `string slice str`.(`String Slice => &str`)
+
+
+> [!tip]
+> + Rust dilinin temelinde yalnızca `str` adlı bir string türü vardır ve bu tür pratikte hep referans (`&str`) olarak kullanılır; `String` ise bunun üzerine inşa edilmiş, heap’te saklanan ayrı bir standart kütüphane yapısıdır.
+
+```rust
+// "merhaba" bellekte bir yerlerde saklanıyor
+// &str → o yeri gösteren bir işaretçi
+
+let s: &str = "merhaba";
+//     ^^^^
+//     Bu bir referans (pointer)
+//     Gerçek veriyi gösteriyor
+```
+
+```rust
+BELLEK:
+┌─────────────────┐
+│ "merhaba" ← str │  ← Gerçek veri (str tipi)
+└─────────────────┘
+        ↑
+        │
+    ┌───┴────┐
+    │  &str  │  ← İşaretçi (referans)
+    └────────┘
+```
+
+
++ Bölüm 4'te, başka bir yerde depolanan UTF-8 kodlamalı *string* verilerine referanslar olan *string slice*'ları tartışmıştık. Örneğin, *string literal*'leri programın *binary*'sinde saklanır ve bu yüzden *string slice*'lardır.
+
++ **String türü**, Rust’ın çekirdek dilinin bir parçası olarak kodlanmış değil, **standart kütüphane tarafından sağlanan**; **büyüyebilen (growable)**, **değiştirilebilir (mutable)**, **sahipliği olan (owned)** ve **UTF-8 kodlamalı** bir string türüdür.
+
++ Rust geliştiricileri (“Rustacean”lar) Rust’ta “string” ifadesini kullandıklarında, yalnızca tek bir türü değil; **String** veya **string slice (`&str`)** türlerinden herhangi birini kastediyor olabilirler.
+
++ Bu bölüm büyük ölçüde **String** türü üzerine odaklansa da, Rust’ın standart kütüphanesinde her iki tür de yoğun biçimde kullanılır ve hem **String** hem de **string slice** türleri **UTF-8 kodlamalıdır**.
+
+
+**Bellek Düzeni:**
+
+```rust
+PROGRAM BINARY (Disk'te):
+┌──────────────────┐
+│ "merhaba" literal│  ← Compile-time'da buraya yerleştirilir
+└──────────────────┘
+        ↑
+        │
+    ┌───┴────┐
+    │  &str  │  ← Programın ömrü boyunca geçerli (&'static str)
+    └────────┘
+
+HEAP (Çalışma zamanında):
+┌─────────────────────┐
+│ String("merhaba")   │  ← Runtime'da oluşturulur
+└─────────────────────┘
+        ↑
+        │
+    ┌───┴────┐
+    │  &str  │  ← String yaşadığı sürece geçerli
+    └────────┘
+```
+
+### 8.2.2. Yeni bir String Oluşturma:
+
++ `Vec<T>` ile mevcut olan birçok işlem, String ile de mevcuttur çünkü String aslında, bazı ek garantiler, kısıtlamalar ve yeteneklerle birlikte bir bayt vektörü(*vector of bytes*) çevresine uygulanmış bir sarmalayıcıdır(*wrapper*). `Vec<T>` ve String ile aynı şekilde çalışan bir fonksiyon örneği, Liste 8-11'de gösterilen bir örnek oluşturmak için kullanılan `new` fonksiyonudur.
+
+
+> [!tip]
+> + Bu paragraf, Rust programlama dilinde `String` tipinin dahili olarak bir `Vec<u8>` (bayt vektörü) üzerine inşa edildiğini ve bu nedenle vektörlerle benzer metodlara sahip olduğunu açıklıyor. 
+> + `new()` fonksiyonu her ikisinde de boş bir örnek oluşturmak için kullanılır. Metindeki "wrapper" terimi, "sarmalayıcı" veya "kapsayıcı" olarak çevrilebilir; burada String'in temelde bir vektör olduğu ama ek kurallar (örneğin geçerli UTF-8 kodlaması zorunluluğu) getirdiği vurgulanıyor.
+
+
+```rust
+fn main() {
+    let mut s = String::new();
+}
+```
+
+> `Liste 8-11`: Yeni, boş bir `String` oluşturma
+
++ Bu satır, daha sonra içine veri yükleyebileceğimiz **`s` adlı yeni ve boş bir string** oluşturur.
++ Çoğu zaman string’i başlatırken kullanmak istediğimiz **bazı başlangıç verileri** olur. Bunun için, **string literal’lerin de uyguladığı `Display` trait’ini** uygulayan herhangi bir tür üzerinde kullanılabilen **`to_string`** metodunu kullanırız.
+	- Bu cümlede denmek istenen şudur: String’i boş oluşturmak yerine, `Display` trait’ini uygulayan (örneğin string literal gibi) bir değeri `to_string()` ile doğrudan `String` olarak başlatabiliriz.
+
++  **Liste 8-12**, bununla ilgili iki örnek göstermektedir.
+
+```rust
+fn main() {
+    let data = "initial contents";
+
+    let s = data.to_string();
+
+    // The method also works on a literal directly:
+    let s = "initial contents".to_string();
+}
+```
+
+> `Liste 8-12`: Bir *string literal*’den `to_string` metodu kullanarak bir `String` oluşturma
+
++ Bu kod, “initial contents” içeriğine sahip bir `String` oluşturur.
+
+> [!NOTE]
+> #### 1. `Display` trait burada neden geçiyor?
+> + Rust’ta `to_string()` **her türde otomatik olarak yoktur**.
+> + Bir türde `to_string()` kullanılabilmesi için:
+> 	- O türün **`Display` trait’ini uygulaması gerekir**
+> 	- Yani, Bu tür ekrana yazdırılabiliyor mu?
+> 	- Eğer cevap **evet** ise: Rust onu string’e çevirebilir.
+> #### 2. Sadece string’ler mi `to_string()` kullanabilir?
+> + Hayır. `Display` uygulayan **her şey** kullanabilir.
+> ```rust
+> let a = 10.to_string();        // i32 → String
+> let b = 3.14.to_string();     // f64 → String
+> let c = true.to_string();     // bool → String
+> ```
+> + Hepsi çalışır çünkü: `i32`, `f64`, `bool` → `Display` uygular
+> #### 3. Neden böyle bir sistem var?
+> + Rust şunu ister:
+> 	- Rastgele türlerin string’e çevrilmesini engellemek
+> 	- Sadece **mantıklı biçimde yazdırılabilen** türlere izin vermek
+
++ Bir string literal’den `String` oluşturmak için `String::from` fonksiyonunu da kullanabiliriz. Liste 8-13’teki kod, `to_string` kullanan Liste 8-12’deki kod ile eşdeğerdir.
+
+```rust
+fn main() {
+    let s = String::from("initial contents");
+}
+```
+
+> `Liste 8-13`: Bir *string literal*’den `String` oluşturmak için `String::from` fonksiyonunun kullanılması
+
++ String’ler çok farklı amaçlarla kullanıldığından, string’ler için birçok farklı genel (generic) API kullanabiliriz; bu da bize pek çok seçenek sunar. Bazıları gereksiz veya tekrarlı gibi görünebilir, ancak hepsinin kendine özgü bir yeri vardır. Bu bağlamda, `String::from` ile `to_string` aynı işi yapar; dolayısıyla hangisini seçeceğiniz, daha çok stil ve okunabilirlik meselesidir.
+
+
+> [!TIP]
+> #### Genel(Generic) API nedir?
+> +  **Tanım:** tek bir somut tipe bağlı olmayan, birden fazla türle çalışabilecek şekilde tasarlanmış fonksiyonlar, metodlar veya arayüzlerdir.
+> + Bu fonksiyon sadece tek bir türle sınırlı değil.
+> ```rust
+> let s = "Hello".to_string();
+> let n = 5.to_string();
+> ```
+> + **İki farklı tür**, ama **aynı metot** çalışıyor.
+> + **Özet:** Genel (generic) API, Rust’ta bir fonksiyonun veya metodun tek bir türe bağlı kalmadan, belirli bir davranışı (trait’i) sağlayan tüm türlerle çalışabilmesini sağlayan tasarım yaklaşımıdır
+
+
+
++ String’lerin UTF-8 kodlamalı olduğunu unutmayın; bu nedenle, `Liste 8-14`’te gösterildiği gibi, uygun şekilde kodlanmış her türlü veriyi string’lerin içinde tutabiliriz.
+
+```rust
+fn main() {
+    let hello = String::from("السلام عليكم");
+    let hello = String::from("Dobrý den");
+    let hello = String::from("Hello");
+    let hello = String::from("שלום");
+    let hello = String::from("नमस्ते");
+    let hello = String::from("こんにちは");
+    let hello = String::from("안녕하세요");
+    let hello = String::from("你好");
+    let hello = String::from("Olá");
+    let hello = String::from("Здравствуйте");
+    let hello = String::from("Hola");
+}
+```
+
+> `Liste 8-14`: Farklı dillerdeki selamlaşma ifadelerinin string’lerde saklanması
+
++ Bunların hepsi geçerli (`valid`) `String` değerleridir.
+
+### 8.2.3. Bir String'i Güncelleme:
+
++ Bir `String`, içine daha fazla veri eklendiğinde boyut olarak büyüyebilir ve içeriği değişebilir; tıpkı bir `Vec<T>`’nin içeriğinin değişebilmesi gibi.
++ Ayrıca, `String` değerlerini birleştirmek (*concatenate*) için `+` operatörünü veya `format!` makrosunu pratik bir şekilde kullanabilirsiniz.
+
+
+#### 8.2.3.1. `push_str` ya da `push` kullanarak String’e veri ekleme:
+
++ `Liste 8-15`'te gösterildiği gibi, bir *string slice*(`&str`) eklemek için `push_str` metodunu kullanarak bir String'i büyütebiliriz.
+
+```rust
+fn main() {
+    let mut s = String::from("foo");
+    s.push_str("bar");
+}
+```
+
+> Liste 8-15: `push_str` metodunu kullanarak bir String’e *string slice*(`&str`)  ekleme
+
++ Bu iki satırdan sonra `s`, `foobar` içeriğine sahip olacaktır. `push_str` metodu bir `string slice` (`&str`) alır; çünkü parametrenin sahipliğini (*ownership*) almamız gerekmez.
+
+> [!TIP]
+> + `push_str` metodunun imzası:
+> ```rust
+>  pub fn push_str(&mut self, string: &str) {
+> ```
+> + Metot **`String` değil `&str` alır**
+> + Yani **sahiplik devri yoktur**, sadece **ödünç alma (borrowing)** vardır
+
++ Örneğin, `Liste 8-16`’daki kodda, `s2`’nin içeriğini `s1`’e ekledikten sonra `s2`’yi hâlâ kullanabilmek istiyoruz.
+
+```rust
+fn main() {
+    let mut s1 = String::from("foo");
+    let s2 = "bar";
+    s1.push_str(s2);
+    println!("s2 is {s2}");
+}
+```
+
+> `Liste 8-16`: Bir `string slice`'nın içeriğini bir `String`’e ekledikten sonra onu kullanmaya devam etmek
+
+**Çıktısı:**
+
+```
+s2 is bar
+```
+
++ Eğer `push_str` metodu `s2`'nin sahipliğini alsaydı, son satırda onun değerini yazdıramazdık. Ancak bu kod, beklediğimiz şekilde çalışmaktadır.
+----
++ `push` metodu tek bir karakteri parametre olarak alır ve bu karakteri `String`’e ekler. `Liste 8-17`'de, `push` metodu kullanılarak bir `String`’e `l` harfi eklenmektedir.
+
+```rust
+fn main() {
+    let mut s = String::from("lo");
+    s.push('l');
+}
+```
+
+> `Liste 8-17`: `push` kullanarak bir `String` değerine tek bir karakter ekleme
+
++ Sonuç olarak, `s` değişkeni `lol` değerini içerecektir.
+#### 8.2.3.2. `+` operatörü ya da `format!` makrosu kullanılarak *string* birleştirme:
+
++ Çoğu zaman, var olan iki *string*’i birleştirmek isteyeceksiniz. Bunu yapmanın bir yolu, `Liste 8-18`’de gösterildiği gibi **`+` operatörünü** kullanmaktır.
+
+```rust
+fn main() {
+	let s1 = String::from("Hello, ");
+	let s2 = String::from("world!");
+	let s3 = s1 + &s2; // s1’in burada taşındığına (move edildiğine) ve artık kullanılamayacağına dikkat edin
+}
+```
+
+> `Liste 8-18`: `+` operatörünü kullanarak iki `String` değerini yeni bir `String` değeri hâline getirme
+
++ `s3` string’i `"Hello, world!"` değerini içerecektir. 
++ Toplama işleminden sonra `s1`’in artık geçerli olmamasının nedeni ve `s2` için neden bir referans kullandığımız, `+` operatörünü kullandığımızda çağrılan metodun imzasıyla ilgilidir.
++ `+` operatörü, `add` metodunu kullanır ve bu metodun imzası kabaca şu şekildedir:
+
+```rust
+fn add(self, s: &str) -> String {
+```
+
++ Standart kütüphanede `add` metodu, jenerikler (*generics*) ve ilişkili tipler (*associated types*) kullanılarak tanımlanmıştır.
++ Burada ise somut tipleri yerleştirdik; bu da metodu `String` değerleriyle çağırdığımızda olan şeydir.
+	- Yani, Rust standart kütüphanesinde `add` metodu **jenerik** olarak tanımlıdır. Yani gerçek tipler yerine **genel (soyut) tipler** kullanılır. Ancak sen bu metodu gerçek bir kodda çağırdığında, Rust bu genel tiplerin yerine **gerçek (somut) tipleri(concrete types)** koyar.
+	- Biz burada jenerik tanımı değil, `String` ile çağrıldığında ortaya çıkan gerçek (somut) hâlini gösteriyoruz
++ Generic'leri Bölüm 10'da tartışacağız.
++ Bu imza bize + operatörünün zor kısımlarını anlamak için ihtiyacımız olan ipuçlarını verir.
++ Ancak bir durun—`&s2`’nin tipi `&String`tir, `add` fonksiyonunun ikinci parametresinde belirtilen `&str` değildir. O hâlde Liste 8-18 neden derleniyor?
++ `add` çağrısında `&s2`’yi kullanabilmemizin sebebi, derleyicinin `&String` argümanını otomatik olarak `&str`’ye **zorlayabilmesidir (coerce)**.
++ `add` metodunu çağırdığımızda Rust, burada `&s2`’yi `&s2[..]` hâline dönüştüren bir **deref coercion** (dereference zorlaması) uygular.
++ Deref coercion konusunu Bölüm 15’te daha ayrıntılı ele alacağız. `add` metodu `s` parametresinin sahipliğini almadığı için, bu işlemden sonra `s2` hâlâ geçerli bir `String` olarak kalır.
++ Rust, burada `&s2`’yi `&s2[..]` hâline dönüştüren bir **deref coercion** (dereference zorlaması) uygular.
++ *Deref coercion* konusunu Bölüm 15’te daha ayrıntılı ele alacağız. `add` metodu `s` parametresinin sahipliğini almadığı için, bu işlemden sonra `s2` hâlâ geçerli bir `String` olarak kalır.
++ İkinci olarak, fonksiyon imzasında `add` metodunun `self` parametresinin başında `&` olmadığını görürüz. Bu, `add`’in `self`’in **sahipliğini aldığını** gösterir. Bu nedenle `Liste 8-18`’deki `s1`, `add` çağrısına taşınır (*move* edilir) ve bu çağrıdan sonra artık geçerli olmaz.
++ Dolayısıyla `let s3 = s1 + &s2;` ifadesi, her iki string’i de kopyalayıp yeni bir string oluşturuyormuş gibi görünse de, gerçekte olan şudur:
++ `s1`’in sahipliği alınır, `s2`’nin içeriğinin bir kopyası buna(`$1`) eklenir ve ardından ortaya çıkan sonucun sahipliği geri döndürülür.
++ Başka bir deyişle, çok fazla kopyalama yapıyormuş gibi görünse de, aslında durum böyle değildir; bu uygulama kopyalamaya kıyasla **daha verimli** olacak şekilde tasarlanmıştır.
+
+---
+
++ Birden fazla *string*’i birleştirmemiz gerektiğinde, `+` operatörünün davranışı kullanışsız (hantal / zor yönetilir) hale gelir.
+	- Yani, birden fazla *string*’i art arda birleştirmek istediğimizde, `+` operatörünü kullanmak karmaşık ve okunması zor bir hâl alır.
+
+```rust
+fn main() {
+    let s1 = String::from("tic");
+    let s2 = String::from("tac");
+    let s3 = String::from("toe");
+
+    let s = s1 + "-" + &s2 + "-" + &s3;
+}
+```
+
++ Bu noktada `s` değişkeni `tic-tac-toe` değerini içerecektir. Ancak bu kadar çok `+` ve `"-"` karakteri olduğu için, kodun ne yaptığını görmek zorlaşır. *String*’leri daha karmaşık şekillerde birleştirmek için bunun yerine `format!` makrosunu kullanabiliriz:
++ Bu kod da `s` değişkenini `tic-tac-toe` olarak ayarlar. `format!` makrosu `println!` makrosuna benzer şekilde çalışır; ancak çıktıyı ekrana yazdırmak yerine, içeriği bir `String` olan bir değer döndürür.
++ `format!` kullanan kod sürümü okunması çok daha kolaydır ve `format!` makrosu tarafından üretilen kod referanslar kullanır, böylece bu çağrı, parametrelerinden hiçbirinin sahipliğini almaz.
+
+
+### 8.2.4. String’lere İndeksleme ile Erişim:
+
++ Birçok başka programlama dilinde, bir string içindeki tek tek karakterlere indeks numarasıyla erişmek geçerli ve yaygın bir işlemdir. Ancak Rust’ta bir `String`’in parçalarına indeksleme sözdizimini kullanarak erişmeye çalışırsanız, bir hata alırsınız. `Liste 8-19`’da geçersiz olan bir kod örneği gösterilmektedir.
+
+**Bu kod derlenmez!**
+
+```rust
+fn main() {
+    let s1 = String::from("hi");
+    let h = s1[0];
+}
+```
+
+> `Listing 8-19`: Bir String ile indeksleme sözdizimini kullanmaya çalışma
+
++ Bu kod çalıştırıldığında aşağıdaki hatayı üretir:
+
+```rust
+$ cargo run
+   Compiling collections v0.1.0 (file:///projects/collections)
+error[E0277]: the type `str` cannot be indexed by `{integer}`
+ --> src/main.rs:3:16
+  |
+3 |     let h = s1[0];
+  |                ^ string indices are ranges of `usize`
+  |
+  = note: you can use `.chars().nth()` or `.bytes().nth()`
+          for more information, see chapter 8 in The Book: <https://doc.rust-lang.org/book/ch08-02-strings.html#indexing-into-strings>
+  = help: the trait `SliceIndex<str>` is not implemented for `{integer}`
+          but trait `SliceIndex<[_]>` is implemented for `usize`
+  = help: for that trait implementation, expected `[_]`, found `str`
+  = note: required for `String` to implement `Index<{integer}>`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `collections` (bin "collections") due to 1 previous error
+```
+
++ Bu hata mesajı durumu açıkça anlatır: **Rust string’ler indekslemeyi desteklemez.** Peki neden? Bu soruyu cevaplayabilmek için Rust’ın string’leri bellekte nasıl sakladığını konuşmamız gerekir.
+
+#### 8.2.4.1. Dahili (İç) Gösterim:
+
++ Bir `String`, aslında `Vec<u8>` üzerine kurulmuş bir sarmalayıcıdır (wrapper).
++ `Liste 8-14`’teki düzgün şekilde `UTF-8` ile kodlanmış *string* örneklerimizden bazılarına bakalım. İlk olarak şu örneği ele alalım:
+
+```rust
+fn main() {
+    let hello = String::from("السلام عليكم");
+    let hello = String::from("Dobrý den");
+    let hello = String::from("Hello");
+    let hello = String::from("שלום");
+    let hello = String::from("नमस्ते");
+    let hello = String::from("こんにちは");
+    let hello = String::from("안녕하세요");
+    let hello = String::from("你好");
+    let hello = String::from("Olá");
+    let hello = String::from("Здравствуйте");
+    let hello = String::from("Hola");  // <<===========
+}
+```
+
++ Bu durumda `len` değeri 4 olacaktır; bu da `"Hola"` *string*’ini saklayan vektörün 4 bayt uzunluğunda olduğu anlamına gelir. Bu harflerin her biri `UTF-8` ile kodlandığında 1 bayt yer kaplar. Ancak aşağıdaki satır sizi şaşırtabilir (bu *string*’in başındaki karakterin `3` rakamı değil, büyük Kiril harfi `Ze` olduğunu unutmayın):
+
+```rust
+fn main() {
+    let hello = String::from("السلام عليكم");
+    let hello = String::from("Dobrý den");
+    let hello = String::from("Hello");
+    let hello = String::from("שלום");
+    let hello = String::from("नमस्ते");
+    let hello = String::from("こんにちは");
+    let hello = String::from("안녕하세요");
+    let hello = String::from("你好");
+    let hello = String::from("Olá");
+    let hello = String::from("Здравствуйте");  // <<===========
+    let hello = String::from("Hola");
+}
+```
+
++ Bu string’in uzunluğunun ne kadar olduğu sorulsa, muhtemelen 12 dersiniz. Oysa Rust’ın verdiği cevap 24’tür: Bunun nedeni, "Здравствуйте" kelimesini `UTF-8` ile kodlamak için 24 bayt gerekmesidir; çünkü bu *string* içindeki her *Unicode skaler değeri* 2 bayt yer kaplar.
++ Dolayısıyla string’in baytları üzerinden yapılan bir indeksleme, her zaman geçerli bir *Unicode skaler değerine* karşılık gelmez. Bunu göstermek için aşağıdaki geçersiz Rust kodunu düşünelim:
+
+
+> [!NOTE]
+> #### Unicode skaler değeri ne demektir?
+> + **Unicode skaler değeri**, Unicode standardında tanımlanmış, **tek bir anlamlı karakter birimini** temsil eden sayısal bir değerdir.
+> + Teknik olarak: **U+0000 ile U+D7FF** ve **U+E000 ile U+10FFFF** aralığındaki Unicode kod noktalarıdır(Unicode Code Point).
+> + Yani **Unicode’un geçerli karakterleri** diyebiliriz.
+> + Örnekler:
+> 	- `A` → `U+0041`
+> 	- `h` → `U+0068`
+> 	- `З` → `U+0417`
+> 	- `你` → `U+4F60`
+> 
+> Bunların her biri **bir Unicode skaler değeridir**.(Unicode scalar value = Geçerli bir Unicode karakteri)
+
+**Bu kod derlenmez!**
+
+```rust
+let hello = "Здравствуйте";
+let answer = &hello[0];
+```
+
++ Artık `answer` değişkeninin, ilk harfi  **З** olmayacağını biliyorsunuz.  UTF-8 ile kodlandığında **З** harfinin ilk baytı 208, ikinci baytı ise 151’dir. Bu durumda `answer`’ın 208 olması gerektiği düşünülebilir; ancak 208 tek başına geçerli bir karakter değildir.
++ Bir kullanıcı bu *string*’in ilk harfini istediğinde, 208 değerinin döndürülmesi büyük olasılıkla istenen bir sonuç değildir. Üstelik string yalnızca Latin harfleri içerse bile kullanıcılar genellikle bayt değerini almak istemez: Eğer `&"hi"[0]` geçerli bir kod olsaydı, dönen değer `h` değil, 104 olurdu.
++ Sonuç olarak, beklenmeyen değerlerin döndürülmesini ve hemen fark edilmeyebilecek hataların oluşmasını engellemek için Rust bu kodu hiç derlemez ve geliştirme sürecinin erken aşamasında bu tür yanlış anlaşılmaları önler.
+
+#### 8.2.4.2. Baytlar, Skaler Değerler ve Grafem Kümeleri:
+
++ UTF-8 ile ilgili bir diğer önemli nokta da, Rust’ın bakış açısından *string*’lere **aslında üç farklı şekilde** bakılabilmesidir: **baytlar**, **skaler değerler** ve **grafem kümeleri** (harf dediğimiz şeye en yakın kavram).
+
++ Devanagari alfabesiyle yazılmış Hintçe **"नमस्ते"** kelimesine bakarsak, bu kelime `u8` değerlerinden oluşan bir vektör olarak şu şekilde saklanır:
+
+```rust
+[224, 164, 168, 224, 164, 174, 224, 164, 184, 224, 165, 141, 224, 164, 164,
+224, 165, 135]
+```
+
++ Bu, toplam **18 bayt** eder ve bilgisayarların bu veriyi en nihayetinde saklama biçimi budur.
++ Bunu Unicode **skaler değerler** (Rust’taki `char` türünün temsil ettiği şey) olarak ele aldığımızda ise, bu baytlar şu şekilde görünür:
+
+```rust
+['न', 'म', 'स', '्', 'त', 'े']
+```
+
++ Burada **altı adet `char` değeri** vardır; ancak dördüncü ve altıncı olanlar harf değildir. Bunlar tek başlarına anlam ifade etmeyen **işaretler (diacritics)** tir.
+
+
+> [!TIP]
+> #### Diacritics (Ayırt Edici İşaretler) Nedir?
+> + **Diacritics**, tek başına **harf olmayan**, ancak bir harfin **okunuşunu, anlamını veya biçimini değiştiren** ek işaretlerdir.
+> 	- `'न'`, `'म'`, `'स'`, `'त'` → harf
+> 	- `'्'` ve `'े'` → **diacritics**
+> + Özellik:
+> 	- `'्'` (virama) → Harfin sesini bastırır.
+> 	- `'े'` → Ünlü ses ekler
+> #### Neden Rust bunu özellikle vurguluyor?
+> + Çünkü;
+> 	- `char` ≠ "insanın gördüğü harf"
+> 	- Bir "harf" (grafem), **birden fazla `char`** içerebilir.
+> 	- Diacritics bu farkın en net örneğidir.
+> + Örneğin;
+> ```text
+> "स्" = 'स' + '्'
+> ```
+> + İnsan için: **tek harf**
+> + Bilgisayar için: **iki Unicode skaler değeri**
+
++ Son olarak, bunlara **grafem kümeleri** olarak baktığımızda, bir insanın Hintçe kelimeyi oluşturan **dört harf** olarak algıladığı şeyleri elde ederiz:
+
+
+> [!TIP]
+> #### Grafem nedir?
+> + **Grafem**, bir insanın **tek bir “harf” olarak algıladığı en küçük yazı birimidir**.
+> + Grafem **bilgisayarın değil, insanın algısına** göredir.
+> + Bir grafem:
+> 	- 1 Unicode skaler değerden oluşabilir.
+> 	- ya da **birden fazla Unicode skaler değerin birleşimi** olabilir.
+> #### Grafem kümesi (grapheme cluster) nedir?
+> + **Grafem kümesi,** bir grafemi oluşturan bir veya daha fazla Unicode skaler değerinin birleşimidir.
+> + Unicode standardı, hangi skaler değerlerin birlikte **tek bir “görünen harf”** oluşturduğunu tanımlar. İşte bu birliktelik **grafem kümesi**dir.
+> ##### Basit Latin Harfi:
+> ```text
+> "a"
+> ```
+> +  Unicode skaler değeri: `U+0061`
+> + `char` sayısı: 1
+> + grafem sayısı: 1
+> ##### Aksanlı Harf:
+> ```text
+> "é"
+> ```
+> + İki farklı şekilde temsil edilebilir:
+> 	- Tek skaler değer: `'é' → U+00E9`
+> 	- Birleşik Biçim: `'e' (U+0065) + '́' (U+0301)`
+> + İnsan için: **1 harf (1 grafem)**
+> + Bilgisayar için: **2 char (2 skaler değer)**
+> + Burada:
+> 	- `'स्'` → **grafem kümesi**
+> 	- `'ते'` → **grafem kümesi**
+
+
++ Rust, bilgisayarların depoladığı ham string verisini yorumlamanın farklı yollarını sağlar, böylece her program verinin hangi insan dilinde olduğuna bakılmaksızın ihtiyaç duyduğu yorumu seçebilir.
+	- Bu cümle, Rust'ın string verilerini baytlar, Unicode scalar values veya grapheme clusters gibi farklı düzeylerde yorumlayabilme esnekliğini vurguluyor.
++ Rust’ın bir `String` üzerinde karakter elde etmek için indekslemeye izin vermemesinin son bir nedeni daha vardır: **indeksleme işlemlerinden her zaman sabit zamanlı (O(1)) olmaları beklenir**. Ancak `String` ile bunu garanti etmek mümkün değildir; çünkü Rust’ın, geçerli karakterlerin sayısını belirlemek için *string*’in başından başlayarak verilen indekse kadar içeriği adım adım dolaşması gerekir.
+
+
+> [!NOTE]
+> #### A. Sabit Zamanlı (O(1)) ne anlama geldir?
+> + O(1) şu demektir:
+> 	- Veri ne kadar büyük olursa olsun 
+> 	- İstenen elemana erişim süresi değişmez.
+> 	- Her zaman *tek adımda* erişilir
+> + Örnek:
+> 	- 10 elemanlı dizi
+> 	- 10 milyon elemanlı dizi
+> 
+> Her ikisinde de:
+> ```rust
+> arr[5]
+> ```
+> işlemi aynı sürede gerçekleşir.
+> #### B. O(1)’in temel şartı: Doğrudan adres hesaplama:
+> + O(1) işlemler **asla arama yapmaz**.
+> + Bunun yerine:
+> 	1. Başlangıç adresi bilinir.
+> 	2. Sabit bir matematiksel formülü hedef adres hesaplanır.
+> 	3. Bellekten okunur.
+> #### C. En net örnek: Dizi (array / Vec) indeksleme:
+> ```rust
+> let v = vec![10, 20, 30, 40];
+> let x = v[2];
+> ```
+> ##### C.1. Bellekte olanlar
+> Varsayalım:
+> + `v` bellekte **0x1000** adresinde başlıyor
+> + Her `i32` → **4 byte**
+> ##### Rust/CPU şunu yapar:
+> ```ini
+> adres = 0x1000 + (2 * 4)
+> ```
+> + Bellekten oku → 30
+> + **Ne Oldu?**
+> 	- Döngü Yok
+> 	- Karakter çözme yok
+> 	- Veri sayısına bakılmadı.
+> 
+> ➡ **O(1)**
+> #### O(1) neden her zaman mümkün değildir?
+> Çünkü her veri yapısı sabit boyutlu değildir.
+> ##### String Örneği:
+> ```rust
+> String = Vec<u8>
+> ```
+> + UTF-8 → karakterler **değişken uzunluklu**
+> + 1 char = 1–4 byte
+> + `s[i] → i.` karakter mi?
+> 	- Bunu bulmak için baştan itibaren çözmek gerekir
+> 
+> ➡ **O(n)**
+
+### 8.2.5. String'leri Dilimleme:
+
++ Bir string üzerinde indeksleme yapmak çoğu zaman **kötü bir fikirdir**, çünkü string indeksleme işleminin **hangi türde bir değer döndürmesi gerektiği açık değildir**:  bir **bayt değeri mi**, bir **karakter mi**, bir **grafem kümesi mi**, yoksa bir **string dilimi (&str)** mi?
++ Bu nedenle, indeksleri gerçekten kullanarak string dilimleri oluşturmanız gerekiyorsa, Rust sizden **daha açık ve net olmanızı ister**.
++ Tek bir sayı ile `[]` kullanarak indekslemek yerine, **bir aralık (range)** ile `[]` kullanarak belirli baytları içeren bir string dilimi oluşturabilirsiniz:
+
+```rust
+#![allow(unused)]
+fn main() {
+let hello = "Здравствуйте";
+
+let s = &hello[0..4];
+}
+```
+
++ Burada `s`, string’in **ilk 4 baytını** içeren bir `&str` olacaktır. Daha önce de belirttiğimiz gibi, bu string’deki her karakter **2 bayt** uzunluğundadır; bu da `s` değişkeninin **“Зд”** içeriğine sahip olacağı anlamına gelir.
+
+```rust
+$ cargo run
+   Compiling collections v0.1.0 (file:///projects/collections)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running `target/debug/collections`
+
+thread 'main' panicked at src/main.rs:4:19:
+byte index 1 is not a char boundary; it is inside 'З' (bytes 0..2) of `Здравствуйте`
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+
+> [!caution]
+> + Bu nedenle, aralıklar (range) kullanarak string dilimleri oluştururken **dikkatli olunmalıdır**, çünkü yanlış bir aralık seçimi **programınızın çökmesine (panic)** neden olabilir.
+
+### 8.2.6. String’ler üzerinde iterasyon:
+
++ String’lerin parçaları üzerinde işlem yapmanın en iyi yolu, **karakterlerle mi yoksa baytlarla mı çalışmak istediğinizi açıkça belirtmektir**. Tek tek Unicode skaler değerleri için `chars` metodunu kullanın.
++ `"Зд"` üzerinde `chars` çağrıldığında, iki adet `char` türünde değer ayrıştırılır ve bunlar üzerinde yineleme (iterasyon) yaparak her bir elemana erişebilirsiniz:
+
+```rust
+#![allow(unused)]
+fn main() {
+	for c in "Зд".chars() {
+	    println!("{c}");
+	}
+}
+```
+
++ Bu kod aşağıdaki çıktıyı üretir:
+
+```shell
+З
+д
+```
+
++ Alternatif olarak, `bytes` metodu her bir ham baytı döndürür; bu da alanınıza (problem domain’inize) bağlı olarak uygun olabilir:
+
+```rust
+#![allow(unused)]
+fn main() {
+	for b in "Зд".bytes() {
+	    println!("{b}");
+	}
+}
+```
+
++ Bu kod, bu *string*’i oluşturan 4 baytı ekrana yazdırır:
+
+```rust
+208
+151
+208
+180
+```
+
++ Ancak **geçerli bir Unicode skaler değerin birden fazla bayttan oluşabileceğini unutmamak gerekir**.
++ Devanagari yazısı gibi durumlarda olduğu üzere, string’lerden **grafem kümeleri** elde etmek karmaşıktır; bu nedenle bu işlevsellik standart kütüphanede sunulmaz. Eğer buna ihtiyaç duyuyorsanız, **[crates.io](https://crates.io/)** üzerinde bu amaçla kullanılabilecek crate’ler mevcuttur.
+
+### 8.2.7. String’lerin Karmaşıklıklarının Ele Alınması:
+
++ Özetlemek gerekirse, *string*’ler karmaşıktır.
++ Farklı programlama dilleri bu karmaşıklığı programcıya nasıl sunacakları konusunda farklı tercihler yapar. Rust ise String verisinin doğru şekilde ele alınmasını tüm Rust programları için varsayılan davranış haline getirmeyi seçmiştir.
+	- Burada kastedilen **string’lerin (metinlerin) içsel olarak karmaşık olmasıdır**.
+	- Bazı diller (örneğin *Python*, *JavaScript*): Bu karmaşıklığı **programcıdan gizler**, *String* indekslemeyi serbest bırakır, Hatalar genellikle **çalışma zamanında** ortaya çıkar. Yani Bu zor detayları sen düşünme, ben hallederim” yaklaşımı vardır.
+	- Rust’un yaklaşımı farklıdır: Karmaşıklığı **saklamak yerine görünür kılar**, Potansiyel hatalara **derleme zamanında** engel olur, "Yanlış anlaşılabilecek" işlemleri (örneğin `s[0]`) **yasaklar**. Yani, Bu veriyi yanlış yorumlamanı istemiyorum. Ne yaptığını açıkça belirt.
++ Bu da programcıların UTF-8 verisini ele alırken en baştan daha fazla düşünmesini gerektirir. Bu tercih, *string*’lerin karmaşıklığını diğer programlama dillerine kıyasla daha görünür kılar; ancak geliştirme sürecinin ilerleyen aşamalarında ASCII olmayan karakterlerle ilgili hatalarla uğraşmak zorunda kalmanızı engeller.
++ İyi haber şu ki, standart kütüphane bu karmaşık durumları doğru şekilde ele alabilmenize yardımcı olmak için `String` ve `&str` türleri üzerine kurulmuş pek çok işlevsellik sunar.
++ Bir *string* içinde arama yapmak için `contains`, bir *string*’in belirli bölümlerini başka bir *string* ile değiştirmek için `replace` gibi faydalı metotların belgelerini mutlaka inceleyin.
+
++ Şimdi biraz daha az karmaşık bir konuya geçelim: hash map’ler!
+
+## 8.3. Hash Map’lerde Anahtarlarla İlişkili Değerlerin Saklanması:
+
++ Yaygın koleksiyonlarımızdan sonuncusu hash map'tir.
++ `HashMap<K, V>` tipi, `K` tipindeki anahtarların `V` tipindeki değerlere eşleştirilmesini bir hashleme (*hashing*) fonksiyonu kullanarak saklar; bu fonksiyon, bu anahtarları ve değerleri belleğe nasıl yerleştireceğini belirler.
++ Birçok programlama dili bu tür bir veri yapısını destekler, ancak genellikle hash, map, object, hash table, dictionary veya associative array gibi farklı bir isim kullanırlar; bunlar sadece birkaç örnektir.
+
++ Hash map’ler, vektörlerde olduğu gibi bir **indeks** kullanarak değil, **herhangi bir türden olabilen bir anahtar** kullanarak veri aramak istediğinizde kullanışlıdır. Örneğin bir oyunda, her takımın skorunu bir hash map içinde tutabilirsiniz: burada her anahtar bir takımın adı olurken, değerler de o takımların skorlarıdır. Elinizde bir takım adı olduğunda, o takımın skorunu kolayca alabilirsiniz.
+
++ Bu bölümde hash map’lerin **temel API’sini** ele alacağız;
++ ancak standart kütüphanede `HashMap<K, V>` üzerinde tanımlı fonksiyonların içinde gizli daha pek çok kullanışlı özellik bulunmaktadır. Her zaman olduğu gibi, daha fazla bilgi için standart kütüphane dokümantasyonuna göz atın.
+
+### 8.3.1. Yeni Bir Hash Map Oluşturma:
+
++ Boş bir hash map oluşturmanın bir yolu `new` kullanmak ve elemanları `insert` ile eklemektir. `Liste 8-20`’de, adları **Blue** ve **Yellow** olan iki takımın skorlarını takip ediyoruz. **Blue** takımı 10 puanla başlıyor, **Yellow** takımı ise 50 puanla başlıyor.
+
+```rust
+fn main() {
+    use std::collections::HashMap;
+
+    let mut scores = HashMap::new();
+
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Yellow"), 50);
+}
+```
+
+> **Liste 8-20:** Yeni bir hash map oluşturma ve bazı anahtar–değer çiftlerini ekleme
+
+
+> [!caution]
+> + Standart kütüphanenin **collections** bölümünden `HashMap`’i önce `use` etmemiz gerektiğine dikkat edin!
+
++ Üç yaygın koleksiyonumuz arasında bu yapı en az kullanılanıdır; bu nedenle **prelude** tarafından otomatik olarak kapsama (scope) alınmaz.
++ Hash map’ler ayrıca standart kütüphaneden daha az destek alır; örneğin onları oluşturmak için yerleşik bir makro bulunmaz.
+
+> [!important]
+> + Vektörlerde olduğu gibi, hash map’ler de verilerini **heap** üzerinde saklar.
+> + Bu `HashMap`’in anahtarları `String` türünde, değerleri ise `i32` türündedir.
+> + Vektörlerde olduğu gibi hash map’ler de **homojendir**: tüm anahtarlar aynı türde olmalı ve tüm değerler de aynı türde olmalıdır.
+
+
+### 8.3.2. Hash Map’te Değerlere Erişme:
+
++ Bir hash map’ten bir değeri almak için, **get** metoduna ilgili **anahtarı** veririz. Bu durum `Liste 8-21`’de gösterilmektedir.
+
+```rust
+fn main() {
+    use std::collections::HashMap;
+
+    let mut scores = HashMap::new();
+
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Yellow"), 50);
+
+    let team_name = String::from("Blue");
+    let score = scores.get(&team_name).copied().unwrap_or(0);
+}
+```
+
+> **Liste 8-21:** Hash map’te saklanan Blue takımının skoruna erişme
+
++ Burada `score`, **Blue** takımıyla ilişkilendirilmiş değeri alır ve sonuç **10** olur.
++ `get` metodu `Option<&V>` döndürür; eğer hash map içinde bu anahtar için bir değer yoksa, `get` metodu `None` döner.
++ Bu programda `Option`, önce `copied` çağrılarak `Option<&i32>` yerine `Option<i32>` elde edilerek, ardından `unwrap_or` kullanılarak ele alınır.
+
+
+> [!TIP]
+> #### 1. `get` metodu neden `Option<&V>` döndürür?
+> + `scores` bir `HashMap<String, i32>`
+> + `get` metodu **değeri kopyalamaz**, yalnızca **içerideki değere bir referans** verir.
+> + Bu yüzden dönüş tipi: `Option<&i32>`
+> + Neden `Option`?
+> 	- Çünkü verdiğin anahtar (`"Blue"`) hash map içinde **olabilir de olmayabilir de**
+> 	- Rust, “kesin vardır” varsayımı yapmana izin vermez.
+> + Durumlar:
+> 	- Anahtar varsa → `Some(&10)`
+> 	- Anahtar yoksa → `None`
+> #### 2. Neden doğrudan `i32` değil de `&i32`?
+> + Rust **varsayılan olarak sahipliği (ownership) vermez**.
+> + Hash map hâlâ o değerin sahibidir.
+> 	- `get` sadece “şuna bir bak” der
+> 	- Bu nedenle sana **ödünç alınmış (borrowed)** bir değer verir: `&i32`
+> 
+> Bu, bellek güvenliği açısından çok kritiktir.
+
++ Böylece `scores` içinde bu anahtar için bir kayıt yoksa `score` değeri **sıfır (0)** olarak ayarlanır.
++ Bir hash map içindeki her **anahtar–değer** çiftini, vektörlerde yaptığımıza benzer şekilde, bir `for` döngüsü kullanarak dolaşabiliriz:
+
+```rust
+fn main() {
+    use std::collections::HashMap;
+
+    let mut scores = HashMap::new();
+
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Yellow"), 50);
+
+    for (key, value) in &scores {
+        println!("{key}: {value}");
+    }
+}
+```
+
++ Bu kod, her anahtar–değer çiftini **rastgele (belirsiz) bir sırayla** yazdırır:
+
+```rust
+Yellow: 50
+Blue: 10
+```
+
+### 8.3.3. Hash Map’lerde Sahipliğin (Ownership) Yönetilmesi:
+
++ `i32` gibi **Copy** trait’ini uygulayan türler için, değerler hash map içine **kopyalanır**. `String` gibi **sahipliği olan (owned)** türlerde ise değerler **taşınır (move edilir)** ve hash map bu değerlerin sahibi olur.
++ Bu durum Liste 8-22’de gösterilmektedir.
+
+```rust
+fn main() {
+    use std::collections::HashMap;
+
+    let field_name = String::from("Favorite color");
+    let field_value = String::from("Blue");
+
+    let mut map = HashMap::new();
+    map.insert(field_name, field_value);
+    // field_name ve field_value bu noktadan sonra geçersizdir;
+    // kullanmayı denerseniz derleyicinin verdiği hatayı görebilirsiniz!
+}
+```
+
+> **Liste 8-22:** Anahtarlar ve değerler eklendikten sonra hash map’in bunların sahibi olduğunu gösterme
+
++ `insert` çağrısıyla hash map içine taşındıktan sonra, `field_name` ve `field_value` değişkenlerini artık kullanamayız.
+
+
+> [!warning]
+> + Eğer *hash map* içine **değerlere ait referanslar** eklerseniz, değerler *hash map* içine taşınmaz.
+> + Ancak bu referansların işaret ettiği değerler, en az *hash map* geçerli olduğu süre boyunca geçerli olmak zorundadır.
+> + Bu konuları **10. Bölümdeki "[Ömürler (Lifetimes) ile Referansları Doğrulama](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#validating-references-with-lifetimes)"** kısmında daha ayrıntılı ele alacağız.
+> ```rust
+> use std::collections::HashMap;
+>
+> fn main() {
+>    let field_name = String::from("Favorite color");
+>    let field_value = String::from("Blue");
+>
+>    let mut map = HashMap::new();
+>    map.insert(&field_name, &field_value); // <= Referanslar
+>
+>    println!("{field_name}");
+>    println!("{}", field_value);
+>}
+> ```
+
+### 8.3.4. Bir Hash Map’i Güncelleme:
+
++ Anahtar–değer çiftlerinin sayısı artırılabilir olsa da, **her benzersiz anahtar** aynı anda yalnızca **tek bir değerle** ilişkilendirilebilir (ancak bunun tersi geçerli değildir: örneğin **Blue** takımı ile **Yellow** takımı, `scores` *hash map*’i içinde her ikisi de **10** değerine sahip olabilir).
++ Bir *hash map* içindeki veriyi değiştirmek istediğinizde, bir anahtarın zaten bir değere sahip olduğu durumu **nasıl ele alacağınıza karar vermeniz gerekir**.
+	- Eski değeri tamamen yok sayarak yeni değerle **değiştirebilirsiniz**.
+	- Eski değeri koruyup yeni değeri yok sayabilir, yalnızca anahtarın zaten bir değeri yoksa yeni değeri ekleyebilirsiniz.(*Hash map* içinde **aynı anahtar zaten varsa** → **mevcut değere dokunma** veya *Hash map* içinde **bu anahtar yoksa** → **yeni değeri ekle**)
+	- Ya da eski değer ile yeni değeri **birleştirebilirsiniz**.
++ Şimdi bunların her birinin nasıl yapılacağına bakalım!
+
+#### 8.3.4.1. Bir Değerin Üzerine Yazma (Overwriting):
+
++ Bir hash map içine bir anahtar–değer çifti ekledikten sonra, **aynı anahtarı farklı bir değerle** tekrar eklerseniz, o anahtarla ilişkilendirilmiş olan değer **değiştirilir (üzerine yazılır)**.
++ `Liste 8-23`’teki  kod `insert`'i iki kez çağırsa da, *hash map* yalnızca bir anahtar-değer çifti içerecektir çünkü *Blue* takımın anahtarı için her iki seferde de değer ekliyoruz.
+
+```rust
+fn main() {
+    use std::collections::HashMap;
+
+    let mut scores = HashMap::new();
+
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Blue"), 25);
+
+    println!("{scores:?}");
+}
+```
+
+> **Liste 8-23:** Belirli bir anahtarla saklanan değerin değiştirilmesi
+
+Bu kodun çıktısı:
+
+```rust
+{"Blue": 25}
+```
+
++ olacaktır. Başlangıçta eklenen **10** değeri, **üzerine yazılarak** **25** ile değiştirilmiştir.
+
+
+> [!NOTE]
+> ```rust
+> {scores:?}
+> ```
+> + `:?` → **Debug formatı** anlamına gelir.
+> + Rust’ta bir tür `Debug` trait’ini implement ediyorsa, `:?` ile yazdırılabilir.
+> + `HashMap` tipi **`Debug` trait’ini destekler**, bu yüzden bu kullanım geçerlidir.
+
+
+> [!NOTE]
+> + `HashMap` **`Display` trait’ini implement etmez.**
+> + Bu nedenle şunu yazamazsın:
+> ```rust
+> println!("{}", scores); // ❌ derleme hatası
+> ```
+> + Ama şunu yazabilirsin:
+> ```rust
+> println!("{:?}", scores); // ✅
+> ```
+
+#### 8.3.4.2. Bir Anahtar Mevcut Değilse Yalnızca Anahtar ve Değer Ekleme:
+
++ Belirli bir anahtarın hash map içinde zaten bir değere sahip olup olmadığını kontrol etmek ve buna göre işlem yapmak oldukça yaygındır: Eğer anahtar hash map içinde **zaten varsa**, mevcut değer olduğu gibi **korunur**; eğer anahtar **yoksa**, anahtar ve ona karşılık gelen bir değer **eklenir**.
++ Hash map'lerin bunu yapmak için entry adında özel bir API'si vardır; bu API, kontrol etmek istediğiniz anahtarı parametre olarak alır.
++ `entry` metodunun dönüş değeri, bir değerin var olup olmadığını temsil eden **`Entry`** adlı bir *enum*’dur.
++ Örneğin **Yellow** takımı için bir değer atanmış mı diye kontrol etmek istediğimizi düşünelim. Eğer yoksa **50** değerini eklemek istiyoruz; **Blue** takımı için de aynı kontrolü yapıyoruz.
++ `entry` API’sini kullanarak kod, Liste 8-24’teki gibi görünür.
+
+```rust
+fn main() {
+    use std::collections::HashMap;
+
+    let mut scores = HashMap::new();
+    scores.insert(String::from("Blue"), 10);
+
+    scores.entry(String::from("Yellow")).or_insert(50);
+    scores.entry(String::from("Blue")).or_insert(50);
+
+    println!("{scores:?}");
+}
+```
+
+> **Liste 8-24:** Anahtarın zaten bir değeri yoksa ekleme yapmak için `entry` metodunun kullanımı
+
++ `Entry` üzerinde tanımlı olan **`or_insert`** metodu,
+	- eğer ilgili anahtar *hash map* içinde **mevcutsa**, o anahtara karşılık gelen değere **değiştirilebilir (mutable) bir referans** döndürür;
+	- eğer anahtar mevcut değilse, parametre olarak verilen değeri bu anahtar için **yeni değer olarak ekler** ve eklenen bu değere ait **mutable bir referans** döndürür.
++ Bu teknik, kontrol mantığını kendimiz yazmaya kıyasla çok daha temizdir ve ayrıca **borrow checker** ile de daha uyumlu çalışır.
+
++ Liste 8-24’teki kod çalıştırıldığında aşağıdaki çıktı üretilir:
+
+```rust
+{"Yellow": 50, "Blue": 10}
+```
+
++ İlk `entry` çağrısı, **Yellow** takımının henüz bir değeri olmadığı için anahtarı **50** değeriyle birlikte ekler.
++ İkinci `entry` çağrısı ise hash map’i değiştirmez; çünkü **Blue** takımı zaten **10** değerine sahiptir.
+
+
+#### 8.3.4.3. Eski Değere Göre Bir Değeri Güncelleme:
+
++ Hash map’lerin yaygın kullanım senaryolarından biri, bir anahtarın değerini bulup **mevcut (eski) değere göre güncellemektir**.
++ Örneğin, Liste 8-25’teki kod, bir metin içinde her kelimenin kaç kez geçtiğini sayar. Burada anahtar olarak **kelimeleri**, değer olarak ise o kelimenin **kaç kez görüldüğünü** tutan bir *hash map* kullanılır. Eğer bir kelimeyle **ilk kez** karşılaşılıyorsa, önce **0** değeri eklenir.
+
+```rust
+fn main() {
+    use std::collections::HashMap;
+
+    let text = "hello world wonderful world";
+
+    let mut map = HashMap::new();
+
+    for word in text.split_whitespace() {
+        let count = map.entry(word).or_insert(0);
+        *count += 1;
+    }
+
+    println!("{map:?}");
+}
+```
+
+> **Liste 8-25:** Kelimelerin kaç kez geçtiğini saymak için *hash map* kullanan örnek
+
++ Bu kodun çıktısı:
+
+```rust
+{"world": 2, "hello": 1, "wonderful": 1}
+```
+
++ olacaktır. Anahtar–değer çiftlerinin farklı bir sırayla yazdırıldığını görebilirsiniz;
++ **"[8.3.2. Hash Map’te Değerlere Erişme](### 8.3.2. Hash Map’te Değerlere Erişme:)"** bölümünde de belirtildiği gibi, *hash map* üzerinde dolaşma işlemi **rastgele (belirsiz) bir sırayla** gerçekleşir.
++ `split_whitespace` metodu, `text` içindeki değeri boşluklara göre ayırarak **alt dilimler (subslices)** üzerinde bir iterator döndürür.
++ `or_insert` metodu ise belirtilen anahtar için değerin **değiştirilebilir bir referansını (`&mut V`)** döndürür.
++ Burada bu mutable referansı `count` değişkeninde sakladığımız için, değere atama yapabilmek adına önce yıldız (`*`) operatörü ile `count`’u **dereference** etmemiz gerekir.
++ Bu mutable referans, `for` döngüsünün sonunda kapsam (scope) dışına çıkar; dolayısıyla yapılan tüm bu değişiklikler, **borrow kuralları** açısından güvenli ve izin verilen işlemlerdir.
+	+ Yani, `count` **sadece for döngüsünün içindedir**. Döngünün **her turu (iteration)** ayrı bir scope gibidir. Tur bittiğinde `count` **yok edilir**
+
+### 8.3.5. Hashleme Fonksiyonları
+
++ Varsayılan olarak `HashMap`, hash tablolarını hedef alan denial-of-service (DoS) saldırılarına karşı dayanıklılık sağlayabilen **SipHash** adlı bir hashleme fonksiyonu kullanır.
++ Bu, mevcut en hızlı hashleme algoritması değildir; ancak performanstaki düşüşe karşılık sağlanan **daha iyi güvenlik** bu ödün vermeye değerdir.
++ Eğer kodunuzun performansını analiz eder (profiling yapar) ve varsayılan hash fonksiyonunun sizin amaçlarınız için **çok yavaş** olduğunu fark ederseniz, **farklı bir hasher belirterek** başka bir fonksiyona geçebilirsiniz.
++ Bir _hasher_, `BuildHasher` trait’ini uygulayan bir türdür.
+
+
+> [!tip]
+> #### 1. BuildHasher Nedir?
+> + **BuildHasher** = HashMap için hangi hashing algoritmasının kullanılacağını belirleyen bir trait
+> #### 2. Tip Seviyesinde Seçim (Derleme Zamanı)
+> + Rust'ta `HashMap` tanımına baktığında üç tane jenerik parametre görürsün: `HashMap<K, V, S>`
+> + Buradaki **`S`** (State), `BuildHasher` trait'ini uygulayan yapıdır. Eğer siz bu `S` parametresini değiştirirseniz, `HashMap`'in kullanacağı algoritmayı da değiştirmiş olursunuz.
+> #### 3. HashMap Tanımı (genel form)
+> ```rust
+> HashMap<K, V, S>
+> ```
+> + `K` → Key
+> + `V` → Value
+> + `S` → Hasher (varsayılan: `RandomState` → SipHash)
+
+
++ Trait’lerin ne olduğu ve nasıl uygulanacağı **Bölüm 10**’da ele alınacaktır. Kendi hasher’ınızı sıfırdan yazmanız gerekmez; **[crates.io](https://crates.io/)** üzerinde, Rust kullanıcıları tarafından paylaşılmış ve birçok yaygın hashleme algoritmasını uygulayan hasher’lar sunan kütüphaneler bulunmaktadır.
+
+## 8.4. Özet:
+
++ Vektörler (`Vec`), string’ler (`String`) ve hash map’ler (`HashMap`), programlarda veriyi **saklamanız**, **erişmeniz** ve **değiştirmeniz** gerektiğinde ihtiyaç duyacağınız işlevselliğin büyük bir kısmını sağlar. İşte artık çözebilecek donanıma sahip olduğunuz bazı alıştırmalar:
+	1. **Medyan ve Mod Hesaplama:** Bir tam sayı listesi verildiğinde, bir vektör kullanarak listenin **medyanını** (liste sıralandığında ortadaki değer) ve **modunu** (en sık tekrarlanan değer; burada bir hash map kullanmak faydalı olacaktır) döndürün.
+	2. **Pig Latin Dönüştürücü:** Karakter dizilerini (stringleri) "Pig Latin"e dönüştürün. Her kelimenin ilk ünsüz harfi kelimenin sonuna taşınır ve "ay" eki eklenir; örneğin "first" kelimesi "irst-fay" olur. Ünlü harfle başlayan kelimelerin sonuna ise "hay" eklenir ("apple" kelimesinin "apple-hay" olması gibi). UTF-8 kodlamasıyla ilgili detayları aklınızda bulundurun
+		+ Her kelimenin **ilk sessiz harfi** kelimenin sonuna taşınır ve **`ay`** eklenir ( `first` → `irst-fay`)
+		+ **Sesli harfle başlayan** kelimelerin sonuna ise **`hay`** eklenir (`apple` → `apple-hay`)
+	3. **Çalışan Yönetim Sistemi:** Hash map ve vektörleri kullanarak, bir kullanıcının bir şirketteki departmanlara çalışan isimleri eklemesine olanak tanıyan bir metin arayüzü oluşturun.
+		+ Örneğin: "Sally'yi Mühendislik'e ekle" veya "Amir'i Satış'a ekle".
+		+ Ardından, kullanıcının bir departmandaki tüm kişilerin listesini veya şirketteki tüm kişileri (departmanlara göre gruplanmış ve alfabetik olarak sıralanmış şekilde) görüntülemesini sağlayın.
+
++ Standart kütüphane (*standard library*) API dokümantasyonu; vektörlerin(`Vec`), karakter dizilerinin(`String`) ve hash map’lerin(`HashMap`) bu alıştırmalarda işinize yarayacak metotlarını detaylıca açıklamaktadır.
++ Artık işlemlerin başarısız olabileceği daha karmaşık programlara geçiyoruz; bu yüzden **hata yönetimi (error handling)** konusunu ele almak için mükemmel bir zaman. Bir sonraki bölümde bunu yapacağız!
+
+
+# 9. Hata Yönetimi (Error Handling)
+
++ Yazılımda hatalar hayatın bir gerçeğidir; bu nedenle Rust, bir şeylerin ters gittiği durumları yönetmek için bir dizi özelliğe sahiptir. Pek çok durumda Rust, kodunuzun derlenmesi için bir hata olasılığını önceden kabul etmenizi ve buna karşı bir önlem almanızı zorunlu kılar. Bu gereklilik, hataları henüz canlı ortama (production) dağıtım yapmadan keşfetmenizi ve uygun şekilde yönetmenizi sağlayarak programınızı daha dayanıklı (robust) hale getirir.
++ Rust, hataları iki ana kategoriye ayırır: **kurtarılabilir (recoverable)** ve **kurtarılamaz (unrecoverable)** hatalar.
+	- **Kurtarılabilir Hatalar:** "Dosya bulunamadı" gibi hatalardır. Bu durumda genellikle kullanıcıya sorunu raporlamak ve işlemi tekrar denemek isteriz.
+	- **Kurtarılamaz Hatalar:** Bir dizinin sınırları dışındaki bir konuma erişmeye çalışmak gibi, her zaman birer "bug" (yazılım hatası) belirtisi olan durumlardır. Bu durumda programı derhal durdurmak isteriz.
++ Çoğu dil bu iki hata türü arasında bir ayrım yapmaz ve her ikisini de **istisnalar (exceptions)** gibi mekanizmalarla aynı şekilde yönetir. Rust'ta ise istisnalar yoktur.
++ Bunun yerine,
+	- kurtarılabilir hatalar için `Result<T, E>` türünü,
+	- program kurtarılamaz bir hatayla karşılaştığında ise çalışmayı durduran `panic!` makrosunu kullanır.
++ Bu bölüm, önce `panic!` makrosunun çağrılmasını ele alacak, ardından `Result<T, E>` değerlerinin döndürülmesinden bahsedecektir. Ayrıca, bir hatadan kurtulmaya çalışmak ile çalışmayı durdurmak arasında karar verirken neleri göz önünde bulundurmamız gerektiğini keşfedeceğiz.
+
+## 9.1. `panic!` ile Kurtarılamaz Hatalar
+
++ Bazen kodunuzda kötü şeyler olur ve bu konuda yapabileceğiniz hiçbir şey yoktur. Bu durumlar için Rust, `panic!` makrosuna sahiptir.
++ Pratikte panik (panic) durumuna yol açmanın iki yolu vardır:
+	1. Kodunuzun paniklemesine neden olacak bir eylemde bulunmak (bir dizinin sınırları dışındaki bir elemana erişmeye çalışmak gibi) veya
+	2. `panic!` makrosunu doğrudan çağırmak.
++ Her iki durumda da programımızda bir panik durumu tetikleriz.
++ Varsayılan olarak bu panikler; bir hata mesajı yazdırır, yığını geri sarar (**unwind**), yığındaki verileri temizler ve programdan çıkar.
++ Bir ortam değişkeni (**environment variable**) aracılığıyla, paniğin kaynağını tespit etmeyi kolaylaştırmak adına Rust'ın panik anında çağrı yığınını (**call stack**) görüntülemesini de sağlayabilirsiniz.
+
+
+> [!NOTE]
+> #### Önemli Terimler Notu:
+> + **Unwind (Geri sarma):** Panik anında Rust'ın bellek yığınını (stack) geriye doğru tarayarak her bir fonksiyondaki verileri temizlemesi işlemidir.
+> + **Call Stack (Çağrı Yığını):** Programın o ana kadar hangi fonksiyonları hangi sırayla çağırdığını gösteren listedir.
+> + **Explicitly (Doğrudan/Açıkça):** Kodun içinde sizin tarafınızdan bilerek yazılması.
+
+
+> [!NOTE]
+> + Varsayılan olarak, bir panik meydana geldiğinde program **yığını geri sarmaya (unwinding)** başlar. Bu, Rust'ın yığın (stack) boyunca geriye doğru ilerlemesi ve karşılaştığı her fonksiyondaki verileri temizlemesi anlamına gelir. Ancak, bu geriye doğru tarama ve temizlik işlemi oldukça zahmetli bir iştir. Bu nedenle Rust, alternatif olarak programı temizlik yapmadan anında sonlandıran **iptal etme (aborting)** seçeneğini seçmenize de olanak tanır.
+> + İptal etme (aborting) durumunda, programın kullandığı belleğin işletim sistemi tarafından temizlenmesi gerekecektir. Eğer projenizde ortaya çıkan ikili dosya (binary) boyutunu mümkün olduğunca küçültmeniz gerekiyorsa, `Cargo.toml` dosyanızdaki ilgili `[profile]` bölümlerine `panic = 'abort'` satırını ekleyerek panik anında geri sarma yerine iptal etme yöntemine geçebilirsiniz.
+> 	- Yani, Derleyici, programın içine "hata anında hangi veriler nasıl temizlenecek" bilgisini içeren **ekstra kodlar ve tablolar** eklemek zorundadır.(Stack unwinding aşamasında)
+> 	- Bu ekstra kodlar, programın son boyutunun (binary) büyümesine neden olur.
+> 	- Bu durumda, o "nazik temizlik" için gereken ekstra kodlara ihtiyaç kalmaz. Derleyici bu kodları dosyanın içine eklemediği için de **dosyanın boyutu küçülür.**
+> + Örneğin, "release" modunda panik anında iptal etme yöntemini kullanmak istiyorsanız şunu ekleyin:
+> ```rust
+> [profile.release]
+> panic = 'abort'
+> ```
+
++ Gelin, basit bir programda `panic!` makrosunu çağırmayı deneyelim:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    panic!("crash and burn");
+}
+```
+
++ Programı çalıştırdığınızda şuna benzer bir çıktı göreceksiniz:
+
+```rust
+$ cargo run
+   Compiling panic v0.1.0 (file:///projects/panic)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running `target/debug/panic`
+
+thread 'main' panicked at src/main.rs:2:5:
+crash and burn
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
++ `panic!` çağrısı, son iki satırda yer alan hata mesajına neden olur.
++ İlk satır, bizim panik mesajımızı ve paniğin kaynak kodumuzda nerede oluştuğunu gösterir: `src/main.rs:2:5` ifadesi, hatanın `src/main.rs` dosyamızın **ikinci satırı, beşinci karakterinde** olduğunu belirtir.
+
+
+> [!NOTE]
+> #### Çıktıdaki Önemli Noktalar:
+> + **`thread 'main' panicked`**: Hatanın ana iş parçacığında (main thread) gerçekleştiğini söyler.
+> + **`crash and burn`**: Bizim `panic!` makrosu içine yazdığımız özel mesajdır.
+> + **`src/main.rs:2:5`**: Hatanın tam koordinatıdır (Satır: 2, Sütun: 5).
+> + **`RUST_BACKTRACE=1`**: Eğer hata daha karmaşık bir yerden geliyorsa, hataya giden tüm yol haritasını (backtrace) görmek için bu komutu nasıl kullanacağınızı hatırlatan bir nottur.
+
+
++ Bu durumda, belirtilen satır doğrudan kendi kodumuzun bir parçasıdır ve o satıra gittiğimizde `panic!` makrosu çağrısını görürüz. Ancak bazı durumlarda `panic!` çağrısı, kodumuzun çağırdığı başka bir kodun içinde olabilir. Bu gibi durumlarda hata mesajında bildirilen dosya adı ve satır numarası, en nihayetinde `panic!` çağrısına yol açan **bizim kodumuzun satırı değil**, `panic!` makrosunun çağrıldığı **başka birine ait (örneğin bir kütüphaneye ait) kodu** gösterir.
++ Paniğe neden olan kodumuzun hangi kısmı olduğunu bulmak için, `panic!` çağrısının geldiği fonksiyonların **backtrace** (geri izleme) dökümünü kullanabiliriz. Bir `panic!` geri izlemesinin nasıl kullanılacağını anlamak için başka bir örneğe bakalım: `panic!` çağrısının doğrudan makroyu çağırmamızdan değil de, kodumuzdaki bir hata (bug) nedeniyle bir kütüphaneden geldiği durumun nasıl olduğunu görelim. `Liste 9-1`, bir vektördeki geçerli indeks aralığının dışındaki bir indekse erişmeye çalışan bir kod içermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let v = vec![1, 2, 3];
+
+    v[99];
+}
+```
+
+> **Liste 9-1**: Bir vektörün sonundaki elemandan sonrasına erişmeye çalışmak; bu durum `panic!` çağrısına neden olacaktır.
+
++ Burada, vektörümüzün 100. elemanına (indeksleme sıfırdan başladığı için 99. indekse) erişmeye çalışıyoruz, ancak vektörün sadece üç elemanı var. Bu durumda Rust panikleyecektir. `[]` (indeks operatörü) kullanımı bir eleman döndürmeyi amaçlar, ancak geçersiz bir indeks girdiğinizde Rust'ın burada döndürebileceği doğru bir eleman yoktur.
++ C dilinde, bir veri yapısının sınırlarının dışını okumaya çalışmak **tanımsız davranıştır (undefined behavior)**. Bellek o veri yapısına ait olmasa bile, veri yapısındaki o elemana karşılık gelecek bellek konumunda her ne varsa onu alabilirsiniz. Buna **tampon aşımı okuması (buffer overread)** denir; eğer bir saldırgan, veri yapısından sonra saklanan ve normalde izin verilmemesi gereken verileri okuyacak şekilde indeksi manipüle edebilirse, bu durum güvenlik açıklarına yol açabilir.
+
+
+> [!NOTE]
+> #### Önemli Teknik Kavramlar:
+> + **Undefined Behavior (Tanımsız Davranış):** Programın nasıl davranacağının dilin standartları tarafından belirlenmediği, yani her türlü sonucun (çökme, yanlış veri, sessizce devam etme vb.) çıkabileceği durumdur.
+> + **Buffer Overread (Tampon Aşımı Okuması):** Bir programın, kendisine ayrılan bellek sınırının ötesini okuması durumudur.
+
+
+> [!TIP]
+> #### Rust Neden Farklı?
+>
+> + C dili hızı önemsediği için her seferinde "Sınırın içinde miyiz?" diye kontrol etmez; bu da hata yapmaya açıktır. Rust ise her erişimde bu kontrolü yapar. 
+> + Eğer sınır dışındaysanız, hatalı bir veri okuyup güvenlik açığı yaratmaktansa programı güvenli bir şekilde durdurmayı (`panic!`) tercih eder.
+
++ Programınızı bu tür güvenlik açıklarından korumak için Rust, mevcut olmayan bir indeksteki elemanı okumaya çalıştığınızda çalışmayı durdurur ve devam etmeyi reddeder. Hadi deneyip görelim:
+
+
+```rust
+$ cargo run
+   Compiling panic v0.1.0 (file:///projects/panic)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running `target/debug/panic`
+
+thread 'main' panicked at src/main.rs:4:6:
+index out of bounds: the len is 3 but the index is 99
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+
+
+
+
+
+
+
+
+# 10. Jenerik Türler, Özellikler (Trait’ler) ve Yaşam Süreleri(Lifetimes)
+
+
+## 10.3. Ömürler (Lifetimes) ile Referansları Doğrulama:
+
+
+
+# 15. Referansı Takip Ederek Değere Ulaşma:
 ## Kaynak:
 
 + [READ THE BOOK!](https://doc.rust-lang.org/book/ch05-01-defining-structs.html)

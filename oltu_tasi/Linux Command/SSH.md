@@ -206,7 +206,7 @@ ssh -R 8080:localhost:8000 ottoman@192.168.1.133
 ```
 
 > + `ssh` → SSH bağlantısı kurar.
-> + `-R 8080:localhost:8000` → Uzak sunucudaki 8888 portunu, yerel sunucudaki 3000 portuna yönlendirir.
+> + `-R 8080:localhost:8000` → Uzak sunucudaki 8080 portunu, yerel sunucudaki 8000 portuna yönlendirir.
 > + `ottoman@192.168.1.133` → Bağlanılacak uzak sunucu ve kullanıcı adı
 
 > [!TIP]

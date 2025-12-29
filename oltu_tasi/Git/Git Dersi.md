@@ -2,12 +2,13 @@
 tags:
   - git
 ---
-### Git Nedir?
+# Git Nedir?
+
 * Git, küçükten çok büyük projelere kadar her şeyi hızlı ve verimli bir şekilde ele almak için tasarlanmış, *ücretsiz ve açık kaynaklı, dağıtılmış bir sürüm kontrol* sistemidir.
 * En kısa tanımı ile bir *versiyon kontrol sistemi*dir.
 
 ---
-## Git Kurulumu
+# Git Kurulumu
 ##### Linux
 ###### Dabian Temeli Dağıtımlar:
 ```shell
@@ -24,7 +25,7 @@ PS C:\Users\tanju> winget install --id Git.Git -e --source winget
 ```
 
 ---
-## Hızlı Başlama (Quick Start)
+# Hızlı Başlama (Quick Start)
 ##### Proje Klasörü Oluştuma
 ```shell
 $ mkdir my_project
@@ -412,9 +413,9 @@ $ git diff
 >+ Eğer bir dosyada değişiklik yapıldıysa bu komut silen veya eklen ifadeleri ekran basar.
 
 ---
-## Yerel Depoda İşlemler(Local Repository)
+# Yerel Depoda İşlemler(Local Repository)
 
-#### Gitignore Dosyası
+## Gitignore Dosyası
 ```shell
 $ touch .gitignore
 ```
@@ -446,13 +447,13 @@ directory/
 > 	+ tüm dosyaları çıkarmak için: `git rm -r --cached` .
 
 ---
-#### Git HEAD:
+## Git HEAD:
 * Git'te **HEAD**, çalışma dizininde hangi commit'in aktif olduğunu belirten bir referanstır.
 * Yani, HEAD, *Git'te şu anda hangi dalda çalıştığınızı ve bu dalın en son commit'ini işaret eder.* Genellikle bir dalın en son commit'ini gösterir
 * **Normal durumda**: HEAD genellikle bir dalı işaret eder, yani `HEAD` bir dal adıyla eşleştirilir, ve o dalın en son commit'ini gösterir.
 * **Detached HEAD (kopuk HEAD) durumu**: Eğer doğrudan bir commit'e (hash'e) checkout yaparsanız, HEAD artık bir dala değil, doğrudan o commit'e işaret eder. - Bu durumda HEAD kopuktur ve bu şekilde yapılan değişiklikler bir dala bağlı olmadığı için dikkatli olunması gerekir.
 ---
-#### Git checkout:
+## Git checkout:
 + Git'te **branch**, **commit**'ler, dosyalar veya dizinler arasında geçiş yapmanızı sağlayan bir komuttur.
 + Farklı bir dal veya commit'e geçmek, belirli bir dosyanın daha eski bir versiyonuna dönmek veya yeni bir dal oluşturmak gibi işlemler için kullanılır.
 
@@ -486,7 +487,7 @@ $ git checkout c107365
 > + Ancak bu, **"detached HEAD"** durumuna yol açar; yani şu an aktif olan HEAD bir *branch* üzerinde değil, belirli bir *commit* üzerindedir.
 
 ---
-#### Git diff:
+## Git diff:
 + Bu komut, **çalışma dizininde**, **staged (indexlenmiş) değişikliklerde** veya **iki commit arasındaki farkları** gösterebilir.
 + + Git'te iki farklı durum arasındaki değişiklikleri (farkları) karşılaştırmak için kullanılan bir komuttur.
 + **Commit öncesi kontrol**: Commit yapmadan önce, çalışma dizinindeki veya staged değişiklikleri gözden geçirmek için kullanılır.
@@ -555,7 +556,7 @@ $ diff --git a/test.txt b/test.txt
 > + Bu satır, hangi dosya üzerinde değişikliklerin yapıldığını belirtir. Burada, **`a/test.txt`** dosyasının eski sürümü ile **`b/test.txt`** dosyasının yeni sürümü karşılaştırılıyor.
 
 ---
-#### Git rm
+## Git rm
 ###### Örnek 1: Temel Kullanımı:
 ```shell
 $ git rm --cached access.log
@@ -573,7 +574,7 @@ $ git rm -r --cached directoryName
 > + `git rm --help` ile -r parametresi ne görevine bakabilirsiniz.
 
 ---
-#### Git rebase:
+## Git rebase:
 + **`git rebase`**, Git'te iki branch arasındaki commit geçmişini birleştirirken (genellikle dalları düzenlerken) kullanılan bir komuttur.
 + Rebase işlemi, mevcut branch'inizin commit'lerini başka bir branch'in en son commit'ine "taşır" ve böylece daha temiz, doğrusal bir commit geçmişi oluşturur.
 + Bu, commit geçmişini temiz ve düzenli tutmak için özellikle kullanışlıdır.
@@ -583,7 +584,7 @@ $ git rebase main
 ```
 
 ---
-#### Git fast-forward:
+## Git fast-forward:
 + Git'te **fast-forward** merge yöntemi, bir dalın başka bir dalın en son noktasına (commit’ine) "hızlıca" ilerletilmesi anlamına gelir.
 + Bu durumda Git, iki dalı birleştirirken yeni bir "merge commit" oluşturmaz; bunun yerine hedef dalı, diğer dalın son commit'ine kadar ileri sarar.
 + `main` dalı üzerinde yeni commit'ler yapılmamışsa ve `feature` dalı doğrudan onun son commit'inden devam ediyorsa, Git bu durumu "fast-forward" olarak değerlendirir.
@@ -601,7 +602,7 @@ main (A) --- (B) --- (C) --- (D)
 ```
 
 + `main` dalı, `feature` dalındaki commit'e (D) kadar "ileri sarılır". Bu işlemde yeni bir birleştirme commit’i oluşturulmaz.
-#### Git config
+## Git config
 
 > [!TIP]
 > Git yapılandırma ayarları belirli bir öncelik sırasına sahiptir:
@@ -609,7 +610,8 @@ main (A) --- (B) --- (C) --- (D)
 > 2. **Kullanıcı (Global) Düzey**: Kullanıcı düzeyindeki ayarlar, sistem düzeyindeki ayarların üzerine yazar.
 > 3. **Sistem (System) Düzey**: En düşük önceliğe sahiptir ve tüm kullanıcılar için geçerlidir.
 
-###### Örnek 1:  --list  
+### Örnek 1:  --list  
+
 ```shell
 $ git config --list
 ```
@@ -625,7 +627,7 @@ $ git config --list
 > [!TIP]
 > `git config user.email "username@gmail.com"`  komutu içerisindeki `email` ile github sizin kim olduğunu tanıyabilmektedir. Kullanıcılarını bu şekilde ayırt edebilmektedir.
 
-###### Örnek 2:  --global
+### Örnek 2:  --global
 ```shell
 $ git config --global user.name "username"
 $ git config --global user.email "username@gmail.com"
@@ -634,7 +636,7 @@ $ git config --global user.email "username@gmail.com"
 > Kullanıcının ev dizininde geçerli olan ayarlar. Ayarlar `~/.gitconfig` veya `~/.config/git/config` dosyasında saklanır.
 > Yukarıda girilen değerleri listelemek için: `$ git config --global --list`
 
-###### Örnek3:  --local
+### Örnek3:  --local
 ```bash
 $ git config --local user.name "username"
 $ git config --local user.name "username@gmail.com"
@@ -647,10 +649,11 @@ $ git config --local user.name "username@gmail.com"
 > [!TIP]
 > + `git --no-paper` komut ile git'in `less` komutunu açması durdurulabilir.
 
-##### Git config Özelleştirme:
+### Git config Özelleştirme:
 **İngilizce:** [Basic Client Configuration](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration)
 
-###### 1. branch.`<branch-name>`.merge:
+#### 1. branch:
+##### 1.1 branch.`<branch-name>`.merge:
 ```shell
 $ git config branch.main.merge "main"
 ```
@@ -667,7 +670,10 @@ $ git config branch.main.merge "main"
 ```
 > **Explanation:**
 > + `.git/config` dosyasındaki bir yapılandırma örneği verilmiştir.
-###### 1.  core.editor (set)
+
+#### 2. core:
+##### 2.1.  core.editor (set)
+
 ```bash
 $ git config --global core.editor "vim"
 ```
@@ -675,14 +681,47 @@ $ git config --global core.editor "vim"
 > *  Eğer `git` düzenleyici(editor) kullanması gerektiğinde burada ayarlanmış olan `vim` ile açılacaktır.
 > * Daha fazla bilgi için [Setup and Config](https://git-scm.com/book/en/v2/Appendix-C%3A-Git-Commands-Setup-and-Config) bakınız.
 
-###### 1.1. core.editor (get)
+##### 2.2. core.editor (get)
+
 ```shell
 $ git config --global core.editor
 ```
 > **Explanation:**
 > * `core.editor` ayarlanmışsa ekran değerini basar.
 
-###### 2. remote.origin.url
+##### 2.3. core.quotepath
+
+```shell
+git config --global core.quotepath false
+```
+
++ `core.quotepath` 
+	- Git, varsayılan olarak **ASCII dışı karakterler** (Türkçe karakterler gibi: `ç, ğ, ü, ö, ş, ı`) içeren dosya adlarını ekrana yazarken bunları **kaçış (escape) dizileri** ile gösterir.
+
+```shell
+dosya_çalışma.txt
+```
+
++ Varsayılan ayarda (`core.quotepath=true`) şu şekilde görünebilir:
+
+```shell
+dosya_\303\247al\304\261\305\237ma.txt
+```
+
++ Bu durum özellikle Türkçe karakter kullanılan sistemlerde okunabilirliği ciddi şekilde düşürür.
++ `false` yaptığımızda ne olur?
+	- Dosya adlarını **orijinal haliyle**
+	- UTF-8 karakterleri bozmadan
+	- İnsan tarafından okunabilir biçimde gösterir.
+
+| Ayar                   | Anlamı                                             |
+| ---------------------- | -------------------------------------------------- |
+| `core.quotepath=true`  | ASCII dışı karakterleri kaçış dizisiyle gösterir   |
+| `core.quotepath=false` | Dosya adlarını normal, okunabilir şekilde gösterir |
+
+#### 3. remote
+##### 3.1. remote.origin.url
+
 ```shell
 $ git config --local remote.origin.url "ssh url veya https url"
 ```
@@ -690,7 +729,7 @@ $ git config --local remote.origin.url "ssh url veya https url"
 > + Git repo'unuza giderek `<> Code` yeşil butonu tıklayarak, ssh url veya https url kopya alarak yeniden URL düzenleyebilirsiniz. 
 
 ---
-#### Git status:
+## Git status:
 ##### 1. Temel Kullanımı
 ```shell
 $ git status
@@ -726,7 +765,7 @@ nothing to commit, working tree clean
 > + `git pull` komut ile de `main` ve `origin/main` birleştirme yapılabileceğinin *ipucunu* vermektedir.
 
 ---
-#### Git branch
+## Git branch
 ###### 1. Temel Kullanımı
 ```shell
 $ git branch
@@ -772,7 +811,7 @@ $ git branch -d prod
 > + eğer uzak depolarda(remote repository) için [[Git Dersi#Uzak Depoda İşlemler(Remote Repository)#Örnek 1 origin de branch silme|Uzak Depoda Branch Silme]] bakınız.
 
 ---
-#### Git stash:
+## Git stash:
 + Git'te **stash**, üzerinde çalıştığınız, henüz commit'lenmemiş değişiklikleri geçici olarak kaydederek (yani "stash"leyerek), çalışma dizininizi temizlemenize ve başka bir dala veya göreve geçiş yapmanıza olanak tanıyan bir özelliktir.
 + Örneğin, bir dosya üzerinde değişiklik yapıyorsunuz ve bu değişiklikleri henüz commit'lemek istemiyorsunuz, ama acilen başka bir dalda çalışmanız gerekiyor.
 + Bu durumda, `stash` komutunu kullanarak geçici olarak bu değişiklikleri saklayabilirsiniz, dal değiştirip gerekli işlemi yaptıktan sonra da bu değişiklikleri geri getirebilirsiniz.
@@ -827,7 +866,7 @@ $ git stash clear
 > + Tüm stash'leri temizler yani siller.
 
 ---
-#### Git log:
+## Git log:
 
 > [!TIP] 
 > + Git'te **`HEAD`**, şu an **aktif olan branch'te veya commit'te** bulunduğunuz yeri temsil eden bir referanstır.
@@ -892,7 +931,7 @@ $ git log --since=10minutes
 > 	+ `--since=3months` : 3 aydan beri olan tüm commit'ler
 
 ---
-#### Git show:
+## Git show:
 ###### Örnek 1: 
 ```bash
 $ git show
@@ -909,13 +948,13 @@ $ git show <commit-hash>
 > + Böylelikle istediğimiz `commit` ayrıntılarını inceleyebiliriz.
 
 ---
-#### Git diff:
+## Git diff:
 ```shell
 $ git diff site.yaml
 ```
 
 ---
-#### Git Yapısı ve Çalışması
+## Git Yapısı ve Çalışması
 
 > [!INFO]
 > *Git yapısı* : Local(Yerel Makine) ve  Remote(Uzak Makine) temelde iki yapıdan oluşur.
@@ -925,7 +964,7 @@ $ git diff site.yaml
 >  Github veya Gitlab
 
 ---
-#### Git add:
+## Git add:
 ###### Örnek 1: Çalışma dizinden geçiş alanına(index)
 ```shell
 $ git add nginx.conf
@@ -954,7 +993,7 @@ $ git add -A
 > `-A` parametresi ile tüm dosyaları indeks ekliyoruz.
 
 ---
-#### Git restore:
+## Git restore:
 ###### Örnek 1:
 ```shell
 $ git restore --staged nginx.conf
@@ -973,7 +1012,7 @@ $ git restore nginx.conf
 > 3. `git status` komutunu kullandığımızda da yukarıdaki komut önermektedir(DİKKAT).
 
 ---
-#### Git checkout
+## Git checkout
 ###### Örnek 1: 
 ```shell
 $ git checkout <commit-hash>
@@ -997,7 +1036,7 @@ $ git checkout -b yeni_branch_adı <commit-hash>
 > `git checkout <commit hash>` komutu, depo çalışma dizinini belirli bir commit'e geri döndürmek için kullanılır. Bu, projenizin önceki durumlarını incelemek, testler yapmak veya hata ayıklamak için kullanışlıdır. Ancak bu işlem sırasında "detached HEAD" durumuna dikkat etmeniz önemlidir, çünkü yaptığınız değişiklikleri kaybetmemek için yeni bir dal oluşturmanız gerekebilir.
 
 ---
-#### Git switch:
+## Git switch:
 ###### Örnek 1: Basit kullanımı
 ```shell
 $ git switch dev
@@ -1021,7 +1060,7 @@ $ git switch -c prod
 > + Bu nedenle, `git switch` ve `git restore` gibi daha spesifik komutlar Git'in yeni sürümlerinde tanıtılmıştır.
 
 ---
-#### Git commit:
+## Git commit:
 ###### Örnek 1: Yaygın kullanımı
 ```shell
 $ git commit -m "nginx.conf dosyasını eklendi veya güncellendi"
@@ -1049,7 +1088,7 @@ $ git commit -am "short explanation about commit"
 > 3. Özetlemek gerekirse; hem `git add .` hem de `git commit -m "message"` aynı anda yapar. 
 
 ---
-#### Git revert:
+## Git revert:
 ###### Örnek 1: Basit Kullanımı
 ```shell
 $ git revert 43bd0f9
@@ -1069,7 +1108,7 @@ $ git revert ff0bd9f
 > + Eğer git revert işlemi yapılmış bir commit tekrardan git revert işlemi yaparsak eksi haline geri gelir yani revert türkçe karşılığı tersini almak demek, böylelikle tersin tersi ilk hali olur. 
 
 ---
-#### Git reset
+## Git reset
 **Tanım:** 
 + Git'te çalışma dizinini, index'i (staging area) ve commit geçmişini belirli bir commit'e geri almak için kullanılan güçlü bir komuttur. 
 + Bu komut, proje geçmişini ve çalışma durumunu geri döndürebilir, yani dosyalarınızı belirli bir commit'teki duruma sıfırlayabilir. 3 farklı modda kullanılabilir:
@@ -1101,7 +1140,7 @@ $ git reset --hard 487e983fbd6b6c0042f9ec3ff75fc068ac1f2125
 > - **Commit geçmişi**: Belirtilen commit'e geri döner yani commit geçmişini geriye alır.(+)
 > - **Index (Staging Area)**: staged değişiklikler geri alınır, dosyalar unstaged duruma getirilir.(+)
 > - **Çalışma dizini**: Dosyalar veya klasörler üzerindeki değişikliklerde geri alınır.(+)
-## Uzak Depoda İşlemler(Remote Repository)
+# Uzak Depoda İşlemler(Remote Repository)
 
 ##### Origin Nedir?
 * Git'te **`origin`**, yerel (local) repository'nizin bağlantılı olduğu **uzaktaki (remote) repository'nin** varsayılan adıdır.
@@ -1268,7 +1307,7 @@ git push origin main --tags
 > + `commit` → değişiklikleri kaydeder.
 > + `tag` → kaydedilmiş bir commit’e “sürüm etiketi” yapıştırır.
 
-## Github GUI
+# Github GUI
 
 ###### 1. Contributors Ekleme:
 + Repositories --> git_test(Proje) --> Settings --> Collaborators --> Add people
@@ -1278,14 +1317,15 @@ git push origin main --tags
 ###### 2. Contirbutors Görme:
 + Insights --> Contirbutors
 
-## Github ile Web Yayınlama
+# Github ile Web Yayınlama
 + Repository oluşutma : `username / username.github.io`
 + Repositories --> username.github.io(Proje) --> Settings --> Pages --> Source --> Github Actions --> Static HTML(configure)
 
-## Senaryolar
+# Senaryolar
 
-#### Örnek 1: Dosyalarda Çakışma
-###### Yerel Bilgisayar(Local Repo):
+## Örnek 1: Dosyalarda Çakışma
+### Yerel Bilgisayar(Local Repo):
+
 ```bash
 #!/usr/bin/bash                   # 1
 read -p "Adınızı giriniz" name
@@ -1296,7 +1336,8 @@ echo "Merhaba $name"
 > 	+ `$ git add myScript.sh`  ile indeksledik.
 > 	+ `$ git commit -m "shebang eklandi"` ile local repo'ya yolladık.
 
-###### Uzak Bilgisayar(Remote Repo):
+### Uzak Bilgisayar(Remote Repo):
+
 ```bash
 #!/usr/bin/env bash               # 2
 read -p "Adınızı giriniz" name
