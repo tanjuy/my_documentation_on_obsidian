@@ -7114,7 +7114,7 @@ fn main() {
 ```
 
 + olacaktır. Anahtar–değer çiftlerinin farklı bir sırayla yazdırıldığını görebilirsiniz;
-+ **"[8.3.2. Hash Map’te Değerlere Erişme](### 8.3.2. Hash Map’te Değerlere Erişme:)"** bölümünde de belirtildiği gibi, *hash map* üzerinde dolaşma işlemi **rastgele (belirsiz) bir sırayla** gerçekleşir.
++ **"[8.3.2. Hash Map’te Değerlere Erişme](### 832-hash-mapte-değerlere-erişme:)"** bölümünde de belirtildiği gibi, *hash map* üzerinde dolaşma işlemi **rastgele (belirsiz) bir sırayla** gerçekleşir.
 + `split_whitespace` metodu, `text` içindeki değeri boşluklara göre ayırarak **alt dilimler (subslices)** üzerinde bir iterator döndürür.
 + `or_insert` metodu ise belirtilen anahtar için değerin **değiştirilebilir bir referansını (`&mut V`)** döndürür.
 + Burada bu mutable referansı `count` değişkeninde sakladığımız için, değere atama yapabilmek adına önce yıldız (`*`) operatörü ile `count`’u **dereference** etmemiz gerekir.
