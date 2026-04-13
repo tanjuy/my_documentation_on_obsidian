@@ -1,902 +1,4278 @@
 #programlama  #rust
-# 🦀 Rust Programlama Nedir?
-
-# Yükleme İşlemleri:
 
 
-> [!TIP]
-> **Yükleme Öncesi yapılması gereken işlemler:**
-> 1. `curl` yükleme işlemi
-> ```shell
-> sudo apt install curl  # Debian/Ubuntu
-> ```
-> ```shell
-> sudo dnf install curl  # Fedora/Rocky/Alma Linux
-> ```
-> ```shell
-> sudo pacman -S curl    # Arch/CachyOS
-> ```
-> 2. Gerekli paketleri kurulumu:
-> ```shell
-> sudo apt install build-essential  # Ubuntu/Debian
-> ```
-> ```shell
-> sudo dnf groupinstall "Development Tools"  # Fedora/RHEL/Rocky/AlmaLinux
-> ```
-> ```shell
-> sudo pacman -S base-devel  # Arch/CachyOS/Manjaro
-> ```
-> ```shell
-> sudo zypper install -t pattern devel_basis
-> ```
+> [!info]
+> Bu çalışma, [_The Rust Programming Language_](https://doc.rust-lang.org/book/) kitabının Türkçe çevirisidir.
+>
+> **Çeviren:** Tanju Yücal
+> 
+>+  Bağlantılarım:
+> 	+ **Linkedin**: [Tanju Yücal ](https://www.linkedin.com/in/tanju-yucal/)
+> 	+ Github: https://github.com/tanjuy
+> 
+> Orijinal eser © Steve Klabnik, Carol Nichols ve Rust Community  
+> Lisans: CC BY 4.0
+# 🦀 Rust Programlama Dili
 
+Steve Klabnik, Carol Nichols ve Chris Krycho tarafından, Rust topluluğunun katkılarıyla
 
+Bu metnin bu sürümü, projelerinizin tümünde `Cargo.toml` dosyasında `edition = "2024"` ayarıyla Rust 2024 Edition deyimlerini(*idioms*) kullanacak şekilde yapılandırılmış, **Rust 1.90.0 (18-09-2025 tarihinde yayımlanan) veya daha yeni bir sürümü** kullandığınızı varsayar. Rust’ı kurma veya güncelleme talimatları için 1. bölümdeki "Installation"(1.1. Kurulum) kısmına bakın ve edition’lar hakkında bilgi için Ek E(Appendix E)’ye göz atın.
 
-+ Rust’ın resmi yükleyicisi **`rustup`** aracılığıyla yapılır. Bu araç, hem Rust derleyicisini (`rustc`) hem de paket yöneticisini (`cargo`) birlikte yükler.
+HTML formatına çevrimiçi olarak [https://doc.rust-lang.org/stable/book/](https://doc.rust-lang.org/stable/book/) adresinden, çevrimdışı olarak ise `rustup` ile yapılan Rust kurulumlarıyla erişilebilir; açmak için `rustup doc --book` komutunu çalıştırın.
 
-```shell
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
+Birçok topluluk [çevirisi](https://doc.rust-lang.org/book/appendix-06-translation.html) de mevcuttur.
 
-+ Kurulum tamamlanınca Rust araçlarının terminalde çalışması için PATH değişkenine eklenir.
-+ Ancak mevcut terminal oturumuna bunu eklemek için şunu çalıştır:
-
-```shell
-source $HOME/.cargo/env
-```
-
-+ Rust ve Cargo’nun yüklendiğini test et:
-
-```shell
-rustc --version
-cargo --version
-```
-
-+ `rustc` ve `cargo` komut çıktıları:
-
-```shell
-rustc 1.90.0 (1159e78c4 2025-09-14)
-cargo 1.90.0 (840b83a10 2025-07-30
-```
-
-# İlk Rust Programı Oluşurma:
-
-+ Yeni bir proje başlat:
-
-```shell
-cargo new hello_world
-```
-
-+ `cargo` komut çıktısı:
-
-```shell
-    Creating binary (application) `hello_world` package
-note: see more `Cargo.toml` keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-```
-
-+ `cargo new` komutu ile oluşan dizin yapısı:
-
-```shell
-hello_world
-├── Cargo.toml
-└── src
-    └── main.rs
-
-2 directories, 2 files
-```
-
-+ `cargo new` komutu ile tüm oluşan dizin yapısını görmek istersek:
-
-```shell
-hello_world
-├── Cargo.toml
-├── .git
-│   ├── config
-│   ├── description
-│   ├── HEAD
-│   ├── hooks
-│   │   ├── applypatch-msg.sample
-│   │   ├── commit-msg.sample
-│   │   ├── fsmonitor-watchman.sample
-│   │   ├── post-update.sample
-│   │   ├── pre-applypatch.sample
-│   │   ├── pre-commit.sample
-│   │   ├── pre-merge-commit.sample
-│   │   ├── prepare-commit-msg.sample
-│   │   ├── pre-push.sample
-│   │   ├── pre-rebase.sample
-│   │   ├── pre-receive.sample
-│   │   ├── push-to-checkout.sample
-│   │   ├── sendemail-validate.sample
-│   │   └── update.sample
-│   ├── info
-│   │   └── exclude
-│   ├── objects
-│   │   ├── info
-│   │   └── pack
-│   └── refs
-│       ├── heads
-│       └── tags
-├── .gitignore
-└── src
-    └── main.rs
-
-11 directories, 21 files
-```
-
+Bu metin, [No Starch Press tarafından basılı kitap (paperback) ve e-kitap](https://nostarch.com/rust-programming-language-3e) formatında sunulmaktadır.
 
 > [!CAUTION]
-> +  Dikkat ederseniz `cargo new` komutu bize ayrıca `git` dizini de oluşturmaktadır.
+> Daha etkileşimli bir öğrenme deneyimi mi istiyorsunuz? Testler, vurgulamalar, görselleştirmeler ve daha fazlasını içeren Rust Book’un farklı bir sürümünü deneyin: [https://rust-book.cs.brown.edu](https://rust-book.cs.brown.edu)
+
+# Özsöz
+
+Rust programlama dili, birkaç kısa yıl içinde, küçük ve yeni gelişen bir meraklı topluluk tarafından oluşturulup geliştirilmesinden, dünyanın en sevilen ve en çok talep gören programlama dillerinden biri haline gelmesine kadar uzun bir yol kat etti. Geriye dönüp bakıldığında, Rust’ın gücü ve vaat ettikleriyle dikkat çekmesi ve sistem programlama alanında yer edinmesi kaçınılmazdı. Kaçınılmaz olmayan şey ise; açık kaynak topluluklarına yayılan ve endüstriler genelinde geniş çaplı benimsenmeyi tetikleyen küresel ilgi ve inovasyon artışıydı.
+
+Bu noktada, bu ilgi ve benimseme patlamasını açıklamak için Rust'ın sunduğu harika özelliklere işaret etmek kolaydır. Kim bellek güvenliği, yüksek performans, kullanıcı dostu bir derleyici ve güçlü araçlar gibi pek çok özelliği istemez ki? Bugün gördüğünüz Rust dili, sistem programlama alanındaki yıllarca süren araştırmaları, canlı ve tutkulu bir topluluğun pratik bilgeliğiyle birleştiriyor. Bu dil bir amaç doğrultusunda tasarlandı ve özenle işlendi; geliştiricilere güvenli, hızlı ve güvenilir kod yazmayı kolaylaştıran bir araç sunuyor.
+
+Ancak Rust’ı gerçekten özel kılan şey, sizi—yani kullanıcıyı—hedeflerinize ulaşmanız için güçlendirmeye dayanan kökleridir. Bu, sizin başarılı olmanızı isteyen bir dildir ve bu güçlendirme ilkesi, dili geliştiren, sürdüren ve savunan topluluğun özünde yer alır. Bu kapsamlı metnin önceki baskısından bu yana Rust, gerçek anlamda küresel ve güvenilir bir dil olarak daha da gelişmiştir. Rust Projesi artık, Rust'ın güvenli, istikrarlı ve sürdürülebilir olmasını sağlamak için kilit girişimlere yatırım yapan Rust Vakfı (Rust Foundation) tarafından güçlü bir şekilde destekleniyor.
+
+_The Rust Programming Language_ kitabının bu baskısı; dilin yıllar içindeki evrimini yansıtan ve değerli yeni bilgiler sağlayan kapsamlı bir güncellemedir. Ancak bu sadece sözdizimi (syntax) ve kütüphaneler için bir rehber değil; kaliteye, performansa ve düşünceli tasarıma değer veren bir topluluğa katılmaya bir davettir. İster Rust'ı ilk kez keşfetmek isteyen deneyimli bir geliştirici, ister becerilerini geliştirmek isteyen kıdemli bir "Rustacean" olun; bu baskı herkes için bir şeyler sunuyor.
+
+Rust yolculuğu; iş birliği, öğrenme ve sürekli geliştirme süreci olmuştur. Dilin ve ekosisteminin büyümesi, arkasındaki canlı ve çeşitli topluluğun doğrudan bir yansımasıdır. Çekirdek dil tasarımcılarından sıradan katkıda bulunanlara kadar binlerce geliştiricinin katkıları, Rust'ı bu kadar benzersiz ve güçlü bir araç yapan şeydir. Bu kitabı elinize aldığınızda, sadece yeni bir programlama dili öğrenmiyorsunuz—aynı zamanda yazılımı daha iyi, daha güvenli ve üzerinde çalışması daha keyifli hale getirmeyi amaçlayan bir harekete katılıyorsunuz.
+
+Rust topluluğuna hoş geldiniz!
+
+**Bec Rumbul, Rust Foundation Yönetim Direktörü**
+
+
+# Giriş
+
+> [!NOTE]
+> Bu kitap baskısı, No Starch Press tarafından basılı ve e-kitap formatında yayımlanan _The Rust Programming Language_ ile aynıdır.
+
+_The Rust Programming Language_(Rust Programlama Dili) kitabına hoş geldiniz; bu, Rust hakkında giriş seviyesinde bir kitaptır. Rust programlama dili, daha hızlı ve daha güvenilir yazılımlar yazmanıza yardımcı olur. Programlama dili tasarımında, yüksek seviyeli kullanım kolaylığı (ergonomi) ile düşük seviyeli kontrol genellikle birbiriyle çelişir; Rust bu çelişkiye meydan okur. Güçlü teknik kapasite(düşük seviyeli kontrol, yüksek performans, donanıma yakın programlama, vb.) ile mükemmel bir geliştirici deneyimini(kullanım kolaylığı, anlaşılır söz dizimi, faydalı hata mesajları, vb.) dengeleyen Rust; size, bu tür kontrollerle geleneksel olarak ilişkilendirilen tüm zorluklara katlanmak zorunda kalmadan, alt seviye ayrıntıları (bellek kullanımı gibi) kontrol etme seçeneği sunar.
+
+## Rust Kimler İçindir
+
+Rust, çeşitli nedenlerle birçok kişi için ideal bir dildir. En önemli gruplardan birkaçına bakalım.
+### Geliştirici Ekipleri
+
+Rust; sistem programlama bilgisi farklı seviyelerde olan, büyük geliştirici ekipleri arasındaki iş birliği için verimli bir araç olduğunu kanıtlıyor. Düşük seviyeli kod, çeşitli ince hatalara(*bugs*) eğilimlidir; bu hatalar diğer dillerin çoğunda yalnızca kapsamlı testler ve deneyimli geliştiricilerin dikkatli kod incelemeleriyle yakalanabilir. Rust'ta ise derleyici, eşzamanlılık hataları(*concurrency bugs*) da dahil olmak üzere bu zor yakalanan hatalar içeren kodu derlemeyi reddederek bir bekçi rolü(*gatekeeper role*) üstlenir. Derleyiciyle birlikte çalışarak ekipler, hataların peşinden koşmak yerine zamanlarını programın mantığına odaklanarak geçirebilir.
+
+Rust ayrıca sistem programlama dünyasına çağdaş geliştirici araçları getirir:
+
++ Dahil edilmiş bağımlılık yöneticisi ve derleme aracı(*build tool*) olan **Cargo**, bağımlılıkları eklemeyi, derlemeyi ve yönetmeyi Rust ekosistemi genelinde sorunsuz ve tutarlı hale getirir. (Dahili bağımlılık yöneticisi(*included dependency manager*) = "Dahili" → Cargo'nun Rust ile birlikte hazır olarak geldiğini, ayrıca kurmanıza gerek olmadığını belirtir. Rust'ı kurduğunuzda Cargo da otomatik olarak kurulur.)
++ **`rustfmt`** biçimlendirme aracı, geliştiriciler arasında tutarlı bir kodlama stili sağlar.
++ **Rust Dil Sunucusu (*Rust Language Server*)**, kod tamamlama ve satır içi hata mesajları için entegre geliştirme ortamı (IDE) entegrasyonuna destek verir.
+
+Rust ekosistemindeki bu ve diğer araçları kullanarak, geliştiriciler sistem düzeyinde kod yazarken verimli olabilirler.
+### Öğrenciler
+
+Rust, öğrenciler ve sistem kavramlarını öğrenmeye ilgi duyanlar içindir. Rust kullanarak birçok kişi işletim sistemi geliştirme(*operating systems development*) gibi konuları öğrenmiştir. Topluluk oldukça misafirperverdir ve öğrencilerin sorularını yanıtlamaktan mutluluk duyar. Bu kitap gibi çalışmalar aracılığıyla Rust ekipleri, sistem kavramlarını daha fazla insana, özellikle de programlamaya yeni başlayanlara daha erişilebilir kılmak istemektedir.
+
+### Şirketler
+
+Büyük ve küçük ölçekli yüzlerce şirket; komut satırı araçları, web servisleri, DevOps araçları, gömülü cihazlar, ses ve video analizi ile dönüştürme (transcoding), kripto paralar, biyoinformatik, arama motorları, Nesnelerin İnterneti (IoT) uygulamaları, makine öğrenmesi ve hatta Firefox web tarayıcısının önemli parçaları dahil olmak üzere çeşitli görevler için üretim aşamasında (production) Rust kullanmaktadır.
+
+### Açık Kaynak Geliştiricileri
+
+Rust; Rust programlama dilini, topluluğunu, geliştirici araçlarını ve kütüphanelerini geliştirmek(*build*) isteyen kişiler içindir. Rust diline katkıda bulunmanızdan memnuniyet duyarız.
+### Hız ve Kararlılığı Önemseyenler
+
+Rust, bir programlama dilinde hız ve kararlılık isteyen kişiler içindir. Hızdan kastımız hem Rust kodunun ne kadar hızlı çalıştığı hem de Rust’ın program yazmayı ne kadar hızlı mümkün kıldığıdır. Rust derleyicisinin yaptığı kontroller, yeni özellikler eklenirken ve kod yeniden düzenlenirken (*refactoring*) kararlılığı sağlar. Bu durum, bu kontrollerin bulunmadığı dillerdeki kırılgan eski kodlarla tam bir tezat oluşturuyor; geliştiriciler bu kodları değiştirmekten genellikle çekiniyorlar. 
+
+Rust, **sıfır maliyetli soyutlamalar (zero-cost abstractions)** hedefiyle, üst seviye özelliklerin elle yazılmış düşük seviye kod kadar hızlı çalışmasını sağlamaya çalışır. Bu sayede Rust, güvenli kodun aynı zamanda hızlı kod olmasını hedefler.
+
+Rust dili, pek çok başka kullanıcıyı da desteklemeyi ummaktadır; burada bahsedilenler yalnızca en büyük paydaşlardan bazılarıdır. Genel olarak Rust'ın en büyük hedefi, güvenlik ve üretkenlik, hız ve kullanım kolaylığı(ergonomi) sağlayarak programcıların onlarca yıldır kabul ettiği ödünleşimleri(*trade-off*) ortadan kaldırmaktır. Rust’ı deneyin ve sunduğu bu tercihlerin sizin için uygun olup olmadığını görün.
+
+## Bu Kitap Kimler İçindir
+
+Bu kitap, başka bir programlama dilinde kod yazmış olduğunuzu varsaymaktadır; ancak hangi dil olduğu konusunda herhangi bir varsayımda bulunmamaktadır. Bu materyali, çok çeşitli programlama geçmişine sahip kişilerin kolayca erişebileceği şekilde hazırlamaya çalıştık. Programlamanın ne olduğu veya nasıl düşünülmesi gerektiği hakkında fazla konuşmuyoruz. Eğer programlamaya tamamen yeniyseniz, özellikle programlamaya giriş niteliği taşıyan bir kitabı okumanız sizin için daha faydalı olacaktır.
+## Bu Kitap Nasıl Kullanılır?
+
+Genel olarak bu kitap, baştan sona sırasıyla okuduğunuzu varsayar. Sonraki bölümler önceki bölümlerdeki kavramlar üzerine inşa edilir; önceki bölümler belirli bir konunun tüm detaylarına inmeyebilir ancak o konuyu ilerleyen bölümlerde tekrar ele alır.
+
+Bu kitapta iki tür bölüm bulacaksınız: **kavram bölümleri (concept chapters)** ve **proje bölümleri (project chapters)**. Kavram bölümlerinde Rust'ın bir yönünü öğreneceksiniz. Proje bölümlerinde ise şimdiye kadar öğrendiklerinizi uygulayarak birlikte küçük programlar inşa edeceğiz. 2., 12. ve 21. bölümler proje bölümleridir; geri kalanlar ise kavram bölümleridir.
+
+**Bölüm 1**, Rust’ın nasıl kurulacağını, bir “Hello, world!” programının nasıl yazılacağını ve Rust’ın paket yöneticisi ve derleme aracı(*build tool*) olan Cargo’nun nasıl kullanılacağını açıklar. Bölüm 2, Rust'ta program yazımına uygulamalı bir giriş niteliğindedir ve bir sayı tahmin oyunu(*number-guessing game*) oluşturmanızı sağlar. Burada kavramları üst seviyeden ele alıyoruz; ilerleyen bölümler ise ek detaylar sunacak. Hemen işe koyulmak istiyorsanız, Bölüm 2 bunun için doğru yerdir. Eğer bir sonrakine geçmeden önce her detayı öğrenmeyi tercih eden titiz bir öğrenciyseniz, **Bölüm 2**'yi atlayıp doğrudan diğer programlama dillerine benzer Rust özelliklerini kapsayan **Bölüm 3**'e atlamak isteyebilirsiniz; ardından öğrendiğiniz detayları bir projede uygulamak istediğinizde Bölüm 2'e geri dönebilirsiniz.
+
+**Bölüm 4**'de Rust'ın sahiplik (ownership) sistemini öğreneceksiniz. **Bölüm 5** **struct** ve **method** konularını ele alır. **Bölüm 6** ise enum'ları, `match` ifadelerini(*expression*) ve `if let` ile `let...else` kontrol akışı yapılarını kapsar. Özel türler oluşturmak için `struct`'ları ve `enum`'ları kullanacaksınız.
+
+Bölüm 7'de, Rust'ın modül sistemi, kodunuzu düzenlemek için gizlilik kuralları(*privacy rules*) ve genel(*public*) uygulama programlama arayüzü (API=`application programming interface`) hakkında bilgi edineceksiniz. **Bölüm 8**, standart kütüphanenin sağladığı bazı yaygın koleksiyon veri yapılarını ele almaktadır: vektörler(*vectors)*, dizeler(*strings*) ve karma haritalar(*hash maps*). **Bölüm 9** ise Rust’ın hata yönetimi (*error handling*) felsefesini ve tekniklerini inceler.
+
+**Bölüm 10**, size birden fazla türe uygulanan kodlar tanımlama gücü veren jenerikler (*generics*), özellikler (*traits*) ve yaşam süreleri (*lifetimes*) konularını derinlemesine inceler. **Bölüm 11** test konusuna ayrılmıştır; Rust’ın sağladığı güvenlik garantilerine rağmen, programınızın mantığının doğru çalıştığını doğrulamak için testler gereklidir. **Bölüm 12**'de, dosyalar içinde metin arayan `grep` komut satırı aracının işlevselliğinin bir alt kümesinin içeren kendi uygulamamızı oluşturacağız. Yani, bölüm 12'de, dosyalarda metin aramak için kullanılan `grep` komut satırı aracının bazı özelliklerini kendimiz sıfırdan geliştireceğiz. Bunun için önceki bölümlerde öğrendiğimiz birçok kavramı kullanacağız.
+
+**Bölüm 13**'de, kökleri işlevsel programlama dillerine dayanan iki Rust özelliğini inceleyeceğiz: *closure*'lar ve *iterator*'ler. **Bölüm 14**’de, Cargo’yu daha derinlemesine inceleyeceğiz ve kütüphanelerinizi başkalarıyla paylaşmanın en iyi yöntemlerinden(*best practices*) bahsedeceğiz. bölüm 15'de ise standart kütüphanenin sağladığı **akıllı işaretçiler (smart pointers)** ve bunların çalışmasını sağlayan *trait*’ler ele alınacaktır.
+
+**Bölüm 16**'de, eşzamanlı(*concurrent*) programlamanın farklı modellerini inceleyeceğiz ve Rust'ın birden fazla iş parçacığında(*thread*) korkusuzca programlama yapmanıza nasıl yardımcı olduğunu konuşacağız. **Bölüm 17**'de ise bunun üzerine inşa ederek Rust’ın *async* ve *await* sözdizimini; ayrıca task’ler, future’lar ve stream’leri ve bunların sağladığı hafif eşzamanlılık modelini(*lightweight concurrency model*) keşfedeceğiz.
+
+**Bölüm 18**'de, Rust deyimlerinin (*idioms*) aşina olabileceğiniz nesne yönelimli programlama (object-oriented programming) ilkeleriyle nasıl karşılaştırıldığına bakıyor.(Yani, Rust'ın kendine özgü yazım ve kullanım biçimlerinin (deyimler/idioms), nesne yönelimli programlamadan (OOP) aşina olunan kavramlarla — örneğin kalıtım (inheritance), kapsülleme (encapsulation), polimorfizm (polymorphism) gibi — nasıl benzeştiğini ya da ayrıştığını karşılaştırmalı olarak ele aldığını ifade eder.) **Bölüm 19**'da, Rust programları genelinde fikirleri ifade etmenin güçlü yolları olan kalıplar (*patterns*) ve kalıp eşleştirme (*pattern matching*) üzerine bir başvuru kaynağıdır.(Yani, Rust'ta **kalıplar (patterns)**, kodun belirli bir veri yapısıyla eşleşip eşleşmediğini kontrol etmek için kullanılan yapılardır. **Kalıp eşleştirme (pattern matching)** ise bu kalıpları kullanarak verinin üzerinde işlem yapma yöntemidir — en çok `match` ifadesiyle karşılaşılır.) **Bölüm 20**'de, unsafe Rust, macros ve lifetimes, traits, types, fonksiyonlar ve closures hakkında daha fazlasını içeren ileri düzey konuyu içermektedir.
+
+**Bölüm 21**'de, düşük seviyeli çok iş parçacıklı (*multithreaded*) bir web sunucusu uygulayacağımız bir projeyi tamamlayacağız!
+
+Son olarak, bazı ekler(*appendix*’ler) dil hakkında daha çok başvuru niteliğinde faydalı bilgiler içerir. **Ek A(_Appendix A_)**, Rust’ın anahtar kelimelerini kapsar, **Ek B(_Appendix B_)**, Rust’ın operatörlerini ve sembollerini kapsar, **Ek C(_Appendix C_)**, standart kütüphane tarafından sağlanan *derivable trait*’leri kapsar, **Ek D(_Appendix D_)**, bazı kullanışlı geliştirme araçlarını kapsar, **Ek E(_Appendix E_)**, Rust sürümlerini (*editions*) açıklar. **Ek F(_Appendix F_)**’te kitabın çevirilerini bulabilirsiniz ve **Ek G(_Appendix G_)**'de ise Rust'ın nasıl yapıldığını ve nightly Rust'ın ne olduğunu kapsar.
+
+Bu kitabı okumanın yanlış bir yolu yoktur: Eğer ileri atlamak istiyorsanız, bunu yapabilirsiniz! Herhangi bir kafa karışıklığı yaşarsanız, önceki bölümlere geri dönmeniz gerekebilir. Ama sizin için en iyi olan neyse onu yapın.
+
+Rust öğrenme sürecinin önemli bir parçası, derleyicinin gösterdiği hata mesajlarını okumayı öğrenmektir: Bunlar sizi çalışan koda doğru yönlendirecektir. Bu nedenle, her durumda derleyicinin size göstereceği hata mesajıyla birlikte derlenmeyen birçok örnek sunacağız. Rastgele bir örneği girip çalıştırırsanız derlenmeyebileceğini bilin! Çalıştırmaya çalıştığınız örneğin hata vermesinin amaçlanıp amaçlanmadığını görmek için çevresindeki metni okuduğunuzdan emin olun. Çoğu durumda, derlenmeyen kodların doğru sürümüne sizi yönlendireceğiz. Ferris de çalışması amaçlanmayan kodları ayırt etmenize yardımcı olacaktır:
+
+|                           Ferris                            |              Anlam              |
+| :---------------------------------------------------------: | :-----------------------------: |
+|   <img src="./Pictures/does_not_compile.svg" width="100">   |       Bu kod derlenmiyor!       |
+|        <img src="./Pictures/panics.svg" width="100">        |       Bu kod panik verir!       |
+| <img src="./Pictures/not_desired_behavior.svg" width="100"> | Bu kod istenen sonucu vermiyor. |
+
+Çoğu durumda, derlenmeyen kodların doğru sürümüne sizi yönlendireceğiz. 
+
+## Kaynak Kodu
+
+"Bu kitabın oluşturulmasında kullanılan kaynak dosyalar **[GitHub](https://github.com/rust-lang/book/tree/main/src)** üzerinde bulunabilir."
+
+
+# 1. Başlarken(Getting Started)
+
+Hadi Rust yolculuğuna başlayalım! Öğrenilecek çok şey var, ancak her yolculuk bir yerden başlar. Bu bölümde şunları ele alacağız:
++ Linux, macOS ve Windows üzerine Rust kurulumu
++ `Hello, world!` yazdıran bir program yazma
++ Rust’ın paket yöneticisi ve derleme sistemi olan Cargo’nun kullanımı
+## 1.1. Kurulum
+
+İlk adım Rust’ı kurmaktır. Rust’ı, Rust sürümlerini ve ilgili araçları yönetmek için kullanılan bir komut satırı aracı olan **rustup** üzerinden indireceğiz. İndirme işlemi için bir internet bağlantısına ihtiyacınız olacak.
+
+> [!NOTE]
+> Herhangi bir nedenle rustup kullanmak istemezseniz, daha fazla seçenek için [Diğer Rust Kurulum Yöntemleri](https://forge.rust-lang.org/infra/other-installation-methods.html) sayfasına bakabilirsiniz.
+
+Aşağıdaki adımlar, Rust derleyicisinin (compiler) en son kararlı (stable) sürümünü kurar. Rust’ın uyumluluk güvencesi(geriye dönük uyumluluk garantisi), kitapta derlenebilen tüm örneklerin daha yeni Rust sürümleriyle de derlenmeye devam edeceğini garanti eder. Sürümler arasında çıktı biraz farklı olabilir, çünkü Rust sık sık hata mesajlarını ve uyarıları geliştirir. Başka bir deyişle, bu adımları kullanarak kurduğunuz daha yeni herhangi bir kararlı Rust sürümü, bu kitabın içeriğiyle beklendiği gibi çalışacaktır.
 
 
 > [!NOTE]
-> ```shell
-> cargo new hello-world --vcs none
-> ```
-> + 🧰 `--vcs none`:
-> 	- **VCS (Version Control System)** → sürüm kontrol sistemi (örneğin Git).
-> 	- Normalde `cargo new` çalıştırıldığında **otomatik olarak bir Git deposu (`git init`) oluşturur**.
-> 	- Ama `--vcs none` dersen, **Git deposu oluşturulmaz** (yani `.git` klasörü eklenmez).
-> #### Örnek Fark:
-> + **Varsayılan(`cargo new hello-world`)**
-> ```shell
-> hello-world/
-> ├── .git/                ← otomatik oluşturulur
-> ├── .gitignore           ← otomatik eklenir
-> ├── Cargo.toml
-> └── src/
->     └── main.rs
-> ```
-> + **`--vcs` parametresi(`cargo new hello-world --vcs none`)**
-> ```shell
-> hello-world/
-> ├── Cargo.toml
-> └── src/
->     └── main.rs
-> ```
+> Bu bölümde ve kitap boyunca, terminalde kullanılan bazı komutları göstereceğiz. Bir terminale girmeniz gereken satırların tamamı `$` işareti ile başlar. `$` karakterini yazmanıza gerek yoktur; bu, her komutun başlangıcını belirtmek için gösterilen komut satırı istemidir (prompt). `$` ile başlamayan satırlar ise genellikle bir önceki komutun çıktısını gösterir. Ek olarak, PowerShell'e özgü örneklerde `$` yerine `>` kullanılacaktır.
 
-+ **`--vcs` Parametresi Seçenekleri:**
+### 1.1.1 Linux veya macOS’ta rustup Kurulumu
 
-| Seçenek        | Açıklama                                                                           |
-| -------------- | ---------------------------------------------------------------------------------- |
-| `--vcs git`    | Git deposu oluşturur (`.git` klasörü, `.gitignore` dosyası). Bu **varsayılandır.** |
-| `--vcs hg`     | **Mercurial (hg)** deposu oluşturur (`.hg` klasörü, `.hgignore` dosyası).          |
-| `--vcs pijul`  | **Pijul** adlı daha yeni bir sürüm kontrol sistemiyle başlatır.                    |
-| `--vcs fossil` | **Fossil SCM** adlı sistemi kullanır (`.fossil-settings` klasörü ekler).           |
-| `--vcs none`   | Hiçbir sürüm kontrol sistemi oluşturmaz (sadece kaynak dosyaları).                 |
+Eğer Linux veya macOS kullanıyorsanız, bir terminal açın ve aşağıdaki komutu girin:
 
-# Programı Derle ve Çalıştır:
-
-+ `cargo new` komut ile oluşturduğumuz `hello_world` klasörüne giriş yapalım:
-
-```shell
-cd hello_world
+```bash
+$ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
 ```
 
-+ Bu dizin içerisindeyken aşağıdaki komut çalıştıralım:
+Bu komut bir betik (script) indirir ve Rust’ın en son kararlı sürümünü kuran `rustup` aracının kurulumunu başlatır. Sizden parola girmeniz istenebilir. Kurulum başarılı olursa aşağıdaki satır görüntülenir:
 
-```shell
-cargo run
+```
+Rust is installed now. Great!
 ```
 
-**Çıktı:**
+Ayrıca bir **linker**’a (bağlayıcıya) da ihtiyacınız olacak. *Linker*, Rust’ın derlenmiş çıktılarını tek bir dosya hâline getirmek için kullandığı bir programdır. Büyük ihtimalle sisteminizde zaten bulunmaktadır. Eğer linker hataları alırsanız, bir C derleyicisi kurmanız gerekir; çünkü bu derleyiciler genellikle bir *linker* içerir. Ayrıca bir C derleyicisi faydalıdır çünkü bazı yaygın Rust paketleri C koduna bağımlıdır ve bir C derleyicisine ihtiyaç duyacaktır.
 
-```shell
+macOS'te, aşağıdaki komutu çalıştırarak bir C derleyicisi edinebilirsiniz:
+
+```bash
+$ xcode-select --install
+```
+
+Linux kullanıcıları ise genellikle dağıtımlarının belgelerine göre GCC veya Clang kurmalıdır. Örneğin, Ubuntu kullanıyorsanız **build-essential** paketini kurabilirsiniz.
+###  1.1.2. Windows’ta rustup Kurulumu
+
+Windows’ta [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install) adresine gidin ve Rust’ı kurmak için verilen talimatları izleyin. Kurulumun bir aşamasında sizden **Visual Studio** yüklemeniz istenecektir. Bu, programları derlemek için gereken bir bağlayıcıyı (linker) ve yerel kütüphaneleri (native libraries) sağlar. Bu adımda daha fazla yardıma ihtiyacınız olursa, [https://rust-lang.github.io/rustup/installation/windows-msvc.html](https://rust-lang.github.io/rustup/installation/windows-msvc.html) sayfasına bakabilirsiniz.
+
+Bu kitabın geri kalanı, hem `cmd.exe` hem de PowerShell'de çalışan komutları kullanır. Eğer belirli farklılıklar varsa, hangisini kullanmanız gerektiğini açıklayacağız.
+### 1.1.3. Sorun Giderme (Troubleshooting)
+
++ Rust’ın doğru şekilde kurulup kurulmadığını kontrol etmek için bir kabuk (shell) açın ve şu komutu girin:
+
+```rust
+$ rustc --version
+```
+
+Yayımlanan en son kararlı sürüm için, aşağıdaki formatta sürüm numarasını, commit hash’ini ve commit tarihini görmelisiniz:
+
+```
+rustc x.y.z (abcabcabc yyyy-mm-dd)
+```
+
+Eğer bu bilgileri görüyorsanız, Rust’ı başarıyla kurmuşsunuz demektir! Eğer görmüyorsanız, Rust’ın sisteminizdeki  `%PATH%` değişkenine eklenip eklenmediğini aşağıdaki şekilde kontrol edin.
+
+Windows CMD’de:
+
+```DOS
+> echo %PATH%
+```
+
+PowerShell’de:
+
+```powershell
+> echo $env:Path
+```
+
+Linux ve macOS’ta:
+
+```bash
+$ echo $PATH
+```
+
+Eğer bunların hepsi doğruysa ve Rust hâlâ çalışmıyorsa, yardım alabileceğiniz birçok yer bulunmaktadır. Diğer Rust kullanıcılarıyla (kendi aramızda kullandığımız eğlenceli bir takma adla _Rustacean’lar_) nasıl iletişime geçebileceğinizi öğrenmek için [topluluk (community)](https://rust-lang.org/community/) sayfasına göz atabilirsiniz.
+
+### 1.1.4.  Güncelleme ve Kaldırma
+
+Rust `rustup` aracılığıyla kurulduktan sonra, yeni yayımlanan bir sürüme güncellemek oldukça kolaydır. Terminalinizden aşağıdaki güncelleme betiğini(*script*) çalıştırın:
+
+```bash
+$ rustup update
+```
+
+Rust ve `rustup` aracını sisteminizden kaldırmak için ise terminalinizden aşağıdaki kaldırma betiğini(*script*) çalıştırın:
+
+```bash
+$ rustup self uninstall
+```
+
+### 1.1.5. Yerel Belgeleri Okuma
+
+Rust kurulumu, belgeleri çevrimdışı (offline) olarak okuyabilmeniz için belgelerin yerel bir kopyasını da içerir. Yerel belgeleri tarayıcınızda açmak için `rustup doc` komutunu çalıştırın.
+
+Standart kütüphane tarafından sağlanan bir tür (*type*) veya fonksiyonun ne yaptığından ya da nasıl kullanılacağından emin olmadığınızda, öğrenmek için **uygulama programlama arayüzü** (**API = application programming interface**) dokümantasyonunu(belgelerini) kullanabilirsiniz.
+
+### 1.1.6. Metin Editörleri ve IDE’ler Kullanımı
+
+Bu kitap, Rust kodu yazmak için hangi araçları kullandığınız konusunda herhangi bir varsayımda bulunmaz. Neredeyse her metin editörü bu işi yapabilir! Ancak birçok metin editörü ve tümleşik geliştirme ortamı (**IDE = integrated development environments**) Rust için yerleşik(*built-in*) desteğe sahiptir. Rust web sitesindeki [araçlar(*tool*) sayfasında](https://rust-lang.org/tools/) her zaman birçok editör ve IDE'nin oldukça güncel bir listesini bulabilirsiniz.
+
+### 1.1.7. Bu Kitapla Çevrimdışı Çalışma(Working Offline with This Book)
+
+Birkaç örneklerde, standart kütüphane dışındaki Rust paketlerini kullanacağız. Bu örnekler üzerinde çalışabilmek için ya bir internet bağlantısına ihtiyacınız olacak ya da bu bağımlılıkları(*dependencies*) önceden indirmiş olmanız gerekecektir. Bağımlılıkları(*dependencies*) önceden indirmek için aşağıdaki komutları çalıştırabilirsiniz. (`cargo`'nun ne olduğunu ve bu komutların her birinin ne işe yaradığını daha sonra ayrıntılı olarak açıklayacağız.)
+
+```bash
+$ cargo new get-dependencies
+$ cd get-dependencies
+$ cargo add rand@0.8.5 trpl@0.2.0
+```
+
+Bu işlem, ilgili paketlerin indirilmesini önbelleğe (`cache`) alır; böylece daha sonra tekrar indirmenize gerek kalmaz. Bu komutları çalıştırdıktan sonra `get-dependencies` klasörünü saklamanıza gerek yoktur. Bu işlemi yaptıktan sonra, kitabın geri kalanında tüm `cargo` komutlarını çalıştırırken ağ bağlantısını kullanmak yerine bu önbelleğe alınmış sürümleri kullanmak için `--offline` bayrağını kullanabilirsiniz.
+
+> [!TIP]
+> Normalde internet bağlantısı gerektiren bir komut şöyle çalıştırılır:
+> ```bash
+> $ cargo build
+> ```
+> Bu komut, gerekli paketleri internetten indirmeye çalışır.
+> ```bash
+> $ cargo build --offline
+> ```
+> Bu komut, internete bağlanmaya çalışmaz; daha önce `cargo add rand@0.8.5 trpl@0.2.0` komutuyla **önbelleğe alınmış** paketleri kullanır.
+> Yani kitabın ilerleyen bölümlerinde şöyle komutlar göreceksiniz:
+> ```bash
+> $ cargo run
+> $ cargo build
+> $ cargo test
+> ```
+> Eğer çevrimdışı çalışmak istiyorsanız, bunları şu şekilde çalıştırırsınız:
+> ```bash
+> $ cargo run --offline
+> $ cargo build --offline
+> $ cargo test --offline
+> ```
+> Bu özellik özellikle şu durumlarda kullanışlıdır:
+> + İnternet bağlantınız yoksa
+> + Yavaş bir internet bağlantınız varsa
+> + Bağımlılıkların değişmesini istemiyorsanız
+
+## 1.2. Merhaba Dünya!
+
+Artık Rust’ı kurduğunuza göre, ilk Rust programınızı yazma zamanı! Yeni bir programlama dili öğrenirken, ekrana **“Hello, world!”** yazdıran küçük bir program yazmak gelenekseldir; biz de burada aynısını yapacağız.
+
+> [!NOTE]
+> Bu kitap, komut satırına temel düzeyde aşina olduğunuzu varsayar. Rust, kodunuzu nasıl düzenlediğiniz, hangi araçları kullandığınız veya kodunuzu nerede tuttuğunuz konusunda özel bir bir talepte bulunmaz. Bu nedenle, komut satırı yerine bir IDE kullanmayı tercih ediyorsanız, favori IDE'nizi kullanmakta özgürsünüz. Günümüzde birçok IDE, Rust için belirli bir düzeyde destek sunmaktadır; ayrıntılar için kullandığınız IDE’nin dokümantasyonuna bakabilirsiniz. Rust ekibi, **rust-analyzer** aracılığıyla güçlü IDE desteği sağlamaya odaklanmıştır. Daha fazla ayrıntı için [Ek D( Appendix D)](https://doc.rust-lang.org/book/appendix-04-useful-development-tools.html)’ye bakabilirsiniz.
+
+### 1.2.1. Proje Dizini(Klasör) Kurulumu
+
+Rust kodlarınızı saklamak için bir dizin (klasör) oluşturarak başlayacaksınız. Kodunuzun nerede bulunduğu Rust için önemli değildir; ancak bu kitaptaki alıştırmalar ve projeler için, ana dizininizde (**home directory**) bir **projects** klasörü(_projects directory_) oluşturmanızı ve tüm projelerinizi burada tutmanızı öneririz.
+
+Terminali açın ve aşağıdaki komutları girerek bir _projects_ dizini ve bu _projects_ dizini içinde "Merhaba dünya!" projesi için bir dizin oluşturun.
+
+```bash
+$ mkdir ~/projects
+$ cd ~/projects
+$ mkdir hello_world
+$ cd hello_world
+```
+
+Windows CMD için şunları girin:
+
+```powershell
+> mkdir "%USERPROFILE%\projects"
+> cd /d "%USERPROFILE%\projects"
+> mkdir hello_world
+> cd hello_world
+```
+
+### 1.2.2. Rust Programlama Temelleri
+
+Ardından, yeni bir kaynak dosyası oluşturun ve adını **main.rs** koyun. Rust dosyaları her zaman **.rs** uzantısıyla biter. Eğer dosya adınız birden fazla kelimeden oluşuyorsa, kelimeleri ayırmak için alt çizgi (`_`) kullanmak bir gelenektir. Örneğin, `helloworld.rs` yerine `hello_world.rs` kullanın.
+
+Şimdi az önce yeni oluşturduğunuz `main.rs` dosyasını açın ve `Liste 1-1`'deki kodu girin.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    println!("Hello, world!");
+}
+```
+
+> **Liste 1-1:** "Hello, world!" yazdıran bir program
+
+Dosyayı kaydedin ve `~/projects/hello_world` dizinindeki terminal pencerenize geri dönün. Linux veya macOS'ta, dosyayı derlemek ve çalıştırmak için aşağıdaki komutları girin:
+
+```bash
+$ rustc main.rs
+$ ./main
 Hello, world!
 ```
 
+Windows'ta, `./main` yerine `.\main` komutunu girin:
+
+```powershell
+> rustc main.rs
+> .\main
+Hello, world!
+```
+
+İşletim sisteminiz ne olursa olsun, terminale `Hello, world!` dizisi yazdırılmalıdır. Bu çıktıyı görmüyorsanız, yardım alma yolları için Kurulum bölümünün "1.1.3. Sorun Giderme(*Troubleshooting*)" kısmına geri dönün.
+
+`Hello, world!` yazdırıldıysa, tebrikler! Resmi olarak bir Rust programı yazdınız. Bu sizi bir Rust programcısı yapar; hoş geldiniz!
+### 1.2.3. Bir Rust Programının Anatomisi
+
+Bu "Hello, world!" programını detaylıca inceleyelim. İşte bulmacanın ilk parçası:
+
+```rust
+fn main() {
+
+}
+```
+
+Bu satırlar **main** adında bir fonksiyon tanımlar. `main` fonksiyonu özeldir: Her çalıştırılabilir (*executable*) Rust programında her zaman ilk çalışan koddur. Burada ilk satır, parametresi olmayan ve hiçbir şey döndürmeyen `main` adında bir fonksiyon tanımlar(*declare*). Eğer parametreler olsaydı, bunlar parantezlerin (`()`) içine yazılırdı.
+
+Fonksiyonun gövdesi **{}** (süslü parantezler) içine alınır. Rust, tüm fonksiyon gövdelerinin süslü parantezler içinde olmasını zorunlu kılar. Açılış küme parantezini(`{`) fonksiyon bildirimiyle(*declaration*) aynı satıra, aralarına bir boşluk bırakarak yerleştirmek iyi bir stil anlayışıdır.
 
 
-> [!NOTE]
-> **(İsteğe bağlı) Manuel derleme:**
-> + İstersen doğrudan `rustc` ile de derleyebilirsin:
-> 1. Bir `manual_derleme` adında dizin oluşturalım ve dosya içerisinde girelim.
-> ```shell
-> mkdir manual_derleme; cd manual_derleme
-> ```
-> 2. `vim` ile dosyamızı açalım
-> ```shell
-> vim hello.rs
-> ```
-> 3. `hello.rs` dosyasını içerisi:
-> ```shell
-> fn main() {
-> 	println!("Hello World!");
+> [!TIP] 
+> ##### Doğru Yazım (Önerilen Stil)
+> Burada fonksiyon ismi, parantezler, boşluk ve süslü parantez aynı satırdadır.
+> ```rust
+> fn main() { // <-- Boşluk bırakıldı ve süslü parantez burada başladı
+>     // Fonksiyon gövdesi
 > }
 > ```
-> 4. Yazmış olduğumuz `hello.rs` dosyasını derleyelim
-> 	- Rust derleyicisi `rustc` kullanılarak bir binary(ikili) dosya oluşturulabilir.
-> ```shell
-> rustc hello.rs
-> ```
-> 5. `rustc` çalıştırılabilen bir `hello` `binary(ikili)` dosyası üretecektir.
-> ```shell
-> ./hello   # Çıktı: Hello World!
+> ##### Yanlış/Önerilmeyen Yazım
+> Bazı dillerde (örneğin C# veya bazı C++ stillerinde) süslü parantez alt satıra indirilir, ancak bu Rust için standart bir yaklaşım değildir.
+> ```cpp
+> // Bu stil Rust'ta pek tercih edilmez
+> fn main()
+> {
+>     // Fonksiyon gövdesi
+> }
 > ```
 
 
 > [!NOTE]
-> + `println!` konsola metin yazdıran bir **makro**dur(`macro`).
-> + Sonraki derslerde **makro**'un(`macro`) derinlemesine anlatılacaktır.
+> Rust projelerinde standart bir stil bağlı kalmak isterseniz, kodunuzu belirli bir formata sokan `rustfmt` adlı otomatik biçimlendirme aracını kullanabilirsiniz (`rustfmt` hakkında daha fazla bilgi [Ek D(Appendix D)](https://doc.rust-lang.org/book/appendix-04-useful-development-tools.html)’dedir). Rust ekibi, bu aracı tıpkı `rustc` gibi standart Rust dağıtımına dahil etmiştir; yani bilgisayarınızda halihazırda yüklü olmalıdır!
 
+`main` fonksiyonunun gövdesi aşağıdaki kodu barındırır:
 
-# Rust'ı güncelleme  ve Kaldırma:
-
-+ Rust'ı güncellemek için aşağıdaki komut:
-
-```shell
-rustup update
+```rust
+// #![allow(unused)]
+// fn main() {
+	println!("Hello, world!");
+// }
 ```
 
-```shell
-info: syncing channel updates for 'stable-x86_64-unknown-linux-gnu'
-info: checking for self-update
+Bu satır, bu küçük programdaki tüm işi yapar: Ekrana metin yazdırır. Burada dikkat edilmesi gereken üç önemli detay vardır. **Birincisi**, `println!` bir Rust makrosunu çağırır. Eğer bunun yerine bir fonksiyon çağırıyor olsaydı, `println` (ünlem işareti olmadan) şeklinde yazılırdı. Rust makroları, Rust sözdizimini (syntax) genişletmek amacıyla kod üreten kodlar yazmanın bir yoludur ve bunları[ Bölüm 20](https://doc.rust-lang.org/book/ch20-05-macros.html)'de daha ayrıntılı inceleyeceğiz. Şimdilik bilmeniz gereken tek şey, `!` işaretinin normal bir fonksiyon değil bir makro çağırdığınız anlamına geldiği ve makroların her zaman fonksiyonlarla aynı kuralları izlemediğidir.
 
-  stable-x86_64-unknown-linux-gnu unchanged - rustc 1.90.0 (1159e78c4 2025-09-14)
+**İkincisi**, `"Hello, world!"` dizgisini (string) görüyorsunuz. Bu string'i `println!` makrosuna bir argüman olarak geçiriyoruz ve string ekrana yazdırılıyor.
 
-info: cleaning up downloads & tmp directories
+**Üçüncüsü** satırı bir noktalı virgül (`;`) ile bitiriyoruz; Bu, ifadenin (expression) sona erdiğini ve bir sonrakinin başlamaya hazır olduğunu belirtir. Çoğu Rust kodu satırı noktalı virgül ile biter.
+
+## 1.3. Derleme ve Çalıştırma (Compilation and Execution)
+
+Yeni oluşturduğunuz bir programı az önce çalıştırdınız; şimdi bu süreçteki her bir adımı inceleyelim.
+
+Bir Rust programını çalıştırmadan önce, onu Rust derleyicisini kullanarak derlemeniz gerekir; bunun için `rustc` komutunu girip ardından kaynak dosyanızın adını aşağıdaki gibi belirtirsiniz:
+
+```bash
+$ rustc main.rs
 ```
 
-> + Her hangi bir güncelleme gerçekleşmediği için yukarıdaki çıktıda `unchanged` görünmektedir.
+Eğer C veya C++ geçmişiniz varsa, bunun **gcc** veya **clang** kullanımına benzediğini fark edebilirsiniz. Derleme başarılı olursa, Rust bir **ikili çalıştırılabilir dosya (binary executable)** üretir.
 
-+ Rust'ı sisteminizden kaldırmak için aşağıdaki komut uygulayınız:
+Linux, macOS ve Windows'ta PowerShell üzerinde, kabuğunuza `ls` komutunu girerek çalıştırılabilir dosyayı(`main`) görebilirsiniz:
 
-```shell
-rustup self uninstall
+```bash
+$ ls
+main  main.rs
 ```
 
+Linux ve macOS'ta iki dosya görürsünüz. Windows'taki PowerShell'de, CMD kullanırken göreceğiniz üç dosyanın aynısını görürsünüz. Windows CMD ile şu komutu girersiniz:
 
-# Rust Main Fonksiyonu:
+```CMD
+> dir /B %= /B seçeneği yalnızca dosya adlarını gösterir =%
+main.exe
+main.pdb
+main.rs
+```
 
-## 1. Programın giriş noktasıdır (entry point):
+Bu, `.rs` uzantılı kaynak kod dosyasını, çalıştırılabilir dosyayı (Windows'ta `main.exe`, ancak diğer tüm platformlarda `main`) ve Windows kullanıldığında `.pdb` uzantılı hata ayıklama(`debug`) bilgilerini içeren bir dosyayı gösterir. Buradan sonra `main` veya `main.exe` dosyasını aşağıdaki gibi çalıştırırsınız:
 
-+ Her programın çalışmaya **nereden başlayacağını** bilmesi gerekir.
-+ Rust derleyicisi (`rustc`), derleme sırasında “programın nereden başlayacağını” belirlemek için `main` fonksiyonunu **otomatik olarak giriş noktası (entry point)** olarak kabul eder.
+```bash
+$ ./main   # Windows’ta .\main
+```
 
-> + Yani, program çalıştırıldığında ilk olarak `main()` fonksiyonunun içindeki kod yürütülür.  Bu, C, C++, Java gibi birçok sistem programlama dilinde de böyledir. 
+Eğer **main.rs** dosyanız “Hello, world!” programıysa, bu komut terminale **Hello, world!** yazdıracaktır.
 
----
-## 2. Derleyici tarafından özel olarak tanımlanmıştır:
+Ruby, Python veya JavaScript gibi dinamik bir dile daha aşina iseniz, bir programı derlemeye ve çalıştırmaya ayrı adımlar olarak alışık olmayabilirsiniz. Bu, programı derleyip ortaya çıkan çalıştırılabilir dosyayı başka birine verdiğinizde, o kişinin bilgisayarında Rust kurulu olmasa bile programı çalıştırabileceği anlamına gelir. Birine *.rb*, *.py* veya *.js* dosyası verirseniz, o kişinin (sırasıyla) Ruby, Python veya JavaScript uygulamasının kurulu olması gerekir. Buna karşılık, bu dillerde genellikle programı derlemek ve çalıştırmak tek bir komutla yapılır. Dil tasarımında her şey bir denge meselesidir(*trade-off*  : Teknik metinlerde "ödün", "denge" veya "takas" olarak çevrilebilir. Bir özelliğin avantajı için başka bir şeyden feragat edilmesini anlatır.)
 
+Basit programlar için sadece `rustc` ile derleme yapmak yeterlidir; ancak projeniz büyüdükçe tüm seçenekleri yönetmek ve kodunuzu paylaşmayı kolaylaştırmak isteyeceksiniz. Bir sonraki bölümde, gerçek dünyadaki Rust programlarını yazmanıza yardımcı olacak **Cargo** aracını tanıtacağız.
 
+## 1.3. Merhaba Cargo!
 
-# Yorum Satırları(Comments):
+Cargo, Rust'ın derleme sistemi(*build system*) ve paket yöneticisidir. Çoğu Rust geliştiricisi (*Rustacean*), Rust projelerini yönetmek için bu aracı kullanır; çünkü Cargo, kodunuzu derlemek, kodunuzun bağımlı olduğu kütüphaneleri indirmek ve bu kütüphaneleri derlemek gibi birçok işi sizin yerinize halleder. (Kodunuzun ihtiyaç duyduğu bu kütüphanelere **bağımlılıklar — dependencies** denir.)
 
-+ Herhangi bir program yorum gerektirir ve Rust birkaç farklı çeşidi destekler:
+Şimdiye kadar yazdığımız gibi en basit Rust programlarının herhangi bir bağımlılığı yoktur. "Hello, world!" projesini Cargo ile oluşturmuş olsaydık, Cargo'nun yalnızca kodunuzu derlemeyi(*building*) ele alan bölümünü kullanırdık. Daha karmaşık Rust programları yazdıkça bağımlılıklar ekleyeceksiniz ve Cargo ile bir proje başlatırsanız, bağımlılıklar eklemek çok daha kolay olacaktır.
 
-## A. Regular Comments:
+Rust projelerinin büyük çoğunluğu Cargo kullandığı için, bu kitabın geri kalanında sizin de Cargo kullandığınız varsayılmaktadır. Eğer Rust’ı "1.1. Kurulum" bölümünde anlatılan resmi yöntemlerle kurduysanız, Cargo, Rust ile birlikte yüklü gelir.
 
-+ Normal yorumlar, sadece **kod okuyucular için açıklama eklemek** amacıyla kullanılır.
-+ Derleyici (`compiler`) bu yorumları tamamen **yok sayar**, yani programın davranışını etkilemez.
+```bash
+$ cargo --version
+```
+
+Eğer bir sürüm numarası görüyorsanız, Cargo yüklüdür! Eğer `command not found`(komut bulunamadı) gibi bir hata alırsanız, Cargo’yu ayrı olarak nasıl kuracağınızı öğrenmek için kullandığınız kurulum yönteminin dokümantasyonuna bakın.
+
+### 1.3.1. Cargo ile Proje Oluşturma
+
+Şimdi Cargo kullanarak yeni bir proje oluşturalım ve bunun önceki “Hello, world!” projemizden nasıl farklı olduğuna bakalım. `projects` dizininize (veya kodunuzu saklamaya karar verdiğiniz yere) geri gidin. Ardından, herhangi bir işletim sisteminde(yani, Linux, macOS veya Windows için geçerli) şu komutu çalıştırın:
+
+```bash
+$ cargo new hello_cargo
+$ cd hello_cargo
+```
+
+İlk komut, *hello_cargo* adında yeni bir dizin(klasör) ve proje oluşturur. Projemize *hello_cargo* adını verdik ve Cargo, dosyalarını aynı isimdeki bir dizin(klasör) içinde oluşturur.
+
+*hello_cargo* dizinine girin ve dosyaları listeleyin. Cargo’nun bizim için iki dosya ve bir dizin oluşturduğunu göreceksiniz: bir *Cargo.toml* dosyası ve içinde `main.rs` dosyası bulunan bir *src* dizini.
+
+Ayrıca bir `.gitignore` dosyasıyla birlikte yeni bir Git deposu (repository) başlatmıştır. Eğer bir Git deposu içerisinde `cargo new` komutunu çalıştırırsanız Git dosyaları oluşturulmaz; bu davranışı `cargo new --vcs=git` kullanarak geçersiz kılabilirsiniz.(*override*)
 
 
 > [!NOTE]
-> + Rust doc comments Markdown biçimini destekler, yani:
-> + `**kalın**`, `*italik*`, `# başlıklar`, `kod blokları` gibi Markdown yazımı kullanılabilir.
+> Git yaygın olarak kullanılan bir sürüm kontrol sistemidir. `--vcs` bayrağını (flag) kullanarak `cargo new` komutunu farklı bir versiyon kontrol sistemi kullanacak veya hiç kullanmayacak(`--vcs none`) şekilde değiştirebilirsiniz. Mevcut seçenekleri görmek için `cargo new --help` komutunu çalıştırın.
 
+Tercih ettiğiniz bir metin editörüyle **Cargo.toml** dosyasını açın. Dosyai `liste 1-2`'deki koda benzer görünmelidir.
 
-+ Rust’ta iki tür “regular comment” vardır:
-### A.1. Tek Satırlık Yorum(Line Comment)
+**Dosya adı:** `Cargo.toml`
 
-+ `//` ile başlar ve satırın sonuna kadar devam eder.
+```toml
+[package]
+name = "hello_cargo"
+version = "0.1.0"
+edition = "2024"
 
-### A.2. Çok satırlı yorum(Block Comment)
+[dependencies]
+```
 
-+ `/*` ile başlar ve `*/` ile biter.
-## B. Doc Comments:
+> **Liste 1-2:** cargo new tarafından oluşturulan `Cargo.toml` içeriği
 
-+ Doc comments, **Rust’ın otomatik dokümantasyon sistemi** olan `[rustdoc](https://doc.rust-lang.org/rustdoc/)` tarafından kullanılır.
-+ Bu yorumlar, **kütüphane (crate)**, **modül**, **fonksiyon**, **yapı (struct)** gibi öğelere açıklama ekler.
+Bu dosya, Cargo’nun yapılandırma formatı olan [TOML](https://toml.io/en/) (*Tom’s Obvious, Minimal Language*) formatındadır.
 
-### B.1. Satır içi dokümantasyon yorumları
+İlk satır olan `[package]`, bir bölüm başlığıdır ve aşağıdaki deyimlerin(*statements*) bir paketi yapılandırdığını belirtir. Bu dosyaya daha fazla bilgi ekledikçe, başka bölümler de ekleyeceğiz.
 
+Sonraki üç satır, Cargo’nun programınızı derlemek için ihtiyaç duyduğu yapılandırma bilgilerini ayarlar: isim (**name**), sürüm (**version**) ve kullanılacak Rust sürümü (**edition**). **Edition** anahtarı hakkında [Ek E(Appendix E)](https://doc.rust-lang.org/book/appendix-05-editions.html)'de konuşacağız.
 
-# İlkel Tipler(Primitives):
+Son satır olan `[dependencies]`, projenizin bağımlılıklarını listeleyeceğiniz bölümün başlangıcıdır. Rust’ta kod paketlerine **crate** denir. Bu proje için başka crate’lere ihtiyacımız yok, Bu proje için başka bir crate'e ihtiyacımız olmayacak ancak Bölüm 2'deki ilk projemizde gerekecek; o yüzden bu bağımlılıklar bölümünü o zaman kullanacağız.
 
-+ Rust programlama dilinde **veri tipleri (data types)**, bir değişkenin bellekte ne tür veri tuttuğunu belirler.
-+ Rust **statik tipli (statically typed)** bir dildir; yani her değişkenin tipi **derleme zamanında (compile time)** bellidir.
-+ Bu tip ya **otomatik olarak çıkarılır (type inference)** ya da **sen belirtirsin**.
+Şimdi `src/main.rs` dosyasını açın ve bir göz atın:
 
-## A. Basit (Scalar) Veri Tipleri
-
-### A.1. Tam sayılar (Integer)
-
-| Tür     | Boyut                              | Aralık             |
-| ------- | ---------------------------------- | ------------------ |
-| `i8`    | 8 bit                              | -128 → 127         |
-| `i16`   | 16 bit                             | -32,768 → 32,767   |
-| `i32`   | 32 bit                             | -2^31 → 2^31 - 1   |
-| `i64`   | 64 bit                             | -2^63 → 2^63 - 1   |
-| `i128`  | 128 bit                            | -2^127 → 2^127 - 1 |
-| `isize` | Mimariye göre (32-bit veya 64-bit) | —                  |
-| `u8`    | 8 bit                              | 0 → 255            |
-| `u16`   | 16 bit                             | 0 → 65,535         |
-| `u32`   | 32 bit                             | 0 → 4 milyar       |
-| `u64`   | 64 bit                             | —                  |
-| `u128`  | 128 bit                            | —                  |
-| `usize` | Mimariye göre                      | —                  |
+**Dosya adı:** `src/main.rs`
 
 ```rust
 fn main() {
-    let x: i32 = -10;
-    let variable = 19i8;
+    println!("Hello, world!");
 }
 ```
 
-### A.2. Ondalıklı sayılar (Floating-point):
+Cargo, tıpkı Liste 1-1'de yazdığımız gibi sizin için bir "Hello, world!" programı oluşturdu! Şu ana kadar bizim projemiz ile Cargo'nun oluşturduğu proje arasındaki farklar; Cargo'nun kodu `src` dizinine yerleştirmesi ve ana dizinde bir `Cargo.toml` yapılandırma(*configuration*) dosyasına sahip olmamızdır.
 
-+ Ondalıklı sayılar IEEE-754 standardına uyar.
+Cargo, kaynak dosyalarınızın `src` dizini içinde yer almasını bekler. Üst düzey (ana) proje dizini ise sadece README dosyaları, lisans bilgileri(*license information*), yapılandırma dosyaları(*configuration files*) ve kodunuzla ilgili olmayan diğer şeyler içindir. Her şeyin bir yeri vardır ve her şey yerli yerindedir.
 
-| Tür   | Boyut  | Hassasiyet                   |
-| ----- | ------ | ---------------------------- |
-| `f32` | 32 bit | Tek hassasiyet               |
-| `f64` | 64 bit | Çift hassasiyet (varsayılan) |
-### A.3. Boolean (Mantıksal):
+Eğer "Hello, world!" projesinde yaptığımız gibi Cargo kullanmayan bir proje başlattıysanız, bunu Cargo kullanan bir projeye dönüştürebilirsiniz. Proje kodunu `src` dizinine taşıyın ve uygun bir `Cargo.toml` dosyası oluşturun. Bu `Cargo.toml` dosyasını edinmenin kolay bir yolu, onu sizin için otomatik olarak oluşturacak olan `cargo init` komutunu çalıştırmaktır.
+### 1.3.2. Cargo Projesini Derleme(building) ve Çalıştırma
 
-+ Sadece **true** veya **false** değerlerini alır.
+Şimdi “Hello, world!” programını Cargo ile derleyip çalıştırdığımızda nelerin farklı olduğuna bakalım. *hello_cargo* dizininizdeyken, projenizi derlemek için şu komutu girin:
 
-```rust
-let aktif: bool = true;
-```
-### A.4. Character (Karakter):
-
-+ Rust’ta karakterler **Unicode** desteklidir, yani sadece ASCII değil:
-
-```rust
-let harf: char = 'A';
-let kalp = '❤';
-let emoji = '😊'
-```
-## B. Bileşik (Compound) Veri Tipleri
-
-+ Birden fazla değeri bir arada tutan türlerdir.
-
-### B.1. Tuple(Demet):
-
-+ Farklı türden birden fazla değeri bir arada tutar.
-
-```rust
-let kisi: (&str, i32, f64) = ("Ali", 30, 72.5);
-println!("İsim: {}, Yaş: {}, Kilo: {}", kisi.0, kisi.1, kisi.2);
+```bash
+$ cargo build
+   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)
+    Finished dev [unoptimized + debuginfo] target(s) in 2.85 secs
 ```
 
-### B.2. Array(Dizi):
+Bu komut, çalıştırılabilir dosyayı mevcut dizin yerine `target/debug/hello_cargo` (Windows’ta `target\debug\hello_cargo.exe`) konumunda oluşturur. Varsayılan derleme(*building*) bir *debug* (hata ayıklama) derlemesi(*building*) olduğundan, Cargo ikili dosyayı(*binary*) `debug` adlı bir dizine koyar. Çalıştırılabilir dosyayı şu komutla çalıştırabilirsiniz:
 
-+ Aynı türden sabit uzunlukta elemanları saklar.
+```bash
+$ ./target/debug/hello_cargo   # Windows’ta .\target\debug\hello_cargo.exe
+Hello, world!
+```
+
+Her şey yolunda giderse, terminale `Hello, world!` yazdırılmalıdır. `cargo build` komutunu ilk kez çalıştırmak, Cargo'nun en üst düzeyde yeni bir dosya oluşturmasına da neden olur: **Cargo.lock**.  Bu dosya, projenizdeki bağımlılıkların tam sürümlerini takip eder. Bu projede bağımlılık yok, bu yüzden dosya biraz boştur. Bu dosyayı asla manuel olarak değiştirmeniz gerekmez; Cargo içeriğini sizin için yönetir.
+
+Projeyi az önce `cargo build` ile derleyip(*build*) ve `./target/debug/hello_cargo` ile çalıştırdık ancak kodu derlemek ve ardından çıkan çalıştırılabilir dosyayı tek bir komutla çalıştırmak için **`cargo run`** komutunu da kullanabiliriz:
+
+```bash
+$ cargo run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/hello_cargo`
+Hello, world!
+```
+
+`cargo run` kullanmak, `cargo build` çalıştırmayı ve ardından ikili dosyanın tam yolunu hatırlamak zorunda kalmaktan daha kullanışlıdır, bu nedenle çoğu geliştirici `cargo run` kullanır.
+
+Bu sefer Cargo'nun `hello_cargo`'yu derlediğini belirten bir çıktı görmediğimize dikkat edin. Cargo dosyaların değişmediğini anladı, bu yüzden yeniden derlemedi ve sadece ikili dosyayı çalıştırdı. Eğer kaynak kodunuzu değiştirmiş olsaydınız, Cargo çalıştırmadan önce projeyi yeniden derleyecekti(*rebuild*) ve şu çıktıyı görecektiniz:
+
+```bash
+$ cargo run
+   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.33 secs
+     Running `target/debug/hello_cargo`
+Hello, world!
+```
+
+Cargo ayrıca **`cargo check`** adlı bir komut daha sağlar. Bu komut, kodunuzun derlendiğinden emin olmak için hızlıca kontrol eder ancak çalıştırılabilir bir dosya oluşturmaz:
+
+```bash
+$ cargo check
+   Checking hello_cargo v0.1.0 (file:///projects/hello_cargo)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.32 secs
+```
+
+Neden çalıştırılabilir bir dosya istemeyesiniz ki? Genellikle `cargo check`, çalıştırılabilir dosya üretme adımını atladığı için `cargo build`'den çok daha hızlıdır.  Eğer kodu yazarken çalışmanızı sürekli kontrol ediyorsanız, `cargo check` kullanmak projenizin hala derlenip derlenmediğini size bildirme sürecini hızlandıracaktır! Bu nedenle birçok Rustacean, programlarını yazarken derlendiğinden emin olmak için periyodik olarak `cargo check` çalıştırır. Ardından, çalıştırılabilir dosyayı kullanmaya hazır olduklarında `cargo build` çalıştırırlar.
+
+Cargo hakkında şu ana kadar öğrendiklerimizi özetleyelim:
+
++ `cargo new` kullanarak bir proje oluşturabiliriz.
++ `cargo build` kullanarak bir projeyi derleyebiliriz(*build*).
++ `cargo run` kullanarak bir projeyi tek adımda derleyip çalıştırabiliriz.
++ `cargo check` kullanarak ikili dosya(*binary*) üretmeden hataları kontrol etmek için projeyi derleyebiliriz.
++ Derleme(*build*) sonucunu kodumuzla aynı dizine kaydetmek yerine, Cargo bunu `target/debug` dizininde saklar.
+
+Cargo kullanmanın ek bir avantajı da, üzerinde çalıştığınız işletim sistemi ne olursa olsun komutların aynı olmasıdır. Bu noktadan itibaren artık Linux ve macOS ile Windows için özel talimatlar(komutlar) sunmayacağız.
+### 1.3.3. Yayın İçin Derleme(Building for Release)
+
+Projeniz nihayet yayınlanmaya hazır olduğunda, onu optimizasyonlarla derlemek için `cargo build --release` komutunu kullanabilirsiniz. Bu komut, `target/debug` yerine `target/release` dizininde bir çalıştırılabilir dosya oluşturur. Optimizasyonlar Rust kodunuzun daha hızlı çalışmasını sağlar; ancak bunları etkinleştirmek programınızın derlenmesi için gereken süreyi uzatır.
+
+İki farklı profilin olmasının nedeni budur: Biri, hızlı ve sık sık yeniden derleme(*rebuild*) yapmak istediğiniz **geliştirme (development)** aşaması içindir; diğeri ise bir kullanıcıya vereceğiniz, tekrar tekrar derlenmeyecek(*rebuild*) ve mümkün olduğunca hızlı çalışacak olan **nihai programı** derlemek(*build*) içindir. Kodunuzun çalışma süresini ölçüyorsanız(*benchmarking*), `cargo build --release` komutunu çalıştırdığınızdan ve `target/release` dizinindeki çalıştırılabilir dosyayla ölçüm yaptığınızdan emin olun.
+
+
+> [!TIP]
+> Bu nedenle iki farklı profil vardır:
+> - **Geliştirme (development)** profili: Hızlı ve sık derleme yapmak istediğiniz durumlar için
+> - **Release** profili: Son kullanıcıya vereceğiniz, tekrar tekrar derlenmeyecek ve mümkün olan en hızlı şekilde çalışması gereken programlar için
+
+### 1.3.4. Cargo’nun Standartlarından Faydalanmak(Leveraging Cargo’s Conventions)
+
+Basit projelerde, Cargo kullanmak yalnızca **rustc** kullanmaya kıyasla çok büyük bir avantaj sağlamaz; ancak programlarınız karmaşıklaştıkça gerçek değerini gösterir. Programlar birden fazla dosyaya büyüdüğünde veya bir bağımlılığa ihtiyaç duyduğunda, derlemeyi(*build*) koordine etmesi için Cargo'ya bırakmak çok daha kolaydır.
+
+**hello_cargo** projesi basit olsa da, artık Rust kariyeriniz boyunca kullanacağınız gerçek araçların çoğunu kullanmaktadır. Aslında, herhangi bir proje üzerinde çalışmak için, kodu Git kullanarak indirmek(*check out*), o projenin dizinine geçmek ve projeyi derlemek(*build*) için aşağıdaki komutları kullanabilirsiniz:
+
+```bash
+$ git clone example.org/someproject
+$ cd someproject
+$ cargo build
+```
+
+Cargo hakkında daha fazla bilgi için [belgelerine](https://doc.rust-lang.org/cargo/) bakın.
+## 1.4. Özet(Summary)
+
+Rust yolculuğunuza harika bir başlangıç yaptınız! Bu bölümde şunları öğrendiniz:
+
++ `rustup` kullanarak Rust’ın en son kararlı sürümünü kurmayı
++ Rust’ı daha yeni bir sürüme güncellemeyi
++ Yerel olarak yüklenmiş belgeleri açmayı.
++ `rustc` kullanarak doğrudan bir "Hello, world!" programı yazmayı ve çalıştırmayı
++ Cargo’nun standartlarını(*conventions of cargo*) kullanarak yeni bir proje oluşturmayı ve çalıştırmayı
+
+Artık Rust kodunu okumaya ve yazmaya alışmak için daha kapsamlı bir program oluşturmanın(*build*) tam zamanı. Bu nedenle, bölüm 2'de bir **sayı tahmin oyunu (guessing game)** programı geliştireceğiz(*build*). Eğer önce ortak programlama kavramlarının Rust’ta nasıl çalıştığını öğrenmek tercih ederseniz, Bölüm 3'e bakın ve ardından Bölüm 2'e geri dönün.
+
+# 2. Bir Tahmin Oyunu Programlamak
+
++ Birlikte uygulamalı bir proje üzerinde çalışarak Rust dünyasına adım atalım! Bu bölüm, size birkaç yaygın Rust kavramını gerçek bir program içinde nasıl kullanacağınızı göstererek giriş yapacak. `let`, `match`, metotlar, ilişkili fonksiyonlar (associated functions), harici paketler (external crates) ve daha fazlasını öğreneceksiniz! Sonraki bölümlerde bu konuları daha detaylı inceleyeceğiz. Bu bölümde ise sadece temel kavramların pratiğini yapacaksınız.
++ Klasik bir başlangıç seviyesi problemi programlamayı uygulayacağız: Bir tahmin oyunu(*a guessing game*). İşte nasıl çalıştığı: Program, 1 ile 100 arasında rastgele bir tam sayı üretecek. Ardından oyuncudan bir tahmin girmesini isteyecek. Bir tahmin girildikten sonra, program tahminin çok düşük mü yoksa çok yüksek mi olduğunu belirtecek. Tahmin doğruysa, oyun bir tebrik mesajı yazdıracak ve çıkış yapacak. Rust’ı farklı bir şekilde kurduysanız, Cargo’nun yüklü olup olmadığını kontrol etmek için terminalinize şu komutu girin:
+## 2.1. Yeni Bir Proje Kurulumu
+
++ Yeni bir proje oluşturmak için, 1. Bölümde oluşturduğunuz `projects` dizinine gidin ve aşağıdaki gibi Cargo kullanarak yeni bir proje oluşturun:
+
+```shell
+$ cargo new guessing_game
+$ cd guessing_game
+```
+
++ İlk komut olan `cargo new`, projenin adını (`guessing_game`) ilk argüman olarak alır. İkinci komut ise yeni oluşturulan proje dizinine geçiş yapar.
++ Oluşturulan `Cargo.toml` dosyasına bir göz atalım:
+
+**Dosya adı:** `src/main.rs`
+
+```toml
+[package]
+name = "guessing_game"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+```
+
++ Bölüm 1'de gördüğünüz gibi, `cargo new` sizin için otomatik olarak bir "Hello, world!" programı oluşturur. `src/main.rs` dosyasını kontrol edin:
 
 ```rust
-let sayilar: [i32; 4] = [10, 20, 30, 40];
-let varsyilan = [0; 5];  // [0, 0, 0, 0, 0]  
+fn main() {
+    println!("Hello, world!");
+}
+```
+
++ Şimdi bu "Hello, world!" programını derleyelim ve `cargo run` komutunu kullanarak aynı adımda çalıştıralım:
+
+```
+$ cargo run
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running `target/debug/guessing_game`
+Hello, world!
+```
+
++ `run` komutu, bu oyunda yapacağımız gibi, bir proje üzerinde hızlıca yineleme(*hızlıca tekrar denemek*) yapmanız gerektiğinde, bir sonrakine geçmeden önce her yinelemeyi(*hızlıca tekrar denemek*) hızla test etmek için oldukça kullanışlıdır.(Yani, run komutu, projeyi hızlıca tekrar tekrar çalıştırıp test etmek için çok kullanışlıdır; bu oyunda da her adımı test ederek ilerleyeceğiz.)
++ Şimdi `src/main.rs` dosyasını tekrar açın. Tüm kodları bu dosyanın içine yazacağız.
+
+## 2.2. Bir Tahmini İşleme (Processing a Guess)
+
++ Tahmin oyunu programının ilk bölümü kullanıcıdan girdi isteyecek, bu girdiyi işleyecek ve girdinin beklenen formda olup olmadığını kontrol edecektir. Başlangıç olarak oyuncunun bir tahmin girmesine izin vereceğiz. Liste 2-1'deki kodu `src/main.rs` dosyasına girin.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::io;
+
+fn main() {
+    println!("Guess the number!");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}");
+}
+```
+
+> **Liste 2-1:** Kullanıcıdan tahmin alan ve onu yazdıran kod
+
++ Bu kod çok fazla bilgi içeriyor, bu yüzden satır satır üzerinden geçelim.  Kullanıcı girdisi almak ve ardından sonucu çıktı olarak yazdırmak için `io` (input/output - giriş/çıkış) kütüphanesini kapsama (scope) dahil etmemiz gerekir. `io` kütüphanesi, `std` olarak bilinen standart kütüphaneden gelir:
+
+```rust
+use std::io; // <============= io kütüphanesi
+
+fn main() {
+    println!("Guess the number!");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}");
+}
+```
+
++ Varsayılan olarak Rust, her programın kapsamına dahil ettiği standart kütüphanede tanımlanmış bir öğe kümesine sahiptir. Bu kümeye **prelude** (başlangıç kümesi) denir ve içindeki her şeyi [standart kütüphane dokümantasyonunda](https://doc.rust-lang.org/std/prelude/index.html) görebilirsiniz.
++ Kullanmak istediğiniz bir tip _prelude_ içinde değilse, o türü(*type*) bir `use` deyimiyle açıkça kapsama dahil etmeniz gerekir. `std::io` kütüphanesini kullanmak, kullanıcı girdisini kabul etme yeteneği de dahil olmak üzere size bir dizi yararlı özellik sunar.
++ Bölüm 1'de gördüğünüz gibi, `main` fonksiyonu programın giriş noktasıdır:
+
+```rust
+use std::io;
+
+fn main() {  // <==================== giriş noktası
+    println!("Guess the number!");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}");
+}
+```
+
++ `fn` söz dizimi yeni bir fonksiyon tanımlar; parantezler `()` parametre olmadığını gösterir; ve süslü parantez `{` fonksiyonun gövdesini başlatır.
++ Yine Bölüm 1'de öğrendiğiniz gibi, `println!` ekrana bir dizgi (string) yazdıran bir makro'dur:
+
+```rust
+use std::io;
+
+fn main() {
+    println!("Guess the number!");        // <============== macro
+
+    println!("Please input your guess."); // <============== macro
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}");
+}
+```
+
++ Bu kod, oyunun ne olduğunu belirten bir mesaj(*prompt*) yazdırır ve kullanıcıdan girdi ister.(Prompt => kullanıcıyı yönlendiren mesaj)
+### 2.2.1. Değerleri Değişkenlerle Saklama (Storing Values with Variables)
+
++ Sırada, kullanıcı girdisini saklamak için bir **değişken (variable)** oluşturacağız, bunun gibi:
+
+```rust
+use std::io;
+
+fn main() {
+    println!("Guess the number!");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();   // <============= değişken
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}");
+}
+```
+
++ Artık program daha ilginç hale geliyor! Bu küçük satırda çok şey oluyor. Değişkeni oluşturmak için `let` deyimini(*statement*) kullanıyoruz. İşte başka bir örnek:
+
+```rust
+let elmalar = 5;
+```
+
++ Bu satır, `elmalar` adında yeni bir değişken oluşturur ve onu `5` değerine bağlar (bind). Rust'ta değişkenler varsayılan olarak **sabittir** (immutable); yani bir değişkene değer verdiğimizde bu değer bir daha değişmez. Bu kavramı Bölüm 3'teki "3.1. Değişkenler(Variables) ve Değişebilirlik(Mutability)" kısmında ayrıntılı olarak tartışacağız. Bir değişkeni **değişebilir** (mutable) yapmak için değişken adından önce `mut` ekleriz:
+
+```rust
+let apples = 5; // immutable(değiştirilemez)
+let mut bananas = 5; // mutable(değiştirilebilir)
 ```
 
 
 > [!NOTE]
-> + Rust’ta değişken tanımlarken tip genelde çıkarılabilir:
-> ```rust
-> let x = 5;        // i32 olarak algılanır
-> let y = 3.14;     // f64 olarak algılanır
-> ```
-> + Ama istersen **tip belirtmek** mümkündür:
-> ```rust
-> let z: f32 = 2.5;
-> ```
+> `//` söz dizimi, satır sonuna kadar devam eden bir **yorum** (comment) başlatır. Rust, yorumlardaki hiçbir şeyi dikkate almaz. Yorumları Bölüm 3'te(3.4. Yorum Satırları) daha detaylı inceleyeceğiz.
 
-## İpucu:
++ Tahmin oyunu(`guessing game`) programına dönersek, artık `let mut guess`'in `guess` adında değiştirilebilir bir değişken tanımlayacağını biliyorsunuz. Eşittir işareti (`=`), Rust'a şu anda değişkene bir şey bağlamak istediğimizi söyler. Eşittir işaretinin sağında, `guess`'in bağlandığı değer bulunur; bu değer, bir `String`'in yeni bir örneğini(*instance*) döndüren `String::new` fonksiyonunun çağrılmasının sonucudur. [String](https://doc.rust-lang.org/std/string/struct.String.html), standart kütüphane tarafından sağlanan, büyüyebilen, UTF-8 kodlu bir metin parçası olan bir string türüdür(yani, String, standart kütüphanede bulunan, boyutu değişebilen ve UTF-8 formatında kodlanmış bir metin veri tipidir.)
++ `::new` ifadesindeki `::` sözdizimi, `new`’ün `String` tipine ait bir ilişkili fonksiyon (*associated function*) olduğunu gösterir. İlişkili fonksiyon(*associated function*), bir tür üzerinde uygulanan fonksiyondur; bu örnekte bu tip `String`’dir. Bu `new` fonksiyonu yeni ve boş bir dizgi (string) oluşturur. `new` fonksiyonunu pek çok türde(*type*) bulacaksınız; çünkü bazı türlerin(*kind*) yeni değerini yapan fonksiyonlar için yaygın bir isimlendirmedir.(**Not:** type => i32, String, f64 gibi yani veri tipi **ama** kind => çeşit anlamında kullanılmıştır. Yani, spesifik bir type değil)
++ Özetle, `let mut tahmin = String::new();` satırı, şu anda yeni ve boş bir `String` örneğine(*instance*) bağlı olan, değiştirilebilir(*mutable*) bir değişken oluşturmuştur. Vay canına!
+### 2.2.2. Kullanıcı Girdisi Alma (Receiving User Input)
 
-+ [Rust By Example](https://doc.rust-lang.org/rust-by-example/primitives.html) sayfasında “**Primitives**” (ilkel türler) başlığı altında sadece `i32`, `f64`, `bool`, `char` gibi _scalar_ türler değil, aynı zamanda `tuple` ve `array` gibi **compound types** (bileşik türler) de anlatılıyor.
-+ Bu durum ilk bakışta kafa karıştırıcı görünebilir ama aslında Rust’ın **dil tasarımı felsefesiyle** alakalı.
-
-#### 1. “Primitive” terimi Rust’ta “basit” değil, “yerleşik” anlamındadır:
-
-+ Rust’ta “primitive types” dendiğinde, “**dilin çekirdeğinde yer alan, standart kütüphaneye bağlı olmadan çalışan türler**” anlamı kastedilir.
-+ Yani bu türler:
-	 - Derleyici (compiler) tarafından **doğrudan tanınır**,
-	 - Ek bir `use` ifadesine veya crate’e gerek duymaz,
-	 - **Temel yapı taşlarıdır (building blocks)**.
-+ Dolayısıyla Rust’ta şu türlerin hepsi **primitive** kabul edilir:
-	- Scalar types: `i32`, `u8`, `f64`, `bool`, `char`
-	- Scalar types: `i32`, `u8`, `f64`, `bool`, `char`
-
-#### 2. Compound types da aslında dil seviyesinde tanımlı:
-
-+ Hem `tuple` hem `array` tipi Rust dilinin **temel (built-in)** parçalarıdır; bunlar `std` kütüphanesi tarafından değil, doğrudan **dilin sözdizimi (syntax)** tarafından sağlanır.
-+ Bu yüzden Rust By Example bunları “primitive types” içinde gösterir.
++ Programın ilk satırında `use std::io;` ifadesiyle standart kütüphaneden giriş/çıkış (input/output) fonksiyonlarını dahil ettiğimizi hatırlayın. Şimdi, kullanıcı girdisini ele almamızı izin verecek olan `io` modülündeki `stdin` fonksiyonunu çağıracağız:
 
 ```rust
-let t = (1, true, 3.5); // tuple literal
-let a = [1, 2, 3, 4];   // array literal
-```
+use std::io;
 
-+ Bunlar tamamen **derleyici tarafından anlaşılan yapılar**, başka bir modül ya da trait gerektirmiyorlar.
-# Değişken Bağlamaları:
-
-+ Rust’ta **“variable bindings”** (değişken bağlamaları), bir **ismi (identifier)** bir **değere (value)** **bağlama** işlemine verilen isimdir.
-+ **Yani aslında “değişken tanımlama” dediğimiz şeyin Rust’taki teknik terimidir.**
-+ Rust, **statik tip kontrolü** kullanarak **tür güvenliği** sağlar.
-	- Yani, her değişkenin tipi **derleme zamanında** (program çalışmadan önce) bellidir.
-	- Bu, hataların erkenden fark edilmesini sağlar.
-	- Örneğin: `let x: i32 = 10;` (burada `x` bir tamsayıdır, başka bir tür atanamaz).
-
-## A. Immutable (Değiştirilemez):
-
-```rust
 fn main() {
-    let x = 10;
-    println!("x değişkeninin değeri: {}", x);
+    println!("Guess the number!");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()                   // <================ 
+        .read_line(&mut guess)    // <================
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}");
 }
 ```
 
-```shell
-cargo run
++ Eğer programın başında `use std::io;` ile `io` modülünü içe aktarmasaydık, bu fonksiyon çağrısını `std::io::stdin` şeklinde yazarak da kullanabilirdik. `stdin` fonksiyonu, terminaliniz için standart girdinin bir tutucusu olarak (*handle*) temsil eden [`std::io::Stdin`](https://doc.rust-lang.org/std/io/struct.Stdin.html) türünde bir örnek(*instance*) döndürür.
+
+> [!TIP]
+> Alternatif kullanım: `use` kullanmadan
+> ```rust
+> // use std::io;
+>
+> fn main() {
+>     println!("Guess the number!");
+>     println!("Please input your guess.");
+> 
+>     let mut guess = String::new();
+>     // io::stdin().read_line(&mut guess).expect("Failed to read line");
+>     std::io::stdin().read_line(&mut guess).expect("Failed to read line");
+> 
+>     println!("You guessed: {guess}");
+> }
+> ```
+
++ Ardından `.read_line(&mut tahmin)` satırı, kullanıcıdan girdi almak için standart girdi tutucusu(*standart input handle*) üzerindeki [`read_line`](https://doc.rust-lang.org/std/io/struct.Stdin.html#method.read_line) metodunu çağırır. Ayrıca, kullanıcı girdisini hangi dizgiye (*string*'e) saklayacağını söylemek için `read_line`'a `&mut guess` değişkenini argüman olarak iletiyoruz. `read_line` metodunun asıl görevi, kullanıcının standart girdiye yazdığı her şeyi alıp bir string’in sonuna eklemektir (mevcut içeriğin üzerine yazmadan). Bu yüzden, o string’i argüman olarak geçiririz. String argümanının değiştirilebilir (mutable) olması gerekir, çünkü metot string’in içeriğini değiştirecektir.
++ Buradaki `&` işareti, bu argümanın bir **referans** olduğunu gösterir. Referanslar, veriyi bellekte birden fazla kez kopyalamaya gerek kalmadan, kodunuzun birden fazla bölümünün aynı veriye erişmesine izin veren bir yol sunar. Referanslar karmaşık bir özelliktir ve Rust’ın en büyük avantajlarından biri, referansları güvenli ve kolay bir şekilde kullanabilmesidir. Bu programı(tahmin oyunu) tamamlamak için bu detayların çoğunu bilmenize gerek yok. Şimdilik bilmeniz gereken, referansların da değişkenler gibi varsayılan olarak değiştirilemez (immutable) olduğudur. Bu nedenle, onu değiştirilebilir yapmak için `&guess` yerine `&mut guess` yazmanız gerekir. (Bölüm 4'de referanslar daha ayrıntılı olarak açıklanacaktır.)
+
+### 2.2.3. Result ile Olası Hataları Ele Alma (Handling Potential Failure with Result)
+
++ Hâlâ aynı kod satırı üzerinde çalışıyoruz. Şu an metnin üçüncü satırı tartışıyoruz ancak bunun hâlâ tek bir mantıksal kod satırının parçası olduğuna dikkat edin. Bir sonraki bölüm şu metottur:
+
+```rust
+use std::io;
+
+fn main() {
+    println!("Guess the number!");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");  // <============ üçüncü satır
+
+    println!("You guessed: {guess}");
+}
 ```
 
-**Çıktı:**
++ Bu kodu şu şekilde de yazabilirdik:
 
-```shell
-   Compiling hello_world v0.1.0 (/home/ottoman/rustDersleri/hello_world)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.68s
-     Running `target/debug/hello_world`
-x değişkeninin değeri: 10
+```rust
+io::stdin().read_line(&mut guess).expect("Failed to read line");
 ```
 
++ Ancak tek bir uzun satırı okumak zordur, bu nedenle bölmek en iyisidir. `.method_name()` söz dizimiyle bir metot çağırdığınızda, uzun satırları parçalamaya yardımcı olması için yeni bir satır(*newline*) ve boşluk(*whitespace*) bırakmak genellikle akıllıca bir davranıştır. Şimdi bu satırın ne yaptığını ele alalım. Şimdi bu satırın ne işe yaradığını tartışalım.
++ Daha önce belirtildiği gibi, `read_line` kullanıcının girdiği her şeyi kendisine ilettiğimiz string'e koyar(yani, `read_line` metodu kullanıcıdan alınan girdiyi verdiğimiz string içine yazar.); ancak aynı zamanda bir `Result` değeri de döndürür. [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html) bir **numaralandırmadır** (*enumeration* - **Bölüm: 6.Enum'lar ve Desen Eşleme(Pattern Matching)**), genellikle **enum** olarak adlandırılır; bu, birden fazla olası durumda bulunabilen bir türdür. Her olası duruma **varyant** (variant) diyoruz.
++ Bölüm 6  enum'ları daha ayrıntılı ele alacaktır(6.Enum'lar ve Desen Eşleme(*Pattern Matching*)). Bu `Result` tiplerinin amacı, hata yönetimi(*error-handling*) bilgilerini kodlamaktır.
++ `Result` tipinin(*type*) varyantları **`Ok`** ve **`Err`**'dir.  `Ok` varyantı işlemin başarılı olduğunu gösterir ve içinde başarıyla oluşturulan değeri barındırır. `Err` varyantı ise işlemin başarısız olduğu anlamına gelir ve işlemin nasıl veya neden başarısız olduğuna dair bilgiler içerir.
++ Herhangi bir türün değerleri gibi, `Result` türünün değerlerinde de tanımlı metotlar bulunur. Bir `Result` örneğinin(*instance*) çağırabileceğiniz bir [`expect` metodu](https://doc.rust-lang.org/std/result/enum.Result.html#method.expect) vardır. Bu `Result` örneği(*instance*) bir `Err` değeriyse, `expect` programın çökmesine neden olur ve `expect`'e argüman olarak ilettiğiniz mesajı gösterir. `read_line` metodu bir `Err` döndürürse, bu büyük olasılıkla altta yatan işletim sisteminden gelen bir hatanın sonucu olacaktır. Bu `Result` örneği(*instance*) bir `Ok` değeriyse, `expect` `Ok`'un tuttuğu dönüş değerini alır ve yalnızca o değeri size döndürür; böylece kullanabilirsiniz. Bu durumda, söz konusu değer kullanıcının girdisindeki bayt sayısıdır.
 
-## B. Mutable(Değiştirilebilir):
 
-+ 
+> [!TIP]
+> + `read_line` metodu başarılı olduğunda, yani `Ok` varyantını döndürdüğünde, bu `Ok` içinde bir sayı barındırır. Bu sayı, kullanıcının girdiği metnin **kaç bayt olduğunu** belirtir.
+> + Örneğin kullanıcı şunu girdiyse:
+> ```rust
+> hello
+> ```
+> + `read_line` şunu döndürür:
+> ```rust
+> Ok(6) // "hello" = 5 karakter + 1 yeni satır (\n) = 6 bayt
+> ```
+> + Yani `expect` metodu bu `Ok(6)` değerinden yalnızca `6` sayısını çıkarıp size verir.
+> + Ancak pratikte bu sayıyı çoğu zaman **kullanmayız.** Bizim için önemli olan kullanıcının girdiği metindir, bayt sayısı değil. Bu nedenle tahmin oyununda bu değeri bir değişkene atamıyoruz, yok sayıyoruz.
+
++ Eğer `expect` metodunu çağırmazsanız, program derlenecektir ancak bir uyarı alırsınız:
+
+```rust
+$ cargo build
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+warning: unused `Result` that must be used
+  --> src/main.rs:10:5
+   |
+10 |     io::stdin().read_line(&mut guess);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this `Result` may be an `Err` variant, which should be handled
+   = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+   |
+10 |     let _ = io::stdin().read_line(&mut guess);
+   |     +++++++
+
+warning: `guessing_game` (bin "guessing_game") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.59s
+```
+
++ Rust, `read_line`'dan döndürülen `Result` değerini kullanmadığınız konusunda uyarı vererek programın olası bir hatayı ele almadığını belirtir.
++ Uyarıyı bastırmanın doğru yolu aslında hatayı ele alma (*error-handling*) kodu yazmaktır; ancak bizim durumumuzda bir sorun oluştuğunda programın çökmesini istiyoruz, bu yüzden `expect` kullanabiliriz. Hatalardan nasıl iyileştireceğiniz(*recovery*) bölüm 9'de öğreneceksiniz.(Bölüm: 9.2 Result ile Kurtarılabilir Hatalar(*Recoverable Errors*))
+
+### 2.2.4. println! Yer Tutucularıyla (*Placeholders*) Değer Yazdırma
+
++ Kapanış süslü parantezinden (`}`) başka, şu ana kadarki kodda tartışılacak yalnızca bir satır kaldı:
+
+```rust
+use std::io;
+
+fn main() {
+    println!("Guess the number!");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}"); // <================
+}
+```
+
++ Bu satır, artık kullanıcının girdisini içeren string’i ekrana yazdırır. `{}` süslü parantezleri birer **yer tutucudur (placeholder)**: `{}` işaretini, bir değeri yerinde tutan küçük "yengeç kıskaçları" gibi düşünebilirsiniz. Bir değişkenin değerini yazdırırken, değişken adı süslü parantezlerin içine gelebilir. Bir ifadenin (*expression*) değerlendirilme sonucunu yazdırırken ise, format dizgisine(*string*) boş süslü parantezler yerleştirin ve ardından her bir boş yer tutucu için sırasıyla yazdırılacak ifadeleri(*expression*) virgülle ayrılmış bir liste olarak ekleyin.
++ Bir değişkeni ve bir ifadenin(*expression*) sonucunu tek bir `println!` çağrısında yazdırmak şu şekilde olur:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let x = 5;
+	let y = 10;
+
+	println!("x = {x} and y + 2 = {}", y + 2);
+}
+```
+
++ Bu kod `x = 5 ve y + 2 = 12` yazdıracaktır.
+### 2.2.5.  İlk Kısmı Test Etme (Testing the First Part)
+
++ Tahmin oyununun ilk bölümünü test edelim. `cargo run` komutunu kullanarak çalıştırın:
+
+```rust
+$ cargo run
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.44s
+     Running `target/debug/guessing_game`
+Guess the number!
+Please input your guess.
+6
+You guessed: 6
+```
+
++ Bu noktada oyunun ilk kısmı bitti: Klavyeden girdi alıyor ve ardından bunu ekrana yazdırıyoruz.
+## 2.3. Gizli Bir Sayı Oluşturma (Generating a Secret Number)
+
++ Sırada, kullanıcının tahmin etmeye çalışacağı gizli bir sayı üretmemiz gerekiyor. Oyunun her oynandığında eğlenceli olması için bu gizli sayı her seferinde farklı olmalıdır. Oyunun çok zor olmaması için 1 ile 100 arasında rastgele bir sayı kullanacağız. Rust, standart kütüphanesinde henüz rastgele sayı işlevselliği içermemektedir. Ancak Rust ekibi, bahsedilen işlevselliğe sahip bir [`rand` crate](https://crates.io/crates/rand)'i sağlamaktadır.
+### 2.3.1. Bir Crate ile İşlevselliği Artırma (Increasing Functionality with a Crate)
+
++ Bir **crate**'in (paket), Rust kaynak kod dosyalarından oluşan bir koleksiyon olduğunu hatırlayın. Şu ana kadar inşa ettiğimiz proje bir **binary crate**'dir, yani çalıştırılabilir bir dosyadır. `rand` crate’i ise bir **library crate**’tir; yani başka programlarda kullanılmak üzere yazılmış kod içerir ve tek başına çalıştırılamaz.
+
++ Cargo'nun harici *crate*'leri koordine etme yeteneği, asıl parladığı noktadır. `rand` *crate*'ini kullanan kodlar yazmadan önce, `Cargo.toml` dosyasını `rand` *crate*'ini bir bağımlılık (*dependency*) olarak içerecek şekilde değiştirmemiz gerekir. Şimdi o dosyayı açın ve Cargo'nun sizin için oluşturduğu `[dependencies]` bölüm başlığının hemen altına şu satırı ekleyin. `rand`’i burada verdiğimiz şekilde ve aynı sürüm numarasıyla yazdığınızdan emin olun; aksi halde bu eğitimdeki kod örnekleri çalışmayabilir.
+
+**Dosya adı:** `src/main.rs`
+
+```toml
+[dependencies]
+rand = "0.8.5"
+```
+
++ `Cargo.toml` dosyasında, bir başlıktan sonra gelen her şey, başka bir bölüm başlayana kadar o bölümün parçasıdır. `[dependencies]` bölümünde, Cargo'ya projenizin hangi harici crate'lere bağımlı olduğunu ve bu crate'lerin hangi sürümlerini gerektirdiğinizi söylersiniz. Bu durumda, `rand` crate'ini **0.8.5** **anlamsal versiyon belirleyicisi (semantic version specifier)** ile belirtiyoruz. Cargo, versiyon numaralarını yazmak için bir standart olan **Anlamsal Versiyonlama** (*Semantic Versioning* - bazen **SemVer** olarak adlandırılır) sistemini anlar. `0.8.5` belirleyicisi aslında `^0.8.5` ifadesinin kısaltmasıdır; bu da "en az 0.8.5 olan ancak 0.9.0'dan küçük olan herhangi bir versiyon" anlamına gelir.
+
+
+> [!NOTE]
+> **Semantic Versioning (SemVer)**, yani **Anlamsal Sürümleme**, yazılım sürümlerini **anlamlı bir şekilde numaralandırma** yöntemidir. Rust ve birçok modern programlama ekosisteminde kullanılır.
+> #### Yapı:
+> Sürüm numarası genellikle üç bölümden oluşur:
+> ```rust
+> MAJOR.MINOR.PATCH
+> ```
+> + **MAJOR** → Büyük değişiklikler, geriye dönük uyumsuzluklar (breaking changes)
+> + **MINOR** → Yeni özellikler eklenir ama mevcut kodlar çalışmaya devam eder (backward-compatible)
+> + **PATCH** → Hata düzeltmeleri, küçük iyileştirmeler (backward-compatible)
+> #### Örnek:
+> ```rust
+> 1.4.2
+> ```
+> + `1` → ana sürüm (major)
+> + `4` → küçük sürüm / yeni özellikler (minor)
+> + `2` → yama / hata düzeltme (patch)
+
++ Cargo, bu sürümlerin(yani 0.8.5 veya 0.9.0’dan küçük olan tüm sürümleri) 0.8.5 sürümüyle uyumlu genel (public) API’lere sahip olduğunu kabul eder ve bu sürüm belirtimi, bu bölümdeki kodla derlenebilecek en son yama sürümünü almanızı garanti eder.
+
+> [!TIP]
+> 👉 `rand = "0.8.5"` yazdığınızda, Cargo size **0.8.5 sürümüyle uyumlu en son “patch” (yama) sürümünü** otomatik olarak seçecek.
+> Yani:
+> + Diyelim ki `rand` crate’in 0.8.5 sürümü var.
+> + Daha sonra 0.8.6, 0.8.7 gibi küçük yama güncellemeleri çıktı.
+> + Bu sürüm belirtimi sayesinde **0.8.5 ile uyumlu en güncel sürüm** kullanılacak.
+> 
+> Ama 0.9.0 veya daha büyük sürümler **uyumlu olmayabilir**, bu yüzden Cargo onları seçmez.
+
++ 0.9.0 veya daha yüksek herhangi bir sürüm, aşağıdaki örneklerde kullanılan API ile aynı olacağı garanti edilmez.
++ Şimdi, kodda herhangi bir değişiklik yapmadan projeyi derleyelim; `Liste 2-2`’de gösterildiği gibi.
+
+```rust
+$ cargo build
+  Updating crates.io index
+   Locking 15 packages to latest Rust 1.85.0 compatible versions
+    Adding rand v0.8.5 (available: v0.9.0)
+ Compiling proc-macro2 v1.0.93
+ Compiling unicode-ident v1.0.17
+ Compiling libc v0.2.170
+ Compiling cfg-if v1.0.0
+ Compiling byteorder v1.5.0
+ Compiling getrandom v0.2.15
+ Compiling rand_core v0.6.4
+ Compiling quote v1.0.38
+ Compiling syn v2.0.98
+ Compiling zerocopy-derive v0.7.35
+ Compiling zerocopy v0.7.35
+ Compiling ppv-lite86 v0.2.20
+ Compiling rand_chacha v0.3.1
+ Compiling rand v0.8.5
+ Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+  Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.48s
+```
+
+> **Liste 2-2:** `rand` crate’ini bağımlılık olarak ekledikten sonra `cargo build` çalıştırmanın çıktısı
+
++ Farklı sürüm numaraları görebilirsiniz (ama hepsi kodla uyumlu olacaktır, bunun nedeni SemVer!), ayrıca satırlar farklı olabilir (işletim sistemine bağlı olarak) ve satırlar farklı bir sırada da olabilir.
++ Harici bir bağımlılık(*rand*) eklediğimizde Cargo, o bağımlılığın ihtiyaç duyduğu her şeyin en güncel sürümlerini **registry** (kayıt defteri) üzerinden getirir. Bu registry (kayıt defteri), **Crates.io**'daki verilerin bir kopyasıdır. Crates.io, Rust ekosistemindeki insanların açık kaynaklı Rust projelerini başkalarının kullanması için paylaştığı yerdir.(*Registry Konumu*: `~/.cargo/registry`)
++ Registry güncellendikten sonra Cargo, `[dependencies]` bölümünü kontrol eder ve hâlihazırda indirilmemiş olan tüm crate’leri indirir. Bu örnekte, yalnızca `rand`’i bağımlılık olarak listelemiş olsak da, Cargo `rand`’in çalışabilmesi için ihtiyaç duyduğu diğer *crate*’leri de indirir. Crate’ler indirildikten sonra, Rust bunları derler ve ardından bağımlılıkları kullanılabilir şekilde projeyi derler.
++ Herhangi bir değişiklik yapmadan hemen tekrar `cargo build` komutunu çalıştırırsanız, `Finished` satırı dışında herhangi bir çıktı almazsınız. Cargo, bağımlılıkları zaten indirdiğini ve derlediğini, sizin de `Cargo.toml` dosyanızda onlarla ilgili hiçbir şeyi değiştirmediğinizi bilir. Cargo ayrıca kendi kodunuzda da hiçbir şeyi değiştirmediğinizi bilir, bu yüzden onu da yeniden derlemez. Yapacak bir işi olmadığı için doğrudan çıkış yapar.
++ Eğer `src/main.rs` dosyasını açıp önemsiz bir değişiklik yapar, kaydedip tekrar derlerseniz, sadece iki satırlık bir çıktı görürsünüz:
+
+```rust
+$ cargo build
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.13s
+```
+
++ Bu satırlar, Cargo'nun derlemeyi (build) yalnızca `src/main.rs` dosyasında yaptığınız o küçücük değişiklikle güncellediğini gösterir. Bağımlılıklarınız değişmediği için Cargo, bunlar için halihazırda indirmiş ve derlemiş olduğu dosyaları yeniden kullanabileceğini bilir.
+#### 2.3.1.1. Yeniden Üretilebilir Derlemelerin Sağlanması
+
++  Cargo, sizin veya kodunuzu derleyen başka birinin her seferinde aynı çıktıyı (*artifact*) almasını sağlayan bir mekanizmaya sahiptir:  Cargo, siz aksini belirtene kadar yalnızca belirttiğiniz bağımlılık sürümlerini kullanacaktır. Örneğin, gelecek hafta `rand` crate'inin `0.8.6` sürümünün çıktığını ve bu sürümün önemli bir hata düzeltmesi içerdiğini, ancak aynı zamanda kodunuzu bozacak bir gerileme(*regression*) de içerdiğini varsayalım. Bunu ele almak için Rust, `cargo build`'i ilk kez çalıştırdığınızda `Cargo.lock` dosyasını oluşturur; bu nedenle artık `guessing_game` dizininde bu dosya bulunmaktadır.
+
+> [!NOTE]
+> #### Regresyon(Regression) nedir?
+> Yazılım geliştirmede **regresyon (gerileme)**, daha önce düzgün çalışan bir şeyin yeni bir güncellemeyle birlikte **bozulması** durumudur.
+> Yani,
+> + Eski sürümde → kod **çalışıyor** ✅
+> + Yeni sürümde → aynı kod **çalışmıyor** ❌
+> 
+> Günlük hayattan bir örnekle açıklamak gerekirse:
+> + Telefonunuzu güncellediniz, yeni sürüm bazı hataları düzeltti **ama** daha önce kullandığınız bir uygulama artık çalışmıyor. Bu da bir regresyondur.
+
++ Bir projeyi ilk kez derlediğinizde, Cargo kriterlere uyan tüm bağımlılık sürümlerini belirler ve ardından bunları `Cargo.lock` dosyasına yazar. Projenizi gelecekte derlediğinizde, Cargo `Cargo.lock` dosyasının var olduğunu görecek ve sürümleri yeniden belirleme işini yapmak yerine orada belirtilen sürümleri kullanacaktır. Bu, otomatik olarak **yeniden üretilebilir bir derlemeye(*reproducible build*)** sahip olmanızı sağlar. Başka bir deyişle, `Cargo.lock` dosyası sayesinde siz açıkça yükseltme yapana kadar projeniz 0.8.5 sürümünde kalmaya devam edecektir. `Cargo.lock` dosyası yeniden üretilebilir derlemeler için önemli olduğundan, sıklıkla projenizdeki diğer kodlarla birlikte kaynak kontrol sistemine (Git gibi) dahil edilir(*checked into source control*).
+
+> [!TIP]
+> "Checked into source control" ifadesindeki **"checked in"** terimi, yazılım geliştirmede özel bir anlam taşır.
+> **"Check in"** (kaynak denetimine eklemek/işlemek), Git gibi sürüm kontrol sistemlerinde bir dosyayı depoya **kaydetmek, işlemek (commit etmek)** anlamına gelir. Bu, yazılım dünyasında yerleşik bir terimdir:
+> - **"Check in"** → dosyayı depoya eklemek/kaydetmek
+> - **"Check out"** → dosyayı depodan almak
+> 
+> Yani cümle şunu söylemektedir:
+> > "`Cargo.lock` dosyası, projedeki diğer kodlar gibi Git'e (veya başka bir sürüm kontrol sistemine) **commit edilmelidir.**"
+
+#### 2.3.1.2. Yeni Bir Sürüm Almak İçin Crate Güncelleme (Updating a Crate to Get a New Version)
+
++ Bir crate’i güncellemek istediğinizde, Cargo size `update` komutunu sağlar. Bu komut `Cargo.lock` dosyasını görmezden gelir ve `Cargo.toml` içindeki belirttiğiniz kriterlere uyan en güncel sürümleri belirler. Cargo daha sonra bu yeni sürümleri `Cargo.lock` dosyasına yazar. Aksi takdirde, varsayılan olarak Cargo yalnızca `0.8.5`'ten büyük ve `0.9.0`'dan küçük sürümleri arayacaktır. Eğer `rand` crate'i `0.8.6` ve `0.999.0` adında iki yeni sürüm yayınlamış olsaydı, `cargo update` komutunu çalıştırdığınızda şuna benzer bir çıktı görürdünüz:
+
+```rust
+$ cargo update
+    Updating crates.io index
+     Locking 1 package to latest Rust 1.85.0 compatible version
+    Updating rand v0.8.5 -> v0.8.6 (available: v0.999.0)
+```
+
++ Cargo, `0.999.0` sürümünü yok sayar. Bu noktada, `Cargo.lock` dosyanızda artık kullandığınız `rand` crate'inin sürümünün `0.8.6` olduğunu belirten bir değişiklik de fark edersiniz. `rand` `0.999.0` sürümünü veya `0.999.x` serisindeki herhangi bir sürümü kullanmak için `Cargo.toml` dosyasını bunun yerine şöyle görünecek şekilde güncellemeniz gerekir (aşağıdaki örnekler `rand` `0.8` kullandığınızı varsaydığından bu değişikliği gerçekte yapmayın):
+
+```toml
+[dependencies]
+rand = "0.999.0"
+```
+
++  `cargo build`'i bir sonraki çalıştırışınızda, Cargo mevcut crate'lerin kayıt defterini(*the registry of crates*) güncelleyecek ve belirttiğiniz yeni sürüme göre `rand` gereksinimlerinizi yeniden değerlendirecektir.
++ [Cargo](https://doc.rust-lang.org/cargo/) ve [ekosistemi](https://doc.rust-lang.org/cargo/reference/publishing.html) hakkında söylenecek çok daha fazla şey var (bunları Bölüm 14'te tartışacağız), ancak şimdilik bilmeniz gerekenler bunlar. Cargo, kütüphanelerin yeniden kullanımını çok kolaylaştırır; böylece "**Rustacean**"lar birçok paketin bir araya getirilmesiyle oluşan daha küçük ve yönetilebilir projeler yazabilirler(yani, Rust’ta projeler, birçok hazır paketin birleşmesiyle hızlıca oluşturulur).
+
+### 2.3.2. Rastgele Bir Sayı Üretme (Generating a Random Number)
+
++ Şimdi `rand` crate’ini kullanarak tahmin edilecek bir sayı üretmeye başlayalım. Bir sonraki adım, `src/main.rs` dosyasını `Liste 2-3`’te gösterildiği gibi güncellemektir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::io;
+
+use rand::Rng;
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    println!("The secret number is: {secret_number}");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}");
+}
+```
+
+> **Liste 2-3:** Rastgele sayı üretmek için kod eklenmesi
+
++ Öncelikle `use rand::Rng;` satırını ekliyoruz. `Rng` trait’i, rastgele sayı üreteçlerinin (*random number generator*) uyguladığı metotları tanımlar ve bu metotları kullanabilmemiz için bu trait’in kapsamda (scope içinde) olması gerekir. Trait’ler 10. bölümde detaylı olarak anlatılacaktır.
+
++ Ardından, ortaya iki çizgi daha ekliyoruz. İlk satırda, kullanacağımız belirli rastgele sayı üretecini(*random number generator*) elde etmek için `rand::thread_rng` fonksiyonunu çağırıyoruz. Bu üreteç(*generator*), çalışmakta olan thread’e (iş parçacığına) özeldir ve başlangıç değeri (*seed*) işletim sistemi tarafından sağlanır.
+
+> [!TIP]
+> #### Başlangıç değeri (seed) işletim sistemi tarafından sağlanır
+>
+> **Tohum (seed)**, rastgele sayı üretecinin başlangıç noktasıdır. Rastgele sayı üreteçleri aslında tamamen rastgele değildir; 
+> bir başlangıç değerinden (tohumdan) yola çıkarak sayı üretirler.
+> 
+> Eğer tohum hep aynı olursa, üretilen sayılar da hep aynı olur. 
+> Bu nedenle `thread_rng`, tohum olarak **işletim sisteminden** alınan gerçek anlamda rastgele bir değer kullanır. 
+> İşletim sistemi bu tohumu; fare hareketleri, klavye girişleri, sistem saati gibi öngörülemeyen kaynaklardan elde eder.
+
++ Daha sonra, bu rastgele sayı üreteci(*random number generator*) üzerinde `gen_range` metodunu çağırıyoruz. Bu metot, `use rand::Rng;` ile kapsamımıza aldığımız `Rng` trait’i tarafından tanımlanmıştır. `gen_range` metodu, argüman olarak bir aralık ifadesi (*range expression*) alır ve bu aralık içinde rastgele bir sayı üretir. Burada kullandığımız aralık ifadesi `start..=end` şeklindedir ve hem alt hem de üst sınırı kapsar (*inclusive*). Dolayısıyla, 1 ile 100 arasında bir sayı istemek için `1..=100` şeklinde belirtmemiz gerekir.
+
+> [!NOTE]
+> Bir crate'ten hangi trait'leri kullanacağınızı ve hangi metotları ve fonksiyonları çağıracağınızı doğrudan bilemezsiniz; bu nedenle her crate'in kullanım talimatlarını içeren belgeleri vardır.
+> Cargo'nun bir diğer güzel özelliği, `cargo doc --open` komutunu çalıştırmanın tüm bağımlılıklarınız tarafından sağlanan belgeleri yerel olarak derleyip tarayıcınızda açmasıdır.
+> Örneğin `rand` crate'indeki diğer işlevselliklerle ilgileniyorsanız, `cargo doc --open` komutunu çalıştırın ve sol kenar çubuğundaki `rand` bağlantısına tıklayın.
+
++ İkinci yeni satır, gizli sayıyı yazdırır. Bu, programı geliştirirken test edebilmek için kullanışlıdır; ancak son sürümde bunu sileceğiz. Program başlar başlamaz cevabı ekrana yazdırırsa pek de bir oyun olmaz!
++ Programı birkaç kez çalıştırmayı deneyin:
+
+```rust
+$ cargo run
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running `target/debug/guessing_game`
+Guess the number!
+The secret number is: 7
+Please input your guess.
+4
+You guessed: 4
+
+$ cargo run
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running `target/debug/guessing_game`
+Guess the number!
+The secret number is: 83
+Please input your guess.
+5
+You guessed: 5
+```
+
++ Farklı rastgele sayılar elde etmelisiniz ve bunların hepsi 1 ile 100 arasında sayılar olmalıdır. Harika iş!
+## 2.4. Tahmini Gizli Sayıyla Karşılaştırma
+
++ Artık elimizde hem kullanıcı girişi hem de rastgele bir sayı olduğuna göre, bunları karşılaştırabiliriz. Bu adım `Liste 2-4`'te gösterilmiştir. Bu kodun henüz derlenmeyeceğini unutmayın; nedenini birazdan açıklayacağız.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::cmp::Ordering;
+use std::io;
+
+use rand::Rng;
+
+fn main() {
+    // --snip--
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    println!("The secret number is: {secret_number}");
+
+    println!("Please input your guess.");
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    println!("You guessed: {guess}");
+
+    match guess.cmp(&secret_number) {
+        Ordering::Less => println!("Too small!"),
+        Ordering::Greater => println!("Too big!"),
+        Ordering::Equal => println!("You win!"),
+    }
+}
+```
+
+> **Liste 2-4:** İki sayıyı karşılaştırmanın olası dönüş değerlerini ele alma(👉 İki sayıyı karşılaştırıp, çıkan sonuca göre farklı davranışlar sergilemek.)
+
++ Önce, standart kütüphaneden `std::cmp::Ordering` adlı bir türü kapsama(*scope*) alan başka bir `use` deyimi(*statement*) ekliyoruz. `Ordering` türü de bir *enum*'dur ve `Less`, `Greater` ve `Equal` varyantlarına sahiptir. Bunlar, iki değeri karşılaştırdığınızda ortaya çıkabilecek üç olası sonuçtur.
++ Daha sonra, en alta `Ordering` türünü kullanan beş yeni satır ekleriz. `cmp` metodu iki değeri karşılaştırır ve karşılaştırılabilecek her şey üzerinde çağrılabilir. Karşılaştırmak istediğiniz değerin(`&secret_number`)  bir referansı alınır: burada `guess` ile `secret_number` karşılaştırılmaktadır. Ardından, daha önce `use` deyimiyle(*statement*)  kapsama aldığımız `Ordering` *enum*’undan bir varyant döndürür. `cmp` metodunun `guess` ve `secret_number` değerlerini karşılaştırarak döndürdüğü `Ordering` varyantına göre ne yapacağımıza karar vermek için bir `match`(6.2. match Kontrol Akış Yapısı) ifadesi(*expression*) kullanıyoruz.
++ Bir `match` ifadesi(*expression*) **kollardan** (*arms*) oluşur. Bir kol(*arm*), eşleştirilecek(`match`) bir desenden(*pattern*) ve verilen değerin o kolun desenine(*pattern*) uyması durumunda çalıştırılması gereken koddan oluşur. Rust, `match`'e verilen değeri alır ve her bir kolun desenine(*pattern*) sırayla bakar. Desenler(*patterns*) ve `match` yapısı Rust'ın güçlü özellikleridir: Kodunuzun karşılaşabileceği çeşitli durumları ifade etmenize(*express*) ve hepsini ele aldığınızdan emin olmanıza olanak tanırlar. Bu özellikler sırasıyla Bölüm 6 ve Bölüm 19'de ayrıntılı olarak ele alınacaktır.
++ Şimdi burada kullandığımız `match` ifadesiyle(*expression*) ilgili bir örneği inceleyelim. Diyelim ki kullanıcı 50 tahmininde bulundu ve bu sefer rastgele üretilen gizli sayı 38 olsun.
++ Kod, 50 ile 38'i karşılaştırdığında, 50 değeri 38'den büyük olduğu için `cmp` metodu `Ordering::Greater` değerini döndürecektir. `match` ifadesi `Ordering::Greater` değerini alır ve her bir kolun desenini(*arm's pattern*) kontrol etmeye başlar. İlk kolun deseni(*arm's pattern*) olan `Ordering::Less`'e bakar ve `Ordering::Greater` değerinin `Ordering::Less` ile eşleşmediğini görür, bu yüzden o koldaki kodu görmezden gelir ve bir sonraki kola geçer. Bir sonraki kolun deseni(*arm's pattern*) `Ordering::Greater`'dır ve bu, `Ordering::Greater` ile **eşleşir!** Bu koldaki ilgili kod çalışır ve ekrana "Çok büyük!" (Too big!) yazdırır. `match` ifadesi(*expression*) ilk başarılı eşleşmeden sonra sona erer; bu nedenle bu senaryoda son kola bakmayacaktır.
++ Ancak, `Liste 2-4`'teki kod yine de derlenmeyecektir. Hadi deneyelim:
+
+```rust
+$ cargo build
+   Compiling libc v0.2.86
+   Compiling getrandom v0.2.2
+   Compiling cfg-if v1.0.0
+   Compiling ppv-lite86 v0.2.10
+   Compiling rand_core v0.6.2
+   Compiling rand_chacha v0.3.0
+   Compiling rand v0.8.5
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+error[E0308]: mismatched types
+  --> src/main.rs:23:21
+   |
+23 |     match guess.cmp(&secret_number) {
+   |                 --- ^^^^^^^^^^^^^^ expected `&String`, found `&{integer}`
+   |                 |
+   |                 arguments to this method are incorrect
+   |
+   = note: expected reference `&String`
+              found reference `&{integer}`
+note: method defined here
+  --> /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/cmp.rs:979:8
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `guessing_game` (bin "guessing_game") due to 1 previous error
+```
+
++ Hatanın özü, **tür uyuşmazlığı** (mismatched types) olduğunu belirtiyor. Rust, güçlü ve statik bir tür sistemine sahiptir; ancak aynı zamanda **tür çıkarımı** (type inference) yeteneğine de sahiptir. `let mut guess = String::new()` yazdığımızda Rust, `guess` değişkeninin bir `String` olması gerektiğini çıkarabildi ve bizi türü açıkça yazmaya zorlamadı. Öte yandan, `secret_number` bir **sayısal tiptir**. Rust'ın sayı tiplerinden birkaçı 1 ile 100 arasında bir değere sahip olabilir: `i32` (32 bit signed integer), `u32` (32 bit unsigned integer), `i64` (64 bit signed integer) ve diğerleri. Aksi belirtilmedikçe, Rust varsayılan olarak i32 türünü kullanır; bu, başka bir yerde Rust'ın farklı bir sayısal tür çıkarımı yapmasına neden olacak tür bilgisi eklemediğiniz sürece `secret_number`'ın türüdür. **Hatanın nedeni, Rust'ın bir metin (string) ile bir sayı tipini karşılaştıramamasıdır.**
++ Sonuç olarak, programın girdi olarak okuduğu `String`'i, gizli sayıyla sayısal olarak karşılaştırabilmek için bir sayı türüne dönüştürmek istiyoruz. Bunu, `main` fonksiyon gövdesine şu satırı ekleyerek yapıyoruz:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::cmp::Ordering;
+use std::io;
+
+use rand::Rng;
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    println!("The secret number is: {secret_number}");
+
+    println!("Please input your guess.");
+
+    // --snip--
+
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    let guess: u32 = guess.trim().parse().expect("Please type a number!");
+
+    println!("You guessed: {guess}");
+
+    match guess.cmp(&secret_number) {
+        Ordering::Less => println!("Too small!"),
+        Ordering::Greater => println!("Too big!"),
+        Ordering::Equal => println!("You win!"),
+    }
+}
+```
+
++ Söz konusu satır şöyledir:
+
+```rust
+let guess: u32 = guess.trim().parse().expect("Please type a number!");
+```
+
++ `guess` adında bir değişken oluşturuyoruz. Ama bir dakika, programda zaten `guess` adında bir değişken yok muydu? Evet var, ama Rust, `guess`'in önceki değerini yeni bir değerle **gölgelememize**(*shadow*) olanak tanıyor. Gölgeleme(*shadow*), örneğin `guess_str` ve `guess` gibi iki benzersiz değişken oluşturmaya zorlamak yerine `guess` değişken adını yeniden kullanmamıza olanak tanır. Bunu Bölüm 3'te(3.1.2. Gölgeleme(*Shadowing*)) daha ayrıntılı ele alacağız, ancak şimdilik bu özelliğin genellikle bir değeri bir türden diğerine dönüştürmek istediğinizde kullanıldığını bilin.
++ Bu yeni değişkeni `guess.trim().parse()` ifadesine(*expression*) bağlıyoruz. İfadedeki(*expression*) `guess`, girdiyi string olarak içeren orijinal `guess` değişkenine atıfta bulunur. `String` örneği(*instance*) üzerindeki `trim` metodu, başlangıç ve sondaki tüm boşlukları(*whitespace*) temizler; bunu, metni yalnızca sayısal veri içerebilen bir `u32` türüne dönüştürmeden önce yapmalıyız. Kullanıcı, tahminini girmek ve `read_line` işlemini tamamlamak için **Enter** tuşuna basmalıdır, bu da metne bir "yeni satır" (newline) karakteri ekler. Örneğin, kullanıcı 5 yazıp Enter'a basarsa, `guess` şöyle görünür: `5\n`. `\n` "yeni satır"ı temsil eder. (Windows'ta Enter'a basmak, bir satır başı ve yeni satır olan `\r\n` ile sonuçlanır.) `trim` metodu `\n` veya `\r\n` karakterlerini temizleyerek geriye sadece `5` bırakır.
++ [String'ler üzerindeki `parse` metodu](https://doc.rust-lang.org/std/primitive.str.html#method.parse), bir string'i başka bir türe dönüştürür. Burada, string'den sayıya dönüştürmek için kullanıyoruz. `let guess: u32` kullanarak Rust'a istediğimiz tam sayı türünü söylememiz gerekir.  `guess`'ten sonraki iki nokta üst üste (`:`), Rust'a değişkenin türünü belirteceğimizi(*annotate*) söyler. Rust'ın birkaç yerleşik(*built-in*) sayı türü vardır; burada görülen `u32`, işaretsiz (unsigned) 32 bitlik bir tam sayıdır. Küçük pozitif sayılar için iyi bir varsayılan seçimdir. Diğer sayı türlerini Bölüm 3'te(3.2.1.1 Integer Types(Tamsayı Türleri)) öğreneceksiniz.
++ Ayrıca bu örnekteki `u32` tür belirtimi(*annotation*) ve `secret_number` ile yapılan karşılaştırma sayesinde Rust, `secret_number`’ın da `u32` olması gerektiğini çıkarır. Artık karşılaştırma aynı türdeki iki değer arasında gerçekleşecek!
++ `parse` metodu yalnızca mantıksal olarak sayıya dönüştürülebilen karakterler üzerinde çalışır ve bu nedenle kolayca hatalara yol açabilir. Örneğin, string `A👍%` içeriyorsa, bunu bir sayıya dönüştürmenin hiçbir yolu olmaz. Başarısız olabileceği için `parse` metodu, tıpkı `read_line` metodunda olduğu gibi bir **`Result`** tipi döndürür (daha önce "2.2.3. Result ile Olası Hataları Ele Alma (*Handling Potential Failure with Result*))" bölümünde tartışıldığı gibi). Bu `Result` tipine yine `expect` metodunu kullanarak aynı şekilde yaklaşacağız. `parse`, *string*'den bir sayı oluşturamadığı için bir `Err` `Result` varyantı döndürürse, `expect` çağrısı oyunu(*game*) çökertecek ve ona verdiğimiz mesajı yazdıracaktır. `parse`, string'i başarıyla bir sayıya dönüştürebilirse, `Result`'ın `Ok` varyantını döndürecek ve `expect`, `Ok` değerinden istediğimiz sayıyı döndürecektir.
++ Hadi şimdi programı çalıştıralım:
+
+```rust
+$ cargo run
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running `target/debug/guessing_game`
+Guess the number!
+The secret number is: 58
+Please input your guess.
+  76
+You guessed: 76
+Too big!
+```
+
++ Harika! Tahminden önce boşluklar eklenmiş olsa bile, program kullanıcının 76 tahmininde bulunduğunu yine de anlayabildi. Farklı girdi çeşitleriyle(örneğin; 20, 50 40 gibi)  farklı davranışı doğrulamak için programı birkaç kez çalıştırın: Sayıyı doğru tahmin edin, çok yüksek bir sayı tahmin edin ve çok düşük bir sayı tahmin edin.
++ Oyunun büyük kısmını şu an çalışır hale getirdik, ancak kullanıcı sadece tek bir tahmin yapabiliyor. Bir **döngü (loop)** ekleyerek bunu değiştirelim!
+## 2.5. Döngülerle Birden Fazla Tahmin Hakkı Tanımak
+
++ `loop` anahtar kelimesi sonsuz bir döngü oluşturur. Kullanıcılara sayıyı tahmin etmeleri için daha fazla şans vermek amacıyla bir döngü ekleyeceğiz:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::cmp::Ordering;
+use std::io;
+
+use rand::Rng;
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    // --snip--
+
+    println!("The secret number is: {secret_number}");
+
+    loop {  // <=====================
+	    // tahmin girdi isteminden(*guess input prompt*)
+        println!("Please input your guess.");
+
+        // --snip--
+        let mut guess = String::new();
+
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
+
+        let guess: u32 = guess.trim().parse().expect("Please type a number!");
+
+        println!("You guessed: {guess}");
+
+        match guess.cmp(&secret_number) {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => println!("You win!"),
+        }
+    } // <============================
+}
+```
+
++ Gördüğünüz gibi, tahmin girdi isteminden(*guess input prompt*) sonraki her şeyi bir döngünün içine taşıdık. Döngü içindeki satırları dörder boşluk daha içeriden (*indent*) yazdığınızdan emin olun ve programı tekrar çalıştırın. Program artık sonsuza kadar yeni bir tahmin isteyecektir; bu da aslında yeni bir sorunu beraberinde getiriyor. Kullanıcının çıkış yapabilmesi mümkün görünmüyor!
++ Kullanıcı her zaman klavyedeki **`Ctrl-C`** kısayolunu kullanarak programı durdurabilir(*interrupt*). Ancak bu "doymak bilmez canavardan" kaçmanın bir yolu daha var; "Tahmini Gizli Sayı ile Karşılaştırmak" bölümündeki `parse` tartışmasında belirtildiği gibi: Eğer kullanıcı sayı olmayan bir yanıt girerse program çökecektir. Burada gösterildiği gibi, kullanıcının çıkış yapmasına izin vermek için bu durumdan faydalanabiliriz:
+
+```rust
+$ cargo run
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running `target/debug/guessing_game`
+Guess the number!
+The secret number is: 59
+Please input your guess.
+45
+You guessed: 45
+Too small!
+Please input your guess.
+60
+You guessed: 60
+Too big!
+Please input your guess.
+59
+You guessed: 59
+You win!
+Please input your guess.
+quit
+
+thread 'main' panicked at src/main.rs:28:47:
+Please type a number!: ParseIntError { kind: InvalidDigit }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
++ `quit` yazmak oyundan çıkacaktır; ancak fark edeceğiniz üzere, sayı olmayan herhangi bir girdi girmek de aynı şekilde çıkış yapacaktır. Bu durum, en hafif tabiriyle ideal olmaktan uzaktır; biz oyunun aynı zamanda doğru sayı tahmin edildiğinde de durmasını istiyoruz.
+### 2.5.1. Doğru Tahminden Sonra Oyundan Çıkmak
+
++ Kullanıcı kazandığında oyunun kapanmasını sağlamak için bir `break` (kır/çık) deyimi(*statement*) ekleyerek programlayalım:
+
+**Dosya adı:** `scr/main.rs`
+
+```rust
+use std::cmp::Ordering;
+use std::io;
+
+use rand::Rng;
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    println!("The secret number is: {secret_number}");
+
+    loop {
+        println!("Please input your guess.");
+
+        let mut guess = String::new();
+
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
+
+        let guess: u32 = guess.trim().parse().expect("Please type a number!");
+
+        println!("You guessed: {guess}");
+
+        // --snip--
+
+        match guess.cmp(&secret_number) {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
+                break;    // <================= Döngü Çıkışı
+            }
+        }
+    }
+}
+```
+
++ `You win!` ifadesinden sonra `break` satırını eklemek, kullanıcı gizli sayıyı doğru tahmin ettiğinde programın döngüden çıkmasını sağlar. Döngüden çıkmak aynı zamanda programdan çıkmak anlamına gelir, çünkü döngü(*loop*) `main` fonksiyonunun son kısmıdır.
+### 2.5.2. Geçersiz Girdiyi (Invalid Input) Ele Alma
+
++ Oyunun davranışını daha da iyileştirmek için, kullanıcı sayı olmayan bir şey girdiğinde programı çöktürmek yerine, oyunun sayı olmayanı yok saymasını sağlayalım; böylece kullanıcı tahmin etmeye devam edebilir. Bunu, `Liste 2-5`'te gösterildiği gibi `guess` değişkeninin `String`'den `u32`'ye dönüştürüldüğü satırı değiştirerek yapabiliriz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::cmp::Ordering;
+use std::io;
+
+use rand::Rng;
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    println!("The secret number is: {secret_number}");
+
+    loop {
+        println!("Please input your guess.");
+
+        let mut guess = String::new();
+
+        // --snip--
+
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
+
+        let guess: u32 = match guess.trim().parse() {  // <=========
+            Ok(num) => num,                            // <=========
+            Err(_) => continue,                        // <=========
+        };                                             // <=========
+
+        println!("You guessed: {guess}");
+
+        // --snip--
+
+        match guess.cmp(&secret_number) {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
+                break;
+            }
+        }
+    }
+}
+```
+
+> **Liste 2-5:** Sayı olmayan bir tahmini yok saymak ve programı çökertmek yerine yeni bir tahmin istemek
+
++ Bir hatayla karşılaşıldığında programın çökmesi yerine hatayı yönetebilmek için `expect` çağrısından `match` ifadesine(*expression*) geçiş yapıyoruz. Unutmayın; `parse` metodu bir `Result` tipi döndürür ve `Result`, `Ok` ve `Err` varyantlarına sahip bir **enum**'dır. Tıpkı `cmp` metodundan dönen `Ordering` sonucunda yaptığımız gibi, burada da bir `match` ifadesi(*expression*) kullanıyoruz.
++ Eğer `parse`, string'i başarıyla bir sayıya dönüştürebilirse, elde edilen sayıyı içeren bir `Ok` değeri döndürür. Bu `Ok` değeri, ilk kolun (*arm*) deseniyle(*pattern*) eşleşir ve `match` ifadesi(*expression*), `parse` işleminin ürettiği ve `Ok` değerinin içine yerleştirdiği `num` değerini geri döndürür. Bu sayı(`num` değişkenin değeri), tam olarak istediğimiz yerde, yani oluşturduğumuz yeni `guess` değişkeninin içinde yerini alır.
++ Eğer `parse`, string'i bir sayıya dönüştüremezse, hata hakkında daha fazla bilgi içeren bir `Err` değeri döndürür. Bu `Err` değeri, ilk koldaki `Ok(num)` deseniyle(*pattern*) eşleşmez; ancak ikinci koldaki `Err(_)` deseniyle(*pattern*) eşleşir. Alt çizgi (`_`), "her şeyi kapsayan" (*catch-all*) bir değerdir; bu örnekte, içinde hangi bilgi olursa olsun tüm `Err` değerlerini eşleştirmek istediğimizi söylüyoruz. `continue` komutu, programa `loop` döngüsünün bir sonraki yinelemesine(*iteration*= başa dönme) gitmesini ve tekrar bir tahmin istemesini söyler. Yani program, `parse` işleminin karşılaşabileceği tüm hataları etkili bir şekilde görmezden gelir!
++ Artık programdaki her şey beklendiği gibi çalışıyor olmalı. Hadi deneyelim:
+
+```rust
+$ cargo run
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running `target/debug/guessing_game`
+Guess the number!
+The secret number is: 61
+Please input your guess.
+10
+You guessed: 10
+Too small!
+Please input your guess.
+99
+You guessed: 99
+Too big!
+Please input your guess.
+foo
+Please input your guess.
+61
+You guessed: 61
+You win!
+```
+
++ Harika! Küçük bir son dokunuşla sayı tahmin oyununu bitirmiş olacağız. Programın hâlâ gizli sayıyı yazdırdığını hatırlayın. Bu, test aşamasında iyi işimize yaradı ancak oyunun heyecanını bozuyor. Gizli sayıyı çıktı olarak veren `println!` satırını silelim. Liste 2-6, kodun son halini göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::cmp::Ordering;
+use std::io;
+
+use rand::Rng;
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    loop {
+        println!("Please input your guess.");
+
+        let mut guess = String::new();
+
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
+
+        let guess: u32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => continue,
+        };
+
+        println!("You guessed: {guess}");
+
+        match guess.cmp(&secret_number) {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
+                break;
+            }
+        }
+    }
+}
+```
+
+> **Liste 2-6:** Tahmin oyununun(*guessing game*) tamamlanmış kodu
+
++ Bu noktada, sayı tahmin oyununu(*guessing game*) başarıyla inşa ettiniz. Tebrikler!
+## 2.6. Özet
+
++ Bu proje, sizi birçok yeni Rust kavramıyla tanıştırmanın uygulamalı(*hands-on*) bir yoluydu: `let`, `match`, fonksiyonlar, harici crate'lerin kullanımı ve daha fazlası. Sonraki birkaç bölümde bu kavramları daha ayrıntılı öğreneceksiniz. Bölüm 4, Rust'ı diğer dillerden farklı kılan bir özellik olan sahipliği inceler. Bölüm 5 *struct*'ları ve metot söz dizimini ele alır;  Bölüm 6 ise *enum*'ların nasıl çalıştığını açıklar.
+
+# 3. Ortak Programlama Kavramları
+
++ Bu bölüm, neredeyse her programlama dilinde karşılaşılan kavramları ve bunların Rust'ta nasıl çalıştığını ele almaktadır. Pek çok programlama dilinin özünde çok sayıda ortak nokta bulunur. Bu bölümde sunulan kavramların hiçbiri Rust'a özgü değildir; ancak bunları Rust bağlamında ele alacak ve kullanımlarına ilişkin kuralları açıklayacağız.
++ Özellikle; **değişkenler**, **temel tipler**, **fonksiyonlar**, **yorum satırları** ve **kontrol akışı** (control flow) hakkında bilgi edineceksiniz. Bu temeller her Rust programında yer alacaktır ve bunları erkenden öğrenmek, başlangıç için size güçlü bir çekirdek bilgi sağlayacaktır.
+
+> [!CAUTION]
+> Rust dilinde, tıpkı diğer dillerde olduğu gibi, yalnızca dil tarafından kullanılmak üzere ayrılmış bir dizi anahtar kelime bulunmaktadır. Bu kelimeleri değişken veya fonksiyon adı olarak kullanamayacağınızı unutmayın. Anahtar kelimelerin büyük çoğunluğunun özel anlamları vardır ve bunları Rust programlarınızda çeşitli görevleri yerine getirmek için kullanacaksınız; birkaçının ise şu an için ilişkilendirilmiş bir işlevi yoktur, ancak ileride Rust'a eklenmesi olası işlevler için rezerve edilmiştir. Anahtar kelimelerin listesini [Ek A (Appendix A)](https://doc.rust-lang.org/book/appendix-01-keywords.html)'da bulabilirsiniz.
+
+## 3.1. Değişkenler ve Değiştirilebilirlik (Mutability)
+
++ “Storing Values with Variables” bölümünde belirtildiği gibi, **varsayılan olarak değişkenler değiştirilemezdir (immutable)**. Bu, Rust’ın sunduğu **güvenlik** ve **kolay eşzamanlılık (concurrency)** avantajlarından yararlanacak şekilde kod yazmanız için Rust’ın size verdiği birçok teşvikten biridir. Ancak yine de değişkenlerinizi **değiştirilebilir (mutable)** yapma seçeneğiniz vardır. Şimdi Rust’ın neden **değiştirilemezliği tercih etmenizi teşvik ettiğini** ve bazen neden bundan vazgeçmek isteyebileceğinizi inceleyelim.
++ Bir değişken **immutable** olduğunda, bir isimle bir değer **eşleştirildikten (bound)** sonra bu değeri değiştiremezsiniz. Bunu göstermek için, `projects` dizininizde şu komutu kullanarak **variables** adlı yeni bir proje oluşturun:
+
+```shell
+cargo new variables
+```
+
++ Daha sonra yeni oluşturulan **variables** dizininde `src/main.rs` dosyasını açın ve içindeki kodu aşağıdaki kodla değiştirin. Bu kod **henüz derlenmeyecektir**.
+
+**Dosya adı:** `src/main.rs`
+
+**Bu kod derlenmez!**
+
+```rust
+fn main() {
+    let x = 5;
+    println!("The value of x is: {x}");
+    x = 6;
+    println!("The value of x is: {x}");
+}
+```
+
++ Programı kaydedin ve `cargo run` komutunu kullanarak çalıştırın. Aşağıdaki çıktıya benzer şekilde **değiştirilemezlik (immutability) hatası** ile ilgili bir hata mesajı almanız gerekir:
+
+```shell
+$ cargo run
+   Compiling variables v0.1.0 (file:///projects/variables)
+error[E0384]: cannot assign twice to immutable variable `x`
+ --> src/main.rs:4:5
+  |
+2 |     let x = 5;
+  |         - first assignment to `x`
+3 |     println!("The value of x is: {x}");
+4 |     x = 6;
+  |     ^^^^^ cannot assign twice to immutable variable
+  |
+help: consider making this binding mutable
+  |
+2 |     let mut x = 5;
+  |         +++
+
+For more information about this error, try `rustc --explain E0384`.
+error: could not compile `variables` (bin "variables") due to 1 previous error
+```
+
++ Bu örnek, **derleyicinin (compiler)** programlarınızdaki hataları bulmanıza nasıl yardımcı olduğunu gösterir. Derleyici hataları bazen sinir bozucu olabilir; ancak aslında yalnızca programınızın **henüz istediğiniz şeyi güvenli bir şekilde yapmadığını** gösterir. Bu, kötü bir programcı olduğunuz anlamına gelmez. Deneyimli **Rust geliştiricileri (Rustaceans)** bile hâlâ derleyici hataları alırlar.
++ immutable (değiştirilemez) `x` değişkenine ikinci bir değer atamaya çalıştığınız için ``cannot assign twice to immutable variable `x` ``   hata mesajını aldınız.
++ Bir değerin **değiştirilemez (immutable)** olarak tanımlandığı halde onu değiştirmeye çalıştığımızda **derleme zamanında (compile-time) hata almamız çok önemlidir**. Çünkü bu tür durumlar hatalara(*bug*) yol açabilir. Kodumuzun bir bölümü bir değerin **asla değişmeyeceği varsayımıyla** çalışırken, kodun başka bir bölümü bu değeri değiştirirse, ilk bölüm tasarlandığı gibi çalışmayabilir. Bu tür bir hatanın(*bug*) nedenini sonradan takip etmek, özellikle kodun ikinci kısmı değeri sadece **bazen** değiştirdiğinde oldukça zor olabilir. Rust derleyicisi, bir değerin değişmeyeceğini belirttiğinizde o değerin gerçekten değişmeyeceğini garanti eder, böylece bunu kendiniz takip etmek zorunda kalmazsınız. Bu sayede kodunuz **anlaşılması ve mantıksal olarak takip edilmesi daha kolay** olur.
++ Ancak değişebilirlik (mutability) çok yararlı olabilir ve kod yazmayı daha kullanışlı hale getirebilir. Değişkenler varsayılan olarak değişmez olsa da, Bölüm 2'de yaptığınız gibi değişken adının önüne `mut` ekleyerek onları değişebilir hale getirebilirsiniz. `mut` eklemek, kodun diğer bölümlerinin bu değişkenin değerini değiştireceğini belirterek, gelecekte kodu okuyacak kişilere niyetinizi de iletmiş olur.
++ Örneğin, `src/main.rs` dosyasını şu şekilde değiştirelim:
+
+**Dosya adı:** `src/main.rs`
 
 ```rust
 fn main() {
     let mut x = 5;
-    println!("x'in ilk değeri: {}", x);
-
-    x = 10;
-    println!("x'in yeni değeri: {}", x);
+    println!("The value of x is: {x}");
+    x = 6;
+    println!("The value of x is: {x}");
 }
 ```
 
-```shell
-cargo run
-```
++ Programı şimdi çalıştırdığımızda şunu elde ederiz:
 
-**Çıktı:**
-
-```shell
-   Compiling hello_world v0.1.0 (/home/ottoman/rustDersleri/hello_world)
+```rust
+$ cargo run
+   Compiling variables v0.1.0 (file:///projects/variables)
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
-     Running `/home/ottoman/rustDersleri/hello_world/target/debug/hello_world`
-x'in ilk değeri: 5
-x'in yeni değeri: 10
+     Running `target/debug/variables`
+The value of x is: 5
+The value of x is: 6
 ```
 
-## C. Shadowing(Gölgeleme):
++ `mut` kullanıldığında `x`'e bağlı değeri `5`'ten `6`'ya değiştirmemize izin verilir. Sonuç olarak, değişebilirlik kullanıp kullanmamaya karar vermek size bağlıdır ve bu, o belirli durumda neyin daha anlaşılır olduğuna dair düşüncenize göre şekillenir.(Sonuç olarak, **mutability kullanıp kullanmama kararı size aittir** ve belirli bir durumda kodun **en açık ve anlaşılır şekilde yazılmasına** göre karar verilmelidir.)
 
-+ Rust’ta **shadowing** (Türkçesiyle “gölgeleme”) kavramı, **aynı isimli bir değişkenin yeni bir değerle yeniden tanımlanması** anlamına gelir.
-+ Bu durumda yeni değişken, **önceki değişkeni "gölgeler"** yani artık önceki tanıma erişilemez — ama teknik olarak eski değişken ortadan kalkmaz, sadece yeni tanım onu gizler.
+### 3.1.1. Sabitleri Tanımlama
 
-|Özellik|Shadowing (`let x = ...`)|Mutable değişken (`let mut x = ...`)|
-|---|---|---|
-|Tür değiştirilebilir|✅ Evet|❌ Hayır|
-|Aynı isimli yeni binding oluşturur|✅ Evet|❌ Hayır|
-|Bellekte yeni yer ayrılır|✅ Evet|❌ Hayır|
-|Kullanım amacı|Dönüştürme, geçici yeniden tanımlama|Değer güncelleme|
++ Değişmez değişkenler gibi, **sabitler** de bir isme bağlanan ve değiştirilmesine izin verilmeyen değerlerdir; ancak sabitler ile değişkenler arasında birkaç fark vardır.
 
-### Örnek 1:
++ İlk olarak, sabitlerle birlikte `mut` anahtar kelimesini kullanmanıza izin verilmez. Sabitler sadece varsayılan olarak değişmez değildir; onlar **her zaman** değişmezdir. Sabitleri `let` yerine `const` anahtar kelimesiyle tanımlarsınız ve değerin veri tipi **mutlaka** belirtilmelidir (*type annotation*). Bir sonraki bölüm olan "3.2.1. Veri Tipleri" kısmında tiplere ve tip belirtimlerine(*type annotation*) değineceğiz, bu yüzden şimdilik detaylar için endişelenmeyin. Sadece tipi her zaman belirtmeniz gerektiğini bilin.
+
++ Sabitler(*constant*) **herhangi bir kapsamda (scope)** tanımlanabilir. Buna **global kapsam** da dahildir. Bu özellik, kodun birçok bölümünün bilmesi gereken değerler için sabitleri kullanışlı hale getirir.
+
++ Son fark ise şudur: **sabitlerin değeri yalnızca sabit bir ifade (constant expression)** olabilir. Yani değer, **sadece çalışma zamanında (runtime) hesaplanabilecek bir sonucun sonucu olamaz**.
+
++ İşte bir sabit tanımlama örneği:
+
+```rust
+#![allow(unused)]
+fn main() {
+const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
+}
+```
+
+
+> [!TIP]
+> ```rust
+> const X: i32 = rand();
+> ```
+>  Bu kod hata verir, çünkü `rand()` runtime'da çalışır. ancak **program çalıştığında** bilinebilir.
+>  
+>  Compiler şu sorunu yaşar:
+>  
+> > Program çalışmadan rastgele bir sayı nasıl üretebilirim?
+>  
+>  Bu yüzden hata verir. 
+
+| Özellik               | immutable variable | const      |
+| --------------------- | ------------------ | ---------- |
+| Tanım                 | `let`              | `const`    |
+| Değiştirilebilir      | Hayır              | Hayır      |
+| Tip belirtme          | Opsiyonel          | Zorunlu    |
+| Runtime değer         | Evet               | Hayır      |
+| Compile-time değer    | Evet               | Evet       |
+| Global kullanılabilir | Genelde hayır      | Evet       |
+| Convention            | snake_case         | UPPER_CASE |
++ Sabitin adı `UC_SAAT_SANIYE_CINSINDEN`'dir ve değeri; 60 (bir dakikadaki saniye sayısı), 60 (bir saatteki dakika sayısı) ve 3'ün (bu programda saymak istediğimiz saat sayısı) çarpımına ayarlanmıştır. Rust'ın sabitler için isimlendirme kuralı, kelimeler arasında alt çizgi kullanarak **tamamı büyük harf** kullanmaktır. Derleyici, derleme zamanında sınırlı sayıdaki işlemi değerlendirebilir(Rust compiler bazı sabit hesapları **program çalışmadan önce** yapabilir.); bu da sabiti doğrudan `10800` yazmak yerine, anlaması ve doğrulaması daha kolay bir şekilde yazmamıza olanak tanır. Sabitleri tanımlarken hangi işlemlerin kullanılabileceği hakkında daha fazla bilgi için [Rust Referansı'nın "sabit değerlendirme" (constant evaluation) bölümüne](https://doc.rust-lang.org/reference/const_eval.html) bakabilirsiniz.
+
++ Sabitler, tanımlandıkları kapsam dahilinde programın çalıştığı tüm süre boyunca geçerlidir. Bu özellik, sabitleri(*constants*) uygulama alanınızdaki (*application domain*) oyunun bir oyuncusunun kazanabileceği maksimum puan veya ışık hızı(**ışık hızı** gibi fiziksel sabitler - *the light of speed* ) gibi programın birden fazla bölümünün bilmesi gerekebilecek değerler için kullanışlı kılar.
++ Programınız genelinde kullanılan sabit(*hardcoded values*) kodlanmış değerleri sabit olarak adlandırmak(*constant*), bu değerin anlamını kodun gelecekteki bakımcılarına iletmek açısından faydalıdır. Ayrıca, sabit kodlanmış değerin ileride güncellenmesi gerekirse kodunuzda değişiklik yapmanız gereken yalnızca tek bir yer olmasını sağlamak da işleri kolaylaştırır.
+
+
+> [!TIP]
+> #### Hatırlatma:
+> **Hardcoded = Koda doğrudan yazılmış sabit değer.** Yani bir değer:
+> - kullanıcıdan alınmıyorsa
+> - dosyadan okunmuyorsa
+> - hesaplanmıyorsa
+> - konfigürasyondan gelmiyorsa
+> 
+> ve **doğrudan kodun içine yazılmışsa**, buna **hardcoded değer** denir.
+
+### 3.1.2. Gölgeleme (Shadowing)
+
++ Bölüm 2'deki tahmin oyunu eğitiminde(*guessing game tutorial*) gördüğünüz gibi, önceki bir değişkenle aynı ada sahip yeni bir değişken tanımlayabilirsiniz. Rustacean'lar(Rust geliştiriciler), birinci değişkenin ikinci tarafından gölgelendiğini söyler; bu, değişkenin adını kullandığınızda derleyicinin ikinci değişkeni göreceği anlamına gelir. Aslında ikinci değişken, birincisinin üzerini örter(gölgede bırakır) ve değişken adının tüm kullanımlarını kendine alır; ta ki kendisi de gölgelenene ya da kapsam(scope) sona erene kadar. Aşağıdaki gibi aynı değişken adını kullanarak ve `let` anahtar kelimesini tekrarlayarak bir değişkeni gölgeleyebiliriz:
+
+**Dosya adı:** `src/main.rs`
 
 ```rust
 fn main() {
     let x = 5;
-    println!("x'in ilk değeri: {}", x);
 
-    let x = x + 1; // shadowing
-    println!("x'in yeni değeri: {}", x);
+    let x = x + 1;
 
     {
-        let x = x * 2; // inner scope shadowing
-        println!("iç bloktaki x: {}", x);
+        let x = x * 2;
+        println!("The value of x in the inner scope is: {x}");
     }
-    println!("Dış bloktaki x: {}", x);
+
+    println!("The value of x is: {x}");
 }
 ```
 
-> 1. `let x = 5;` → `x` isimli bir değişken tanımlanıyor.
-> 2. `let x = x + 1;` → Yeni bir `x` oluşturuluyor, önceki `x`’i **gölgeliyor**.
-> 3. İç blokta (`{}` içinde) tekrar `let x = x * 2;` diyerek o blokta geçerli **yeni bir x** oluşturuluyor.
++ Bu program önce `x`'i `5` değerine bağlar. Ardından, `let x =` ifadesini tekrarlayarak yeni bir `x` değişkeni oluşturur, orijinal değeri alıp `1` ekler, böylece `x`'in değeri `6` olur. Daha sonra, süslü parantezlerle oluşturulan bir iç kapsamda, üçüncü `let` ifadesi de `x`'i gölgeler ve önceki değeri `2` ile çarparak `x`'e `12` değerini veren yeni bir değişken oluşturur. Bu kapsam sona erdiğinde, içteki gölgeleme de biter ve `x` tekrar `6` değerine döner. Bu programı çalıştırdığımızda çıktı şu şekilde olacaktır:
 
-+ Her yeni `let` ifadesiyle **yeni bir binding** (bağlantı) oluşur, öncekini değiştirmez — sadece **üzerine yazar gibi görünür.**
-
-**Çıktı:**
-
-```text
-   Compiling hello_world v0.1.0 (/home/ottoman/rustDersleri/hello_world)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.99s
-     Running `target/debug/hello_world`
-x'in ilk değeri: 5
-x'in yeni değeri: 6
-iç bloktaki x: 12
-Dış bloktaki x: 6
+```rust
+$ cargo run
+   Compiling variables v0.1.0 (file:///projects/variables)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/debug/variables`
+The value of x in the inner scope is: 12
+The value of x is: 6
 ```
 
-### Örnek 2: Tür değiştirme
++ Gölgeleme(*Shadowing*), bir değişkeni `mut` olarak işaretlemekten farklıdır; çünkü `let` anahtar kelimesini kullanmadan yanlışlıkla bu değişkene tekrar atama yapmaya çalışırsak derleme zamanı hatası(*compile-time error*) alırız. `let` kullanarak bir değer üzerinde birkaç dönüşüm gerçekleştirebiliriz; ancak bu dönüşümler tamamlandıktan sonra değişken değişmez(*immutable*) olur. 
++ `mut` ile gölgeleme arasındaki diğer fark şudur: `let` anahtar kelimesini tekrar kullandığımızda aslında yeni bir değişken oluşturduğumuzdan, değerin türünü değiştirebilir ancak aynı adı yeniden kullanabiliriz. Örneğin, programımızın kullanıcıdan bazı metinler arasında kaç boşluk istediğini boşluk karakterleri girerek göstermesini istediğimizi ve ardından bu girdiyi bir sayı olarak saklamak istediğimizi varsayalım:
 
 ```rust
 fn main() {
-
-    let spaces = "     ";       // string slice
-    let spaces = spaces.len();  // integer (yeni değişken)
-
-    println!("spaces: {}", spaces);
+    let spaces = "   ";
+    let spaces = spaces.len();
 }
 ```
 
-> + Burada `spaces` önce bir **`&str (string slice)`**, sonra bir **u32 (tamsayı)** oluyor.
-> + Bunu `mut` ile yapamazdık çünkü tür değişikliğine izin verilmez.
++ İlk `spaces` değişkeni string türündedir, ikinci `spaces` değişkeni ise sayı türündedir. Gölgeleme sayesinde `spaces_str` ve `spaces_num` gibi farklı isimler bulmak zorunda kalmayız; bunun yerine daha basit olan `spaces` adını yeniden kullanabiliriz. Ancak burada gösterildiği gibi `mut` kullanmaya çalışırsak derleme zamanı hatası(*compile-time error*) alırız:
 
-**Çıktı:**
-
-```text
-   Compiling hello_world v0.1.0 (/home/ottoman/rustDersleri/hello_world)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.81s
-     Running `target/debug/hello_world`
-spaces: 5
-```
-## İpuçları:
-
-### Kullanılmayan Değişken:
+**Bu kod derlenmez!**
 
 ```rust
-let variable = 19i8;
+fn main() {
+    let mut spaces = "   ";
+    spaces = spaces.len();
+}
 ```
 
-**Çıktı:**
++ Hata, bir değişkenin tipini değiştirmemize (mutate) izin verilmediğini söyler:
 
-```shell
-   Compiling hello_world v0.1.0 (/home/ottoman/rustDersleri/hello_world)
-warning: unused variable: `variable`
- --> src/main.rs:4:9
+```rust
+$ cargo run
+   Compiling variables v0.1.0 (file:///projects/variables)
+error[E0308]: mismatched types
+ --> src/main.rs:3:14
   |
-4 |     let variable = 19i8;
-  |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_variable`
-  |
-  = note: `#[warn(unused_variables)]` on by default
+2 |     let mut spaces = "   ";
+  |                      ----- expected due to this value
+3 |     spaces = spaces.len();
+  |              ^^^^^^^^^^^^ expected `&str`, found `usize`
 
-warning: `hello_world` (bin "hello_world") generated 1 warning
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.37s
-     Running `target/debug/hello_world`
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `variables` (bin "variables") due to 1 previous error
 ```
 
-> + Bu satırda `y` değişkenini tanımlıyorsun ama sonra programın hiçbir yerinde `variable`’ı **kullanmıyorsun**.
-> + Rust, kullanılmayan değişkenleri varsayılan olarak **uyarı** olarak gösterir, çünkü bu genellikle gereksiz veya unutulmuş bir kod parçası anlamına gelir.
-> + `^^^^^^^^ help: if this is intentional, prefix it with an underscore: _variable`
-> 	- Eğer gerçekten `y`’yi **bilerek** kullanmıyorsan (örneğin geçici bir değişken olarak), Rust’a bunu belirtmek için ismini `_` ile başlatabilirsin:
-> + `let _variable = 19i8` 
-> 	- Bu durumda uyarı **kaybolur**, çünkü Rust `_` ile başlayan değişkenlerin **bilerek kullanılmadığını** varsayar.
++ Değişkenlerin nasıl çalıştığını incelediğimize göre, şimdi sahip olabilecekleri daha fazla veri türüne bakalım.
+## 3.2. Veri Tipleri
 
-### Tür Bildirimi(type annotation):
++ Rust’taki her değer belirli bir **veri türüne (data type)** sahiptir. Bu veri türü, Rust’a hangi tür verinin belirtildiğini söyler; böylece Rust bu veriyle nasıl çalışacağını bilir. Veri türlerinin iki alt kümesini inceleyeceğiz: **skaler (scalar)** ve **bileşik (compound)** türler.
++ Rust’ın **statik tipli (statically typed)** bir dil olduğunu unutmayın. Bu, Rust’ın **tüm değişkenlerin türlerini derleme zamanında (compile time)** bilmesi gerektiği anlamına gelir. Derleyici genellikle kullandığımız değere ve o değeri nasıl kullandığımıza bakarak hangi türü kullanmak istediğimizi **kendisi çıkarabilir (type inference)**. Bölüm 2'deki "Tahmini Gizli Sayı ile Karşılaştırma" kısmında `parse` kullanarak bir `String`'i sayısal bir tipe dönüştürdüğümüzde olduğu gibi, birçok tipin mümkün olduğu durumlarda şu şekilde bir tip belirtimi (type annotation) eklemeliyiz:
 
+```rust
+#![allow(unused)]
+fn main() {
+	let guess: u32 = "42".parse().expect("Not a number!");
+}
+```
 
-# Fonksiyonlar:
++ Yukarıdaki kodda gösterilen `: u32` tip belirtimini eklemezsek, Rust aşağıdaki hatayı görüntüleyecektir; bu, derleyicinin hangi tipi kullanmak istediğimizi bilmek için bizden daha fazla bilgiye ihtiyaç duyduğu anlamına gelir:
 
+```rust
+$ cargo build
+   Compiling no_type_annotations v0.1.0 (file:///projects/no_type_annotations)
+error[E0284]: type annotations needed
+ --> src/main.rs:2:9
+  |
+2 |     let guess = "42".parse().expect("Not a number!");
+  |         ^^^^^        ----- type must be known at this point
+  |
+  = note: cannot satisfy `<_ as FromStr>::Err == _`
+help: consider giving `guess` an explicit type
+  |
+2 |     let guess: /* Type */ = "42".parse().expect("Not a number!");
+  |              ++++++++++++
 
-# Sahiplik(Ownership) Nedir?
+For more information about this error, try `rustc --explain E0284`.
+error: could not compile `no_type_annotations` (bin "no_type_annotations") due to 1 previous error
+```
 
-+ Sahiplik, bir Rust programının belleği nasıl yöneteceğini belirleyen bir dizi kuraldır.
-+ Tüm programlar çalışırken bilgisayarın belleğini nasıl kullanacaklarını yönetmek zorundadır.
++ Diğer veri türleri için de farklı **tür belirtimleri (type annotations)** göreceksiniz.
+
+### 3.2.1. Skaler Türler
+
++  Bir **skaler (scalar)** tür, **tek bir değeri temsil eder**. Rust’ta dört temel skaler tür vardır:
+	- **tamsayılar (integers)**
+	- **kayan noktalı sayılar (floating-point numbers)**
+	- **Boolean değerler**
+	- **karakterler (characters)**
++ Bunları muhtemelen diğer programlama dillerinden de tanıyorsunuzdur. Rust'ta nasıl çalıştıklarına geçelim.
+#### 3.2.1.1. Integer Types (Tamsayı Türleri)
+
++ Bir **tam sayı**, kesirli bileşeni olmayan bir sayıdır. Bölüm 2'de bir tam sayı tipi olan `u32` tipini kullanmıştık. Bu tip bildirimi, ilişkili olduğu değerin 32 bitlik yer kaplayan işaretsiz bir tam(*unsigned integer*) sayı (işaretli tam sayı(*signed integer*) tipleri `u` yerine `i` ile başlar) olması gerektiğini belirtir. `Tablo 3-1`, Rust'taki yerleşik tam sayı tiplerini göstermektedir. Bir tam sayı değerinin tipini belirtmek için bu varyantlardan herhangi birini kullanabiliriz.
+
+**Tablo 3-1:** Rust'taki Tam Sayı Tipleri
+
+| Length                 | Signed  | Unsigned |
+| ---------------------- | ------- | -------- |
+| 8-bit                  | `i8`    | `u8`     |
+| 16-bit                 | `i16`   | `u16`    |
+| 32-bit                 | `i32`   | `u32`    |
+| 64-bit                 | `i64`   | `u64`    |
+| 128-bit                | `i128`  | `u128`   |
+| Architecture-dependent | `isize` | `usize`  |
+
++ Her varyant **işaretli (signed)** veya **işaretsiz (unsigned)** olabilir ve **belirli bir boyuta (explicit size)** sahiptir. **İşaretli** (signed) ve **işaretsiz** (unsigned), sayının negatif olma ihtimalinin olup olmadığını ifade eder. Başka bir deyişle, sayının bir işarete (+ veya -) ihtiyacı olup olmadığı (işaretli-signed) veya her zaman pozitif olacağı için işaretsiz(unsigned) temsil edilip edilemeyeceği (işaretsiz-unsigned) durumudur. Bu, sayıları kağıda yazmaya benzer: İşaret önemli olduğunda sayı artı veya eksi işaretiyle gösterilir; ancak sayının pozitif olduğu varsayılabiliyorsa işaret konulmaz. İşaretli sayılar **ikiye tümleyen** ([two's complement](https://en.wikipedia.org/wiki/Two%27s_complement)) gösterimiyle saklanır.
+
++ Her işaretli değişken(*signed variant*), n'in o değişkenin kullandığı bit sayısı olduğu durumlarda −(2ⁿ⁻¹)'den 2ⁿ⁻¹ − 1'e kadar olan sayıları (dahil) saklayabilir. Dolayısıyla bir `i8`, −(2⁷)'den 2⁷ − 1'e kadar olan sayıları saklayabilir; bu da −128'den 127'ye eşittir. İşaretsiz değişkenler(*unsigned variant*) 0'dan 2ⁿ − 1'e kadar olan sayıları saklayabilir; bu nedenle bir `u8`, 0'dan 2⁸ − 1'e kadar olan sayıları saklayabilir; bu da 0'dan 255'e eşittir.
++ Ayrıca `isize` ve `usize` türleri, programınızın çalıştığı bilgisayarın mimarisine bağlıdır: 64-bit mimarideyseniz 64 bit, 32-bit mimarideyseniz 32 bit.
++ Tam sayı sabitlerini (*Interger literals*) `Tablo 3-2`'de gösterilen formlardan herhangi biriyle yazabilirsiniz. Birden fazla sayısal tip olabilen sayı sabitlerinde, tipi belirlemek için `57u8` gibi bir tip soneki (suffix) kullanılabileceğini unutmayın. Sayı sabitleri(*Interger literals*), sayının okunmasını kolaylaştırmak için görsel bir ayırıcı olarak `_` kullanabilir; örneğin `1_000` yazımı `1000` ile aynı değere sahip olacaktır.
+
+**Tablo 3-2:** Rust'ta Tam Sayı Sabitleri
+
+| Number literals  | Example       |
+| ---------------- | ------------- |
+| Decimal          | `98_222`      |
+| Hex              | `0xff`        |
+| Octal            | `0o77`        |
+| Binary           | `0b1111_0000` |
+| Byte (`u8` only) | `b'A'`        |
+
+> [!TIP]
+> Peki hangi tam sayı türünü kullanacağınızı nasıl bileceksiniz? Emin değilseniz, Rust'ın varsayılanları genellikle iyi bir başlangıç noktasıdır: Tam sayı türleri varsayılan olarak `i32`'dir. `isize` veya `usize` kullanacağınız temel durum, bir tür koleksiyonu indekslediğiniz zamandır.
 
 
 > [!NOTE]
-> #### Sahilik Kuralları:
-> Öncelikle sahiplik kurallarına(ownership rules) bir göz atalım. Örnekleri incelerken bu kuralları aklınızda bulundurun:
-> 1. Her değerin yalnızca **bir sahibi** vardır.
-> 2. Sahiplik kapsam(Scope) dışına çıktığında, değer otomatik olarak **drop** edilir (yani bellekten sillinir).
-> 3. Sahiplik başka bir değişkene **taşınabilir (move)**, ama aynı anda iki sahip olamaz.
+> + Diyelim ki elinizde 0 ile 255 arasındaki değerleri tutabilen `u8` tipinde bir değişken var. Eğer bu değişkeni 256 gibi bu aralığın dışındaki bir değere değiştirmeye çalışırsanız, **tam sayı taşması** (*integer overflow*) meydana gelir ve bu da iki davranıştan biriyle sonuçlanır. **Hata ayıklama (debug)** modunda derleme yaparken Rust, tam sayı taşması kontrollerini programa dahil eder; böylece bu durum gerçekleşirse programınız çalışma zamanında(*runtime*) **panikler** (panic). Rust, bir program hata vererek kapandığında "panikleme(_panicking_)" terimini kullanır; panikleri Bölüm 9'daki "9.2. panic! ile Kurtarılamaz Hatalar" bölümünde daha derinlemesine inceleyeceğiz.
+> + `--release` bayrağı ile **yayın (release)** modunda derleme yaptığınızda, Rust paniklere neden olan tam sayı taşması kontrollerini programa dahil **etmez**. Bunun yerine, taşma meydana gelirse Rust, **ikiye tümleyen sarmalaması** (two’s complement wrapping) gerçekleştirir. Kısaca, tipin tutabileceği maksimum değerden daha büyük olan değerler, tipin tutabileceği minimum değerden başlayarak "başa sarar(*wrapping*)". Bir `u8` durumunda, 256 değeri 0 olur, 257 değeri 1 olur ve bu böyle devam eder. Program paniklemez ancak değişken, muhtemelen beklediğinizden farklı bir değere sahip olur. Tam sayı taşmasının (*integer overflow*) başa sarılma(*wrapping*) davranışına güvenmek bir hata olarak kabul edilir.
+> + Taşma(*overflow*) olasılığını açıkça yönetmek için standart kütüphane tarafından temel sayısal tipler için sağlanan şu metot gruplarını kullanabilirsiniz:
+> 	- `wrapping_add` gibi `wrapping_*` metotlarıyla tüm modlarda **değerin başa sarılmasını (wrap)** sağlar.
+> 	- `checked_*` metotlarıyla taşma varsa `None` değeri döndürün.
+> 	- `overflowing_*` metotlarıyla değeri ve taşmanın olup olmadığını gösteren bir *Boolean* değeri döndürün.
+> 	- `saturating_*` metotlarıyla değerin minimum veya maksimum değerinde doyuma ulaşın.(Değer taşma durumunda **minimum veya maksimum değerde sabitlenir (saturate)**)
 
-##  A. Taşıma(move):
+> [!TIP]
+> ##### Küçük Bir Örnekle Açıklama:
+> Eğer bir oyun yapıyorsanız ve can değeri (health) 0 ile 255 arasındaysa:
+> + **Wrapping:** 255 + 1 yaparsanız canınız bir anda 0 olur (başa döner).
+> + **Saturating:** 255 + 1 yaparsanız canınız 255'te kalır (maksimuma sabitlenir).
+
+#### 3.2.1.2. Kayan Noktalı Sayı Tipleri (Floating-Point Types)
+
++ Rust, ondalık noktalı sayılar olan **kayan noktalı sayılar** için iki adet ilkel(*primitive*) tipe sahiptir. Rust'ın kayan noktalı sayı tipleri, sırasıyla 32 bit ve 64 bit boyutunda olan `f32` ve `f64`'tür. Varsayılan tip `f64`'tür; çünkü modern işlemcilerde `f64`, `f32` ile yaklaşık olarak aynı hızdadır ancak daha fazla hassasiyet (precision) kapasitesine sahiptir. Tüm kayan noktalı sayı tipleri işaretlidir (signed).
+
++ İşte kayan noktalı sayıların kullanımını gösteren bir örnek:
+
+**Dosya adı:** `src/main.rs`
 
 ```rust
 fn main() {
-    let s1 = String::from("Merhaba");
-    let s2 = s1; // s1'in sahipliği s2'ye geçer (move edilir)
+    let x = 2.0; // f64
 
-    // println!("{}", s1); // ❌ Hata! s1 artık geçerli değil
-    println!("{}", s2); // ✅ s2 artık sahibidir
+    let y: f32 = 3.0; // f32
 }
 ```
 
-> + 👉 Burada `String` heap üzerinde bir veri tutar.
-> + `s1` → `s2` aktarımı bir **kopyalama (copy)** değil, **taşıma (move)** işlemi olur.
-> + Bu nedenle `s1` artık geçersiz hale gelir.
++ Kayan noktalı sayılar **IEEE-754** standardına göre temsil edilirler.
 
-## B. Kopyalama(Copy):
 
-+ Bazı türler (örneğin ilkel türler(Primitive) – integer, bool, char, vb.)
-+ **stack üzerinde saklandıkları için taşınmak yerine kopyalanırlar.**
+> [!INFO]
+> **IEEE-754**, bilgisayarlarda **kayan noktalı sayıların (floating-point numbers)** nasıl saklanacağını ve nasıl hesaplanacağını belirleyen **uluslararası bir standarttır**.
+> Basitçe söylemek gerekirse:
+> > Ondalıklı sayıların bilgisayar belleğinde nasıl temsil edileceğini tanımlayan kurallar kümesidir.
+> 
+> Çünkü bilgisayarlar **ondalıklı sayıları doğrudan saklayamaz**, onları **ikili sistemde (binary)** özel bir formatla saklar.
+
+#### 3.2.1.3. Sayısal İşlemler(Numeric Operations)
+
++ Rust, tüm sayı tipleri için bekleyeceğiniz temel matematiksel işlemleri destekler: toplama, çıkarma, çarpma, bölme ve kalan (modül). Tam sayı bölmesi, sonucu sıfıra doğru en yakın tam sayıya yuvarlayarak keser (ondalık kısmı atar). Aşağıdaki kod, her bir sayısal işlemin bir `let` ifadesi içinde nasıl kullanılacağını göstermektedir:
+
+```rust
+fn main() {
+    // addition(toplama)
+    let sum = 5 + 10;
+
+    // subtraction(çıkarma)
+    let difference = 95.5 - 4.3;
+
+    // multiplication(çarpma)
+    let product = 4 * 30;
+
+    // division(bölme)
+    let quotient = 56.7 / 32.2;
+    let truncated = -5 / 3; // Results in -1
+
+    // remainder(kalan)
+    let remainder = 43 % 5;
+}
+```
+
++ Bu ifadelerdeki(*statements*) her bir deyim(*expression*) bir matematiksel operatör kullanır ve tek bir değer hesaplar; bu değer daha sonra bir değişkene bağlanır. **[Ek B(Appendix B)](https://doc.rust-lang.org/book/appendix-02-operators.html)**, Rust'ın sunduğu tüm operatörlerin bir listesini içermektedir.
+#### 3.2.1.4. Boolean Tipi
+
++ Diğer çoğu programlama dilinde olduğu gibi, Rust'ta da Boolean tipinin iki olası değeri vardır: `true` (doğru) ve `false` (yanlış). Boolean'lar bellekte **bir bayt** boyutundadır. Rust'ta Boolean tipi `bool` anahtar kelimesi kullanılarak belirtilir. Örneğin:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let t = true;
+
+    let f: bool = false; // açık tür belirtimiyle(annotation)
+}
+```
+
++ Boolean değerlerini kullanmanın temel yolu, `if` ifadesi(*expression*) gibi koşullu yapılardır. `if` ifadelerinin Rust'ta nasıl çalıştığını "3.5. Kontrol Akışı" (*3.5. Control Flow*) bölümünde ele alacağız.
+#### 3.2.1.5. Karakter Tipi (The Character Type)
+
++ Rust'ın `char` tipi, dilin en ilkel(*primitive*) alfabetik tipidir. Aşağıda `char` değerlerinin tanımlanmasına dair bazı örnekler verilmiştir:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let c = 'z';
+    let z: char = 'ℤ'; // açık tür belirtimiyle(annotation)
+    let heart_eyed_cat = '😻';
+}
+```
+
+
+> [!CAUTION]
+> *String literal*'lerinin çift tırnak kullanmasına karşın, `char` literal'lerini **tek tırnak(')** ile belirttiğimize dikkat edin.
+
++ Rust'ın `char` tipi **4 bayt** boyutundadır ve bir **Unicode Skaler Değeri**ni (Unicode Scalar Value) temsil eder; bu da onun ASCII'den çok daha fazlasını temsil edebileceği anlamına gelir. Aksanlı harfler; Çince, Japonca ve Korece karakterler; emojiler ve görünmeyen boşluk karakterleri (zero-width spaces) Rust'ta geçerli `char` değerleridir. Unicode skaler değerleri `U+0000` ile `U+D7FF` ve `U+E000` ile `U+10FFFF` aralığındadır (bu değerler dahildir). Ancak, "karakter" aslında Unicode'da tam bir kavram değildir, bu nedenle bir "karakterin" ne olduğuna dair insani sezginiz, Rust'taki bir `char` ile tam olarak örtüşmeyebilir.
+
+
+> [!IMPORTANT]
+> Günlük hayatta "karakter" denildiğinde aklımıza tek bir harf, rakam veya sembol gelir. Örneğin "é", "ğ" veya "😻" birer karakter gibi görünür.
+> Ancak Unicode standardında "karakter" kavramı bu kadar basit değildir. Bazı görsel karakterler aslında **birden fazla Unicode skaler değerinin birleşiminden** oluşur. Örneğin:
+> + "é" harfi, tek bir Unicode değeri olabileceği gibi, "e" harfi + ayrı bir aksan işaretinin **birleşimi** olarak da temsil edilebilir. Görsel olarak tek bir karakter gibi görünse de aslında **iki ayrı** Unicode değeridir.
+> + Bazı emojiler de birden fazla Unicode değerinin birleşiminden oluşur. Örneğin 👨‍👩‍👧 ailesi emojisi aslında birkaç ayrı emojinin **birleştirilmesiyle** oluşur.
+> 
+> Bu **tek `char`** olur.
+> ```rust
+> let c = 'é';
+> ```
+> İki karakterin birleşimi
+> ```
+> e + ́
+> ```
+> Unicode:
+> ```
+> U+0065  (e)
+> U+0301  (accent)
+> ```
+> Rust açısından bu: `2 adet char`
+> 
+> Rust'ın `char` türü ise her zaman **tek bir Unicode skaler değerini** temsil eder. Dolayısıyla:
+> + Gözünüze tek bir karakter gibi görünen bir şey, Rust'ta **birden fazla** `char` olabilir.
+> + Ya da Rust'ın tek bir `char` olarak sakladığı şey, ekranda **farklı** görünebilir.
+> 
+> Kısaca: **"Gördüğünüz" ile Rust'ın içinde sakladığı her zaman birebir örtüşmeyebilir.**
+> ```rust
+> fn main() {
+>    // let s = "e\u{0301}";
+>    let s = "\u{0065}\u{0301}";
+>
+>    println!("{}", s);
+>    println!("char sayısı: {}", s.chars().count());
+>}
+> ```
+
++ Bu konuyu 8. Bölümün "8.2. UTF-8 Kodlamalı Metinlerin Dizeler İçinde Saklanması" bölümünde ayrıntılı olarak ele alacağız.
+
+### 3.2.2. Bileşik Türler (Compound Types)
+
++ Bileşik tipler(_Compound types_), birden fazla değeri tek bir tip altında gruplayabilir. Rust'ın iki ilkel bileşik tipi vardır: demetler (tuples) ve diziler (arrays).
+
+#### 3.2.2.1. Demet Tipi (The Tuple Type)
+
++ Demet(*tuple*), çeşitli tiplerdeki bir dizi değeri tek bir bileşik tipte gruplandırmanın genel bir yoludur. Demetlerin uzunluğu sabittir: Bir kez tanımlandıktan sonra boyutları büyüyemez veya küçülemez.
+
++ Parantez içinde, virgülle ayrılmış bir değer listesi yazarak bir demet oluştururuz. Demetteki her pozisyonun bir tipi vardır ve demetteki farklı değerlerin tiplerinin aynı olması gerekmez. Bu örnekte isteğe bağlı tip belirtimleri ekledik:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let tup: (i32, f64, u8) = (500, 6.4, 1);
+}
+```
+
++ `tup` değişkeni demetin(*tuple*) tamamına bağlanır, çünkü bir demet tek bir bileşik öğe(*compound element*) olarak kabul edilir. Bir tuple içindeki **tek tek değerleri elde etmek** için **pattern matching (desen eşleştirme)** kullanarak tuple değerini **parçalayabiliriz (destructure)**. Bunun nasıl yapıldığını aşağıdaki örnek gösterir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let tup = (500, 6.4, 1);
+
+    let (x, y, z) = tup;
+
+    println!("The value of y is: {y}");
+}
+```
+
+**Kod çıktısı:**
+
+```bash
+The value of y is: 6.4
+```
+
++ Bu program önce bir **tuple oluşturur** ve onu **`tup` değişkenine bağlar**. Daha sonra **`let` ile bir desen (pattern)** kullanarak `tup` değerini alır ve onu **üç ayrı değişkene** dönüştürür: **`x`**, **`y`** ve **`z`**. Buna **destructuring (parçalama)** denir çünkü tek bir tuple değeri **üç parçaya ayrılmış olur**. Son olarak program **`y` değişkeninin değerini yazdırır**, bu değer **6.4**’tür.
++ Ayrıca bir tuple içindeki bir elemana **doğrudan erişmek** için **nokta (`.`) operatörünü** ve ardından erişmek istediğimiz değerin **indeksini** kullanabiliriz. Örneğin:
+
+**Dosya adı:** `scr/main.rs`
+
+```rust
+fn main() {
+    let x: (i32, f64, u8) = (500, 6.4, 1);
+
+    let five_hundred = x.0;
+
+    let six_point_four = x.1;
+
+    let one = x.2;
+}
+```
+
++ Bu program **`x` adlı tuple’ı oluşturur** ve daha sonra tuple’ın her bir elemanına **kendi indekslerini kullanarak erişir**. Çoğu programlama dilinde olduğu gibi, bir tuple’daki **ilk indeks 0’dır**.
+
+
+> [!IMPORTANT] 
+>  Hiç değer içermeyen tuple’ın özel bir adı vardır: **unit**. Bu değer ve ona karşılık gelen tip **`()`** şeklinde yazılır ve **boş bir değeri** veya **boş bir dönüş tipini (return type)** temsil eder. 
+>  Eğer İfadeler(*expressions*), başka bir değer döndürmüyorlarsa **örtük olarak (implicitly)** `unit` değerini döndürürler.
+
+#### 3.2.2.2. Dizi Tipi (The Array Type)
+
++ Birden fazla değerden oluşan bir koleksiyona sahip olmanın başka bir yolu da **dizi** (array) kullanmaktır.(Birden fazla değeri bir arada tutmanın başka bir yolu da **array (dizi)** kullanmaktır.)
+
+> [!CAUTION]
+> Bir demetten (tuple) farklı olarak, bir dizinin **her öğesi aynı tipte olmalıdır.** Diğer bazı dillerdeki dizilerin aksine, Rust'taki dizilerin uzunluğu sabittir.
+
++ Bir dizinin içindeki değerleri **köşeli parantezler (`[]`) içinde virgülle ayırarak** yazarız:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let a = [1, 2, 3, 4, 5];
+}
+```
+
++ Diziler, verilerinizin *heap* yerine, şimdiye kadar gördüğümüz diğer türlerle aynı şekilde *stack* üzerinde tahsis edilmesini istediğinizde (heap ve stack'i 4. Bölümde daha ayrıntılı ele alacağız) ya da her zaman sabit sayıda elemana sahip olmak istediğinizde kullanışlıdır. Ancak dizi (**array**) türü, **vector** türü kadar esnek değildir. **Vector**, standart kütüphane tarafından sağlanan benzer bir koleksiyon türüdür ve içeriği **heap üzerinde saklandığı için büyüyebilir veya küçülebilir**. Eğer bir **array mi yoksa vector mü kullanmanız gerektiğinden emin değilseniz**, büyük ihtimalle **vector kullanmanız daha doğru olacaktır**. 8. Bölümde(8.1. Vektörler Kullanarak Değer Listelerinin Saklanması) vektörler daha ayrıntılı ele alınmaktadır.
++ Buna karşılık, **eleman sayısının değişmeyeceğini bildiğiniz durumlarda** diziler daha kullanışlıdır. Örneğin bir programda **ayların isimlerini** kullanıyorsanız, büyük ihtimalle **vector yerine array kullanırsınız**, çünkü her zaman **12 eleman** olacağını bilirsiniz:
+
+```rust
+#![allow(unused)]
+fn main() {
+let months = ["January", "February", "March", "April", "May", "June", "July",
+              "August", "September", "October", "November", "December"];
+}
+```
+
++ **Bir dizinin tipini**; köşeli parantez içine her bir öğenin tipini, ardından bir noktalı virgül ve dizideki öğe sayısını yazarak belirtirsiniz:(Bir dizinin türünü yazarken **köşeli parantezler** kullanılır. Parantezlerin içinde **her bir elemanın türü**, ardından **noktalı virgül (`;`)** ve daha sonra **dizideki eleman sayısı** belirtilir.):
+
+```rust
+#![allow(unused)]
+fn main() {
+	let a: [i32; 5] = [1, 2, 3, 4, 5];
+}
+```
+
++ Burada `i32` her elemanın türüdür. Noktalı virgülden sonra, 5 sayısı dizinin beş eleman içerdiğini belirtir.
++ Ayrıca aşağıda gösterildiği gibi, başlangıç değerini, ardından noktalı virgülü ve köşeli parantez içinde dizinin uzunluğunu belirterek her eleman için aynı değeri içerecek şekilde bir diziyi başlatabilirsiniz:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let a = [3; 5];
+}
+```
+
++ `a` adlı dizi, başlangıçta hepsi 3 değerine ayarlanmış 5 eleman içerecektir. Bu, `let a = [3, 3, 3, 3, 3];` yazmakla aynıdır, ancak daha kısa bir yoldur.
+
+#### 3.2.2.3. Dizi Elemanlarına Erişim (Array Element Access)
+
++ Bir dizi (**array**), **boyutu önceden bilinen ve sabit olan tek parça bir bellek alanıdır** ve **stack üzerinde tahsis edilebilir**. Bir dizinin elemanlarına **indeksleme (indexing)** kullanarak erişebilirsiniz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let a = [1, 2, 3, 4, 5];
+
+    let first = a[0];
+    let second = a[1];
+}
+```
+
++ Bu örnekte, `first` adlı değişken 1 değerini alacaktır; çünkü dizide `[0]` indeksindeki değer budur. `second` adlı değişken ise dizide `[1]` indeksinden 2 değerini alacaktır.
+
+#### 3.2.2.4. Geçersiz Dizi Elemanına Erişim (Invalid Array Element Access)
+
++ Dizinin sonundan daha ilerideki bir öğeye erişmeye çalışırsanız ne olacağına bakalım. Diyelim ki **2. bölümdeki tahmin oyunu örneğine benzer şekilde**, kullanıcıdan bir dizi indeksi almak için şu kodu çalıştırıyorsunuz:
+
+**Bu kod panik fırlatır!**
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::io;
+
+fn main() {
+    let a = [1, 2, 3, 4, 5];
+
+    println!("Please enter an array index.");
+
+    let mut index = String::new();
+
+    io::stdin()
+        .read_line(&mut index)
+        .expect("Failed to read line");
+
+    let index: usize = index
+        .trim()
+        .parse()
+        .expect("Index entered was not a number");
+
+    let element = a[index];
+
+    println!("The value of the element at index {index} is: {element}");
+}
+```
+
++ Bu kod başarıyla derlenir. Eğer bu kodu `cargo run` kullanarak çalıştırır ve `0`, `1`, `2`, `3` veya `4` girerseniz, program dizideki o indekse karşılık gelen değeri yazdıracaktır. Ancak dizinin sonunu geçen bir sayı, örneğin `10` girerseniz, şöyle bir çıktı görürsünüz:
+
+```
+thread 'main' panicked at src/main.rs:19:19:
+index out of bounds: the len is 5 but the index is 10
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
++ Program, indeksleme işleminde geçersiz bir değer kullanıldığı noktada bir **çalışma zamanı hatası (runtime error)** ile sonuçlandı. Program bir hata mesajıyla kapandı ve sonuncu `println!` ifadesini(*statement*) çalıştırmadı. İndeksleme kullanarak bir öğeye(elemana) erişmeye çalıştığınızda Rust, belirttiğiniz indeksin dizi uzunluğundan küçük olup olmadığını kontrol eder. Eğer indeks uzunluğa eşit veya daha büyükse, Rust **panikler (panic)**. Bu kontrolün çalışma zamanında yapılması gerekir; çünkü bu örnekte olduğu gibi, derleyicinin bir kullanıcının kod çalışırken hangi değeri gireceğini önceden bilmesi mümkün değildir.
+
++ Bu, Rust'ın bellek güvenliği(*memory safety*) ilkelerinin işleyişine bir örnektir. Birçok düşük seviyeli dilde (örneğin C veya C++) bu tür bir kontrol yapılmaz ve yanlış bir indeks verdiğinizde geçersiz bir bellek bölgesine erişilebilir. Rust, bellek erişimine izin verip devam etmek yerine programı anında kapatarak sizi bu tür hatalardan korur. Bölüm 9'de, Rust’ın **hata yönetimi (error handling)** daha ayrıntılı şekilde ele alınmakta ve **ne panik(panic) eden ne de geçersiz bellek erişimine izin veren**, okunabilir ve güvenli kodların nasıl yazılacağı anlatılmaktadır.
+
+## 3.3. Fonksiyonlar (Functions)
+
++ Fonksiyonlar, Rust kodunda oldukça yaygın olarak kullanılır. Zaten dildeki en önemli fonksiyonlardan birini gördünüz: birçok programın başlangıç noktası olan **`main` fonksiyonu**. Ayrıca yeni fonksiyonlar tanımlamamızı sağlayan **`fn` anahtar kelimesini** de gördünüz.
+
++ Rust kodu, fonksiyon ve değişken isimleri için geleneksel stil olarak, tüm harflerin küçük olduğu ve kelimelerin alt çizgilerle ayrıldığı **snake case** (yılan stili) yapısını kullanır. İşte örnek bir fonksiyon tanımı içeren program:
+
+**Dosya adı:** `scr/main.rs`
+
+```rust
+fn main() {
+    println!("Hello, world!");
+
+    another_function();
+}
+
+fn another_function() {
+    println!("Another function.");
+}
+```
+
+
++ Rust'ta bir fonksiyonu, `fn` yazıp ardından bir fonksiyon ismi ve bir çift parantez koyarak tanımlarız. Süslü parantezler derleyiciye fonksiyon gövdesinin nerede başlayıp nerede bittiğini söyler.
+
++ Tanımladığımız herhangi bir fonksiyonu, adını ve ardından bir çift parantez`()` yazarak çağırabiliriz. `another_function` program içinde tanımlandığı için, `main` fonksiyonunun içinden çağrılabilir.
+
+> [!CAUTION]
+> Kaynak kodda `another_function`'ı `main` fonksiyonundan **sonra** tanımladığımıza dikkat edin; onu daha önce de tanımlayabilirdik.
+
++ Rust, fonksiyonlarınızı nerede tanımladığınızı önemsemez, sadece çağıran tarafından görülebilecek bir kapsamda (scope) tanımlanmış olmalarına bakar.(Yani, Rust için önemli olan, fonksiyonların nerede tanımlandığı değil, **çağrıldığı yerden erişilebilir bir kapsamda (scope) tanımlanmış olmasıdır**.)
++ Fonksiyonları daha derinlemesine incelemek için `functions` adında yeni bir ikili (binary) proje başlatalım. `another_function` örneğini `src/main.rs` içine yerleştirin ve çalıştırın. Şu çıktıyı görmelisiniz:
+
+```
+$ cargo run
+   Compiling functions v0.1.0 (file:///projects/functions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running `target/debug/functions`
+Hello, world!
+Another function.
+```
+
++ Satırlar, `main` fonksiyonunda göründükleri sırayla yürütülür. Önce "Merhaba dünya!" mesajı yazdırılır, ardından `another_function` çağrılır ve onun mesajı yazdırılır.
+### 3.3.1. Parametreler (Parameters)
+
++ Fonksiyonları **parametreler** alacak şekilde tanımlayabiliriz. Parametreler, bir fonksiyonun imzasının (signature) parçası olan **özel değişkenlerdir**. Bir fonksiyonun parametreleri olduğunda, bu parametreler için somut değerler(*concrete values*) sağlayabilirsiniz. Teknik olarak bu somut değerlere **argüman** (*argument*) denir; ancak günlük konuşmada insanlar "parametre" ve "argüman" kelimelerini hem fonksiyon tanımındaki değişkenler hem de fonksiyon çağrılırken aktarılan somut değerler(*concrete values*) için birbirinin yerine kullanma eğilimindedirler.
+
+> [!TIP]
+> Teknik olarak:
+> - Fonksiyon tanımındaki değişkenlere → **parametre (parameter)**
+> - Fonksiyon çağrılırken verilen değerlere → **argüman (argument)** denir
+> 
+> Ancak günlük kullanımda insanlar bu iki terimi genellikle **birbirinin yerine kullanır**.
+
++ `another_function`'ın bu sürümünde bir parametre ekliyoruz:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    another_function(5);
+}
+
+fn another_function(x: i32) {
+    println!("The value of x is: {x}");
+}
+```
+
++ Bu programı çalıştırmayı deneyin; aşağıdaki çıktıyı almalısınız:
+
+```
+$ cargo run
+   Compiling functions v0.1.0 (file:///projects/functions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.21s
+     Running `target/debug/functions`
+The value of x is: 5
+```
+
++ Fonksiyon imzalarında(**function signatures**), her parametrenin türünü **mutlaka** belirtmelisiniz. Bu, Rust'ın tasarımında kasıtlı bir karardır: Fonksiyon tanımlarında tür belirtimleri(*annotation*) gerektirmek, derleyicinin ne tür kastettiğinizi anlamak için kodun başka yerlerinde bunları kullanmanıza neredeyse hiç ihtiyaç duymaması anlamına gelir.
+
+> [!TIP]
+> Bu cümle şunu anlatmaktadır:
+> Rust'ta bir fonksiyon tanımlarken parametrelerin türlerini **zorunlu olarak** belirtirsiniz. Örneğin:
+> ```rust
+> fn another_function(x: i32) { ... }
+> ```
+> Bu zorunluluk sayesinde derleyici, `x`'in `i32` türünde olduğunu **kesin olarak bilir.** Dolayısıyla bu fonksiyonu çağırdığınız yerde ayrıca tür belirtmenize gerek kalmaz:
+> ```rust
+> another_function(5); // Burada "5'in i32 olduğunu" ayrıca belirtmek gerekmez
+> ```
+> Eğer fonksiyon tanımında tür belirtme zorunluluğu olmasaydı, derleyici türü anlamak için kodun **pek çok farklı yerine** bakması ve sizden ek tür bilgisi istemesi gerekirdi.
+
++ Derleyici, fonksiyonun hangi türleri beklediğini bilirse daha yardımcı hata mesajları da verebilir.
++ Birden fazla parametre tanımlarken, parametre bildirimlerini aşağıdaki gibi virgülle ayırın:
+
+```rust
+fn main() {
+    print_labeled_measurement(5, 'h');
+}
+
+fn print_labeled_measurement(value: i32, unit_label: char) {
+    println!("The measurement is: {value}{unit_label}");
+}
+```
+
++ Bu örnek, iki parametreli `print_labeled_measurement` adında bir fonksiyon oluşturur. İlk parametre `value` olarak adlandırılmış ve `i32` türündedir. İkincisi `unit_label` olarak adlandırılmış ve `char` türündedir. Fonksiyon daha sonra hem `value` hem de `unit_label`'ı içeren bir metin yazdırır.
++ Bu kodu çalıştırmayı deneyelim. `functions` projenizdeki `src/main.rs` dosyasındaki mevcut kodu yukarıdaki örnekle değiştirin ve `cargo run` kullanarak çalıştırın:
+
+```rust
+$ cargo run
+   Compiling functions v0.1.0 (file:///projects/functions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/debug/functions`
+The measurement is: 5h
+```
+
++ Fonksiyonu `value` değeri için `5` ve `unit_label` değeri için `'h'` ile çağırdığımız için, program çıktısı bu değerleri içerir.
+
+### 3.3.2. Deyimler (Statements) ve İfadeler (Expressions)
+
++ Fonksiyon gövdeleri, isteğe bağlı olarak bir ifadeyle(*expression*) biten bir dizi deyimden(*statements*) oluşur.  Şimdiye kadar incelediğimiz fonksiyonlar sonunda bir ifadesi(*expression*) içermiyordu ancak bir deyimin(*statements*) parçası olarak bir ifade(*expression*) görmüştünüz.(Fonksiyonların sonunda henüz expression kullanmadık (yani return gibi),  ama statement’ların içinde expression kullandık.) Rust, **expression (ifadeye dayalı)** bir dil olduğu için bu ayrımı anlamak oldukça önemlidir. Diğer bazı dillerde bu ayrım bu kadar belirgin değildir, bu yüzden statement ve expression kavramlarının ne olduğunu ve fonksiyon gövdelerini nasıl etkilediklerini inceleyelim.
+
+
+> [!important]
+> - **Deyimler (Statements):** Bir eylem gerçekleştiren ve değer döndürmeyen talimatlardır.
+> - **İfadeler (Expressions):** Bir sonuç değerine ulaşmak için hesaplanan yapılardır.(Expression’lar, değerlendirilir ve **bir değer üretir**.)
+
++ Bazı örneklere bakalım.
++ Aslında zaten deyimleri(*statements*) ve ifadeleri(*expression*) kullandık. `let` anahtar kelimesiyle bir değişken oluşturmak ve ona bir değer atamak bir **deyimdir**(*statements*). Liste 3-1'deki `let y = 6;` bir deyimdir(*statements*).
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let y = 6;
+}
+```
+
+> **Liste 3-1:** Tek bir deyim(*statement*) içeren bir main fonksiyonu tanımı
+
++ Fonksiyon tanımları da deyimlerdir(*statement*); yukarıdaki örneğin tamamı başlı başına bir deyimdir.(Kısa süre sonra göreceğimiz üzere, bir fonksiyonu çağırmak ise bir deyim(*statement*) değildir.)
++ Deyimler(*statement*) değer döndürmezler. Bu nedenle, aşağıdaki kodun yapmaya çalıştığı gibi bir `let` deyimini başka bir değişkene atayamazsınız; bir hata alırsınız:
+
+**Bu kod derlenmez!**
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let x = (let y = 6);
+}
+```
+
++ Bu programı çalıştırdığınızda alacağınız hata şuna benzer:
+
+```rust
+$ cargo run
+   Compiling functions v0.1.0 (file:///projects/functions)
+error: expected expression, found `let` statement
+ --> src/main.rs:2:14
+  |
+2 |     let x = (let y = 6);
+  |              ^^^
+  |
+  = note: only supported directly in conditions of `if` and `while` expressions
+
+warning: unnecessary parentheses around assigned value
+ --> src/main.rs:2:13
+  |
+2 |     let x = (let y = 6);
+  |             ^         ^
+  |
+  = note: `#[warn(unused_parens)]` on by default
+help: remove these parentheses
+  |
+2 -     let x = (let y = 6);
+2 +     let x = let y = 6;
+  |
+
+warning: `functions` (bin "functions") generated 1 warning
+error: could not compile `functions` (bin "functions") due to 1 previous error; 1 warning emitted
+```
+
++ `let y = 6` ifadesi **bir değer döndürmez**, bu yüzden **`x`’in bağlanabileceği (atanabileceği) bir değer yoktur**. Bu, `C` ve `Ruby` gibi diğer dillerde olanlardan farklıdır; o dillerde atama işlemi, atamanın değerini döndürür(Yani, `C` ve `Ruby` gibi bazı diğer dillerden farklıdır; o dillerde **atama işlemi bir değer döndürür**). O dillerde `x = y = 6` yazabilirsiniz ve hem `x` hem de `y` 6 değerini alır; Rust'ta durum böyle değildir.
+
++ **İfadeler(Expression)** bir değeri hesaplar ve Rust'ta yazacağınız kodun geri kalanının çoğunu oluşturur.  `5 + 6` gibi matematiksel bir işlemi düşünün; bu, `11` değerini veren bir ifadedir(*expression*). İfadeler(*expression*) deyimlerin(*statment*) parçası olabilir: `Liste 3-1`'de, `let y = 6;` deyimindeki(*statment*) `6` rakamı, `6` değerini veren bir ifadedir(*expression*). Bir fonksiyonu çağırmak bir ifadedir(*expression*). Süslü parantezlerle oluşturulan yeni bir kapsam bloğu (scope block) da bir ifadedir(*expression*), örneğin:
+
+```rust
+fn main() {
+    let y = {
+        let x = 3;
+        x + 1
+    };
+
+    println!("The value of y is: {y}");
+}
+```
+
+```
+The value of y is: 4
+```
+
++ Şu ifade:
+
+```rust
+{
+    let x = 3;
+    x + 1
+}
+```
+
++ bu durumda `4` değerini veren(*evaluate*) bir ifadedir(*expression*). Bu değer, `let` deyiminin(*statement*) bir parçası olarak `y` değişkenine bağlanır.
+
+
+> [!CAUTION]
+> + **`x + 1` satırının sonunda noktalı virgül(`;`) olmadığına dikkat edin**, bu şimdiye kadar gördüğünüz satırların çoğundan farklıdır.
+> + İfadelerin(*expression*) sonuna noktalı virgül konulmaz.
+> + Bir ifadenin(*expression*) sonuna noktalı virgül eklerseniz, onu bir deyime dönüştürmüş olursunuz ve o artık bir değer döndürmez.
+
++ Bir sonraki bölümde fonksiyon dönüş değerlerini ve ifadeleri(*expression*) incelerken bunu aklınızda bulundurun.
+
+### 3.3.3. Değer Döndüren Fonksiyonlar
+
++ Fonksiyonlar, kendilerini çağıran koda değer döndürebilir. Dönüş değerlerini adlandırmayız, ancak türlerini bir oktan (`->`) sonra bildirmemiz gerekir. Rust'ta bir fonksiyonun dönüş değeri, fonksiyon gövdesinin bloğundaki son ifadenin(*expression*) değeriyle eş anlamlıdır. `return` anahtar kelimesini kullanıp bir değer belirterek bir fonksiyondan erken dönebilirsiniz, ancak çoğu fonksiyon son ifadeyi örtük olarak (implicitly) döndürür. ("Örtük olarak" (İngilizcede "implicitly") şu anlama gelir: **Açıkça belirtmeden, otomatik olarak, arka planda kendiliğinden gerçekleşen** bir şeyi ifade eder.)
++ İşte değer döndüren bir fonksiyon örneği:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn five() -> i32 {
+    5
+}
+
+fn main() {
+    let x = five();
+
+    println!("The value of x is: {x}");
+}
+```
+
++ `five` fonksiyonunda ne bir fonksiyon çağrısı, ne bir makro, ne de bir `let` deyimi vardır; sadece tek başına 5 sayısı bulunur. Bu, Rust'ta tamamen geçerli bir fonksiyondur. Fonksiyonun dönüş türünün de `-> i32` olarak belirtildiğine dikkat edin. Bu kodu çalıştırmayı deneyin; çıktı şöyle olmalıdır:
+
+```shell
+$ cargo run
+   Compiling functions v0.1.0 (file:///projects/functions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running `target/debug/functions`
+The value of x is: 5
+```
+
++ `five` fonksiyonundaki `5`, fonksiyonun dönüş değeridir; bu yüzden dönüş türü `i32`'dir. Bunu biraz daha detaylı inceleyelim. Burada iki önemli nokta var: Birincisi, `let x = five();` satırı, bir değişkeni başlatmak için bir fonksiyonun dönüş değerini kullandığımızı gösterir. `five` fonksiyonu 5 döndürdüğü için, bu satır şununla aynıdır:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let x = 5;
+}
+```
+
++ İkincisi, `bes` fonksiyonunun hiçbir parametresi yoktur ve dönüş değerinin türünü tanımlar, ancak fonksiyonun gövdesi, değerini döndürmek istediğimiz bir **ifade(*expression*)** olduğu için sonunda noktalı virgül olmayan yalnız bir `5`'ten ibarettir.
++ Başka bir örneğe bakalım:
+
+**Dosya adı:**
+
+```rust
+fn main() {
+    let x = plus_one(5);
+
+    println!("The value of x is: {x}");
+}
+
+fn plus_one(x: i32) -> i32 {
+    x + 1
+}
+```
+
++ Bu kodu çalıştırmak `The value of x is: 6` ekrana yazdıracaktır. Peki `x + 1`'i içeren satırın sonuna noktalı virgül koyarak onu bir ifadeden(*expression*) deyime(*statement*) dönüştürürsek ne olur?
+
+**Bu kod derlenmez!**
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let x = plus_one(5);
+
+    println!("The value of x is: {x}");
+}
+
+fn plus_one(x: i32) -> i32 {
+    x + 1;
+}
+```
+
++ Bu kodu derlemek aşağıdaki gibi bir hata üretecektir:
+
+```rust
+$ cargo run
+   Compiling functions v0.1.0 (file:///projects/functions)
+error[E0308]: mismatched types
+ --> src/main.rs:7:24
+  |
+7 | fn plus_one(x: i32) -> i32 {
+  |    --------            ^^^ expected `i32`, found `()`
+  |    |
+  |    implicitly returns `()` as its body has no tail or `return` expression
+8 |     x + 1;
+  |          - help: remove this semicolon to return this value
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `functions` (bin "functions") due to 1 previous error
+```
+
++ Ana hata mesajı olan **“mismatched types” (tür uyuşmazlığı)**, bu koddaki temel sorunu ortaya koyar. `plus_one` fonksiyonunun tanımı, **`i32` türünde bir değer döndüreceğini** söyler; ancak statement’lar (deyimler) bir değere değerlendirilmez ve bu durum **`()` (unit türü)** ile ifade(*expressed*) edilir. Bu nedenle aslında hiçbir değer döndürülmez; bu da fonksiyon tanımıyla çelişir ve bir hataya yol açar. Bu çıktıda Rust, bu sorunu düzeltmeye yardımcı olabilecek bir mesaj verir: Hatayı düzeltecek olan noktalı virgülün(`;`) kaldırılmasını önerir.
+## 3.4. Yorum Satırları(Comments)
+
++ Tüm programcılar kodlarını anlaşılır kılmaya çalışır, ancak bazen ekstra açıklama gerekebilir. Bu durumlarda programcılar, kaynak kodlarına derleyicinin(*compiler*) görmezden geleceği, ancak kodu okuyan kişilerin faydalı bulabileceği yorumlar(*comments*) bırakırlar.
++ İşte basit bir yorum örneği:
+
+```rust
+#![allow(unused)]
+fn main() {
+	// hello, world
+}
+```
+
++ Rust'ta yaygın (idiomatik) yorum stili, yorumun iki eğik çizgi (`//`) ile başlamasıdır ve yorum satırın sonuna kadar devam eder. Tek bir satırı aşan yorumlar için her satıra `//` eklemeniz gerekir, şu şekilde:
+
+```rust
+#![allow(unused)]
+fn main() {
+// Burada karmaşık bir şeyler yapıyoruz, o kadar uzun ki
+// bunu yapmak için birden fazla yorum satırına ihtiyacımız var! Vay canına!
+// Umuyoruz ki bu yorum neler olup bittiğini açıklayacaktır.
+}
+```
+
++ Yorumlar, kod içeren satırların sonuna da yerleştirilebilir:
+
+**Dosya adı:** `scr/main.rs`
+
+```rust
+fn main() {
+    let lucky_number = 7; // Bugün şanslı hissediyorum
+}
+```
+
++ Ancak yorumları daha sık şu formatta, yani açıklama ekleneceği kodun üzerindeki ayrı bir satırda görürsünüz:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+
+```
+
++ Rust ayrıca, Bölüm 14'teki "[Crates.io'da Bir Crate Yayınlamak](https://doc.rust-lang.org/book/ch14-02-publishing-to-crates-io.html)" bölümünde ele alacağımız başka bir yorum türüne, yani **dokümantasyon yorumlarına** (*documentation comments*) da sahiptir.
+## 3.5. Kontrol Akışı (Control Flow)
+
++ Bir koşulun **doğru (true)** olup olmamasına bağlı olarak bazı kodları çalıştırabilme ve bir koşul **doğru olduğu sürece** bazı kodları tekrar tekrar çalıştırabilme yeteneği, çoğu programlama dilinde temel yapı taşlarındandır. Rust dilinde kodun yürütülme akışını kontrol etmenizi sağlayan en yaygın yapılar **`if` ifadeleri (if expressions)** ve **döngülerdir (loops)**.
+
+### 3.5.1. if İfadeleri (if Expressions)
+
++ Bir `if` ifadesi, koşullara bağlı olarak kodunuzun farklı yollar izlemesini sağlar. Bir koşul verirsiniz ve ardından şöyle dersiniz: "Eğer bu koşul sağlanırsa, bu kod bloğunu çalıştır. Eğer koşul sağlanmazsa, bu kod bloğunu çalıştırma."
++ `if` ifadesini(*expression*) denemek için projeler dizininizde `branches` adında yeni bir proje oluşturun. `src/main.rs` dosyasına aşağıdaki kodu yazın:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let number = 3;
+
+    if number < 5 {
+        println!("condition was true");
+    } else {
+        println!("condition was false");
+    }
+}
+```
+
++ Tüm `if` ifadeleri(*expressions*) `if` anahtar kelimesiyle başlar ve ardından bir koşul gelir. Bu örnekte koşul, `number` değişkeninin değerinin 5’ten küçük olup olmadığını kontrol eder. Koşul **doğru** (`true`) ise çalıştırılacak kod bloğunu, koşulun hemen ardına süslü parantezlerin(`{}`) içine yerleştiririz. `if` ifadelerindeki koşullarla ilişkilendirilmiş kod bloklarına bazen, Bölüm 2'deki ["Tahmini sayıyı gizli sayıyla karşılaştırma"](https://doc.rust-lang.org/book/ch02-00-guessing-game-tutorial.html#comparing-the-guess-to-the-secret-number) kısmında tartıştığımız `match` ifadelerinde olduğu gibi **kol** (*arm*) denir.
++ İsteğe bağlı olarak, koşulun yanlış olarak değerlendirilmesi durumunda programa çalıştıracağı alternatif bir kod bloğu vermek için burada yaptığımız gibi bir `else` ifadesi de ekleyebiliriz. Eğer bir `else` ifadesi(*expression*) belirtmezseniz ve koşul yanlışsa(`false`), program `if` bloğunu atlayıp bir sonraki kod parçasına geçer.
++ Bu kodu çalıştırmayı deneyin; aşağıdaki çıktıyı görmelisiniz:
+
+```rust
+$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/debug/branches`
+condition was true
+```
+
++ Ne olacağını görmek için `number` değişkeninin değerini, koşulu **`false` (yanlış)** yapacak bir değerle değiştirmeyi deneyelim:
+
+```rust
+fn main() {
+    let number = 7;  // <=============
+
+    if number < 5 {
+        println!("condition was true");
+    } else {
+        println!("condition was false");
+    }
+}
+```
+
++ Programı tekrar çalıştırın ve çıktıyı inceleyin:
+
+```rust
+$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/debug/branches`
+condition was false
+```
+
++ Ayrıca, bu koddaki koşulun **mutlaka** bir `bool` (mantıksal değer) olması gerektiğini de belirtmekte fayda var. Eğer koşul bir `bool` değilse, bir hata alırız. Örneğin, aşağıdaki kodu çalıştırmayı deneyin:
+
+**Bu kod derlenmez!**
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let number = 3;
+
+    if number {  // <==============
+        println!("number was three");
+    }
+}
+```
+
++ Bu kez `if` koşulu 3 değerine karşılık gelir ve Rust bir hata verir.
+
+```rust
+$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+error[E0308]: mismatched types
+ --> src/main.rs:4:8
+  |
+4 |     if number {
+  |        ^^^^^^ expected `bool`, found integer
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `branches` (bin "branches") due to 1 previous error
+```
+
++ Hata, Rust’un bir **bool (boolean)** beklediğini ancak bir **tamsayı (integer)** aldığını gösterir. Rust, Ruby ve JavaScript gibi dillerin aksine, Boolean olmayan türleri otomatik olarak Boolean’a dönüştürmeye çalışmaz. Belirgin (explicit) olmalı ve `if` ifadesine(*expression*) koşul olarak her zaman bir *Boolean* sağlamalısınız. Örneğin, bir sayının **0’a eşit olmadığı durumlarda** `if` bloğunun çalışmasını istiyorsak, `if` ifadesini şu şekilde değiştirebiliriz:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let number = 3;
+
+    if number != 0 {   // <=============
+        println!("number was something other than zero");
+    }
+}
+```
+
++ Bu kodu çalıştırdığınızda, `number was something other than zero` yazdırılacaktır.
+
+####  3.5.1.1. `else if` ile Birden Fazla Koşulu Ele Alma
+
++ `if` ve `else`'i bir `else if` ifadesinde birleştirerek birden fazla koşul kullanabilirsiniz. Örneğin:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let number = 6;
+
+    if number % 4 == 0 {
+        println!("number is divisible by 4");
+    } else if number % 3 == 0 {
+        println!("number is divisible by 3");
+    } else if number % 2 == 0 {
+        println!("number is divisible by 2");
+    } else {
+        println!("number is not divisible by 4, 3, or 2");
+    }
+}
+```
+
++ Bu programın izleyebileceği dört olası yol vardır. Çalıştırdıktan sonra aşağıdaki çıktıyı görmelisiniz:
+
+```rust
+$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/debug/branches`
+number is divisible by 3
+```
+
++ Bu program yürütüldüğünde, her bir `if` ifadesini sırayla kontrol eder ve koşulu **doğru** (`true`) olan ilk gövdeyi çalıştırır.  6'nın 2'ye bölünebilir olmasına rağmen `number is divisible by 2` çıktısını görmediğimize, ayrıca `else` bloğundan `number is not divisible by 4, 3, or 2` metnini de görmediğimize dikkat edin. Bunun nedeni, Rust'ın yalnızca ilk `true` koşulu için bloğu çalıştırması ve bir tanesini bulduğunda geri kalanını denetlememesidir.
++ Çok fazla `else if` ifadesi(*expressions*) kullanmak kodunuzu karmaşıklaştırabilir; bu nedenle birden fazla koşulunuz varsa kodunuzu yeniden düzenlemek (*refactor*) isteyebilirsiniz. **Bölüm 6**, bu gibi durumlar için Rust'ın `match` adı verilen güçlü bir dallanma yapısını açıklamaktadır.
+#### 3.5.1.2. `let` Deyiminde `if` Kullanımı
+
++ `if` bir ifade(*expression*) olduğu için, `Liste 3-2`'de olduğu gibi bir `let` deyiminin(*statement*) sağ tarafında sonucu bir değişkene atamak için kullanabiliriz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let condition = true;
+    let number = if condition { 5 } else { 6 };
+
+    println!("The value of number is: {number}");
+}
+```
+
+> **Liste 3-2:** Bir `if` ifadesinin(*expression*) sonucunu bir değişkene atama
+
++ Bu örnekte `number` değişkeni, `if` ifadesinin sonucuna göre bir değere bağlanır (atanır). Ne olduğunu görmek için bu kodu çalıştırın:
+
+```rust
+$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running `target/debug/branches`
+The value of number is: 5
+```
+
++ Kod bloklarının, içlerindeki(`{ ... }`) son ifadeye göre değerlendirildiğini ve sayıların tek başlarına da birer ifade(*expression*) olduklarını unutmayın. Bu durumda, tüm `if` ifadesinin değeri hangi kod bloğunun çalıştığına bağlıdır. Bu, `if`'in her bir kolundan (*arm*) sonuç olarak gelme potansiyeli olan değerlerin **aynı tipte** olması gerektiği anlamına gelir; `Liste 3-2`'de hem `if` kolunun(*arm*) hem de `else` kolunun(*arm*) sonuçları `i32` tam sayılarıydı. Eğer aşağıdaki örnekte olduğu gibi tipler uyuşmazsa, bir hata alırız:
+
+**Bu kod derlenmez!**
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let condition = true;
+
+    let number = if condition { 5 } else { "six" };
+
+    println!("The value of number is: {number}");
+}
+```
+
++ Bu kodu derlemeye çalıştığımızda bir hata alırız. `if` ve `else` kollarının(*arm*) değer türleri birbiriyle uyumsuzdur ve Rust, programdaki sorunun tam olarak nerede bulunacağını belirtir:
+
+```rust
+$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+error[E0308]: `if` and `else` have incompatible types
+ --> src/main.rs:4:44
+  |
+4 |     let number = if condition { 5 } else { "six" };
+  |                                 -          ^^^^^ expected integer, found `&str`
+  |                                 |
+  |                                 expected because of this
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `branches` (bin "branches") due to 1 previous error
+```
+
++ `if` bloğundaki ifade bir tam sayıya (integer), `else` bloğundaki ifade ise bir dizgiye (string) döndürür(bu cümlede aslı kullanılan fil: evaluate = değerlendirilir). Bu çalışmayacaktır; çünkü değişkenlerin tek bir türü(*type*) olmalıdır ve Rust'ın, `number` değişkeninin hangi türde(*type*) olduğunu derleme aşamasında kesin olarak bilmesi gerekir. `number` değişkenin türünü bilmek, derleyicinin `number` değişkeni kullandığımız her yerde türün geçerli olduğunu doğrulamasına olanak tanır. Eğer `number` değişkeninin türü(*type*) yalnızca çalışma zamanında (*runtime*) belirlenseydi, Rust bunu yapamazdı. Derleyici, herhangi bir değişken için birden fazla varsayımsal türü(*type*) takip etmek zorunda kalsaydı, hem çok daha karmaşık olurdu hem de kod hakkında daha az garanti verebilirdi.
+### 3.5.2. Döngüler ile Tekrarlama (Repetition with Loops)
+
++ Bir kod bloğunu birden fazla kez çalıştırmak çoğu zaman kullanışlıdır.  Bu görev için Rust, döngü gövdesindeki kodu sonuna kadar çalıştıracak ve ardından hemen en baştan tekrar başlatacak birkaç farklı **döngü** (loop) sunar. Döngülerle denemeler yapmak için `loops` adında yeni bir proje oluşturalım.
++ Rust'ın üç çeşit döngüsü vardır: `loop`, `while` ve `for`. Şimdi her birini tek tek deneyelim.
+#### 3.5.2.1. `loop` ile Kod Tekrarlama
+
++ `loop` anahtar kelimesi, Rust'a bir kod bloğunu sonsuza dek veya siz açıkça durmasını söyleyene kadar tekrar tekrar çalıştırmasını söyler.
++ Örnek olarak, `loops` dizininizdeki `src/main.rs` dosyasını şu şekilde değiştirin:
+
+**Dosya adı:** `scr/main.rs`
+
+```rust
+fn main() {
+    loop {
+        println!("again!");
+    }
+}
+```
+
++ Bu programı çalıştırdığımızda, programı manuel olarak durdurana kadar sürekli olarak **"again!"** yazıldığını göreceğiz. Çoğu terminal, sürekli döngüye giren bir programı kesmek için **`ctrl-C`** klavye kısayolunu destekler. Bir deneyin:
+
+```rust
+$ cargo run
+   Compiling loops v0.1.0 (file:///projects/loops)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running `target/debug/loops`
+again!
+again!
+again!
+again!
+^Cagain!
+```
+
++ `^C` sembolü, **ctrl-C** tuşlarına bastığınız yeri temsil eder. Kodun kesme sinyalini(*interrupt signal*) aldığı sırada döngünün neresinde olduğuna bağlı olarak, `^C`'den sonra "tekrar!" kelimesini görebilir veya görmeyebilirsiniz.
++ Neyse ki Rust, kod kullanarak bir döngüden çıkmanın bir yolunu da sunar. Programın döngüyü ne zaman durduracağını söylemek için döngü içine **`break`** anahtar kelimesini yerleştirebilirsiniz. Bölüm 2'deki **"2.5.1. Doğru Tahminden Sonra Çıkış"** kısmında, kullanıcı doğru sayıyı tahmin edip oyunu kazandığında programdan çıkmak için bunu yaptığımızı hatırlayın.
++ Tahmin oyununda ayrıca `continue` de kullandık; bu anahtar kelime, bir döngüde programa döngünün bu yinelemesinde(*iteration*) kalan tüm kodu atlamasını(üzerinden atla) ve bir sonraki yinelemeye(*iteration*) geçmesini söyler.
+#### 3.5.2.2. Döngülerden Değer Döndürme (Returning Values from Loops)
+
++ `loop` kullanımının amaçlarından biri, başarısız olma ihtimali olan bir işlemi tekrar denemektir. Örneğin, bir thread’in işini tamamlayıp tamamlamadığını kontrol etmek gibi (İnternet bağlantısı gelene kadar tekrar denemek veya Kullanıcı doğru giriş yapana kadar sormak). Ayrıca bu işlemin sonucunu döngüden çıkıp kodunuzun geri kalanına aktarmanız gerekebilir. Bunu yapmak için, döngüyü durdurmak için kullandığınız `break` ifadesinden sonra döndürülmesini istediğiniz değeri ekleyebilirsiniz; bu değer, aşağıda gösterildiği gibi kullanabilmeniz için döngüden dışarı aktarılacaktır:
+
+```rust
+fn main() {
+    let mut counter = 0;
+
+    let result = loop {
+        counter += 1;
+
+        if counter == 10 {
+            break counter * 2;
+        }
+    };
+
+    println!("The result is {result}");
+}
+```
+
++ Döngüden(*loop*) önce, `counter` adında bir değişken tanımlıyoruz ve onu `0` ile başlatıyoruz. Ardından, döngüden dönen değeri tutması için `result` adında bir değişken tanımlıyoruz. Döngünün(*loop*) her tekrarlanmasında `counter` değişkenine `1` ekliyoruz ve ardından `counter`'ın `10`'a eşit olup olmadığını kontrol ediyoruz. Eşit olduğunda, `break` anahtar kelimesini `counter * 2` değeriyle birlikte kullanıyoruz. Döngüden sonra, `result` değişkenine değer atayan deyimi(*statement*) bitirmek için bir noktalı virgül kullanıyoruz. Son olarak, bu örnekte `20` olan `result` değerini yazdırıyoruz.
+
+> [!CAUTION]
+> Bir döngünün içinden `return` ile de çıkabilirsiniz. `break` yalnızca mevcut döngüden çıkarken, `return` her zaman mevcut fonksiyondan çıkar.
+
+#### 3.5.2.3. Döngü Etiketleriyle Belirsizliği Gidermek
+
++ İç içe döngüleriniz varsa, `break` ve `continue` o noktadaki en içteki döngüye(*loop*) uygulanır. İsteğe bağlı olarak, bir döngüye bir **döngü etiketi** (*loop label*) atayabilir; ardından bu etiketi `break` veya `continue` ile kullanarak, bu anahtar kelimelerin en içteki döngü(*loop*) yerine etiketlenmiş döngüye(*loop label*) uygulanmasını sağlayabilirsiniz. Döngü etiketleri tek tırnak (`'`) işareti ile başlamalıdır. İşte iki iç içe döngü(*nested loops*) içeren bir örnek:
+
+```rust
+fn main() {
+    let mut count = 0;
+    'counting_up: loop {
+        println!("count = {count}");
+        let mut remaining = 10;
+
+        loop {
+            println!("remaining = {remaining}");
+            if remaining == 9 {
+                break;
+            }
+            if count == 2 {
+                break 'counting_up;
+            }
+            remaining -= 1;
+        }
+
+        count += 1;
+    }
+    println!("End count = {count}");
+}
+```
+
++ Dış döngü `'counting_up` etiketine sahiptir ve 0'dan 2'ye kadar sayacaktır. Etiketi olmayan iç döngü ise 10'dan 9'a doğru geri sayar. Etiket belirtmeyen ilk `break` ifadesi, yalnızca iç döngüden çıkacaktır. `break 'counting_up;` ifadesi ise dış döngüden çıkış yapacaktır. Bu kod şunları yazdırır:
+
+```rust
+$ cargo run
+   Compiling loops v0.1.0 (file:///projects/loops)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running `target/debug/loops`
+count = 0
+remaining = 10
+remaining = 9
+count = 1
+remaining = 10
+remaining = 9
+count = 2
+remaining = 10
+End count = 2
+```
+
+#### 3.5.2.4. `while` kullanarak koşullu döngüleri basitleştirme
+
++ Bir programın sıklıkla döngü(*loop*) içinde bir koşulu değerlendirmesi gerekir. Koşul `true` olduğu sürece döngü çalışır. Koşul artık doğru olmadığında, program döngüyü durdurmak için `break` fonksiyonunu çağırır. Bu tür bir davranışı `loop`, `if`, `else` ve `break` kombinasyonunu kullanarak uygulamak mümkündür; isterseniz bunu şu an bir programda deneyebilirsiniz. Ancak bu kalıp o kadar yaygındır ki, Rust bunun için **`while`** döngüsü adı verilen yerleşik bir dil yapıya(*built-in language construct*) sahiptir. `Liste 3-3`'te, programı üç kez döndürmek, her seferinde geri sayım yapmak ve ardından döngüden sonra bir mesaj yazdırıp çıkmak için `while` kullanıyoruz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let mut number = 3;
+
+    while number != 0 {
+        println!("{number}!");
+
+        number -= 1;
+    }
+
+    println!("LIFTOFF!!!");
+}
+```
+
+> **Liste 3-3:** Bir koşul `true` olduğu sürece kodu çalıştırmak için `while` döngüsü kullanmak
+
++ Bu yapı, `loop`, `if`, `else` ve `break` kullandığınızda gerekli olacak pek çok iç içe geçmeyi (nesting) ortadan kaldırır ve daha açıktır. Koşul **doğru** (`true`) olarak değerlendirildiği sürece kod çalışır; aksi takdirde döngüden çıkılır.
+#### 3.5.2.4. `for` ile Koleksiyon Üzerinde Gezmek (Looping Through a Collection with for)
+
++ Bir dizi(*array*) gibi koleksiyonun elemanları üzerinde gezinmek(`loop over`) için `while` yapısını kullanmayı seçebilirsiniz. Örneğin, `Liste 3-4`'teki döngü, `a` dizisindeki(*array*) her bir elemanı yazdırır.
+
+**Dosya adı:** `scr/main.rs`
+
+```rust
+fn main() {
+    let a = [10, 20, 30, 40, 50];
+    let mut index = 0;
+
+    while index < 5 {
+        println!("the value is: {}", a[index]);
+
+        index += 1;
+    }
+}
+```
+
+> `Liste 3-4`: Bir `while` döngüsü kullanarak bir koleksiyonun her bir elemanı üzerinde gezinme(` Looping through`)
+
++ Burada kod, dizinin elemanları boyunca yukarı doğru sayar. İndeks `0`'dan başlar ve dizideki son indekse ulaşana kadar (yani `indeks < 5` artık `true` olmayana kadar) döngüye devam eder. Bu kodu çalıştırmak dizideki her elemanı yazdıracaktır:
+
+```
+$ cargo run
+   Compiling loops v0.1.0 (file:///projects/loops)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.32s
+     Running `target/debug/loops`
+the value is: 10
+the value is: 20
+the value is: 30
+the value is: 40
+the value is: 50
+```
+
++ Beklendiği gibi, beş dizi değerinin tamamı terminalde görünür. `indeks` bir noktada `5` değerine ulaşacak olsa da, döngü diziden altıncı bir değeri getirmeye çalışmadan önce yürütmeyi durdurur.
+
++ Ancak bu yaklaşım hataya açıktır; indeks değeri veya test koşulu yanlışsa programın paniklemesine (çökmesine) neden olabiliriz. Örneğin, `a` dizisinin tanımını dört elemanlı olacak şekilde değiştirip koşulu `while indeks < 4` olarak güncellemeyi unutursanız, kod panikler. Ayrıca yavaştır; çünkü derleyici, döngünün her yinelemesinde(*iteration*) indeksin dizi(*array*) sınırları içinde olup olmadığının koşullu denetimini gerçekleştirmek için çalışma zamanı(*runtime*) kodu ekler.
+
++ Daha kısa bir alternatif olarak, bir `for` döngüsü kullanabilir ve bir koleksiyondaki her öğe(*item*) için belirli bir kodu çalıştırabilirsiniz. Bir `for` döngüsü, `Liste 3-5`'teki kod gibi görünür.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let a = [10, 20, 30, 40, 50];
+
+    for element in a {
+        println!("the value is: {element}");
+    }
+}
+```
+
+> `Liste 3-5`: Bir `for` döngüsü kullanarak bir koleksiyonun her bir elemanı üzerinde gezinme(` Looping through`)
+
++ Bu kodu çalıştırdığımızda, `Liste 3-4`'teki ile aynı çıktıyı görürüz. Daha da önemlisi, kodun güvenliğini artırdık ve dizinin sonuna kadar gidilmemesi veya yeterince gidilmemesi ve bazı öğelerin atlanması sonucu oluşabilecek hataların olasılığını ortadan kaldırdık. `for` döngülerinden üretilen makine kodu daha verimli olabilir çünkü her yinelemede(*iteration*) dizinin uzunluğunun indeksle karşılaştırılmasına gerek kalmaz.
+
++ `for` döngüsünü kullandığınızda, Liste 3-4'te kullanılan yöntemin aksine, dizideki değer sayısını değiştirirseniz başka herhangi bir kodu değiştirmeyi hatırlamanız gerekmez.
+
++ `for` döngülerinin güvenliği ve kısalığı, onları Rust'ta en yaygın kullanılan döngü yapısı yapar. Hatta `Liste 3-3`'teki `while` döngüsü kullanılan geri sayım örneğinde(*countdown example*) olduğu gibi, bir kodu belirli bir sayıda çalıştırmak istediğiniz durumlarda bile çoğu "Rustacean" (Rust kullanıcısı) bir `for` döngüsü kullanır. Bunu yapmanın yolu, standart kütüphane tarafından sağlanan ve bir(başlangıç → 1) sayıdan başlayıp diğer(bitiş →  4) bir sayıdan önce biten tüm sayıları sırayla üreten bir **`Range`** kullanmaktır. (`1..4` → 1’den başlar, **4 hariç** (yani 1, 2, 3))
+
++ İşte bir `for` döngüsü ve henüz bahsetmediğimiz başka bir metot olan, aralığı tersine çeviren `rev` (*reverse*) kullanıldığında geri sayımın(*countdown*) nasıl görüneceği:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    for number in (1..4).rev() {
+        println!("{number}!");
+    }
+    println!("LIFTOFF!!!");
+}
+```
+
+**Kod Çıktısı:**
+
+```
+3!  
+2!  
+1!  
+LIFTOFF!!!
+```
+
++ Bu kod biraz daha şık, değil mi?
+## 3.6. Özet(Summary)
+
++ Başardınız! Bu oldukça kapsamlı bir bölümdü: Değişkenler, skaler ve bileşik veri tipleri, fonksiyonlar, yorum satırları, `if` ifadeleri(*expressions*) ve döngüler hakkında çok şey öğrendiniz.
++ Bu bölümde tartışılan kavramları pekiştirmek için aşağıdaki programları oluşturmayı deneyin:
+	- Sıcaklık birimlerini Fahrenheit ve Celsius arasında dönüştürün.
+	- n'inci Fibonacci sayısını hesaplayın.
+	- "*The Twelve Days of Christmas*" Noel şarkısının sözlerini, şarkıdaki tekrarlardan yararlanarak (döngülerle) yazdırın.
++ Devam etmeye hazır olduğunuzda, Rust’ta diğer programlama dillerinde yaygın olmayan bir kavramdan bahsedeceğiz: **ownership (sahiplik)**.
+
+# 4. Sahipliği (Ownership) Anlamak
+
++ Ownership (sahiplik), Rust’ın en **özgün(benzersiz)** özelliğidir ve dilin geri kalanı üzerinde derin etkileri vardır.
++ Rust’ın bir _garbage collector_ (çöp toplayıcı) kullanmadan bellek güvenliği garantileri verebilmesini sağlar. Bu yüzden ownership’in nasıl çalıştığını anlamak çok önemlidir.
++ Bu bölümde ownership kavramını, bununla ilişkili bazı özellikleri — **borrowing (ödünç alma)**, **slice’lar** ve Rust’ın veriyi bellekte nasıl düzenlediğini — ele alacağız.
+## 4.1. Sahiplik (Ownership) Nedir?
+
++ Ownership (sahiplik), bir Rust programının belleği nasıl yöneteceğini belirleyen kurallar bütünüdür.
++ Çalışan tüm programlar, bilgisayarın belleğini nasıl kullanacaklarını yönetmek zorundadır.
++ Bazı programlama dillerinde, program çalışırken artık kullanılmayan belleği düzenli olarak tespit edip temizleyen bir **çöp toplayıcı (garbage collector)** bulunur.
++ Diğer bazı dillerde ise programcı belleği açıkça ayırmak (_allocate_) ve serbest bırakmak (_free_) zorundadır.
+
+| **Yaklaşım**        | **Örnek Diller** | **Avantajı**        | **Dezavantajı**                           |
+| ------------------- | ---------------- | ------------------- | ----------------------------------------- |
+| **Çöp Toplayıcı**   | Java, Python     | Güvenli, kolay.     | Çalışma zamanı yükü (yavaşlama).          |
+| **Manuel Yönetim**  | C, C++           | Tam kontrol, hızlı. | Hata yapmaya çok açık (bellek sızıntısı). |
+| **Sahiplik (Rust)** | Rust             | Hızlı ve güvenli.   | Öğrenme eğrisi biraz daha diktir.         |
+
++ Rust ise üçüncü bir yaklaşım kullanır:
+	- Bellek, derleyicinin denetlediği belirli kurallardan oluşan bir ownership sistemi aracılığıyla yönetilir.
+	- Bu kurallardan herhangi biri ihlal edilirse program derlenmez.
+	- Ownership’e ait özelliklerin hiçbiri program çalışırken performansı yavaşlatmaz.
++ Ownership birçok programcı için yeni bir kavram olduğundan, buna alışmak biraz zaman alabilir. Ancak iyi haber şu ki, Rust ve ownership sistemi kuralları konusunda deneyim kazandıkça, güvenli ve verimli kodu doğal biçimde yazmanın giderek daha kolaylaştığını göreceksiniz. Sabırlı olun ve pratik yapmaya devam edin.
++ Ownership’i anladığınızda, Rust’ı özgün kılan özellikleri kavramak için sağlam bir temel edinmiş olursunuz.
++ Bu bölümde ownership’i, oldukça yaygın bir veri yapısı olan **string’ler (metin dizileri)** üzerinden örneklerle öğreneceksiniz.
+
+
+> [!NOTE]
+> #### Yığın (Stack) ve Öbek (Heap)
+> + Pek çok programlama dili, yığın (stack) ve öbek (heap) hakkında sıkça düşünmenizi gerektirmez. Ancak Rust gibi bir sistem programlama dilinde, bir değerin yığında mı yoksa öbekte mi olduğu, dilin nasıl davrandığını ve sizin neden belirli kararlar almanız gerektiğini etkiler. Sahipliğin (ownership) bazı kısımları bu bölümün ilerleyen kısımlarında yığın ve öbekle ilişkilendirilerek anlatılacaktır; bu yüzden hazırlık olması açısından burada kısa bir açıklama yer almaktadır.
+> + Hem yığın hem de öbek, kodunuzun çalışma zamanında (runtime) kullanabileceği bellek parçalarıdır, ancak farklı şekillerde yapılandırılmışlardır.
+> ##### Stack (Yığın)
+> + **Yığın**(*stack*), değerleri alış sırasına göre saklar ve değerleri bu sıranın tersine göre çıkarır. Buna **son giren ilk çıkar** (Last In, First Out - LIFO) denir. 
+> + Bir tabak yığınını düşünün: Yeni tabaklar eklediğinizde onları yığının en üstüne koyarsınız ve bir tabağa ihtiyacınız olduğunda en üsttekini alırsınız. Ortadan veya alttan tabak eklemek veya çıkarmak pek işe yaramazdı! 
+> + Veri eklemeye yığına(*stack*) **itme** (*pushing onto the stack*), veri çıkarmaya ise yığından(*stack*) **çıkarma** (*popping off the stack*) denir. 
+> + Yığında(stack) saklanan tüm verilerin bilinen, sabit bir boyutu olmalıdır. Derleme zamanında(*compile time*) boyutu bilinmeyen veya boyutu değişebilecek veriler ise bunun yerine öbekte(*heap*) saklanmalıdır.
+> ##### Heap (Öbek)
+> + Heap daha az düzenlidir. Heap’e veri koyduğunuzda, belirli bir miktarda alan talep edersiniz.
+> + Bellek ayırıcı (_memory allocator_), heap içinde yeterince büyük boş bir alan bulur, burayı kullanımda olarak işaretler ve o konumun adresi olan bir **işaretçiyi** (*pointer*) döndürür. Bu işleme **heap üzerinde bellek ayırma (allocation)** denir. Genellikle kısaca _allocation_ olarak anılır. (Yığına(*stack*) değer itmek(*push*), tahsis etme(*allocation*) olarak kabul edilmez)
+> + Heap’teki verinin adresi olan pointer (işaretçi) sabit boyutlu olduğu için stack’te saklanabilir. Ancak asıl veriye erişmek için pointer’ı takip etmeniz gerekir.
+> + Bir restoran benzetmesi yapalım: İçeri girdiğinizde kaç kişi olduğunuzu söylersiniz. Görevli, size uygun boş bir masa bulur ve sizi oraya götürür. Grubunuzdan biri geç gelirse, hangi masaya oturduğunuzu sorarak sizi bulabilir. İşte pointer da buna benzer şekilde çalışır.
+> ##### Performans Farkı
+> + Stack'e veri itmek(*pushing*),  heap'te yer tahsis etmekten(*allocation*) daha hızlıdır; çünkü ayırıcı(*allocator*) hiçbir zaman yeni veriyi saklamak için yer aramak zorunda kalmaz; o konum her zaman yığının en üstüdür.
+> + Karşılaştırma yapıldığında, heap'te yer tahsis etmek(*allocation*) daha fazla iş gerektirir; çünkü ayırıcı(*allocator*) önce veriyi tutacak kadar büyük bir alan bulmalı ve ardından bir sonraki tahsisat için defter tutma (bookkeeping) işlemlerini yapmalıdır.
+> + Heap'teki veriye erişmek, genellikle stack'teki veriye erişmekten daha yavaştır çünkü oraya ulaşmak için bir işaretçiyi takip etmeniz gerekir. Günümüz işlemcileri, bellekte daha az zıpladıkları sürece daha hızlı çalışırlar.
+> + Benzetmeye devam edersek; birçok masadan sipariş alan bir garsonu düşünün. Bir sonraki masaya geçmeden önce tek bir masadaki tüm siparişleri almak en verimlisidir. A masasından, sonra B masasından, sonra tekrar A'dan ve tekrar B'den sipariş almak çok daha yavaş bir süreç olurdu. Aynı şekilde, bir işlemci birbirine yakın verilere (stack'de olduğu gibi) odaklandığında, birbirinden uzak verilere (heap'te olabileceği gibi) odaklanmasından daha iyi iş çıkarır.
+> ##### Fonksiyon Çağrıları ve Stack
+> + Kodunuz bir fonksiyonu çağırdığında, fonksiyona geçirilen değerler (potansiyel olarak heap’teki verilere işaret eden pointer’lar dahil) ve fonksiyonun yerel değişkenleri *yığına itilir(pushing onto the stack)*.
+> + Fonksiyon sona erdiğinde, bu değerler *yığından çıkarılır(popping off the stack)*.
+> ##### Ownership ile İlişkisi
+> + Kodun hangi bölümlerinin heap’teki hangi verileri kullandığını takip etmek, heap’teki gereksiz veri kopyalarını azaltmak ve kullanılmayan heap verilerini temizleyerek belleğin tükenmesini önlemek gibi sorunları ownership sistemi çözer.
+> + Ancak ownership’in temel amacının heap verisini yönetmek olduğunu bilmek, neden bu şekilde çalıştığını açıklamaya yardımcı olabilir.
+
+### 4.1.1. Ownership Kuralları
+
++ Öncelikle ownership kurallarına bakalım. Bu kuralları, bunları açıklayan örnekleri incelerken aklınızda bulundurun:
+	1. Rust’taki her değerin bir sahibi (**owner**) vardır.
+	2. Aynı anda yalnızca **bir tane** sahibi olabilir.
+	3. Sahibi kapsam (**scope**) dışına çıktığında, değer **drop edilir** (bellekten temizlenir).
+
+### 4.1.2. Değişken Kapsamı (Variable Scope)
+
++ Artık temel Rust sözdizimini geçtiğimiz için, örneklerde sürekli `fn main() { ... }` kodunu dahil etmeyeceğiz.
+
+> [!CAUTION]
+> + Eğer örnekleri takip ediyorsanız, bunları manuel olarak bir `main` fonksiyonunun içine yerleştirmeyi unutmayın.
+> + Bu sayede örneklerimiz biraz daha özlü olacak ve kalıplaşmış kodlar yerine asıl ayrıntılara odaklanmamızı sağlayacaktır. Yani, örnekler daha sade olacak ve ayrıntılara odaklanabileceğiz.
+
++ Ownership’e ilk örnek olarak bazı değişkenlerin kapsamına bakalım. **Scope (kapsam)**, bir program içinde bir öğenin geçerli olduğu aralığı ifade eder. Şu değişkeni ele alalım:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let s = "hello";
+}
+```
+
++ `s` değişkeni bir string literal'ine (dize sabitine) işaret eder; burada string'in değeri programımızın metnine sabit kodlanmıştır(**hardcoded**).
+
+> [!TIP]
+> Bu cümlede anlatılmak istenen şu:
+> ```rust
+> let s = "hello";
+> ```
+> Buradaki `"hello"` bir **string literal**’dır. Yani:
+> + Değeri programın içine **doğrudan yazılmıştır**.
+> + Çalışma zamanında oluşturulmaz.
+> + Derleme zamanında bellidir.
+> + Genellikle programın **binary’si içinde sabit bir veri olarak** saklanır.
+> 
+> Dolayısıyla `s` değişkeni heap’te yeni bir `String` üretmez. Sadece bellekte zaten var olan `"hello"` sabit metnine bir **referans** tutar.
+
++ Değişken, tanımlandığı noktadan başlayarak içinde bulunduğu kapsamın sonuna kadar geçerlidir.
++ `Liste 4-1`, `s` değişkeninin nerede geçerli olacağını açıklayan yorumlarla birlikte bir program gösterir.
+
+```rust
+fn main() {
+	{                      // s burada geçerli değil, çünkü henüz bildirilmedi
+        let s = "hello";   // s bu noktadan itibaren geçerlidir
+        // s ile bir şeyler yap
+    }                      // bu kapsam artık bitti ve s artık geçerli değil
+}
+```
+
+> **Liste 4-1:** Bir değişken ve geçerli olduğu kapsam
+
++ Başka bir ifadeyle burada iki önemli zaman noktası vardır:
+	- `s` kapsam içine girdiğinde geçerli olur.
+	- Kapsam dışına çıkana kadar geçerliliğini sürdürür.
++ Bu noktada, kapsamlar ile değişkenlerin ne zaman geçerli olduğu arasındaki ilişki, diğer programlama dillerindekine benzerdir. Şimdi bu anlayışın üzerine inşa ederek `String` türünü tanıtacağız.
+### 4.1.3. String Türü
+
++ Ownership kurallarını açıklayabilmek için, 3. Bölümdeki “3.1. Veri Türleri” kısmında ele aldıklarımızdan daha karmaşık bir veri türüne ihtiyacımız var.
++ Daha önce işlediğimiz türler sabit bir boyuta sahiptir, yığında (*stack*) saklanabilirler, kapsamları bittiğinde yığından(*stack*) çıkarılabilirler ve kodun başka bir bölümü aynı değeri farklı bir kapsamda kullanmak isterse hızlıca kopyalanarak yeni, bağımsız bir örnek(*instance*) oluşturulabilirler.
++ **Ancak öbekte(*heap*) saklanan verilere bakmak ve Rust'ın bu verileri ne zaman temizleyeceğini nasıl bildiğini keşfetmek istiyoruz ve `String` tipi bunun için harika bir örnektir(*example*).**
++ Bu bölümde `String`’in ownership ile ilgili yönlerine odaklanacağız. Bu özellikler yalnızca `String` için değil; ister standart kütüphaneden gelsin ister sizin tarafınızdan oluşturulmuş olsun, diğer karmaşık veri türleri için de geçerlidir. `String`’in ownership dışındaki özelliklerini ise 8. Bölümde ele alacağız.(8.2. UTF-8 Kodlamalı Metinlerin Dizeler İçinde Saklanması)
++ Bir metin değerinin programımıza sabit olarak kodlandığı **string literal** (metin sabitlerini) zaten görmüştük.(sabit olarak kodlama = hardcode)
+
+> [!TIP]
+> #### Hardcode (hard-coded) nedir?
+> **Hardcode (hard-coded)**, bir değerin programın içine **doğrudan sabit olarak yazılması** demektir.
+> Yani değer:
+> + Dışarıdan alınmaz (kullanıcıdan, dosyadan, API’den vs.)
+> + Çalışma zamanında değişmez
+> + Kodun içine gömülüdür
+> ```rust
+> let port = 8080;          // hard-coded değer
+> let name = "Tanju";       // hard-coded string literal
+> ```
+> Burada `8080` ve `"Tanju"` değerleri programın içine sabit olarak yazılmıştır. Değiştirmek için kodu değiştirip yeniden derlemek gerekir.
+> ##### Hardcode Olmayan Örnek
+> ```rust
+> let port = std::env::var("PORT").unwrap();
+> ```
+> Burada değer ortam değişkeninden geliyor; sabit değil.
+> ##### Kısaca
+> > Hardcode = Değeri kodun içine sabit olarak gömmek.
+> 
+> Genellikle küçük örneklerde sorun değildir; ancak gerçek uygulamalarda yapılandırma (config) değerlerini hard-code etmek iyi bir pratik değildir.
+
++ *String literal*’lar kullanışlıdır, ancak metin kullanmak isteyebileceğimiz her durum için uygun değildirler.
+	- Bunun bir nedeni değiştirilemez (*immutable*) olmalarıdır.
+	- Bir diğeri ise her string değerinin kodumuzu yazarken bilinemiyor olmasıdır: Örneğin, kullanıcı girdisi almak ve bunu saklamak istersek ne olur?
++ İşte bu gibi durumlar için Rust’ta `String` türü vardır. Bu tür heap üzerinde ayrılmış veriyi yönetir ve bu sayede derleme zamanında boyutu bilinmeyen miktarda metni saklayabilir.
++ Bir string literal’dan `String` oluşturmak için `from` fonksiyonu kullanılabilir:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let s = String::from("hello");
+}
+```
+
++ Çift iki nokta `::` operatörü, bu `from` fonksiyonunu `string_from` gibi bir isimle kullanmak yerine `String` türü altında bir isim alanı (**namespace**) ile kullanmamızı sağlar.
+	+ Buradaki çift iki nokta `::` operatörü, `from` fonksiyonunun `String` türü altında tanımlı olduğunu gösterir. Yani genel bir `string_from` gibi bir isim kullanmak yerine, bu fonksiyona `String::from` şeklinde erişiriz.
++ Bu sözdizimini Bölüm 5'teki "Metotlar"(5.3. Metot Sözdizimi) kısmında ve Bölüm 7'deki(Modül ağacındaki öğelere erişim yolları) modül yapılarından bahsederken daha ayrıntılı ele alacağız.
++ Bu tür string değiştirilebilir (mutable) olabilir:
+
+```rust
+let mut s = String::from("hello");
+
+s.push_str(", world!"); // push_str() bir String'e metin ekler
+
+println!("{s}"); // ekrana `hello, world!` yazdırır
+```
+
++ Peki buradaki fark nedir? Neden `String` değiştirilebilirken *string literal*’lar değiştirilemez?
++ Fark, bu iki türün belleği nasıl yönettiğinde yatmaktadır.
+
+
+> [!TIP]
+> ##### Bellek Yönetimi Farkı
+> Bu iki tür arasındaki temel farkı şöyle özetleyebiliriz:
+> + **String Literals (Metin Sabitleri):** Kodun içine gömülüdür, boyutları sabittir ve hızlıdırlar ancak değiştirilemezler.
+> + **String Türü:** Öbekte (heap) yer tutar. Çalışma anında büyüyebilir, küçülebilir ve içeriği tamamen değiştirilebilir.
+> 
+> **Özetle:** `String` türü, program çalışırken ne kadar yer kaplayacağını bilmediğimiz (kullanıcı girişi gibi) esnek metinler için kullanılır.
+
+### 4.1.4. Bellek ve Tahsis (Memory and Allocation)
+
++ Bir string literal söz konusu olduğunda, içeriği derleme zamanında bildiğimiz için metin doğrudan son oluşturulan çalıştırılabilir dosyanın (binary) içine sabit olarak yerleştirilir (hard-coded edilir). String literal’ların hızlı ve verimli olmasının nedeni budur. Ancak bu özellikler yalnızca string literal'inin değişmezliğinden (immutability) gelir.
++ Ne yazık ki, derleme zamanında boyutu bilinmeyen ve program çalışırken boyutu değişebilecek her metin parçası için belleği binary’nin içine sabit olarak koyamayız.
++ `String` türüyle değiştirilebilir ve büyüyebilen bir metni destekleyebilmek için, içeriği tutacak belleği **derleme zamanında boyutu bilinmeden** heap üzerinde ayırmamız gerekir.
+	1. Bellek, çalışma zamanında (_runtime_) bellek ayırıcıdan (_memory allocator_) talep edilmelidir.
+	2. String ile işimiz bittiğinde bu belleği tahsis ediciye geri döndürmenin bir yoluna ihtiyacımız var.
++ Birinci kısım bizim tarafımızdan yapılır: `String::from` çağrıldığında, onun uygulaması (implementation - yani fonksiyon ) ihtiyaç duyduğu belleği talep eder. Bu, programlama dillerinde neredeyse evrenseldir.
++ **Ancak ikinci kısım farklıdır.**
+	- **Çöp toplayıcısı (Garbage Collector - GC)** olan dillerde, GC artık kullanılmayan belleğin takibini yapar ve onu temizler, bizim bu konuda düşünmemize gerek kalmaz.
+	- GC olmayan çoğu dilde ise, belleğin ne zaman artık kullanılmadığını belirlemek ve onu tıpkı talep ederken yaptığımız gibi açıkça serbest bırakmak (free) bizim sorumluluğumuzdur.
+	- Bunu doğru yapmak tarihsel olarak zor bir programlama problemi olmuştur.
+	- Eğer unutursak belleği boşa harcarız. Eğer çok erken yaparsak geçersiz bir değişkenimiz olur.
+	- Eğer iki kez yaparsak, bu da bir hatadır(bug).
+	- Tam olarak bir "tahsis etme" (allocate) işlemini, tam olarak bir "serbest bırakma" (free) işlemiyle eşleştirmemiz gerekir.
++ **Rust farklı bir yol izler:**
+	- Bellek, ona sahip olan değişken kapsam (scope) dışına çıktığı anda otomatik olarak geri iade edilir.
+	- İşte Listing 4-1'deki kapsam örneğimizin string literal yerine String kullanan bir versiyonu:
+
+```rust
+fn main() {
+    {
+        let s = String::from("hello"); // s bu noktadan itibaren geçerlidir
+
+        // s ile bir şeyler yap
+    }                                  // bu kapsam artık bitti ve s artık
+                                       // geçerli değil
+}
+```
+
++ Bir değişken kapsam dışına çıktığında Rust bizim için özel bir fonksiyon çağırır. Bu fonksiyonun adı [drop](https://doc.rust-lang.org/std/ops/trait.Drop.html#tymethod.drop)’tur. `String` türünü yazan kişi, belleği geri verme kodunu `drop` fonksiyonunun içine yerleştirir. Rust kapanış süslü parantezine (`}`) gelindiğinde `drop`’u otomatik olarak çağırır. 
+
+> [!NOTE]
+> C++’ta, bir kaynağın (resource) yaşam süresinin sonunda serbest bırakılması desenine **RAII (Resource Acquisition Is Initialization)** denir. Eğer RAII kullanmışsanız, Rust’taki `drop` davranışı size tanıdık gelecektir.
+
++ Bu desen, Rust kodunun yazılış biçimi üzerinde derin bir etkiye sahiptir. Şu an basit görünebilir; ancak heap’te ayrılmış veriyi birden fazla değişkenin kullanmasını istediğimiz daha karmaşık durumlarda beklenmedik davranışlarla karşılaşabiliriz.
+
+> [!TIP]
+> Desen;
+> 1. `String` heap’te bellek ayırır.
+> 2. O `String`’in sahibi olan değişken scope dışına çıkar.
+> 3. Rust otomatik olarak `drop` fonksiyonunu çağırır.
+> 4. Heap belleği geri verilir.
+
++ Şimdi bu durumların bazılarını inceleyelim.
+
+#### 4.1.4.1. Move ile Değişkenler ve Verinin Etkileşimi
+
++ Rust’ta birden fazla değişken aynı veriyle farklı şekillerde etkileşime girebilir. `Liste 4-2`, bir tam sayı (integer) kullanan örneği göstermektedir.
 
 ```rust
 fn main() {
     let x = 5;
-    let y = x; // burada x kopyalanır, çünkü i32 Copy trait'ine sahiptir
-
-    println!("x = {}, y = {}", x, y); // ✅ her ikisi de geçerli
+    let y = x;
 }
 ```
 
-### Copy Trait nedir?
+> **Liste 4-2:** x değişkeninin tam sayı değerini y'ye atamak
 
-+ Rust'ta `Copy trait` bir değerin sahipliği taşınmadan (move olmadan) otomatik olarak kopyalanabileceğini belirtir.
-+ Yani, bir tür `Copy trait`'ini destekliyorsa, o türün değerleri **taşımak yerine kopyalanır.**
-
-#### Basit Açıklama:
-
-+ Normalde;
++ Bunun ne yaptığını muhtemelen tahmin edebiliriz: 
+	- "5 değerini `x`'e bağla; sonra `x` içindeki değerin bir kopyasını çıkar ve bunu `y`'ye bağla." Artık elimizde `x` ve `y` adında iki değişken var ve her ikisi de 5'e eşit. Gerçekten de olan budur; çünkü tam sayılar bilinen, sabit boyutlu basit değerlerdir ve bu iki "5" değeri **yığına (stack)** itilir(*pushed onto the stack*).
++ Şimdi bir de `String` versiyonuna bakalım:
 
 ```rust
-let s1 = String::from("Linux is Awesome");
-let s2 = s1;    // move olur
+fn main() {
+    let s1 = String::from("hello");
+    let s2 = s1;
+}
 ```
 
-> + Burada, `String`, `Copy trait`'ini **desteklemez**.
-> + Dolayısıyla `s1` artık geçersiz hale  gelir(move gerçekleşir.)
++  Bu çok benzer görünüyor, bu yüzden çalışma şeklinin de aynı olduğunu varsayabiliriz: Yani ikinci satırın, `s1` içindeki değerin bir kopyasını alıp `s2`'ye bağlayacağını düşünebiliriz. Ancak durum pek de öyle değil. 
 
-+ Ama;
++ `String`'in arka planda neler yaptığını görmek için `Şekil 4-1`'e bakın. Bir `String` üç parçadan oluşur (solda gösterilmiştir): dizenin içeriğini tutan belleğe bir **işaretçi (pointer)**, bir **uzunluk (length)** ve bir **kapasite (capacity)**. Bu veri grubu yığında (stack) saklanır. Sağ tarafta ise içeriği tutan yığındaki (heap) bellek bulunur.
+
+> [!NOTE]
+> Bir `String` üç parçadan oluşur (stack üzerinde tutulur - solda gösterilmiştir):
+> 1. Heap’teki veriyi gösteren bir **pointer**
+> 2. **length** (kaç byte kullanıldığı)
+> 3. **capacity** (allocator’dan alınmış toplam alan)
+> 
+> Stack’te bu üçlü yapı bulunur. Asıl karakter verisi ise heap’te saklanır.
+
++ Bu veri grubu yığında (stack) saklanır. Sağ tarafta ise içeriği tutan yığındaki (*heap*) bellek bulunur.
+
+![Şekil 4-1](./Pictures/trpl04-01.svg)
+> **Şekil 4-1**: s1'e bağlı "hello" değerini tutan bir *String*'in bellekteki temsili
+
++ **Uzunluk**, `String` içeriğinin şu anda kaç baytlık bellek kullandığıdır. **Kapasite** ise `String`'in bellek ayırıcıdan (*allocator*) aldığı toplam bellek miktarıdır (bayt cinsinden). Uzunluk ve kapasite arasındaki fark önemlidir, ancak bu bağlamda değil; bu yüzden şimdilik kapasiteyi görmezden gelebilirsiniz.
+
++ `s1`'i `s2`'ye atadığımızda, `String` verisi kopyalanır; yani yığında bulunan işaretçi(*pointer*), uzunluk(*length*) ve kapasiteyi(*capacity*) kopyalarız. İşaretçinin işaret ettiği yığındaki (*heap*) veriyi **kopyalamayız**. Diğer bir deyişle, bellekteki veri temsili `Şekil 4-2`'deki gibi görünür.
+
+![Şekil 4-2](./Pictures/trpl04-02.svg)
+
+> **Şekil 4-2:** s1'in işaretçi, uzunluk ve kapasitesinin bir kopyasına sahip olan s2 değişkeninin bellekteki temsili.
+
++ Bu gösterim, Rust'ın heap verilerini de kopyalaması durumunda belleğin nasıl görüneceğini gösteren `Şekil 4-3`'e benzemez. Eğer Rust bunu yapsaydı, yığındaki veri çok büyük olduğunda `s2 = s1` işlemi çalışma zamanı performansı açısından çok maliyetli olabilirdi.
+
+![trpl04-03.svg](./Pictures/trpl04-03.svg)
+> **Şekil 4-3:** Rust'ın yığın verilerini de kopyalaması durumunda `s2 = s1`'in neler yapabileceğine dair başka bir **olasılık**.
+
++ Daha önce, bir değişken kapsam dışına çıktığında Rust'ın otomatik olarak `drop` fonksiyonunu çağırdığını ve o değişken için *heap* belleğini temizlediğini söylemiştik. Ancak `Şekil 4-2`, her iki veri işaretçisinin(pointer) de aynı konumu gösterdiğini gösteriyor. Bu bir sorundur: `s2` ve `s1` kapsam dışına çıktığında, her ikisi de aynı belleği serbest bırakmaya çalışacaktır. Bu, **"double free" (çift serbest bırakma)** hatası olarak bilinir ve daha önce bahsettiğimiz bellek güvenliği hatalarından biridir. Belleği iki kez serbest bırakmak belleğin bozulmasına yol açabilir ve bu da potansiyel olarak güvenlik açıklarına neden olabilir.
+
++ Bellek güvenliğini sağlamak için `let s2 = s1;` satırından sonra Rust, `s1`'i artık geçerli saymaz. Bu nedenle, `s1` kapsam dışına çıktığında Rust'ın hiçbir şeyi serbest bırakması gerekmez. `s2` oluşturulduktan sonra `s1`'i kullanmaya çalıştığınızda ne olacağına bakın; çalışmayacaktır:
+
+**Bu kod derlenmez!**
 
 ```rust
-let x = 5;
-let y = x;
+fn main() {
+    let s1 = String::from("hello");
+    let s2 = s1;
+
+    println!("{s1}, world!");
+}
 ```
 
-> + Burada `i32` `Copy trait`'ine sahiptir.
-> + yani, x'in değeri **yeni bir kopya olarak y'ye kopyalanır,** `x` hala geçerlidir.
++ Rust geçersiz kılınmış referansı kullanmanızı engellediği için şuna benzer bir hata alırsınız:
 
-#### `Copy Trait`'in Mantığı:
+```shell
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0382]: borrow of moved value: `s1`
+ --> src/main.rs:5:16
+  |
+2 |     let s1 = String::from("hello");
+  |         -- move occurs because `s1` has type `String`, which does not implement the `Copy` trait
+3 |     let s2 = s1;
+  |              -- value moved here
+4 |
+5 |     println!("{s1}, world!");
+  |                ^^ value borrowed here after move
+  |
+  = note: this error originates in the macro `$crate::format_args_nl` which comes from the expansion of the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider cloning the value if the performance cost is acceptable
+  |
+3 |     let s2 = s1.clone();
+  |                ++++++++
 
-`Copy trait`'in etkin olduğu türler:
-+ Stack üzerinden depolanan,
-+ Karmaşık heap verisi içermeyen,
-+ Küçük, basit türlerdir
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+```
+
++ Diğer dillerle çalışırken **"shallow copy" (sığ kopyalama)** ve **"deep copy" (derin kopyalama)** terimlerini duyduysanız, verileri kopyalamadan işaretçiyi, uzunluğu ve kapasiteyi kopyalama kavramı muhtemelen bir sığ kopyalama gibi geliyordur. Ancak Rust aynı zamanda ilk değişkeni geçersiz kıldığı için, bu işlem sığ kopyalama yerine **"move" (taşıma)** olarak bilinir. Bu örnekte, `s1`'in `s2`'ye **taşındığını** söyleriz. Yani gerçekte olan şey `Şekil 4-4`'te gösterilmiştir.
+
+![Şekil 4-4 | Dosya adı: trpl04-04.svg](./Pictures/trpl04-04.svg)
+
+> **Şekil 4-4:** s1 geçersiz kılındıktan sonra bellekteki temsili.
+
++ Bu, sorunumuzu çözer! Sadece `s2` geçerli olduğundan, kapsam dışına çıktığında belleği tek başına o serbest bırakacaktır ve işlem tamamlanacaktır.
+
+> [!TIP]
+> #### Shallow Copy (Yüzeysel Kopya)
+> **Tanım:** Nesnenin yalnızca üst seviye (stack’teki) alanları kopyalanır; heap’teki veri **kopyalanmaz**, sadece referansı/adresi kopyalanır.
+> ##### Ne olur?
+> + İki değişken aynı *heap* verisini gösterir.
+> + İçerik değişirse iki değişkende de değişmiş görünür.
+> + Bellek yönetimi dikkat gerektirir (double free riski olabilir).
+> ```
+> s1 ──► [heap verisi]
+> s2 ──┘
+> ```
+> İkisi de aynı heap alanını gösterir.
+> #### Deep Copy (Derin Kopya)
+> **Tanım:** Hem üst seviye veri hem de heap’teki verinin **tamamı yeni bir bellek alanına kopyalanır**.
+> ##### Ne olur?
+> + İki değişken birbirinden tamamen bağımsızdır.
+> + Biri değişirse diğeri etkilenmez.
+> + Bellek maliyeti daha yüksektir (çünkü veri gerçekten çoğaltılır).
+> ```
+> s1 ──► [heap verisi A]
+> s2 ──► [heap verisi B]
+> ```
+> A ve B aynı içeriğe sahip ama farklı bellek alanlarıdır.
+
++ Ayrıca burada ima edilen bir tasarım tercihi vardır: Rust, verilerinizin otomatik olarak “derin kopyalarını” (deep copy) asla oluşturmaz. 
++ Bu nedenle, herhangi bir otomatik kopyalamanın çalışma zamanı performansı açısından maliyetinin düşük olduğu varsayılabilir.
+	- Rust’ta otomatik işlemler **her zaman ucuzdur**.
+	- Pahalı işlemler ise **daima programcı tarafından bilinçli olarak talep edilir**.
+	- Bu, Rust’ın hem performans öngörülebilirliğini hem de bellek güvenliğini sağlayan temel tasarım prensiplerinden biridir.
+#### 4.1.4.2. Kapsam ve Atama (Scope and Assignment)
+
++ Bunun tersi durum da kapsam (scope), sahiplik (ownership) ve belleğin `drop` fonksiyonu aracılığıyla serbest bırakılması arasındaki ilişki için geçerlidir.
+
+> [!TIP]
+> **Önce normal durumu hatırlayalım:**
+> + Bir değer scope dışına çıkarsa (örneğin blok biterse),
+> + Rust otomatik olarak `drop` çağırır,
+> + Bellek serbest bırakılır.
+> ```
+> scope biter → drop çalışır → bellek free edilir
+> ```
+> **Tersi de doğrudur:**
+> + **Eğer bir değerin sahipliği(ownership) kaybolursa (örneğin yeni bir değer atanırsa),**
+> + Eski değer artık erişilemez hale gelir,
+> + Rust hemen `drop` çağırır,
+> + Bellek anında serbest bırakılır.
+> ```
+> sahiplik kaybolur (atama ile) → drop çalışır → bellek free edilir
+> ```
+
++ Mevcut bir değişkene tamamen yeni bir değer atadığınızda, Rust `drop` fonksiyonunu çağırır ve orijinal değerin belleğini hemen serbest bırakır. Örneğin şu kodu ele alalım:
+
+```rust
+fn main() {
+    let mut s = String::from("hello");
+    s = String::from("ahoy");
+
+    println!("{s}, world!");
+}
+```
+
++ Başlangıçta `s` adında bir değişken tanımlar ve onu değeri `"hello"` olan bir `String`’e bağlarız. Ardından hemen `"ahoy"` değerine sahip yeni bir `String` oluşturur ve bunu `s` değişkenine atarız. Bu noktada *heap* üzerindeki orijinal değere artık hiçbir şey referans vermemektedir. `Şekil 4-5`, bu andaki *stack* ve *heap* verilerini göstermektedir:
+
+![Şekil 4-5 | Dosya adı: trpl04-05.svg](./Pictures/trpl04-05.svg)
+
+> **Şekil 4-5:** Orijinal değer tamamen değiştirildikten sonra bellekteki temsil.
+
++ Böylece orijinal string derhal kapsam dışına çıkar. Rust onun üzerinde `drop` fonksiyonunu çalıştırır ve belleği hemen serbest bırakılır. Programın sonunda değeri yazdırdığımızda çıktı `"ahoy, world!"` olacaktır.
+#### 4.1.4.3. Clone ile Değişkenler ve Verinin Etkileşimi
+
+ + Eğer `String`'in sadece yığındaki (stack) verilerini değil, aynı zamanda öbekteki (heap) verilerini de **derinlemesine kopyalamak (deep copy)** istersek, `clone` adı verilen yaygın bir yöntemi kullanabiliriz.
++ Metot sözdizimini 5. Bölüm’de ele alacağız; ancak metotlar birçok programlama dilinde ortak bir özellik olduğundan, muhtemelen daha önce karşılaşmışsınızdır.
++ İşte `clone` metodunun çalışır haldeki bir örneği:
+
+```rust
+fn main() {
+    let s1 = String::from("hello");
+    let s2 = s1.clone();
+
+    println!("s1 = {s1}, s2 = {s2}");
+}
+```
+
++ Bu kod sorunsuz bir şekilde çalışır ve açıkça Şekil 4-3’te gösterilen davranışı üretir; yani heap üzerindeki veri gerçekten kopyalanır.
++ `clone` çağrısını gördüğünüzde, rastgele (keyfi) bir kodun çalıştırıldığını ve bu kodun maliyetli olabileceğini bilirsiniz. Bu, farklı bir işlemin gerçekleştiğini gösteren görsel bir işarettir.(Bu nedenle `clone()` çağrısı potansiyel olarak pahalıdır. Rust’ın tasarım felsefesi şudur: Pahalı işlemler kodda açıkça görünmelidir. Burada bilinçli olarak pahalı bir işlem talep ediyorsunuz.)
+#### 4.1.4.4. Sadece Stack'deki Veri: Copy
+
++ Henüz değinmediğimiz başka bir ayrıntı daha var. Aşağıdaki, tamsayıları (integer) kullanan kod — bir kısmı Liste 4-2’de gösterilmişti — çalışır ve geçerlidir:
+
+```rust
+fn main() {
+    let x = 5;
+    let y = x;
+
+    println!("x = {x}, y = {y}");
+}
+```
+
++ Ancak bu kod az önce öğrendiklerimizle çelişiyor gibi görünmektedir: `clone` çağrısı yok, fakat `x` hâlâ geçerli ve `y`’ye **taşınmış (move edilmiş)** değil.
++ Bunun nedeni, derleme zamanında boyutu bilinen tam sayılar gibi türlerin tamamen **yığında (stack)** depolanmasıdır; bu nedenle gerçek değerlerin kopyalarını oluşturmak hızlıdır. Bunun nedeni, derleme zamanında boyutu bilinen tam sayılar gibi türlerin tamamen **yığında (stack)** depolanmasıdır; bu nedenle gerçek değerlerin kopyalarını oluşturmak hızlıdır. Bu da, `y` değişkenini oluşturduktan sonra `x`'in geçerli kalmasını engellememiz için hiçbir neden olmadığı anlamına gelir. Başka bir deyişle, burada deep copy ile shallow copy arasında bir fark yoktur; dolayısıyla `clone` çağırmak, normal kopyalamadan farklı bir davranış üretmez ve bu yüzden gerekmez.
+
+> [!NOTE]
+> + Rust, tam sayılarda olduğu gibi yığında(stack) depolanan türlerin üzerine koyabileceğimiz `Copy` özelliği (trait) adında özel bir belirtece sahiptir (özellikler hakkında 10. Bölümde daha fazla konuşacağız). Eğer bir tür `Copy` özelliğini(trait) uyguluyorsa (implement), onu kullanan değişkenler taşınmaz, bunun yerine basitçe kopyalanır; bu da başka bir değişkene atandıktan sonra bile onları geçerli kalırlar.
+> + Rust, bir tip veya onun herhangi bir parçası `Drop` trait’ini uyguluyorsa, o tipe `Copy` işaretlemesi yapmamıza izin vermez. Eğer bir tip kapsam dışına çıktığında özel bir işlem yapılması gerekiyorsa ve biz o tipe `Copy` eklemeye çalışırsak, derleme zamanında hata alırız. Kendi tipinize `Copy` özelliğini nasıl ekleyeceğinizi öğrenmek için Ek C’deki “Türetilen Trait’ler” (Derivable Traits) bölümüne bakabilirsiniz.
+
++ Peki, hangi tipler `Copy` trait'ini uygular? Emin olmak için verilen tipin dokümantasyonunu kontrol edebilirsiniz, ancak genel bir kural olarak, herhangi bir basit skaler değer grubu `Copy`'yi uygulayabilir ve tahsis gerektiren veya **bir tür kaynak olan** hiçbir şey `Copy`'yi uygulayamaz. İşte `Copy`'yi uygulayan tiplerden bazıları:
+	- `u32` gibi tüm **tam sayı** (*integer*) türleri.
+	- `true` ve `false` değerlerine sahip **Boolean** türü, `bool`.
+	- `f64` gibi tüm **kayan noktalı sayı** (*floating-point*) türleri..
+	- Karakter tipi, `char`.
+	- Tuple'lar, eğer sadece `Copy`'yi de uygulayan tipleri içeriyorlarsa. Örneğin, `(i32, i32)` `Copy`'yi uygular, ancak `(i32, String)` uygulamaz.
+
+
+> [!TIP]
+> "Bir tür kaynak" (some form of resource) ifadesiyle kastedilen, **sistem kaynaklarıdır**. Örnekler:
+> **Kaynak örnekleri:**
+> - **Dosya tanıtıcıları (file handles)** - açık dosyalar
+> - **Ağ bağlantıları (network connections)** - soketler
+> - **Bellek tahsisleri** - öbekte (heap) tahsis edilmiş bellek
+> - **Veritabanı bağlantıları**
+> - **Mutex'ler ve kilit mekanizmaları**
+> - **Thread'ler**
+> ##### Neden Copy uygulamazlar?
+> 1. Basitçe kopyalanamazlar (bir dosya tanıtıcısını kopyalamak mantıklı değildir)
+> 2. Özel temizlik gerektirirler (kullanım bittiğinde kapatılmalı/serbest bırakılmalıdır)
+> 3. Sahiplik önemlidir (iki değişken aynı kaynağı sahiplenemez)
+> ##### Örneklerle:
+> - `String` → öbekte bellek tahsis eder → kaynak → `Copy` uygulamaz
+> - `Vec<T>` → öbekte bellek tahsis eder → kaynak → `Copy` uygulamaz
+> - `File` → dosya tanıtıcısı → kaynak → `Copy` uygulamaz
+> - `i32` → sadece bir sayı → kaynak DEĞİL → `Copy` uygular ✓
+> 
+> Yani "kaynak", yönetilmesi ve temizlenmesi gereken herhangi bir sistem kaynağıdır.
+
+### 4.1.5. Ownership (Sahiplik) ve Fonksiyonlar
+
++ Bir değerin bir fonksiyona geçirilme mekanizması, bir değişkene değer atama mekanizmasına benzer. Bir değişkeni fonksiyona geçirmek, tıpkı atamada olduğu gibi, değerin ya taşınmasına (*move*) ya da kopyalanmasına (*copy*) neden olur. `Liste 4-3`, değişkenlerin hangi noktalarda kapsam içine girip çıktığını gösteren açıklamalarla birlikte bir örnek içermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let s = String::from("hello");  // s kapsam içine girer
+
+    takes_ownership(s);             // s'nin değeri fonksiyona taşınır...
+                                    // ... ve bu yüzden burada artık geçerli değildir
+
+    let x = 5;                      // x kapsam(scope) içine girer
+
+    makes_copy(x);                  // i32, Copy trait'ini uyguladığı için
+                                    // x fonksiyona taşınmaz(move),
+                                    // bu nedenle sonrasında x'i kullanmak sorun değildir.
+
+} // Burada önce x, sonra s kapsam dışı kalır. Ancak s'nin değeri taşındığı(move) için
+  // s için özel bir şey (drop) gerçekleşmez.
+
+fn takes_ownership(some_string: String) { // some_string kapsam içine girer
+    println!("{some_string}");
+} // Burada some_string kapsam dışına çıkar ve `drop` çağrılır.
+  // Arkasındaki (heap) bellek serbest bırakılır.
+
+fn makes_copy(some_integer: i32) { // some_integer kapsam içine girer
+    println!("{some_integer}");
+} // Burada some_integer kapsam dışına çıkar. Özel bir durum gerçekleşmez.
+```
+
+> **Liste 4-3:** Sahiplik(*ownership*) ve kapsamın(*scope*) açıklamalarla gösterildiği fonksiyonlar
+
+**Kod Çıktısı:**
+
+```shell
+hello  
+5
+```
+
++ Eğer `takes_ownership` çağrısından sonra `s`’yi kullanmaya çalışsaydık, Rust derleme zamanında (compile time) bir hata verirdi. Bu statik kontroller bizi hatalardan korur. `main` fonksiyonuna `s` ve `x`’i kullanan ek kodlar ekleyerek, hangi durumlarda kullanabildiğinizi ve sahiplik(*ownership*) kurallarının hangi durumlarda buna izin vermediğini gözlemleyebilirsiniz.
+
+### Dönüş Değerleri ve Kapsam (Return Values and Scope)
+
++ **Fonksiyonlardan değer döndürmek de sahipliği (*ownership*) aktarabilir.** `Liste 4-4`, `Liste 4-3`’tekilere benzer açıklamalarla birlikte, bir değer döndüren fonksiyon örneğini göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let s1 = gives_ownership();        // gives_ownership dönüş değerini
+                                       // s1'e taşır
+
+    let s2 = String::from("hello");    // s2 kapsam(scope) içine girer
+
+    let s3 = takes_and_gives_back(s2); // s2, takes_and_gives_back fonksiyonuna
+                                       // taşınır; bu fonksiyon da dönüş
+                                       // değerini s3'e taşır.
+} // Burada s3 kapsam dışına çıkar ve drop edilir.
+  // s2 taşındığı için onun için bir şey yapılmaz.
+  // s1 kapsam dışına çıkar ve drop edilir.
+
+fn gives_ownership() -> String {       // gives_ownership, dönüş değerini
+                                       // çağıran fonksiyona taşır.
+
+    let some_string = String::from("yours"); // some_string kapsam içine girer.
+
+    some_string                        // some_string döndürülür ve
+                                       // çağıran fonksiyona taşınır.
+}
+
+// Bu fonksiyon bir String alır ve bir String döndürür.
+fn takes_and_gives_back(a_string: String) -> String {
+    // a_string kapsam içine girer.
+
+    a_string  // a_string döndürülür ve çağıran fonksiyona taşınır.
+}
+```
+
+> **Liste 4-4:** Dönüş değerlerinin sahipliğinin(*ownership*) aktarılması
+
++ Bir değişkenin sahipliği her zaman aynı deseni izler: Bir değeri başka bir değişkene atamak onu taşır (move). Heap üzerinde veri içeren bir değişken kapsam dışına çıktığında, eğer sahipliği başka bir değişkene aktarılmamışsa, değer `drop` tarafından temizlenir.
++ Bu yöntem çalışsa da, her fonksiyonda sahipliği alıp tekrar geri döndürmek biraz zahmetlidir. Eğer bir fonksiyonun bir değeri kullanmasını ama sahipliğini almamasını istiyorsak ne olacak? İçeri aktardığımız her şeyi tekrar geri döndürmek zorunda kalmak oldukça can sıkıcıdır; özellikle de fonksiyon gövdesinden üretmek istediğimiz başka bir veriyi de döndürmek istiyorsak.
++ Rust, Liste 4-5’te gösterildiği gibi, tuple kullanarak birden fazla değer döndürmemize izin verir.
+
+```rust
+fn main() {
+    let s1 = String::from("hello");
+
+    let (s2, len) = calculate_length(s1);
+
+    println!("The length of '{s2}' is {len}.");
+}
+
+fn calculate_length(s: String) -> (String, usize) {
+    let length = s.len(); // len() returns the length of a String
+
+    (s, length)
+}
+```
+
+```
+The length of 'hello' is 5.
+```
+
++ Ancak bu yaklaşım, oldukça yaygın olması gereken bir kavram için fazla törensel (gereksiz ayrıntılı - seremoni) ve zahmetlidir. Neyse ki Rust, bir değeri sahipliğini aktarmadan kullanmamıza imkân tanıyan bir özelliğe sahiptir: referanslar (references).
+
+## 4.2. Referanslar ve Ödünç Alma (References and Borrowing)
+
++ Listing 4-5’teki tuple kodunun sorunu, `String` değerini `calculate_length` fonksiyonuna taşıdığımız (move ettiğimiz) için, fonksiyon çağrısından sonra `String`’i tekrar kullanabilmek amacıyla onu çağıran fonksiyona geri döndürmek zorunda olmamızdır. Bunun yerine `String` değerine bir referans verebiliriz. Bir referans, bir işaretçiye (pointer) benzer; o adreste saklanan veriye erişmek için takip edebileceğimiz bir adrestir ve o veri başka bir değişkene aittir (ownership başka değişkendedir). Pointer’dan farklı olarak, referans belirli bir türde geçerli bir değeri, referansın yaşam süresi boyunca işaret ettiğini garanti eder.
++ Aşağıda, bir değerin sahipliğini almak yerine, parametre olarak bir nesneye referans alan `calculate_length` fonksiyonunun nasıl tanımlanıp kullanılacağı gösterilmektedir:
+
+```rust
+fn main() {
+    let s1 = String::from("hello");
+
+    let len = calculate_length(&s1);
+
+    println!("The length of '{s1}' is {len}.");
+}
+
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}
+```
+
++ Öncelikle, değişken tanımındaki ve fonksiyon dönüş değerindeki tüm tuple kodunun kaldırıldığını fark edin. İkinci olarak, `calculate_length` fonksiyonuna `&s1` gönderiyoruz ve fonksiyon tanımında `String` yerine `&String` alıyoruz. Bu `&` işaretleri referansları temsil eder ve sahipliğini almadan bir değere erişmemizi(referans vermeyi) sağlar. `Şekil 4-6` bu konsepti göstermektedir.
+
+<img src="./Pictures/trpl04-06.svg" width="500" alt="Şekil 4-6 | Dosya adı: trpl04-06.svg">
+
+> **Şekil 4-6:** `String s1`'e işaret eden `&String s`'nin diyagramı
 
 
 > [!NOTE]
-> **✅ Copy olabilen tür örnekleri:**
-> + Bütün sayılar(`i32`, `u8`, `usize`, vs)
-> + Ondalıklı sayılar(`f32`, `f64`)
-> + `char`
-> + `bool`
-> + Bu türlerin sabit uzunluktaki dizileri, örneğin `[i32; 3]`
-
-
-> [!NOTE]
-> **❌ Copy olamayan türler:**
-> + `String`, `Vec<T>`, `Box<T>`, `HashMap<K, V>`
-> + Heap üzerinde veri tutan veya `Drop trait`'i uygulayan türler.
-
-##### Örnek: Copy vs Move Farkı
+> Not: `&` ile referans vermenin tersi işleme dereference denir ve `*` operatörü ile yapılır. Dereference operatörünü Bölüm 8’de göreceğiz ve ayrıntılı olarak Bölüm 15’te inceleyeceğiz.
 
 ```rust
 fn main() {
-    let a = 10;     // i32 -> Copy trait'i var
-    let b = a;      // kopyalanır
-    println!("a: {}, b: {}", a, b); // ✅ her ikisi de geçerli
+    let s1 = String::from("hello");  // <===== 
 
-    let s1 = String::from("Rust");
-    let s2 = s1;    // move edilir
-    // println!("{}", s1); // ❌ hata! s1 artık geçerli değil
-    println!("{}", s2);
+    let len = calculate_length(&s1); // <=====
+
+    println!("The length of '{s1}' is {len}.");
+}
+
+fn calculate_length(s: &String) -> usize {
+    s.len()
 }
 ```
 
++ `&s1` sözdizimi, `s1` değerine referans oluşturmamızı sağlar; ancak bu değerin sahipliğini almaz. Referans, ona sahip olmadığı için, referans kullanılmayı bıraktığında işaret ettiği değer drop edilmez (bellekten silinmez).
 
-| Özellik           | `Copy` Türleri           | `Move` Türleri              |
-| ----------------- | ------------------------ | --------------------------- |
-| Sahiplik aktarımı | Kopyalanır               | Taşınır                     |
-| Heap verisi       | Yok                      | Var                         |
-| Geçerli kalma     | Eski değişken geçerlidir | Eski değişken geçersiz olur |
-| Örnek             | `i32`, `bool`, `char`    | `String`, `Vec<T>`          |
-
-
-## C. Borrowing(Ödünç Alma):
-
-+ Bir değeri **taşımadan** (move etmeden) başka bir fonksiyona ya da değişkene **geçici erişim** vermek istiyorsan, **referans (&)** kullanırsın.
-+ Bu işleme **borrowing** denir.
++ Aynı şekilde, fonksiyonun imzası da `s` parametresinin türünün bir referans olduğunu belirtmek için `&` kullanır. Bazı açıklayıcı notlar ekleyelim:
 
 ```rust
 fn main() {
-    let s1 = String::from("Selam");
-    let len = string_length(&s1); // & ile ödünç(Borrowing) veriyoruz
+    let s1 = String::from("hello");
 
-    println!("'{}' uzunluğu {} karakterdir.", s1, len);
+    let len = calculate_length(&s1);
+
+    println!("The length of '{s1}' is {len}.");
 }
 
-fn string_length(s: &String) -> usize {
-    s.len() // sadece okuma(readonly) izni var
-}
+fn calculate_length(s: &String) -> usize { // s bir String'e referanstır
+    s.len()
+} // Burada s kapsam dışına çıkar. Ancak s, işaret ettiği şeyin sahipliğine
+  // sahip olmadığı için String silinmez(dropped).
 ```
 
-> + `&s1` → `s1`’in referansını gönderir, sahipliği devretmez.
-> + `string_uzunlugu` fonksiyonu değeri **okuyabilir**, ama **değiştiremez**.
++ `s` değişkeninin geçerli olduğu kapsam, herhangi bir fonksiyon parametresinin kapsamı ile aynıdır; ancak referansın işaret ettiği değer, `s`'nin kullanımı bittiğinde silinmez, çünkü `s` o değerin sahibi değildir. Fonksiyonlar gerçek değerler yerine parametre olarak referans aldıklarında, sahipliği geri vermek için değerleri döndürmemize gerek kalmaz, çünkü sahipliğe zaten hiç sahip olmamışızdır.
++ Bir referans oluşturma işlemine **borrowing (ödünç alma)** denir. Gerçek hayattaki gibi düşünebilirsiniz: Bir nesnenin sahibi vardır; siz onu ödünç alırsınız. İşiniz bitince geri verirsiniz. Ona sahip olmazsınız.
++ Peki, ödünç aldığımız bir şeyi değiştirmeye çalışırsak ne olur? `Listing 4-6`'daki kodu deneyin. Spoiler uyarısı: Çalışmaz!
 
-## D. ✏️Mutable Borrowing (Değiştirilebilir Ödünç Alma):
-
-+ Bir değeri **değiştirmek** istiyorsan, `&mut` kullanman gerekir.
-+ Ama aynı anda yalnızca bir mutable referans olabilir.
+**Dosya adı:** `src/main.rs`
 
 ```rust
 fn main() {
-    let mut s = String::from("Hey");
-    ekle(&mut s);
+    let s = String::from("hello");
 
-    println!("{}", s);
+    change(&s);
 }
 
-fn ekle(s: &mut String) {
-    s.push_str(", nasılsın?");
+fn change(some_string: &String) {
+    some_string.push_str(", world");
 }
-
-// Kod Çıktısı: Hey, nasılsın?
 ```
 
-> **Kurallar:**
-> 1. Aynı anda **bir tane mutable referans** olabilir.
-> 2. Mutable ve immutable referanslar **aynı anda var olamaz**.
+> **Liste 4-6:** Ödünç alınan(*borrowing*) bir değeri değiştirme girişimi
+
++ İşte alacağınız hata:
+
+```
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0596]: cannot borrow `*some_string` as mutable, as it is behind a `&` reference
+ --> src/main.rs:8:5
+  |
+8 |     some_string.push_str(", world");
+  |     ^^^^^^^^^^^ `some_string` is a `&` reference, so the data it refers to cannot be borrowed as mutable
+  |
+help: consider changing this to be a mutable reference
+  |
+7 | fn change(some_string: &mut String) {
+  |                         +++
+
+For more information about this error, try `rustc --explain E0596`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+```
+
++ Değişkenlerin varsayılan olarak değiştirilemez (immutable) olması gibi, referanslar da varsayılan olarak değiştirilemezdir. Referansına sahip olduğumuz bir şeyi değiştirmemize izin verilmez.
+
+### 4.2.1. Değiştirilebilir Referanslar (Mutable References)
+
++ Listing 4-6’daki kodu, küçük birkaç değişiklik yaparak ve mutable reference (`&mut`) kullanarak ödünç alınmış bir değeri değiştirebilir hale getirebiliriz:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    change(&mut s);
+}
+
+fn change(some_string: &mut String) {
+    some_string.push_str(", world");
+}
+```
+
++ Öncelikle, `s` değişkenini `mut` (değiştirilebilir) olarak değiştiriyoruz. Ardından, `change` fonksiyonunu çağırdığımız yerde `&mut s` ile değiştirilebilir bir referans oluşturuyoruz ve fonksiyon imzasını `some_string: &mut String` ile değiştirilebilir bir referans kabul edecek şekilde güncelliyoruz. Bu, `change` fonksiyonunun ödünç aldığı değeri değiştireceğini (*mutate*) çok net bir hale getirir.
 
 
 > [!CAUTION]
-> #### Örnek Hata(Çakışan Borrow):
-> ```rust
-> fn main() {
->    let mut s = String::from("Selam");
->
->    let r1 = &s;     // immutable Borrowing
->    let r2 = &s;     // immutable Borrowing
->    let r3 = &mut s; // ❌ Hata! immutable referanslar varken mutable olamaz
->
->    println!("{}, {}, {}", r1, r2, r3);
->}
-> ```
-> **Çıktısı:**
-> ```rust
->    Compiling hello_world v0.1.0 (/home/ottoman/rustDersleri/hello_world)
-> error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable
-> --> src/main.rs:7:14
->    |
->5  |     let r1 = &s;
->    |              -- immutable borrow occurs here
->6  |     let r2 = &s;
->7  |     let r3 = &mut s;
->    |              ^^^^^^ mutable borrow occurs here
->8  |
->9  |     println!("{} {} {}", r1, r2, r3);
->    |                          -- immutable borrow later used here
->
-> For more information about this error, try `rustc --explain E0502`.
-> error: could not compile `hello_world` (bin "hello_world") due to 1 previous error
-> FAIL
-> ```
+> Değiştirilebilir referansların büyük bir kısıtlaması vardır: **Bir değerin değiştirilebilir bir referansına sahipseniz, o değere başka hiçbir referansınız olamaz.**
+
++ `s` değişkeni için iki tane değiştirilebilir referans oluşturmaya çalışan bu kod hata verecektir:
+
+**Dosya adı:** `src/main.rs`
+
+**Bu kod derlenmez!**
+
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &mut s;
+    let r2 = &mut s;
+
+    println!("{r1}, {r2}");
+}
+```
+
++ Hata mesajı:
+
+```
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0499]: cannot borrow `s` as mutable more than once at a time
+ --> src/main.rs:5:14
+  |
+4 |     let r1 = &mut s;
+  |              ------ first mutable borrow occurs here
+5 |     let r2 = &mut s;
+  |              ^^^^^^ second mutable borrow occurs here
+6 |
+7 |     println!("{r1}, {r2}");
+  |                -- first borrow later used here
+
+For more information about this error, try `rustc --explain E0499`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+```
+
++ Bu hata, bu kodun geçersiz olduğunu söylüyor çünkü `s`'yi aynı anda birden fazla kez değiştirilebilir olarak ödünç alamayız(*mutable borrowing*). İlk değiştirilebilir ödünç alma `r1`'dedir ve `println!`de kullanılana kadar sürmeli, ancak bu değiştirilebilir referansın oluşturulması ile kullanımı arasında, `r1` ile aynı veriyi ödünç alan `r2`'de başka bir değiştirilebilir referans oluşturmaya çalıştık.
 
 
 > [!NOTE]
-> #### Ownership ve Bellek Yönetimi:
-> Rust, bu kurallar sayesinde;
-> 1. Çift serbest bırakma(**double free**) hataları önler.
-> 2. Boş referans(**dangling pointer**) hatalarını engeller.
-> 3. Veri yarışlarını (**date race**) derleme zamanında yakalar.
-# String Tanımlama:
+> Aynı veriye aynı anda birden fazla değiştirilebilir referans verilmesini engelleyen bu kısıtlama, veri değişimine izin verir ama bunu çok kontrollü bir biçimde yapar. Bu, yeni Rust kullanıcılarının (Rustaceans) zorlandığı bir konudur çünkü çoğu dil istediğiniz zaman veri değiştirmenize izin verir. Bu kısıtlamanın avantajı, Rust'ın derleme zamanında **veri yarışlarını (data races)** önleyebilmesidir. Bir veri yarışı, şu üç durum gerçekleştiğinde ortaya çıkar ve bir "race condition" (yarış durumu) ile benzerdir:
+> 1. İki veya daha fazla işaretçi (*pointer*) aynı veriye aynı anda erişiyor.
+> 2. İşaretçilerden(*pointer*) en az biri veriye yazmak için kullanılıyor.
+> 3. Veriye erişimi senkronize etmek için kullanılan herhangi bir mekanizma yok.
 
-## A. `&str` (string slice):
-
-+ Bu, **değiştirilemez** (immutable) bir **string dilimidir**.
-+ Genellikle **sabit metinler (literal)** bu türdedir.
++ Veri yarışları, belirsiz davranışlara (undefined behavior) neden olur ve çalışma zamanında bunları teşhis edip düzeltmek oldukça zordur; Rust, veri yarışı içeren kodları derlemeyi reddederek bu sorunu kökten çözer!
++ Her zaman olduğu gibi, yeni bir kapsam oluşturmak için süslü parantezler(`{}`) kullanabiliriz, bu da *eşzamanlı olmamak* kaydıyla birden fazla değiştirilebilir referansa izin verir:
 
 ```rust
 fn main() {
-    let s: &str = "Merhaba Rust!";
-    println!("{}", s);
+    let mut s = String::from("hello");
+
+    {
+        let r1 = &mut s;
+    } // r1 burada kapsam dışına çıkar, böylece sorunsuzca yeni bir referans oluşturabiliriz.
+
+    let r2 = &mut s;
 }
 ```
 
-> + `"Merhaba Rust!"` Programın sabit belleğinde(stack) tutulur.
-> + `$str` veriye **referans** eder (yani kendi başına sahip değildir).
-> + **Değiştirilemez** → içeriğini değiştiremezsin.
++ Rust, değiştirilebilir(*mutable*) ve değiştirilemez (*immutable*) referansların bir arada kullanılması konusunda da benzer bir kural uygular. Şu kod bir hataya yol açar:
 
-## B. `String` (heap-allocated string):
-
-+ Bu, **sahip olunan (owned)** ve **değiştirilebilir** (mutable) string türüdür.
-+ Heap üzerinde tutulur.
+**Bu kod derlenmez!**
 
 ```rust
+fn main() {
+    let mut s = String::from("hello");
 
+    let r1 = &s; // sorun yok
+    let r2 = &s; // sorun yok
+    let r3 = &mut s; // BÜYÜK SORUN
+
+    println!("{r1}, {r2}, and {r3}");
+}
 ```
 
++ Hata şudur:
 
-# Kontrol Akışı(Control Flow):
+```shell
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable
+ --> src/main.rs:6:14
+  |
+4 |     let r1 = &s; // no problem
+  |              -- immutable borrow occurs here
+5 |     let r2 = &s; // no problem
+6 |     let r3 = &mut s; // BIG PROBLEM
+  |              ^^^^^^ mutable borrow occurs here
+7 |
+8 |     println!("{r1}, {r2}, and {r3}");
+  |                -- immutable borrow later used here
 
-## A. If Koşulu(If Expressions):
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+```
 
-## B. Dögüler(Repetition with Loops):
+> [!CAUTION]
+> Vay be! Aynı değere değiştirilemeyen bir referansımız(*immutable referans*) varken değiştirilebilir bir referansa(*mutable bir referansa*) da sahip olamayız.
 
-+ Bir kod bloğunu birden fazla kez çalıştırmak çoğu zaman faydalıdır.
-+ Rust, döngü gövdesinin içindeki kodu sonuna kadar çalıştıracak ve ardından hemen başa dönerek devam edecek birkaç döngü sağlar.
-+ Döngülerle denemeler yapmak için `loops` adında yeni bir proje yapalım.
-
-### B.1. Loop ile Kod Tekarı(Repeating Code with loop):
-
-
-# Tuple(Demet):
-
-+ Rust’ta **tuple (demet)**, birden fazla değeri **tek bir yapıda bir araya getiren** bir veri tipidir.
-+ Tuple’lar genellikle **farklı türlerdeki** değerleri birlikte tutmak için kullanılır.
----
-+ Bir tuple, farklı tiplerdeki değerlerin bir araya gelmesiyle oluşan bir koleksiyondur.
-+ Tuple'lar parantez () kullanılarak oluşturulur ve her tuple'ın kendisi (T1, T2, ...) tür imzasına sahip bir değerdir; burada T1, T2 üyelerinin türleridir.
++ Değiştirilemez bir referansın kullanıcıları, değerin bir anda altlarından değişmesini beklemezler! Ancak birden fazla değiştirilemez referansa izin verilir, çünkü veriyi sadece okuyan hiç kimse, başkasının veriyi okumasını etkileme gücüne sahip değildir.
 
 
 > [!CAUTION]
-> + Bu soru Rust’ın **türü güvenli (`type-safe`)** yapısına dokunuyor çünkü Rust’ta `tuple` üzerinde doğrudan `for` döngüsü **yapılamaz**. Yani, farklı veri tiplerini barındırdığı için `loop` kullanılamaz.
-> #### Tuple Üzerinde `for` Döngüsü Neden Olmaz?
-> + Rust’ta `for` döngüsü yalnızca **iterable** (yani `IntoIterator` trait’ini uygulayan) veri tipleriyle çalışır:
-> + Örneğin; `Vec<T>` (vektör), `array` (`[T; N]`), `range` (`0..10` gibi)
-> + Ancak **tuple** (`(a, b, c, ...)`) bu trait’i **uygulamaz**.
-> ```rust
-> fn main() {
->    let tup = (1, 2, 3);
->
->    for x in tup {  // ❌ hata!
-> 	  println!("{}", x);
->    }
->}
-> ```
-> #### Tür Güvenliği Sayesinde Bellek Hataları Azalır:
-> + Bazı dillerde (örneğin C), bir değişkeni yanlış türde kullanırsan **bellek sızıntısı** veya **program çökmesi** olabilir.  Ama Rust buna derleme aşamasında izin vermez.
-> ```rust
-> let t = (10, 3.14, "Rust");
-> ```
-> + Bu tuple üzerinde `for` döngüsü yapmak istersen Rust şöyle der:
-> 	- "Bu tuple’da farklı türler var, ben bunu teker teker döngüye sokamam."
-> + Bu da Rust’ın **type-safe** olmasından kaynaklanır.
-> 	- Yani, Rust _ne yaptığını bilmeden_ türleri karıştıramaz.
-
-
-## Söz dizimi:
-
-+ Bir **tuple**, değerlerin **parantez içinde** ve **virgülle ayrılarak** yazılmasıyla tanımlanır:
-
-```rust
-let tuple_name = (value_1, value_2, value_3);
-```
-
-## Örnek 1:
+> + Unutmayın ki bir referansın kapsamı, tanımlandığı yerden başlar ve o referansın **son kez kullanıldığı** yere kadar devam eder. 
+> + Örneğin, bu kod derlenecektir çünkü değiştirilemez referansların(*immutable references*) son kullanımı, değiştirilebilir(*mutable references*) referans tanımlanmadan önceki `println!` satırındadır:
 
 ```rust
 fn main() {
-    let kişi = ("Ahmet", 25, 1.75);
+    let mut s = String::from("hello");
 
-    println!("İsim: {}", kişi.0);
-    println!("Yaş: {}", kişi.1);
-    println!("Boy: {}", kişi.2);
+    let r1 = &s; // sorun yok
+    let r2 = &s; // sorun yok
+    println!("{r1} and {r2}");
+    // r1 ve r2 değişkenleri, bu noktadan sonra kullanılmayacak.
+
+    let r3 = &mut s; // sorun yok
+    println!("{r3}");
 }
 ```
 
-> + `("Ahmet", 25, 1.75)` bir tuple’dır.
-> + `kişi.0`, `kişi.1`, `kişi.2` sırasıyla tuple’ın **0., 1. ve 2.** elemanlarına erişir. (Tuple indeksleri 0’dan başlar.)
++ `r1` ve `r2` referanslarının kapsamı, son kullanıldıkları `println!`'den sonra sona erer; bu da `r3` oluşturulmadan öncedir. Bu kapsamlar birbiriyle çakışmadığı için bu koda izin verilir.
++ Derleyici, referansın kapsam sonundan önce bir noktada artık kullanılmadığını anlayabilir.(Aşağıdaki Tip kutucuğunda açıklanmıştır.)
 
-## Tür Belirtme:
+> [!TIP]
+> + Rust derleyicisi, bir referansın **gerçek kullanım süresini** analiz eder. Yani yalnızca süslü parantezlerle belirlenen lexical scope’a bakmaz; referansın **en son nerede kullanıldığına** bakar.
+> + Normalde `r1` ve `r2` değişkenleri teknik olarak scope sonuna kadar yaşar. Ancak derleyici şunu analiz eder:
+> 	1. `r1` ve `r2` en son `println!` içinde kullanıldı.
+> 	2. O satırdan sonra artık kullanılmıyorlar.
+> 	3. Dolayısıyla immutable borrow burada fiilen sona ermiştir.
+> 	4. Bu yüzden mutable borrow (`r3`) oluşturulabilir.
+> + Bu analiz mekanizmasına **Non-Lexical Lifetimes (NLL)** denir. Rust, referansın yaşam süresini blok sonuna kadar zorlamaz; son kullanım noktasına kadar indirger.
+> + **Özet:** Derleyici, referansın gerçekten ne zamana kadar kullanıldığını statik analiz ile belirler ve referans artık kullanılmıyorsa, o noktadan sonra yeni bir borrow’a izin verir.
 
-+ Tuple’ların türleri **içindeki elemanların türlerinden** oluşur:
++ Ödünç alma(*borrowing*) hataları zaman zaman sinir bozucu olsa da, Rust derleyicisinin potansiyel bir hatayı erkenden (çalışma zamanı yerine derleme zamanında) işaret ettiğini ve sorunun tam olarak nerede olduğunu gösterdiğini unutmayın. Böylece verilerinizin neden beklediğiniz gibi olmadığını takip etmek zorunda kalmazsınız.
+### 4.2.2. Dangling References (Sarkan Referanslar)
+
++ İşaretçi (pointer) içeren dillerde, bazı belleği serbest bırakırken(*free*) o belleğe bir işaretçiyi(pointer) koruyarak yanlışlıkla sarkan bir işaretçi (dangling pointer) oluşturmak kolaydır—başka birine verilmiş olabilecek bellekteki bir konuma referans veren bir işaretçi(pointer).
++ Rust'ta ise, bunun aksine, derleyici referansların asla sarkan referansları(*dangling References*) olmayacağını garanti eder: Bazı verilere bir referansınız varsa, derleyici verinin, ona olan referanstan önce kapsam dışına çıkmayacağını sağlar.
++ Rust’ın bunu compile-time’da nasıl engellediğini görmek için bilinçli olarak bir dangling reference oluşturmaya çalışalım:
+
+**Dosya adı:** `src/main.rs`
+
+**Bu kod derlenmez!**
 
 ```rust
 fn main() {
+    let reference_to_nothing = dangle();
+}
 
-    let veri: (i32, f64, &str) = (42, 3.14, "Rust");
+fn dangle() -> &String {
+    let s = String::from("hello");
 
-    println!("{}", veri.0);
-    println!("{}", veri.1);
-    println!("{}", veri.2);
+    &s
+}
+```
+
++ Bu hata mesajı, henüz işlemediğimiz bir özelliğe atıfta bulunuyor: **Yaşam Süreleri (Lifetimes)**. Yaşam sürelerini 10. Bölümde detaylıca tartışacağız. Ancak, ömür süreleriyle ilgili kısımları göz ardı ederseniz, mesaj bu kodun neden sorunlu olduğuna dair anahtarı içeriyor:
+
+```
+bu fonksiyonun dönüş türü ödünç alınmış bir değer içeriyor, ancak ödünç alınabileceği bir değer yok
+```
+
++ `dangle` kodumuzun her aşamasında tam olarak neler olduğuna daha yakından bakalım:
+
+**Dosya adı:** `src/main.rs`
+
+**Bu kod derlenmez!**
+
+```rust
+fn main() {
+    let reference_to_nothing = dangle();
+}
+
+fn dangle() -> &String { // dangle bir String referansı döndürür
+
+    let s = String::from("hello"); // yeni bir String'dir
+
+    &s // String'e bir referans döndürüyoruz, s
+} // Burada, s kapsam dışına çıkar ve düşürülür(drop), dolayısıyla belleği yok olur.
+  // Tehlike!
+```
+
++ `s`, `dangle` fonksiyonunun içinde oluşturulduğu için, fonksiyonun kodu bittiğinde `s` bellekten silinecektir(*deallocated*). Ancak biz ona(`&String`) bir referans döndürmeye çalıştık. Bu referansın(`&s`) geçersiz bir `String`'i işaret edeceği anlamına gelir. Bu hiç iyi değil! Rust bunu yapmamıza izin vermez.
++ Buradaki çözüm, `String`'i doğrudan döndürmektir:
+
+```rust
+fn main() {
+    let string = no_dangle();
+}
+
+fn no_dangle() -> String {
+    let s = String::from("hello");
+
+    s
+}
+```
+
++ Bu kod hiçbir sorun olmadan çalışır. Sahiplik (ownership) dışarıya **taşınır (move)** ve hiçbir şey bellekten silinmez(*deallocated*).
+
+### 4.2.3. Referans Kuralları (The Rules of References)
+
+Referanslar hakkında şimdiye kadar konuştuklarımızı özetleyelim:
++ **Herhangi bir zamanda,** ya **bir adet** değiştirilebilir (mutable) referansa **ya da** dilediğiniz sayıda değiştirilemez (immutable) referansa sahip olabilirsiniz.
++ Referanslar **her zaman geçerli** olmak zorundadır (dangling referanslara izin verilmez).
+Bir sonraki bölümde, farklı bir referans türüne bakacağız: **slice’lar (dilimler)**.
+
+## 4.3. Slice(Dilim) Tipi
+
++ **Dilimler (slice)**, bir koleksiyon içindeki bitişik (contiguous) bir eleman dizisine referans vermenizi sağlar. Slice bir referans türüdür; dolayısıyla **ownership (sahiplik)** taşımaz.
+
+> [!NOTE]
+> İşte küçük bir programlama problemi:
+> > Parametre olarak boşluklarla ayrılmış kelimelerden oluşan bir string alan ve bu string içinde bulduğu ilk kelimeyi döndüren bir fonksiyon yazın.
+> > Eğer fonksiyon string içinde bir boşluk bulamazsa, tüm string tek bir kelime demektir; bu durumda tüm string döndürülmelidir.
+
+> [!CAUTION]
+> **Not:** Dilimleri tanıtmak amacıyla, bu bölümde sadece ASCII karakterleri kullandığımızı varsayıyoruz; UTF-8 kodlu metinlerin işlenmesine dair daha kapsamlı bir tartışma Bölüm 8'deki "8.2. String'ler ile UTF-8 Kodlu Metinleri Depolama" bölümünde yer almaktadır.
+
++ String'lerin çözdüğü sorunu anlamak için, önce string'leri kullanmadan bu fonksiyonun imzasını nasıl yazacağımıza bakalım:
+
+```rust
+fn first_word(s: &String) -> ?
+```
+
++ `first_word` fonksiyonu `&String` tipinde bir parametreye sahiptir. Sahipliğe ihtiyacımız yok, bu yüzden bu kullanım uygundur. (İdiomatik Rust'ta, fonksiyonlar ihtiyaç duymadıkça argümanların sahipliğini almazlar; bunun nedenleri ilerledikçe daha netleşecektir.) Peki ne döndürmeliyiz? Bir *string*'in bir kısmından bahsetmenin gerçekten bir yolu yok. Ancak, bir boşlukla belirtilen kelimenin sonunun indeksini döndürebiliriz.(*String*’in bir parçasını doğrudan ifade edemiyoruz. Bunun yerine ilk boşluğun indeksini döndürebiliriz.) Bunu deneyelim, `Listing 4-7`'de gösterildiği gibi.
+
+```rust
+fn first_word(s: &String) -> usize {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+}
+
+fn main() {}
+```
+
+> **Liste 4-7:** `String` parametresinin içindeki bir konuma karşılık gelen bayt indeksini döndüren `first_word` fonksiyonu
+
++ `String` içindeki her bir öğeyi tek tek kontrol etmemiz ve bir değerin boşluk olup olmadığını anlamamız gerektiği için, `as_bytes` yöntemini kullanarak `String`'i bir bayt dizisine(*array*) dönüştürüyoruz.
+
+```rust
+fn first_word(s: &String) -> usize {
+    let bytes = s.as_bytes(); // <<============= string --> byte
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+}
+
+fn main() {}
+```
+
++ Sonra, `iter` metodunu kullanarak bayt dizisi üzerinde bir tekrarlayıcı (*iterator*) oluşturuyoruz:
+
+```rust
+fn first_word(s: &String) -> usize {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() { // <<========= iter()
+        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+}
+
+fn main() {}
+```
+
++ Yineleyicileri Bölüm 13'te(13.2. Processing a Series of Items with Iterators) daha detaylı tartışacağız. Şimdilik, `iter`'in bir koleksiyondaki her elemanı döndüren bir metot olduğunu ve `enumerate`'in `iter`'in sonucunu sarıp her elemanı bir tuple'ın parçası olarak döndürdüğünü bilin. `enumerate`'den döndürülen tuple'ın ilk elemanı indekstir ve ikinci eleman elemana bir referanstır. Bu, indeksi kendimiz hesaplamaktan biraz daha kullanışlıdır.
++ `enumerate` metodu bir demet döndürdüğü için, bu demeti(*tuple*) ayrıştırmak (*destructure*) için desenler (*patterns*) kullanabiliriz. Desenleri Bölüm 6'da(6.2.1. Değerlere Bağlanan Desenler) daha fazla tartışacağız. `for` döngüsünde, tuple'daki indeks için `i` ve tuple'daki tek bayt için `&item` içeren bir desen belirtiyoruz. `.iter().enumerate()`'den elemana(`(index, element)`) bir referans aldığımız için, desende `&` kullanıyoruz.
++ `for` döngüsünün içinde, bayt literal sözdizimini kullanarak boşluğu temsil eden baytı arıyoruz. Eğer bir boşluk bulursak, konumunu döndürüyoruz. Aksi takdirde, `s.len()` kullanarak string'in uzunluğunu döndürürüz.
+
+```rust
+        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+```
+
++ Artık string'deki ilk kelimenin sonunun indeksini bulmanın bir yoluna sahibiz, ancak bir sorun var. Kendi başına bir `usize` döndürüyoruz, ama bu sadece `&String` bağlamında anlamlı bir sayıdır. Başka bir deyişle, String'den ayrı bir değer olduğu için, gelecekte hala geçerli olacağının garantisi yok. Listing 4-7'deki `first_word` fonksiyonunu kullanan Listing 4-8'deki programı düşünün.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn first_word(s: &String) -> usize {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+}
+
+fn main() {
+    let mut s = String::from("hello world");
+
+    let word = first_word(&s); // word değişkeni 5 değerini alacak
+
+    s.clear(); // bu String'i boşaltır, onu "" ile eşit yapar
+
+    // word değişkeni hala burada 5 değerine sahip, ama s artık 5 değeriyle
+    // anlamlı bir şekilde kullanabileceğimiz herhangi bir içeriğe sahip değil,
+    // bu yüzden word artık tamamen geçersiz!
+}
+```
+
+> **Liste 4-8:** `first_word` fonksiyonunun çağrılmasından elde edilen sonucu saklayıp ardından `String` içeriğini değiştirmek
+
++ Bu program herhangi bir hata olmadan derlenir ve `s.clear()` çağrısından sonra `word` değişkenini kullansaydık da yine derlenirdi. Çünkü `word`, `s`’nin durumuyla hiçbir şekilde bağlantılı değildir; bu nedenle `word` hâlâ 5 değerini tutar. Bu 5 değerini `s` değişkeniyle birlikte ilk kelimeyi çıkarmaya çalışmak için kullanabilirdik; ancak bu bir hata olurdu, çünkü `word` içine 5 değerini kaydettiğimizden beri `s`’nin içeriği değişmiştir.
+
++ `word`'deki indeksin s'deki veriyle senkronize olmaması konusunda endişelenmek zorunda kalmak yorucu ve hataya açıktır! Bu indeksleri yönetmek bir `second_word` fonksiyonu yazarsak daha da kırılgandır. İmzası şöyle görünmek zorunda kalırdı:
++ `word` içindeki indeksin `s` içindeki verilerle senkronizasyonunun bozulması konusunda endişelenmek sıkıcı ve hataya açıktır! Eğer bir de `second_word` fonksiyonu yazarsak, bu indeksleri yönetmek daha da kırılgan (hassas ve kolay bozulabilir) hâle gelir. Böyle bir fonksiyonun imzası muhtemelen şu şekilde olmak zorunda kalırdı:
+
+```rust
+fn second_word(s: &String) -> (usize, usize) {
+```
+
++ Artık hem bir başlangıç hem de bir bitiş indeksini takip ediyoruz ve belirli bir durumdaki veriden hesaplanmış, fakat o duruma hiçbir şekilde bağlı olmayan daha fazla değere sahibiz. Etrafta dolaşan ve senkronize tutulması gereken, birbiriyle ilgisiz üç değişkenimiz oldu.
++ Neyse ki Rust’ın bu probleme bir çözümü var: **string slice’lar (string dilimleri)**.
+###  4.3.1. String Slices (Dizgi Dilimleri)
+
++ Bir string slice, bir `String`'in ardışık(*contiguous*) elemanlarına yapılan bir **referanstır** ve şu şekilde görünür:
+
+```rust
+fn main() {
+    let s = String::from("hello world");
+
+    let hello = &s[0..5];  // Kod çıktısı: hello
+    let world = &s[6..11]; // Kod çıktısı: world
+}
+```
+
++ Tüm `String`’e bir referans olmak yerine, `hello` değişkeni `String`’in bir bölümüne referanstır; bu bölüm `[0..5]` ifadesiyle belirtilmiştir. Slice’ları (dilimleri), köşeli parantezler içinde bir aralık belirterek oluştururuz: `[starting_index..ending_index]`. Burada `starting_index`, dilimin başladığı ilk konumu; `ending_index` ise dilimin son elemanından **bir sonraki** konumu ifade eder. Dahili olarak slice veri yapısı, dilimin **başlangıç konumunu** ve **uzunluğunu** saklar. Bu uzunluk değeri `ending_index - starting_index` hesaplamasına karşılık gelir. Dolayısıyla `let world = &s[6..11];` ifadesinde `world`, `s`'nin 6. indeksindeki bayta işaret eden bir işaretçi ve 5 değerinde bir uzunluk içeren bir slice olur.
+
++ **Şekil 4-7** bunu bir diyagramda göstermektedir.
+
+![Şekil 4-7 | Dosya adı: trpl04-07.svg](./Pictures/trpl04-07.svg)
+> **Şekil 4-7:** Bir `String`’in bir bölümüne referans veren bir string slice
+
++ Rust’taki `..` aralık (range) sözdiziminde, eğer dilimleme işlemi **0 indeksinden başlayacaksa**, iki noktanın (`..`) önündeki değeri yazmak zorunda değilsiniz.
+
+```rust
+#![allow(unused)]
+fn main() {
+	let s = String::from("hello");
+
+	let slice = &s[0..2]; // Kod çıktısı: he
+	let slice = &s[..2];  // Kod çıktısı: he
+}
+```
+
++ Aynı şekilde, eğer oluşturduğunuz slice `String`’in son baytını da kapsıyorsa, sondaki sayıyı yazmayabilirsiniz. Bu durumda aşağıdaki kullanımlar aynı anlama gelir.
+
+```rust
+#![allow(unused)]
+fn main() {
+	let s = String::from("hello");
+
+	let len = s.len();
+
+	let slice = &s[3..len];  // Kod çıktısı: lo
+	let slice = &s[3..];     // Kod çıktısı: lo
+}
+```
+
++ Tüm `String`’i kapsayan bir slice oluşturmak için başlangıç ve bitiş değerlerinin ikisini de yazmayabilirsiniz. Bu nedenle aşağıdaki ifadelere eşdeğerdir.
+
+```rust
+#![allow(unused)]
+fn main() {
+	let s = String::from("hello");
+
+	let len = s.len();
+
+	let slice = &s[0..len];
+	let slice = &s[..];
 }
 ```
 
 
+> [!WARNING]
+> **Not:** String slice aralık indeksleri, geçerli **UTF-8 karakter sınırlarında** olmalıdır. Çok baytlı bir karakterin ortasında bir string slice oluşturmaya çalışırsanız, programınız hata vererek sonlanır.
+
++ Tüm bu bilgileri göz önünde bulundurarak, şimdi `first_word` fonksiyonunu bir **slice** döndürecek şekilde yeniden yazalım. **"String slice"** anlamına gelen tür, Rust’ta **`&str`** olarak yazılır.
+
+```rust
+fn first_word(s: &String) -> &str {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+
+    &s[..]
+}
+
+fn main() {}
+```
+
++ Kelimenin sonunun indeksini, **Listeleme 4-7’de yaptığımız gibi**, ilk boşluk karakterinin bulunduğu yeri arayarak elde ederiz. Bir boşluk bulduğumuzda, string’in başlangıcını ve boşluğun indeksini başlangıç ve bitiş indeksleri olarak kullanarak bir **string slice** döndürürüz.
++ Artık `first_word` fonksiyonunu çağırdığımızda, **altta yatan veriye bağlı tek bir değer** elde ederiz. Bu değer, slice’ın başlangıç noktasına bir referans ve slice içindeki eleman sayısından oluşur.
+
+**Dosya adı:** `src/main.rs` 
+
+```rust
+fn first_word(s: &String) -> &str {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+
+    &s[..]
+}
+
+fn main() {
+    let mut s = String::from("hello world");
+
+    let word = first_word(&s);
+
+    s.clear(); // error!
+
+    println!("the first word is: {word}");
+}
+```
+
++ Derleyici hatası şu şekildedir:
+
+```shell
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable
+  --> src/main.rs:18:5
+   |
+16 |     let word = first_word(&s);
+   |                           -- immutable borrow occurs here
+17 |
+18 |     s.clear(); // error!
+   |     ^^^^^^^^^ mutable borrow occurs here
+19 |
+20 |     println!("the first word is: {word}");
+   |                                   ---- immutable borrow later used here
+
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+```
+
+
+> [!CAUTION]
+> Borrowing (ödünç alma) kurallarından hatırlayacağınız üzere, eğer bir değere **değiştirilemez (immutable) bir referansımız** varsa, aynı anda **değiştirilebilir (mutable) bir referans** da alamayız.
+
++ `clear` metodu `String`’i kısaltmak (içeriğini boşaltmak) zorunda olduğu için **mutable bir referans** almak zorundadır. Ancak `clear` çağrısından sonra gelen `println!`, `word` içindeki referansı kullanır; bu nedenle o noktada **immutable referans hâlâ aktif durumdadır**.
++ Rust, `clear` içindeki **mutable referansın** ve `word` içindeki **immutable referansın** aynı anda var olmasına izin vermez ve bu yüzden derleme başarısız olur.
++ Rust yalnızca API’mizi kullanmayı kolaylaştırmakla kalmaz, aynı zamanda **bütün bir hata sınıfını derleme zamanında ortadan kaldırır**. (Rust sadece fonksiyonun kullanım arayüzünü (API) daha kolay hale getirmekle kalmaz, aynı zamanda bazı hataları daha program çalışmadan **derleme sırasında tamamen ortadan kaldırır**.)
+
+#### 4.3.1.1. Slice'lar gibi String Literal'leri
+
++ String literallerinin (string sabitlerinin) **binary dosyasının içinde saklandığından** daha önce bahsettiğimizi hatırlayın. Artık **slice** kavramını bildiğimize göre, string literal'lerini doğru şekilde anlayabiliriz:
+
+```rust
+#![allow(unused)]
+fn main() {
+    let s = "Hello, world!";
+}
+```
+
+
+> [!CAUTION]
+>  + Burada `s` değişkeninin tipi **`&str`**’dir. Yani bu, **binary dosyasının içindeki belirli bir konumu gösteren bir slice (dilim)**'tir.
+>  + String literallerinin **değiştirilemez (immutable)** olmasının nedeni de budur; çünkü **`&str` değiştirilemez bir referanstır (immutable reference)**.
+
+#### 4.3.1.2. String Slice’ları Parametre Olarak Kullanmak
+
++ String literal'lerinden ve `String` değerlerinden **slice (dilim)** alınabildiğini bilmek, `first_word` fonksiyonunda bir iyileştirme daha yapmamıza imkân verir; bu da **fonksiyonun imzasıdır**:
+
+```rust
+fn first_word(s: &String) -> &str {
+```
+
+> [!CAUTION]
+> Daha deneyimli bir Rust geliştiricisi (**Rustacean**), bunun yerine **Liste 4-9’da gösterilen fonksiyon imzasını** kullanırdı; çünkü bu sayede aynı fonksiyonu hem **`&String` değerleri** hem de **`&str` değerleri** ile kullanmak mümkün olur.
+
+| Durum             | Veri nerede? | Slice neyi gösterir             |
+| ----------------- | ------------ | ------------------------------- |
+| `"Hello"` literal | binary       | binary içindeki veri            |
+| `String::from()`  | heap         | heap içindeki veri              |
+| `&s[0..5]`        | heap         | heap içindeki string’in parçası |
+```rust
+fn first_word(s: &str) -> &str {   // <<<<<<<<< &str
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+
+    &s[..]
+}
+
+fn main() {
+    let my_string = String::from("hello world");
+
+    // `first_word`, `String`'lerin dilimlerinde(slice), ister kısmi ister tam olsun, çalışır.
+    let word = first_word(&my_string[0..6]);
+    let word = first_word(&my_string[..]);
+    // `first_word`, `String`'lere yapılan referanslar üzerinde de çalışır; bunlar, 
+    // `String`'lerin tam dilimlerine eşdeğerdir.
+    let word = first_word(&my_string);
+
+    let my_string_literal = "hello world";
+
+    // `first_word`, string literallerinin dilimlerinde(slice), ister kısmi ister tam olsun, 
+    // çalışır.
+    let word = first_word(&my_string_literal[0..6]);
+    let word = first_word(&my_string_literal[..]);
+
+    // String literalleri zaten birer string dilimi olduğundan, bu dilim söz 
+    // dizimi(slice syntax - &veri[başlangıç..bitiş]) olmadan da çalışır!
+    let word = first_word(my_string_literal);
+}
+```
+
+> **Liste 4-9:** `s` parametresinin türü olarak string slice kullanarak `first_word` fonksiyonunun iyileştirilmesi
+
++ Eğer elimizde bir **string slice** varsa, onu doğrudan parametre olarak verebiliriz. Eğer elimizde bir **`String`** varsa, `String`’in bir slice’ını veya `String`’e bir referansı da verebiliriz.
++ Bu esneklik, **deref coercion** (dolaylı referans dönüşümü) özelliğinden yararlanır. Bu özelliği **15. Bölümdeki “[Using Deref Coercions in Functions and Methods](https://doc.rust-lang.org/book/ch15-02-deref.html#using-deref-coercions-in-functions-and-methods)”** bölümünde ele alacağız.
++ Bir fonksiyonu, `String`’e referans almak yerine **string slice** alacak şekilde tanımlamak, hiçbir işlevselliği kaybetmeden **API’mizi daha genel ve daha kullanışlı** hale getirir.
+
+
+> [!TIP]
+> #### `&String` Nedir?
+> `&String`, **heap üzerinde tutulan bir `String` nesnesine referanstır**.
+> ```rust
+> fn foo(s: &String) {
+> 	println!("{s}");
+> }
+> ```
+> Burada
+> - `String` → heap’te veri tutan, büyüyebilen (growable) bir türdür.
+> - `&String` → o `String`’in referansıdır.
+> - Bu, "bir String'e borrow edilmiş referans" demektir.
+> #### `&str` Nedir?
+> `&str`, bir **string slice**’tır. Yani, Bir string verisinin bir bölümüne referanstır.
+> ```rust
+> fn foo(s: &str) {
+> 	println!("{s}");
+> }
+> ```
+> `&str` şunları temsil edebilir:
+> + String literal: `"hello"` (binary içinde sabit durur)
+> + Bir `String`’in tamamı
+> + Bir `String`’in bir kısmı
+> + Başka bir string slice
+
+```rust
+fn main() {
+    let my_string = String::from("hello world");
+
+    // `first_word`, `String`'lerin dilimlerinde(slice), ister kısmi ister tam olsun, çalışır.
+    let word = first_word(&my_string[0..6]);
+    let word = first_word(&my_string[..]);
+    // `first_word`, `String`'lere yapılan referanslar üzerinde de çalışır; bunlar, 
+    // `String`'lerin tam dilimlerine eşdeğerdir.
+    let word = first_word(&my_string);
+
+    let my_string_literal = "hello world";
+
+    // `first_word`, string literallerinin dilimlerinde(slice), ister kısmi ister tam olsun, 
+    // çalışır.
+    let word = first_word(&my_string_literal[0..6]);
+    let word = first_word(&my_string_literal[..]);
+
+    // String literalleri zaten birer string dilimi olduğundan, bu dilim söz 
+    // dizimi(slice syntax - &veri[başlangıç..bitiş]) olmadan da çalışır!
+    let word = first_word(my_string_literal);
+}
+```
+### 4.3.2. Diğer Slice’lar
+
++ String slice’ların, tahmin edebileceğiniz gibi, **string’lere özgü** olduğunu düşünebilirsiniz. Ancak daha **genel bir slice türü** de vardır. Aşağıdaki diziyi (array) ele alalım:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let a = [1, 2, 3, 4, 5];
+}
+```
+
++ Bir string’in bir bölümüne referans vermek isteyebileceğimiz gibi, bir dizinin(*array*) de yalnızca **bir bölümüne referans vermek isteyebiliriz**. Bunu şu şekilde yaparız:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let a = [1, 2, 3, 4, 5];
+
+	let slice = &a[1..3];
+	// let slice: &[i32] = &a[1..3];
+
+	assert_eq!(slice, &[2, 3]);
+}
+```
+
++ Bu slice’ın tipi **`&[i32]`**’dir. Bu, string slice’ların çalıştığı şekilde çalışır:  ilk elemana bir referans ve dilimin uzunluğunu saklar. 
++ Bu tür slice’ları **diğer pek çok koleksiyon için de** kullanırsınız. Bu koleksiyonları **8. Bölümde vektörleri (vector) ele alırken** ayrıntılı olarak inceleyeceğiz.
+## 4.4. Özet(Summary)
+
++ **Ownership (sahiplik)**, **borrowing (ödünç alma)** ve **slices (dilimler)** kavramları, Rust programlarında **bellek güvenliğini derleme zamanında (compile time)** sağlar.
++ Rust dili, diğer sistem programlama dilleri gibi **bellek kullanımını kontrol etmenizi** sağlar. Ancak Rust’ta verinin **sahibi (owner)** scope dışına çıktığında, o verinin **otomatik olarak temizlenmesi (free edilmesi)** sayesinde bu kontrolü sağlamak için ekstra kod yazmanız ve hata ayıklamanız gerekmez.
++ **Ownership**, Rust’ın diğer birçok özelliğinin nasıl çalıştığını da etkiler. Bu yüzden kitabın geri kalanında bu kavramlardan tekrar tekrar bahsedilecektir.
++ Şimdi **Bölüm 5’e** geçelim ve verileri birlikte gruplamak için kullanılan **`struct` (yapı)** kavramına bakalım.
 # 5. İlişkili Verileri Düzenlemek için Struct’ları Kullanmak:
 
-
++ Bir **struct** (ya da açık adıyla _structure_), birbirleriyle ilişkili birden fazla değeri anlamlı bir grup oluşturacak şekilde bir araya getirmenize ve isimlendirmenize olanak tanıyan özel(custom) bir veri tipidir. 
++ Eğer nesne yönelimli (object-oriented) bir dile aşinaysanız, bir **struct** bir nesnenin veri özniteliklerine (attributes) benzer.
++ Bu bölümde, **tuple** ile **struct** arasındaki farkları karşılaştırarak bildiğiniz bilgilerin üzerine ekleyeceğiz ve **struct’ların verileri gruplamak için ne zaman daha iyi bir seçenek olduğunu** göstereceğiz.
 ## 5.1. Struct’ları Tanımlama ve Örneklerini (Nesnelerini) Oluşturma:
 
 + Rust’ta **`struct` (structure)**, kendi veri türünü (custom data type) tanımlamak için kullanılır.
@@ -905,6 +4281,8 @@ fn main() {
 + `structs`, "`Tuple` Türü" bölümünde tartışılan `tuple`'lara benzer, çünkü her ikisi de birden fazla ilişkili değeri tutar.
 + `Tuple`'lar gibi, bir struct'ın parçaları da farklı tiplerde olabilir.
 + Demetlerden(`Tuple`) farklı olarak, bir struct'da her veri parçasına isim verirsiniz, böylece değerlerin ne anlama geldiği açık olur.
++ Struct’ların **nasıl tanımlandığını** ve **nasıl örneklendirileceğini (instantiate)** göstereceğiz. Ayrıca **ilişkili fonksiyonların (associated functions)** nasıl tanımlandığını, özellikle **method** olarak adlandırılan ve bir **struct türüyle ilişkili davranışı belirleyen** fonksiyonları ele alacağız.
++ **Struct’lar** ve **enum’lar** (6. bölümde ele alınacak), programınızın alanına özgü **yeni türler oluşturmanın temel yapı taşlarıdır**. Bu sayede Rust’ın **derleme zamanındaki (compile-time) tür denetiminden** tam anlamıyla yararlanabilirsiniz.(Struct ve enum kullanarak programın alanına(domain -> Banka uygulaması, Oyun, E-ticaret) uygun yeni veri tipleri oluşturursun. Böylece Rust’ın güçlü tip kontrolü sayesinde hatalar program çalışmadan önce yakalanır.)
 
 ### A. Temel Tanım
 
@@ -3192,10 +6570,10 @@ fn main() {
 ```rust
 #![allow(unused)]
 fn main() {
-enum Option<T> {
-    None,
-    Some(T),
-}
+	enum Option<T> {
+	    None,
+	    Some(T),
+	}
 }
 ```
 
@@ -5016,7 +8394,7 @@ front_of_house/hosting/add_to_waitlist
 
 + Bir yolun bir modül adıyla başlaması, o yolun **göreceli bir yol** olduğunu gösterir.
 ---
-+ Göreceli (relative) ya da mutlak (absolute) yol kullanmayı seçmek, projenize göre vereceğiniz bir karardır ve bir öğenin tanımını, o öğeyi kullanan koddaki yerinden ayrı mı yoksa birlikte mi taşıma olasılığınıza bağlıdır.
++ Göreceli (*relative*) ya da mutlak (*absolute*) yol kullanmayı seçmek, projenize göre vereceğiniz bir karardır ve bir öğenin tanımını, o öğeyi kullanan koddaki yerinden ayrı mı yoksa birlikte mi taşıma olasılığınıza bağlıdır.
 + Örneğin, `front_of_house` modülünü ve `eat_at_restaurant` fonksiyonunu `customer_experience` adında bir modülün içine taşırsak, `add_to_waitlist` için kullandığımız **mutlak yolu** güncellememiz gerekir; ancak **göreceli yol** hâlâ geçerli olur.
 + Buna karşılık, `eat_at_restaurant` fonksiyonunu tek başına `dining` adında bir modüle taşırsak, `add_to_waitlist` için kullandığımız **mutlak yol aynı kalır**, fakat **göreceli yolu** güncellememiz gerekir.
 
@@ -6200,7 +9578,7 @@ fn main() {
 + Vektör düşürüldüğünde (drop edildiğinde), içindeki tüm içerik de düşürülür; yani tuttuğu tamsayılar bellekten temizlenir. **Borrow checker**, bir vektörün içeriğine ait tüm referansların(*yani, içeriğine yapılan referansların*), yalnızca vektörün kendisi geçerli olduğu sürece kullanılmasını garanti eder.
 + Şimdi bir sonraki koleksiyon türüne geçelim: **String**!
 
-## 8.2. UTF-8 Kodlamalı Metinlerin Dizeler İçinde Saklanması:
+## 8.2. UTF-8 Kodlamalı Metinlerin Dizeler İçinde Saklanması
 
 + 4. Bölümde string’lerden bahsetmiştik, ancak şimdi onları daha ayrıntılı olarak inceleyeceğiz.
 + Yeni Rust kullanıcıları (Rustacean’lar) genellikle string’ler konusunda zorlanır; bunun üç temel nedeni vardır:
@@ -6970,7 +10348,7 @@ fn main() {
 > [!warning]
 > + Eğer *hash map* içine **değerlere ait referanslar** eklerseniz, değerler *hash map* içine taşınmaz.
 > + Ancak bu referansların işaret ettiği değerler, en az *hash map* geçerli olduğu süre boyunca geçerli olmak zorundadır.
-> + Bu konuları **10. Bölümdeki "[Ömürler (Lifetimes) ile Referansları Doğrulama](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#validating-references-with-lifetimes)"** kısmında daha ayrıntılı ele alacağız.
+> + Bu konuları **10. Bölümdeki "[Yaşam Süreleri (Lifetimes) ile Referansları Doğrulamak](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#validating-references-with-lifetimes)"** kısmında daha ayrıntılı ele alacağız.
 > ```rust
 > use std::collections::HashMap;
 >
@@ -7114,7 +10492,7 @@ fn main() {
 ```
 
 + olacaktır. Anahtar–değer çiftlerinin farklı bir sırayla yazdırıldığını görebilirsiniz;
-+ **"[8.3.2. Hash Map’te Değerlere Erişme](#832-hash-mapte-değerlere-erişme:)"** bölümünde de belirtildiği gibi, *hash map* üzerinde dolaşma işlemi **rastgele (belirsiz) bir sırayla** gerçekleşir.
++ **"[8.3.2. Hash Map’te Değerlere Erişme](#832-hash-mapte-değerlere-erişme)"** bölümünde de belirtildiği gibi, *hash map* üzerinde dolaşma işlemi **rastgele (belirsiz) bir sırayla** gerçekleşir.
 + `split_whitespace` metodu, `text` içindeki değeri boşluklara göre ayırarak **alt dilimler (subslices)** üzerinde bir iterator döndürür.
 + `or_insert` metodu ise belirtilen anahtar için değerin **değiştirilebilir bir referansını (`&mut V`)** döndürür.
 + Burada bu mutable referansı `count` değişkeninde sakladığımız için, değere atama yapabilmek adına önce yıldız (`*`) operatörü ile `count`’u **dereference** etmemiz gerekir.
@@ -7166,7 +10544,7 @@ fn main() {
 + Yazılımda hatalar hayatın bir gerçeğidir; bu nedenle Rust, bir şeylerin ters gittiği durumları yönetmek için bir dizi özelliğe sahiptir. Pek çok durumda Rust, kodunuzun derlenmesi için bir hata olasılığını önceden kabul etmenizi ve buna karşı bir önlem almanızı zorunlu kılar. Bu gereklilik, hataları henüz canlı ortama (production) dağıtım yapmadan keşfetmenizi ve uygun şekilde yönetmenizi sağlayarak programınızı daha dayanıklı (robust) hale getirir.
 + Rust, hataları iki ana kategoriye ayırır: **kurtarılabilir (recoverable)** ve **kurtarılamaz (unrecoverable)** hatalar.
 	- **Kurtarılabilir Hatalar:** "Dosya bulunamadı" gibi hatalardır. Bu durumda genellikle kullanıcıya sorunu raporlamak ve işlemi tekrar denemek isteriz.
-	- **Kurtarılamaz Hatalar:** Bir dizinin sınırları dışındaki bir konuma erişmeye çalışmak gibi, her zaman birer "bug" (yazılım hatası) belirtisi olan durumlardır. Bu durumda programı derhal durdurmak isteriz.
+	- **Kurtarılamaz Hatalar:** Bir dizinin(`array`) sınırları dışındaki bir konuma erişmeye çalışmak gibi, her zaman birer "*bug*" (yazılım hatası) belirtisi olan durumlardır. Bu durumda programı derhal durdurmak isteriz.
 + Çoğu dil bu iki hata türü arasında bir ayrım yapmaz ve her ikisini de **istisnalar (exceptions)** gibi mekanizmalarla aynı şekilde yönetir. Rust'ta ise istisnalar yoktur.
 + Bunun yerine,
 	- kurtarılabilir hatalar için `Result<T, E>` türünü,
@@ -7283,22 +10661,6273 @@ index out of bounds: the len is 3 but the index is 99
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 ```
 
++ Bu hata, `main.rs` dosyamızın 4. satırına, yani `v` vektörünün 99. indeksine erişmeye çalıştığımız yere işaret eder.
++ `note:` satırı bize, hataya tam olarak neyin sebep olduğunu anlamak için `RUST_BACKTRACE` ortam değişkenini ayarlayarak bir **backtrace (geri izleme)** dökümü alabileceğimizi söyler. Backtrace, o ana gelene kadar çağrılmış olan tüm fonksiyonların listesidir.
++ Rust'taki geri izleme dökümleri diğer dillerdeki gibi çalışır: Backtrace okumanın püf noktası, en üstten başlayarak **kendi yazdığınız dosyaları görene kadar** okumaktır. Sorunun kaynaklandığı yer tam orasıdır. Bu noktanın üzerindeki satırlar, sizin kodunuzun çağırdığı kodlardır; altındaki satırlar ise sizin kodunuzu çağıran kodlardır. Bu "öncesi ve sonrası" satırları; Rust çekirdek kodlarını, standart kütüphane kodlarını veya kullandığınız paketleri (crates) içerebilir.
++ Şimdi `RUST_BACKTRACE` ortam değişkenini **0 dışında herhangi bir değere** ayarlayarak bir backtrace elde etmeyi deneyelim. **Liste 9-2**, göreceğiniz çıktıya benzer bir çıktıyı göstermektedir.
+
+```rust
+$ RUST_BACKTRACE=1 cargo run
+thread 'main' panicked at src/main.rs:4:6:
+index out of bounds: the len is 3 but the index is 99
+stack backtrace:
+   0: rust_begin_unwind
+             at /rustc/4d91de4e48198da2e33413efdcd9cd2cc0c46688/library/std/src/panicking.rs:692:5
+   1: core::panicking::panic_fmt
+             at /rustc/4d91de4e48198da2e33413efdcd9cd2cc0c46688/library/core/src/panicking.rs:75:14
+   2: core::panicking::panic_bounds_check
+             at /rustc/4d91de4e48198da2e33413efdcd9cd2cc0c46688/library/core/src/panicking.rs:273:5
+   3: <usize as core::slice::index::SliceIndex<[T]>>::index
+             at file:///home/.rustup/toolchains/1.85/lib/rustlib/src/rust/library/core/src/slice/index.rs:274:10
+   4: core::slice::index::<impl core::ops::index::Index<I> for [T]>::index
+             at file:///home/.rustup/toolchains/1.85/lib/rustlib/src/rust/library/core/src/slice/index.rs:16:9
+   5: <alloc::vec::Vec<T,A> as core::ops::index::Index<I>>::index
+             at file:///home/.rustup/toolchains/1.85/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:3361:9
+   6: panic::main
+             at ./src/main.rs:4:6
+   7: core::ops::function::FnOnce::call_once
+             at file:///home/.rustup/toolchains/1.85/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+```
+
+> **Liste 9-2:** `RUST_BACKTRACE` ortam değişkeni ayarlandığında, `panic!` çağrısı sonucu üretilen backtrace (geri izleme).
+
++ Bu epey fazla çıktı demek! Göreceğiniz çıktı, işletim sisteminize ve Rust sürümünüze bağlı olarak farklılık gösterebilir. Bu bilgileri içeren geri izleme dökümlerini alabilmek için **hata ayıklama sembollerinin (debug symbols)** etkin olması gerekir. Hata ayıklama sembolleri, burada yaptığımız gibi `cargo build` veya `cargo run` komutlarını `--release` bayrağı olmadan kullandığınızda varsayılan olarak etkindir.
++ Liste 9-2'deki çıktıda, geri izleme(*backtrace*) dökümünün 6. satırı projemizde soruna neden olan yere işaret ediyor: `src/main.rs` dosyasının 4. satırı. Eğer programımızın paniklemesini istemiyorsak, incelememize **kendi yazdığımız bir dosyadan bahseden ilk satırın** işaret ettiği konumdan başlamalıyız.
++ Kasten panikleyecek kod yazdığımız `Liste 9-1`'de, paniği düzeltmenin yolu vektör indeks aralığının dışında bir eleman talep etmemektir. Gelecekte kodunuz paniklediğinde; kodun hangi değerlerle hangi işlemi yaparak paniğe neden olduğunu ve bunun yerine ne yapması gerektiğini bulmanız gerekecektir.
++ Bölümün ilerleyen kısımlarında, "[9.3. `panic!` mi kullanmalı, yoksa kullanmamalı mı?](##93-panic!-mi-kullanmalı-yoksa-kullanmamalı-mı)" başlığı altında hata durumlarını yönetmek için `panic!` kullanımına tekrar değineceğiz. Sırada, `Result` kullanarak bir hatadan nasıl kurtulacağımıza bakacağız.
+
+
+## 9.2. `Result` ile Kurtarılabilir Hatalar (Recoverable Errors)
+
++ Çoğu hata, programın tamamen durmasını gerektirecek kadar ciddi değildir. Bazen bir fonksiyon başarısız olur; ancak bunun nedeni kolayca yorumlanabilir ve buna uygun şekilde tepki verilebilir. Örneğin bir dosyayı açmaya çalıştığınızda, dosya mevcut olmadığı için bu işlem başarısız olabilir. Böyle bir durumda süreci sonlandırmak yerine, dosyayı oluşturmayı tercih edebilirsiniz.
++ Bölüm 2'deki "**Result ile Olası Hataların Ele Alınması**" kısmından hatırlayacağınız üzere, `Result` enum'ı şu şekilde iki varyant (`Ok` ve `Err`) içerecek şekilde tanımlanmıştır:
+
+```rust
+#![allow(unused)]
+fn main() {
+	enum Result<T, E> {
+	    Ok(T),
+	    Err(E),
+	}
+}
+```
+
++ Buradaki `T` ve `E` harfleri genel (generic) tip parametreleridir; "generics" konusunu Bölüm 10'da daha detaylı inceleyeceğiz. Şu an bilmeniz gereken şey;
+	- `T`, işlem **başarılı** olduğunda `Ok` varyantı içinde döndürülecek değerin türünü temsil eder.
+	- `E` ise işlem **başarısız** olduğunda `Err` varyantı içinde döndürülecek hata türünü temsil eder.
++ `Result` bu genel(*generic*) tip parametrelerine sahip olduğu için, döndürmek istediğimiz başarı ve hata değerlerinin farklılık gösterebileceği pek çok farklı durumda `Result` tipini ve üzerinde tanımlı fonksiyonları kullanabiliriz.
++ Şimdi, başarısız olma ihtimali bulunan ve bu nedenle bir `Result` değeri döndüren bir fonksiyonu çağıralım. **Liste 9-3**’te bir dosyayı açmayı deniyoruz.
+
+**Dosya adı** : `src/main.rs`
+
+```rust
+use std::fs::File;
+
+fn main() {
+    let greeting_file_result = File::open("hello.txt");
+}
+```
+
+> **Liste 9-3**: Dosya Açma
+
++ `File::open` fonksiyonunun dönüş tipi bir `Result<T, E>`'dir.
++ Buradaki genel (*generic*) parametre olan `T`, `File::open` uygulaması tarafından başarı durumundaki değerin tipi olan `std::fs::File` (bir dosya tutucu/*a file handle*) ile doldurulmuştur. Hata durumunda kullanılan `E` parametresinin tipi ise `std::io::Error`'dır.
+
+> [!NOTE]
+> + `File::open` fonksiyonu **şu şekilde tanımlanmıştır** (basitleştirilmiş hâliyle):
+> ```rust
+> fn open(path: &str) -> Result<std::fs::File, std::io::Error>
+> ```
+> + Yani,
+> 	- `T` yerine → `std::fs::File`
+> 	- `E` yerine → `std::io::Error`
+> + Cümleyi günlük ama teknik dile çevirirsek:
+> 	- `Result<T, E>` genel bir şablondur.
+> 	- `File::open` fonksiyonu bu şablonu kullanırken, **başarılı olursa dönecek değerin türünün `std::fs::File` olduğunu belirlemiştir.**
+> ```rust
+> // Genel şablon
+> Result<T, E>
+>
+> // File::open için somut hâli
+> Result<std::fs::File, std::io::Error>
+> ```
+> + **Özet**: Bu cümle, `Result<T, E>` içindeki `T`’nin soyut olmadığını; `File::open` fonksiyonunda `T`’nin somut olarak `std::fs::File` ile doldurulduğunu anlatmaktadır.
+
++ Bu dönüş tipi, `File::open` çağrısının başarılı olabileceği ve okuma veya yazma yapabileceğimiz bir dosya tutucu döndürebileceği anlamına gelir. Öte yandan, fonksiyon çağrısı başarısız da olabilir: Örneğin, dosya mevcut olmayabilir veya dosyaya erişim iznimiz olmayabilir.
+
++ `File::open` fonksiyonu, işlemin başarılı mı yoksa başarısız mı olduğunu bize bildirecek; aynı zamanda bize ya dosya tutucuyu ya da hata bilgisini verecek bir yola ihtiyaç duyar. Bu bilgi, tam olarak `Result` enum'ının ilettiği şeydir.
+	- Yani, `File::open` fonksiyonunun, başarılı mı yoksa başarısız mı olduğunu bize bildirebilmesi ve aynı zamanda ya dosya tanıtıcısını ya da hata bilgisini vermesi gerekir. İşte bu bilgi, tam olarak `Result` enum’u tarafından taşınır.
+
++ `File::open` işleminin başarılı olduğu durumda, `greeting_file_result` değişkenindeki değer, içinde bir dosya tutucu barındıran bir `Ok` örneği (*instance*) olacaktır. Başarısız olduğu durumda ise `greeting_file_result` içindeki değer, oluşan hatanın türü hakkında daha fazla bilgi içeren bir `Err` örneği olacaktır.
+
++ `File::open` fonksiyonunun döndürdüğü değere göre farklı eylemler gerçekleştirmek için `Liste 9-3`'teki koda eklemeler yapmamız gerekiyor.
++ Liste 9-4, Bölüm 6'da ele aldığımız temel bir araç olan `match` ifadesini kullanarak `Result` tipinin nasıl yönetileceğini göstermektedir.
+
+
+> [!NOTE]
+> + **File Handle (Dosya Tutucu):** İşletim sisteminin bir dosyaya erişmek için programınıza verdiği "anahtar" veya referans.
+> + **Instance (Örnek):** Bir veri tipinden (bu durumda enum'dan) oluşturulmuş somut nesne.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::fs::File;
+
+fn main() {
+    let greeting_file_result = File::open("hello.txt");
+
+    let greeting_file = match greeting_file_result {
+        Ok(file) => file,
+        Err(error) => panic!("Problem opening the file: {error:?}"),
+    };
+}
+```
+
+
+> [!caution]
+> + Unutmayın ki; `Option` *enum*'ında olduğu gibi, `Result` *enum*'ı ve varyantları da **prelude** (standart kütüphaneyle birlikte otomatik yüklenenler) tarafından kapsam içine alınmıştır.
+> + Bu nedenle `match` kollarında `Ok` ve `Err` varyantlarından önce `Result::` yazmamıza gerek yoktur.
+
++ `match` ifadesinin diğer kolu ise `File::open` fonksiyonundan bir `Err` değeri aldığımız durumu yönetir. Bu örnekte, `panic!` makrosunu çağırmayı tercih ettik. Eğer mevcut dizinimizde `hello.txt` adında bir dosya yoksa ve bu kodu çalıştırırsak, `panic!` makrosundan şu çıktıyı alırız:
+
+```rust
+$ cargo run
+   Compiling error-handling v0.1.0 (file:///projects/error-handling)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.73s
+     Running `target/debug/error-handling`
+
+thread 'main' panicked at src/main.rs:8:23:
+Problem opening the file: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
++ Her zamanki gibi, bu çıktı bize tam olarak neyin ters gittiğini söyler.
+
+### 9.2.1. Farklı Hata Türleri Üzerinde Eşleştirme:
+
++ `Liste 9-4`'teki kod, `File::open` fonksiyonunun neden başarısız olduğuna bakmaksızın `panic!` yapacaktır. Ancak biz, farklı başarısızlık nedenleri için farklı aksiyonlar almak istiyoruz.
+	- Eğer `File::open`, dosya mevcut olmadığı için başarısız olduysa, dosyayı oluşturmak ve yeni dosyanın tutucusunu (handle) döndürmek istiyoruz.
+	- Eğer `File::open` başka herhangi bir nedenle başarısız olduysa (örneğin, dosyayı açma iznimiz yoksa), kodun yine Liste 9-4'te olduğu gibi paniklemesini istiyoruz.
++ Bunun için, `Liste 9-5`'te gösterilen iç içe geçmiş (*inner*) bir `match` ifadesi ekliyoruz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::fs::File;
+use std::io::ErrorKind;
+
+fn main() {
+    let greeting_file_result = File::open("hello.txt");
+
+    let greeting_file = match greeting_file_result {
+        Ok(file) => file,
+        Err(error) => match error.kind() {
+            ErrorKind::NotFound => match File::create("hello.txt") {
+                Ok(fc) => fc,
+                Err(e) => panic!("Problem creating the file: {e:?}"),
+            },
+            _ => {
+                panic!("Problem opening the file: {error:?}");
+            }
+        },
+    };
+}
+```
+
+> **Liste 9-5**: Farklı hata türlerini farklı şekillerde yönetmek
+
++ `File::open` fonksiyonunun `Err` varyantı içinde döndürdüğü değerin tipi `io::Error`'dır; bu, standart kütüphane tarafından sunulan bir yapıdır (*struct*).
+	- Bu yapının, bir `io::ErrorKind` değeri almak için çağırabileceğimiz `kind` adında bir metodu vardır.
+	- `io::ErrorKind` *enum*'ı standart kütüphane tarafından sağlanır ve bir G/Ç (I/O) işleminden kaynaklanabilecek farklı hata türlerini temsil eden varyantlara sahiptir.
++ Kullanmak istediğimiz varyant, açmaya çalıştığımız dosyanın henüz mevcut olmadığını belirten `ErrorKind::NotFound` varyantıdır.
++ Bu yüzden `greeting_file_result` üzerinde bir eşleştirme (*match*) yapıyoruz, ancak aynı zamanda `error.kind()` üzerinde de bir iç eşleştirme yapıyoruz.
++ İçteki `match` ifadesinde kontrol etmek istediğimiz koşul, `error.kind()` tarafından döndürülen değerin `ErrorKind` *enum*'ının `NotFound` varyantı olup olmadığıdır.
+	- Eğer öyleyse, `File::create` ile dosyayı oluşturmaya çalışırız.
+	- Ancak `File::create` fonksiyonu da başarısız olabileceği için, içteki `match` ifadesine ikinci bir kol eklememiz gerekir.
+	- Dosya oluşturulamadığında farklı bir hata mesajı yazdırılır.
++ Dıştaki `match` ifadesinin ikinci kolu ise aynı kalır; böylece program, dosya bulunamaması hatası dışındaki tüm hatalarda panikler.
+
+
+> [!NOTE]
+> #### `Result<T, E>` ile `match` Kullanımına Alternatifler
+> + Bu epey fazla `match` demek! `match` ifadesi çok kullanışlıdır ancak aynı zamanda oldukça ilkel (*primitive*) bir yapıdır.
+> + Bölüm 13'te, `Result<T, E>` üzerinde tanımlanmış birçok metodla birlikte kullanılan **closure** (isimsiz fonksiyonlar) konusunu öğreneceksiniz.
+> + Bu metotlar, `Result<T, E>` değerlerini işlerken `match` kullanmaya kıyasla **çok daha kısa ve okunabilir** kodlar yazmanızı sağlar.
+> + Örneğin, `Liste 9-5`'teki mantığın aynısını bu kez *closure*'lar ve `unwrap_or_else` metodunu kullanarak yazmanın bir yolu şöyledir:
+> ```rust
+> use std::fs::File;
+> use std::io::ErrorKind;
+>
+> fn main() {
+>    let greeting_file = File::open("hello.txt").unwrap_or_else(|error| {
+>        if error.kind() == ErrorKind::NotFound {
+>            File::create("hello.txt").unwrap_or_else(|error| {
+>                panic!("Problem creating the file: {error:?}");
+>            })
+>        } else {
+>            panic!("Problem opening the file: {error:?}");
+>        }
+>    });
+>}
+> ```
+> + Bu kod, Liste 9-5 ile aynı şekilde davranmasına rağmen hiçbir `match` ifadesi içermez ve okunması daha temizdir.
+> + Bölüm 13'ü okuduktan sonra bu örneğe tekrar dönün ve standart kütüphane dokümantasyonundan `unwrap_or_else` metoduna bakın.
+> + Hatalarla uğraşırken, bu metodların birçoğu devasa ve iç içe geçmiş `match` ifadelerini sadeleştirebilir.
+> 	- Yani, `Result<T, E>` ile çalışırken, bu tür metotların iç içe geçmiş büyük `match` ifadelerini **önemli ölçüde sadeleştirebildiğini** göreceksiniz.
+> ##### `unwrap_or_else` nedir?
+> + Bu metod kabaca şunu söyler: _"Eğer sonuç başarılıysa (`Ok`) içindeki değeri ver; ama eğer hata (`Err`) varsa, sana vereceğim şu fonksiyonu (closure) çalıştır._
+
+#### 9.2.1.1. Hata Durumunda Panik Oluşturmak İçin Kısayollar
+
++ `match` kullanımı yeterince iyi çalışır; ancak biraz **fazla ayrıntılı (verbose)** olabilir ve her zaman kodun niyetini net biçimde ifade etmeyebilir.
++ `Result<T, E>` türü üzerinde, daha özel görevleri yerine getirmek için tanımlanmış birçok **yardımcı metot** bulunmaktadır.
++ **`unwrap`** metodu, Liste 9-4'te yazdığımız `match` ifadesiyle tıpatıp aynı şekilde çalışan bir kestirme yoldur.
+	- Eğer `Result` değeri `Ok` varyantı ise, `unwrap` içindeki değeri döndürür.
+	- Eğer `Result` değeri `Err` varyantı ise, `unwrap` bizim yerimize `panic!` makrosunu çağırır.
++ İşte iş başındaki bir `unwrap` örneği:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::fs::File;
+
+fn main() {
+    let greeting_file = File::open("hello.txt").unwrap();
+}
+```
+
+**Kod Çıktısı:**
+
+```rust
+Compiling playground v0.0.1 (/playground)  
+warning: unused variable: `greeting_file`  
+--> src/main.rs:4:9  
+|  
+4 | let greeting_file = File::open("hello.txt").unwrap();  
+| ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_greeting_file`  
+|  
+= note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default  
+  
+warning: `playground` (bin "playground") generated 1 warning (run `cargo fix --bin "playground" -p playground` to apply 1 suggestion)  
+Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.80s  
+Running `target/debug/playground`  
+  
+thread 'main' (13) panicked at src/main.rs:4:49:  
+called `Result::unwrap()` on an `Err` value: Os { code: 2, kind: NotFound, message: "No such file or directory" }  
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
++ Eğer bu kodu `hello.txt` dosyası olmadan çalıştırırsak, `unwrap` metodunun yaptığı `panic!` çağrısından kaynaklanan bir hata mesajı görürüz:
+
+```rust
+thread 'main' panicked at src/main.rs:4:49:
+called `Result::unwrap()` on an `Err` value: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+```
+
++ Benzer şekilde, `expect` metodu da `panic!` çağrısında kullanılacak hata mesajını **bizim belirlememize** imkân tanır. `unwrap` yerine `expect` kullanmak ve anlamlı hata mesajları vermek, kodun niyetini daha iyi ifade eder ve bir `panic!` durumunun kaynağını bulmayı kolaylaştırır. `expect`’in sözdizimi şu şekildedir:
+
+```rust
+use std::fs::File;
+
+fn main() {
+    let greeting_file = File::open("hello.txt")
+        .expect("hello.txt should be included in this project");
+}
+```
+
++ `expect`, `unwrap` ile aynı şekilde kullanılır: ya dosya tanıtıcısını döndürür ya da `panic!` makrosunu çağırır.
++ Ancak `expect`’in çağırdığı `panic!` içindeki hata mesajı, `unwrap`’ın kullandığı varsayılan mesaj yerine, `expect`’e parametre olarak verdiğimiz metin olur.
++ Çıktı şu şekilde görünür:
+
+```rust
+thread 'main' panicked at src/main.rs:5:10:
+hello.txt should be included in this project: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+```
+
++ Üretim kalitesindeki (production-quality) kodlarda çoğu Rust geliştiricisi(*Rustaceans*), `unwrap` yerine `expect` kullanmayı tercih eder ve işlemin neden her zaman başarılı olmasının beklendiğine dair daha fazla bağlam (context) sunar. Bu sayede, eğer varsayımlarınız bir gün yanlış çıkarsa, hata ayıklama (debugging) sırasında kullanabileceğiniz daha fazla bilgiye sahip olursunuz.
+
+
+> [!NOTE]
+> ##### Özetle Fark Nedir?
+> + **`unwrap`**: "Bunu aç, hata varsa standart bir mesajla çök."
+> + **`expect`**: "Bunu aç, hata varsa **benim belirlediğim şu açıklamayla** çök."
+
+
+### 9.2.2. Hataların Yayılması (Propagating Errors)
+
++ Bir fonksiyonun gerçekleştiriminde (implementation) hata oluşturabilecek bir işlem çağrıldığında, hatayı fonksiyonun içinde ele almak yerine, **hatayı çağıran koda geri döndürebilirsiniz**. Buna hatanın **yayılması (propagating)** denir.
++ Bu yaklaşım, hatanın nasıl ele alınacağına karar verme yetkisini çağıran koda bırakır; çünkü çoğu zaman çağıran kodda, hatanın nasıl işlenmesi gerektiğini belirleyecek daha fazla bilgi veya iş mantığı bulunur.
++ Örneğin `Liste 9-6`, bir dosyadan kullanıcı adını okuyan bir fonksiyonu göstermektedir. Eğer dosya mevcut değilse veya okunamazsa, bu fonksiyon bu hataları kendisini çağıran koda döndürecektir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+#![allow(unused)]
+fn main() {
+	use std::fs::File;
+	use std::io::{self, Read};
+
+	fn read_username_from_file() -> Result<String, io::Error> {
+	    let username_file_result = File::open("hello.txt");
+
+	    let mut username_file = match username_file_result {
+	        Ok(file) => file,
+	        Err(e) => return Err(e),
+	    };
+
+	    let mut username = String::new();
+
+	    match username_file.read_to_string(&mut username) {
+	        Ok(_) => Ok(username),
+	        Err(e) => Err(e),
+	    }
+	}
+}
+```
+
+> **Liste 9-6:** `match` kullanarak hataları çağıran koda geri döndüren bir fonksiyon
+
+> [!NOTE]
+> + Çıktı elde etmek için kodun tam hali:
+> ```rust
+> use std::fs::File;
+> use std::io::{self, Read};
+>
+> // Sizin yazdığınız fonksiyon
+> fn read_username_from_file() -> Result<String, io::Error> {
+>    let username_file_result = File::open("hello.txt");
+>
+>    let mut username_file = match username_file_result {
+>        Ok(file) => file,
+>        Err(e) => return Err(e),
+>    };
+>
+>    let mut username = String::new();
+>
+>    match username_file.read_to_string(&mut username) {
+>        Ok(_) => Ok(username),
+>        Err(e) => Err(e),
+>    }
+>}
+>
+> fn main() {
+>    // Fonksiyonu çağırıyoruz ve sonucu kontrol ediyoruz
+>    match read_username_from_file() {
+>        Ok(isim) => println!("Dosyadan okunan isim: {}", isim),
+>        Err(hata) => println!("Bir hata oluştu: {}", hata),
+>    }
+>}
+> ```
+
+> [!caution]
+> + Bu fonksiyon çok daha kısa bir yolla yazılabilir, ancak hata yönetimini derinlemesine incelemek için başlangıçta birçok işlemi manuel olarak yapacağız; sonunda ise kısa yolu göstereceğiz.
+
++ Önce fonksiyonun dönüş tipine bakalım: `Result<String, io::Error>`. Bu, fonksiyonun `Result<T, E>` tipinde bir değer döndürdüğü anlamına gelir;
+	- burada genel(*generic*) parametre `T`, somut tip olan `String` ile,
+	- genel(*generic*) tip `E` ise somut tip olan `io::Error` ile doldurulmuştur.
+
++ Eğer bu fonksiyon hiçbir sorunla karşılaşmadan başarılı olursa, fonksiyonu çağıran kod, dosyadan okunan **kullanıcı adını** içeren bir `Ok(String)` değeri alır.
++ Fonksiyon herhangi bir sorunla karşılaşırsa, çağıran kod, sorun hakkında daha fazla bilgi içeren bir `io::Error` örneğini(`instance`) barındıran bir `Err` değeri alır.
++ Bu fonksiyonun dönüş tipi olarak `io::Error`’ı seçmemizin nedeni, fonksiyon gövdesinde hata oluşturabilecek her iki işlemin de (`File::open` ve `read_to_string`) hata durumunda `io::Error` türünde bir değer döndürmesidir.
++ Fonksiyonun gövdesi `File::open` fonksiyonunu çağırarak başlar.  Ardından, Liste 9-4'tekine benzer bir `match` ile `Result` değerini işleriz.
+	- Eğer `File::open` başarılı olursa, desen değişkeni `file` içindeki dosya tutucu, değiştirilebilir (*mutable*) `username_file` değişkeninin değeri olur ve fonksiyon devam eder.
+	- `Err` durumunda ise, `panic!` çağırmak yerine, fonksiyondan tamamen erken çıkmak (*early return*) için `return` anahtar kelimesini kullanırız ve `File::open`'dan gelen (şu an `e` değişkeninde olan) hata değerini bu fonksiyonun hata değeri olarak çağıran koda geri iletiriz.
+
+
+> [!NOTE]
+> #### Desen Değişkeni ne demektir?
+> + **Desen değişkeni**, `match`, `if let`, `while let` gibi yapılarda, bir değerin içini **parçalayarak (destructure ederek)** elde edilen ve **o anda oluşturulan geçici değişkendir**.
+> ##### Örnek:
+> + `Ok(file)`
+> 	- `Ok(file)` bir *desen(pattern)*'dir.
+> 	- `file` ise bu desenin içindeki *desen değişenidir.*
+> + **Anlamı şudur:**
+> 	- Eğer değer `Ok` ise, içindeki değeri al ve ona `file` adını ver.
+
++ Böylece, eğer `username_file` içinde bir dosya tutucumuz(*a file handle*) varsa, fonksiyon `username` değişkeninde yeni bir `String` oluşturur ve dosyanın içeriğini `username` içine okumak için `username_file` üzerindeki `read_to_string` metodunu çağırır.
++ `File::open` başarılı olsa bile `read_to_string` metodu da başarısız olabileceği için bir `Result` döndürür.
+	- Eğer `read_to_string` başarılı olursa, fonksiyonumuz başarılı olmuştur ve dosyadan gelen kullanıcı adını bir `Ok` içine sararak döndürürüz.
+	- Eğer `read_to_string` başarısız olursa, hata değerini `File::open` sonucunu işleyen `match` ifadesinde yaptığımız gibi döndürürüz.
++ Ancak, bu fonksiyonun son ifadesi olduğu için açıkça `return` dememize gerek yoktur.
+
+
+> [!NOTE]
+> #### 1. `Ok(_)` ne demek?
+> + Bu değeri(`usize`) **bilerek görmezden geliyorum** demektir.
+> #### 2. `Ok(_) => Ok(username)` neden böyle?
+> + Okuma başarılıysa:
+> 	- `username` string’i artık dosya içeriğini **taşıyor**
+> 	- Fonksiyonun görevi: `String` döndürmek
+> + Okuma başarılıysa, sonucu `Ok` içine sar ve `username`’i döndür
+> #### 3. `Err(e) => Err(e)` ne demektir?
+> + Aynı hatayı **hiç değiştirmeden**
+> + Çağıran koda geri gönder.
+> + Bu hatayı ben çözmeye çalışmıyorum, yukarıya iletiyorum
+
++ Bu fonksiyonu çağıran kod, ya bir kullanıcı adı içeren `Ok` değeri ya da bir `io::Error` içeren `Err` değeri alacaktır. Bu değerlerle ne yapılacağına karar vermek tamamen çağıran koda bağlıdır. Örneğin çağıran kod:
+	- `panic!` çağırarak programı sonlandırabilir,
+	- Varsayılan bir kullanıcı adı(`username`) kullanabilir,
+	- Kullanıcı adını(`username`) dosya dışındaki(örneğin bir veri tabanından) başka bir kaynaktan elde edebilir.
++ Çağıran kodun gerçekte ne yapmaya çalıştığına dair yeterli bilgiye sahip olmadığımız için, tüm başarı veya hata bilgilerini uygun şekilde yönetmesi için yukarıya doğru yayıyoruz(`propagating`).
++ Hataların bu şekilde yayılması Rust’ta o kadar yaygın bir kalıptır ki, Rust bu işlemi kolaylaştırmak için **soru işareti operatörünü (`?`)** sağlamaktadır.
+
+#### 9.2.2.1. `?` Operatörü Kısayolu
+
++ Liste 9-7, Liste 9-6’daki `read_username_from_file` fonksiyonuyla **aynı işlevselliğe sahip**, ancak bu kez `?` operatörünü kullanan bir uygulamayı göstermektedir.
+
+```rust
+#![allow(unused)]
+fn main() {
+	use std::fs::File;
+	use std::io::{self, Read};
+
+	fn read_username_from_file() -> Result<String, io::Error> {
+	    let mut username_file = File::open("hello.txt")?;
+	    let mut username = String::new();
+	    username_file.read_to_string(&mut username)?;
+	    Ok(username)
+	}
+}
+```
+
+> **Liste 9-7** `?` operatörünü kullanarak hataları çağıran koda döndüren bir fonksiyon yani, `?` operatörüyle hataları çağıran koda ileten bir fonksiyon 
+
++ Bir `Result` değerinin sonuna konulan `?`, neredeyse Liste 9-6’da `Result` değerlerini ele almak için tanımladığımız `match` ifadeleriyle **aynı şekilde çalışır**.
+	- Eğer `Result` değeri `Ok` ise, `Ok` içindeki değer bu ifadeden döndürülür ve program çalışmaya devam eder.
+	- Eğer değer `Err` ise, `Err` tüm fonksiyondan **erken dönüş** yapılarak çağıran koda geri döndürülür; sanki `return` anahtar kelimesini kullanmışız gibi.(Sadece `e` tek başına dönmez, çağıran koda `Err(e)` döner)
+
+
+> [!warning]
+> #### `match` ile `?` arasındaki önemli fark
+> + Liste 9-6’daki `match` ifadesi ile `?` operatörü arasında **önemli bir fark vardır**:
+> + Üzerinde `?` operatörü çağrılan hata değerleri, standart kütüphanedeki `From` trait'inde tanımlanan ve değerleri bir tipten diğerine dönüştürmek için kullanılan `from` fonksiyonundan geçer.
+> + `?` operatörü `from` fonksiyonunu çağırdığında, alınan hata tipi, mevcut fonksiyonun dönüş tipinde tanımlanan hata tipine dönüştürülür.
+> + Bu, bir fonksiyonun birçok farklı nedenle başarısız olabileceği durumlarda, tüm bu hataları temsil etmek için tek bir hata tipi döndürmesi açısından kullanışlıdır.
+> #### Örnek Özel bir hata türü
+> + Örneğin, Liste 9-7'deki fonksiyonu, kendi tanımladığımız `OurError` adlı özel bir hata tipini döndürecek şekilde değiştirebiliriz.
+> + Eğer bir `io::Error`dan `OurError` oluşturmak için `impl From<io::Error> for OurError` tanımlamasını da yaparsak, fonksiyonun içindeki `?` çağrıları, koda başka hiçbir ekleme yapmaya gerek kalmadan `from` fonksiyonunu çağıracak ve hata tiplerini otomatik olarak dönüştürecektir.
+> + Basit veya küçük bir örnek projede bu kod: `src/main.rs`
+> ```rust
+> use std::io;
+>
+> #[allow(dead_code)]
+> #[derive(Debug)]
+> enum OurError {
+>    Io(io::Error),
+> }
+>
+>impl From<io::Error> for OurError {
+>    fn from(error: io::Error) -> Self {
+>        OurError::Io(error)
+>    }
+>}
+>
+>fn open_file() -> Result<(), OurError> {
+>    std::fs::File::open("hello.txt")?;
+>    Ok(())
+>}
+>
+>fn main() {
+>    if let Err(e) = open_file() {
+>        println!("Hata: {:?}", e);
+>    }
+>}
+> ```
+> + Bu kullanım tamamen geçerlidir ve öğrenme aşamasında tercih edilir.
+
++ Liste 9-7 bağlamında,
+	- `File::open` çağrısının sonundaki `?`, `Ok` içindeki değeri `username_file` değişkenine döndürecektir.
+	- Bir hata oluşursa, `?` operatörü tüm fonksiyondan erken çıkacak (*return early*) ve her türlü `Err` değerini çağıran koda iletecektir. **(Sadece `e` tek başına dönmez, çağıran koda `Err(e)` döner)**
++ Aynı durum `read_to_string` çağrısının sonundaki `?` için de geçerlidir.
++ `?` operatörü, **çok sayıda tekrarlanan (boilerplate) hata yönetimi kodunu ortadan kaldırır** ve fonksiyonun uygulanmasını daha sade hâle getirir.
++ Hatta bu kodu, `?` operatöründen hemen sonra metot zincirleme (*method chaining*) kullanarak daha da kısaltabiliriz; bu durum Liste 9-8’de gösterilmektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+#![allow(unused)]
+fn main() {
+	use std::fs::File;
+	use std::io::{self, Read};
+
+	fn read_username_from_file() -> Result<String, io::Error> {
+	    let mut username = String::new();
+
+	    File::open("hello.txt")?.read_to_string(&mut username)?;
+
+	    Ok(username)
+	}
+}
+```
+
+> **Liste 9-8**: `?` operatöründen sonra metod çağrılarını zincirleme
+
++ `username` içindeki yeni `String` oluşturma işlemini fonksiyonun başına taşıdık; bu kısım değişmedi.
++ Bir `username_file` değişkeni oluşturmak yerine, `read_to_string` çağrısını doğrudan `File::open("hello.txt")?` sonucuna zincirledik.
++ `read_to_string` çağrısının sonunda hala bir `?` var ve hem `File::open` hem de `read_to_string` başarılı olduğunda, hata döndürmek yerine hala `username` içeren bir `Ok` değeri döndürüyoruz.
++ İşlevsellik yine `Liste 9-6` ve `Liste 9-7` ile aynıdır; bu sadece yazmanın farklı ve daha ergonomik bir yoludur.
++ `Liste 9-9`, `fs::read_to_string` kullanarak bunu daha da kısaltmanın bir yolunu göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+#![allow(unused)]
+fn main() {
+	use std::fs;
+	use std::io;
+
+	fn read_username_from_file() -> Result<String, io::Error> {
+	    fs::read_to_string("hello.txt")
+	}
+}
+```
+
+> **Liste 9-9**: Dosyayı açıp sonra okumak yerine `fs::read_to_string` kullanmak
+
+
+> [!caution] Title
+> + `Liste 9-8`:
+> 	- `std::io::Read::read_to_string(&mut username)` metottu kullanılıyor.
+> + `Liste 9-9`:
+> 	- `std::fs::read_to_string("hello.txt")` metottu kullanılıyor.
+
+
++ Bir dosyayı bir dizgiye (*string*) okumak oldukça yaygın bir işlemdir, bu nedenle standart kütüphane; dosyayı açan, yeni bir `String` oluşturan, dosyanın içeriğini okuyan, içeriği o `String` içine yerleştiren ve onu döndüren kullanışlı `fs::read_to_string` fonksiyonunu sunar.
++ Tabii ki, `fs::read_to_string` kullanmak bize tüm hata yönetimini açıklama fırsatı vermezdi, bu yüzden önce uzun yoldan yaptık.
+
+#### 9.2.2.2. `?` Operatörü Nerelerde Kullanılabilir?
+
++ `?` operatörü yalnızca, kullanıldığı değerin türüyle **"uyumlu bir dönüş türüne" sahip** fonksiyonlarda kullanılabilir.
++ Bunun nedeni, `?` operatörünün, Listing 9-6’da tanımladığımız `match` ifadesine benzer şekilde, **fonksiyondan erken dönüş (early return)** yapacak şekilde tanımlanmış olmasıdır.
+
+
+> [!NOTE]
+> #### uyumlu dönüş türü
+> ```rust
+> fn main() {
+> 	let f = File::open("hello.txt");
+> }
+> ```
+> + `File::open(...)` → `Result<File, io::Error>` döner
+> 	- `?` der ki:
+> 	- "Eğer `Err(io::Error)` ise, fonksiyondan `Err(io::Error)` döneyim" 
+
++ Listing 9-6’da, `match` ifadesi bir `Result` değeri üzerinde çalışıyordu ve erken dönüş yapılan kolda `Err(e)` değeri döndürülüyordu. Dolayısıyla, bu `return` ifadesinin geçerli olabilmesi için fonksiyonun dönüş türünün de bir `Result` olması gerekir.
++ `Liste 9-10`'da, dönüş tipi `?` operatörünü kullandığımız değerle uyumsuz olan bir `main` fonksiyonunda bu operatörü kullanırsak alacağımız hataya bakalım:
+
+```rust
+use std::fs::File;
+
+fn main() {
+    let greeting_file = File::open("hello.txt")?;
+}
+```
+
+> **Liste 9-10:** Dönüş türü `()` olan bir `main` fonksiyonunda `?` kullanmaya çalışmak derleme hatasına yol açar.
+
++ Bu kod, başarısız olabilecek bir dosya açma işlemi yapmaktadır.
++ `?` operatörü, `File::open` tarafından döndürülen `Result` değerini takip eder, ancak bu `main` fonksiyonunun dönüş tipi `Result` değil, `()` (boş tip) şeklindedir. Bu kodu derlediğimizde şu hata mesajını alırız:
+
+```rust
+$ cargo run
+   Compiling error-handling v0.1.0 (file:///projects/error-handling)
+error[E0277]: the `?` operator can only be used in a function that returns `Result` or `Option` (or another type that implements `FromResidual`)
+ --> src/main.rs:4:48
+  |
+3 | fn main() {
+  | --------- this function should return `Result` or `Option` to accept `?`
+4 |     let greeting_file = File::open("hello.txt")?;
+  |                                                ^ cannot use the `?` operator in a function that returns `()`
+  |
+  = help: the trait `FromResidual<Result<Infallible, std::io::Error>>` is not implemented for `()`
+help: consider adding return type
+  |
+3 ~ fn main() -> Result<(), Box<dyn std::error::Error>> {
+4 |     let greeting_file = File::open("hello.txt")?;
+5 +     Ok(())
+  |
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `error-handling` (bin "error-handling") due to 1 previous error
+```
+
++ Bu hata, `?` operatörünü yalnızca `Result`, `Option` veya `FromResidual` *trait*'ini uygulayan başka bir tür döndüren fonksiyonlarda kullanmamıza izin verildiğini belirtir.
+	1. Eğer herhangi bir kısıtlamanız yoksa, fonksiyonunuzun dönüş tipini `?` kullandığınız değerle uyumlu olacak şekilde değiştirmek.
+	2. `Result<T, E>` değerini uygun şekilde yönetmek için bir `match` ifadesi veya `Result<T, E>` metodlarından birini kullanmak.
++ Hata mesajı ayrıca `?` operatörünün `Option<T>` değerleriyle de kullanılabileceğinden bahsetmişti.
++ `Result` üzerindeki kullanımında olduğu gibi, bir `Option` üzerinde `?` operatörünü yalnızca `Option` döndüren bir fonksiyon içinde kullanabilirsiniz.
+	- Yani, `Option` üzerinde `?` kullanacaksanız, fonksiyonun dönüş türü de **`Option` olmak zorundadır**.
++ `Option<T>` üzerinde çağrıldığında `?` operatörünün davranışı, `Result<T, E>` üzerindeki davranışına benzer:
+	- Eğer değer `None` ise, `None` o noktada fonksiyondan erkenden döndürülür.
+	- Eğer değer `Some` ise, `Some` içindeki değer ifadenin sonucudur ve fonksiyon devam eder.
++ `Liste 9-11`, verilen metnin ilk satırının son karakterini bulan bir fonksiyon örneği içermektedir.
+
+```rust
+fn last_char_of_first_line(text: &str) -> Option<char> {
+    text.lines().next()?.chars().last()
+}
+
+fn main() {
+    assert_eq!(
+        last_char_of_first_line("Hello, world\nHow are you today?"),
+        Some('d')
+    );
+
+    assert_eq!(last_char_of_first_line(""), None);
+    assert_eq!(last_char_of_first_line("\nhi"), None);
+}
+```
+
+> **Liste 9-11**: `Option<T>` değeri üzerinde `?` operatörünün kullanımı
+
++ Bu fonksiyon `Option<char>` döndürür çünkü orada bir karakter olma ihtimali olduğu gibi, olmama ihtimali de vardır.
++ Bu kod, `text` *string slice*(`&str`) argümanını alır ve üzerinde *string* içindeki satırlar üzerinde gezinen bir *iteratör* döndüren `lines` metodunu çağırır.
++ Fonksiyon ilk satırı incelemek istediği için, *iteratörden* ilk değeri almak üzere `next` metodunu çağırır.
+	1. Eğer `text` boş bir *string* ise, `next` çağrısı `None` döndürecektir; bu durumda `?` operatörünü kullanarak işlemi durdurur ve `last_char_of_first_line` fonksiyonundan `None` döndürürüz.
+	2. Eğer `text` boş değilse, `next` metodu `text` içindeki ilk satırın *string slice*'ını içeren bir `Some` değeri döndürecektir.
++ `?` operatörü bu *string slice*'ını dışarı çıkarır (*extract*) ve biz de o satırdaki karakterlerin *iteratörünü* almak için `chars` metodunu çağırabiliriz.
++ Bu ilk satırdaki son karakterle ilgilendiğimiz için *iteratördeki* son öğeyi döndüren `last` metodunu çağırırız.
++ Bu bir `Option`'dır.(`last` metodu da bir `Option` döndürür) çünkü ilk satırın boş olması mümkündür;
+	- örneğin `text` değişkeni `"\nhi"` örneğinde olduğu gibi boş bir satırla başlıyor olabilir.
+	- Ancak, ilk satırda bir son karakter varsa, bu `Some` varyantı içinde döndürülecektir.
++ Ortadaki `?` operatörü bize bu mantığı ifade etmek için kısa bir yol sunarak fonksiyonu tek satırda yazmamıza olanak tanır.
++ Eğer `Option` üzerinde `?` operatörünü kullanamasaydık, bu mantığı daha fazla metot çağrısı veya bir `match` ifadesi kullanarak kurmamız gerekirdi.
+
+
+> [!NOTE]
+> #### `assert_eq!` ne yapar?
+> ```rust
+> assert_eq!(sol, sağ);
+> ```
+> + `sol == sağ` mı diye kontrol eder
+> + **Eşitse** → program normal şekilde devam eder
+> + **Eşit değilse** → program **panic!** eder ve hata mesajı üretir
+> #### `assert_eq!` nerede kullanılır?
+> + ✔ Testlerde (en yaygın)
+> + ✔ Geliştirme sırasında: Hata ayıklama ve varsayımları doğrulamak için
+
+**`assert_eq!` ile `==` farkı:**
+
+| `==`                 | `assert_eq!`                         |
+| -------------------- | ------------------------------------ |
+| Sadece karşılaştırır | Karşılaştırır + hata fırlatır        |
+| Sonuç `bool`         | Sonuç **program durur / devam eder** |
+| Sessizdir            | Hata mesajı üretir                   |
+
+> [!TIP]
+> #### `Option` üzerinde `?` operatörünü kullanamasaydık
+> + `next()?` satırının **gerçekte yaptığı şey**
+> + Bunu zihninizde şu `match` ile eşdeğer düşünmelisiniz:
+> ```rust
+> match text.lines().next() {
+> 	Some(line) => line,
+> 	None => return None,
+> }
+> ```
+> #### Göresel Olarak:
+> ```rust
+> text.lines().next()
+>        |
+>        v
+>     Option<&str>
+>        |
+>        +-- None  --------->  return None (erken çıkış)
+>        |
+>        +-- Some("&str") --->  devam et
+> ```
+> + `?` operatörü burada **kontrol + erken dönüş** işini otomatik yapar.
+
+
+> [!NOTE]
+> #### Örnek 1: `text = ""`(boş string)
+> ```rust
+> text = ""
+> lines() -> iterator (boş)
+> next()  -> None
+> ?       -> return None
+> ```
+> + Fonksiyon burada biter. 
+> 	- Sonuc: `None` 
+
+
+> [!NOTE]
+> #### Örnek 2: `text = "Hello\nWorld"`
+> ```rust
+> text = "Hello\nWorld"
+> lines() -> ["Hello", "World"]
+> next()  -> Some("Hello")
+> ?       -> "Hello"
+> chars() -> ['H', 'e', 'l', 'l', 'o']
+> last()  -> Some('o')
+> ```
+> + Sonuç: `Some('o')`
 
 
 
+> [!NOTE]
+> #### Örnek 3: `text = "\nWorld"`(ilk satır boş)
+> ```rust
+> text = "\nWorld"
+> lines() -> ["", "World"]
+> next()  -> Some("")
+> ?       -> ""
+> chars() -> []
+> last()  -> None
+> ```
+> + Sonuç: None
+> + 📌 Burada ikinci `None`, `last()` çağrısından gelir.
 
 
 
+> [!NOTE]
+> ##### Zincirleme Çağrısının Görsel Zinciri
+> ```rust
+> text
+ > │
+>  ▼
+> lines()
+>  │
+>  ▼
+> Iterator<Item = &str>
+>  │
+>  ▼
+> next() ──► Option<&str>
+>  │
+>  ▼
+> ?  (erken dönüş kontrolü)
+>  │
+>  ▼
+> &str
+>  │
+>  ▼
+> chars()
+>  │
+>  ▼
+> Iterator<Item = char>
+>  │
+>  ▼
+> last()
+>  │
+>  ▼
+> Option<char>
+> ```
 
+
+> [!NOTE]
+> ##### Genel Akış Diyagramı (Yüksek Seviye)
+> ```rust
+> fn last_char_of_first_line(text: &str) -> Option<char> {
+> 	text.lines().next()?.chars().last()
+> }
+> ```
+>```rust
+>         text: &str
+>             |
+>             v
+>      text.lines()
+>             |
+>             v
+>      iterator over lines
+>            |
+>            v
+>          next()
+>         /      \
+>    None        Some(first_line)
+>     |               |
+>     |               v
+>  return None   first_line.chars()
+>                     |
+>                     v
+>                iterator over chars
+>                     |
+>                     v
+>                   last()
+>                 /        \
+>             None         Some(char)
+>               |              |
+>               v              v
+>          return None    return Some(char)
+>```
+
+> [!WARNING]
+> + Unutmayın ki; `Result` döndüren bir fonksiyonda `Result` üzerinde, `Option` döndüren bir fonksiyonda ise `Option` üzerinde `?` operatörünü kullanabilirsiniz, ancak bunları birbirine karıştıramazsınız.
+
++ `?` operatörü bir `Result`ı otomatik olarak `Option`a veya tam tersine dönüştürmez;
+	- bu durumlarda, dönüşümü açıkça yapmak için `Result` üzerindeki `ok` metodu veya
+	- `Option` üzerindeki `ok_or` metodu gibi araçları kullanabilirsiniz.
++ Şimdiye kadar kullandığımız tüm `main` fonksiyonları `()` döndürüyordu.
+
+
+> [!tip]
+> + Hiçbir şey döndürmemek:
+> ```rust
+> fn main() {
+> }
+> ```
+> + Bu aslında şudur:
+> ```rust
+> fn main() -> () {
+> }
+> ```
+
+
+> [!TIP]
+> #### `()` neden kullanılıyor?
+> ```rust
+> ()
+> ```
+> + Rust'ta **unit type** denir.
+> + Bu fonksiyonun başarı durumunda döndürecek bir verisi yok
+> + C'deki `void` gibi düşünebilirsin.
+
++ `main` fonksiyonu özeldir çünkü çalıştırılabilir bir programın giriş ve çıkış noktasıdır ve programın beklendiği gibi davranması için dönüş tipinin ne olabileceği konusunda **kısıtlamalar vardır**.
+
+
+> [!NOTE]
+> #### Kısıtlama tam olarak nedir?
+> + Rust'ta her fonksiyon istediği türü döndürebilir, AMA `main` fonksiyonu bunu yapamaz.
+> ##### ❌ Geçersiz Örnekler:
+> ```rust
+> fn main() -> i32 { 5 }
+> fn main() -> String { "ok".to_string() }
+> fn main() -> Option<()> {}
+> ```
+
++ Neyse ki `main` fonksiyonu `Result<(), E>` de döndürebilir.
++ `Liste 9-12`, `Liste 9-10`'daki kodu içerir ancak `main` fonksiyonunun dönüş tipini `Result<(), Box<dyn Error>>` olarak değiştirdik ve sonuna bir `Ok(())` dönüş değeri ekledik. Bu kod artık derlenecektir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::error::Error;
+use std::fs::File;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let greeting_file = File::open("hello.txt")?;
+
+    Ok(())
+}
+```
+
+> **Liste 9-12:** `main` fonksiyonunun `Result<(), E>` döndürecek şekilde değiştirilmesi, `Result` değerleri üzerinde `?` operatörünün kullanılmasına izin verir.
+
++ `Box<dyn Error>` tipi bir **trait nesnesidir (trait object)**; buna Bölüm 18'deki "Paylaşılan Davranış Üzerinde Soyutlama Yapmak için Trait Object’lerin Kullanılması" kısmında değineceğiz.
++ Şimdilik `Box<dyn Error>` ifadesini **"her türlü hata"** anlamına gelecek şekilde okuyabilirsiniz.
+	- `Box<dyn Error>`, farklı hata tiplerini tek bir çatı altında toplamaya yarayan esnek bir yapıdır.
++ Hata tipi `Box<dyn Error>` olan bir `main` fonksiyonunda `Result` değeri üzerinde `?` kullanılmasına izin verilir, çünkü bu her türlü `Err` değerinin erkenden döndürülmesine olanak tanır.
++ Bu `main` fonksiyonunun gövdesi her ne kadar sadece `std::io::Error` tipinde hatalar döndürecek olsa da, `Box<dyn Error>` belirterek bu imza (*signature*), `main` gövdesine başka hatalar döndüren kodlar eklense bile doğru kalmaya(doğru çalışmaya) devam edecektir.
++ Bir `main` fonksiyonu `Result<(), E>` döndürdüğünde, eğer `main` `Ok(())` döndürürse program `0` değeriyle, bir `Err` değeri döndürürse sıfır olmayan (*nonzero*) bir değerle sonlanır.
++ C dilinde yazılmış çalıştırılabilir dosyalar çıktıklarında tam sayılar döndürür: Başarıyla sonlanan programlar `0`, hata veren programlar ise `0` dışında bir tam sayı döndürür.
++ Rust da bu geleneğe uyumlu olmak için çalıştırılabilir dosyalardan tam sayı döndürür.
+
+> [!NOTE]
+> #### Neden `<Result<(), E>` serbest bırakılmış?
+> + Çünkü Rust şunu yapar:
+> ```rust
+> Ok(()) -> program 0 ile çıkar
+> Err(e) -> program != 0 ile çıkar + hatayı yazdırır
+> ```
+> Yani:
+> ```rust
+> File::open("hello.txt")?;
+> ```
+> + satırı hata verirse:
+> 	- `?` → `Err` döndürür
+> 	- `main` → erken çıkar
+> 	- işletim sistemi → hatalı çıkış kodu alır
+> + Bu, C’deki şu yapının **güvenli Rust karşılığıdır**:
+> ```C
+> if (error) {
+> 	return 1;
+> }
+> ```
+
++ `main` fonksiyonu, içinde bir `ExitCode` döndüren `report` fonksiyonunu barındıran [`std::process::Termination` trait](https://doc.rust-lang.org/std/process/trait.Termination.html)'ini uygulayan herhangi bir tipi döndürebilir.
+
++ **Kendi tipleriniz için `Termination` trait'ini uygulamak** hakkında daha fazla bilgi için standart kütüphane dokümantasyonuna başvurun.
+
+
+> [!NOTE]
+> #### Kendi tipleriniz için `Termination` trait'ini uygulamak:
+> + İstersen **kendi yazdığın bir türü** bile `main`’den döndürebilirsin  **ama sadece** `Termination` trait’ini uygularsan
+> ```rust
+> use std::process::{ExitCode, Termination};
+>
+> struct MyExit;
+> 
+> impl Termination for MyExit {
+>    fn report(self) -> ExitCode {
+>        ExitCode::from(42)
+>    }
+>}
+>
+> fn main() -> MyExit {
+>     MyExit
+> }
+> ```
+> + Linux Shell'de
+> ```shell
+> echo $?   # Çıktı: 42
+> ```
+
++ `panic!` çağırmanın veya `Result` döndürmenin detaylarını tartıştığımıza göre, hangi durumda hangisinin kullanılmasının uygun olduğuna nasıl karar vereceğimiz konusuna geri dönelim.
+
+## 9.3. `panic!` mi kullanmalı, yoksa kullanmamalı mı?
+
++ Peki, ne zaman `panic!` çağırmanız gerektiğine ve ne zaman `Result` döndürmeniz gerektiğine nasıl karar verirsiniz? Kod `panic!` ettiğinde, artık **toparlanmanın (recover)** bir yolu yoktur. İster toparlanmanın mümkün olduğu ister olmadığı durumlar olsun, her hata durumu için `panic!` çağırabilirsiniz; ancak bunu yaptığınızda, bir durumun **kurtarılamaz (unrecoverable)** olduğuna, çağıran kod adına **siz karar vermiş olursunuz**.
++ Buna karşılık, bir `Result` değeri döndürmeyi seçtiğinizde, çağıran koda seçenekler sunmuş olursunuz.
++ Çağıran kod, kendi bağlamına uygun bir şekilde
+	- hatadan toparlanmayı deneyebilir ya da
+	- bu durumda bir `Err` değerinin kurtarılamaz olduğuna karar verip `panic!` çağırarak, toparlanabilir bir hatayı kurtarılamaz bir hataya dönüştürebilir.
+	
+> [!TIP]
+> + Bu nedenle, **başarısız olma ihtimali olan bir fonksiyon tanımlarken varsayılan olarak `Result` döndürmek iyi bir tercihtir.**
+
++ Örnekler(`example`), prototip kodlar ve testler gibi durumlarda ise, `Result` döndürmek yerine `panic!` eden kod yazmak daha uygundur.
++ Gelin bunun nedenlerini inceleyelim;
++  ardından derleyicinin başarısızlığın imkansız olduğunu anlayamadığı ama sizin bir insan olarak anlayabildiğiniz durumları tartışalım.
++ Bölüm, kütüphane kodlarında (*library code*) panikleyip paniklememe kararına dair bazı genel yönergelerle sona erecek.
+
+### 9.3.1. Örnekler, Prototip Kod ve Testler
+
++ Bir kavramı açıklamak için örnek yazarken, aynı zamanda kapsamlı hata yönetimi (robust error handling) kodları eklemek, örneğin anlaşılmasını zorlaştırabilir. Örneklerde, `unwrap` gibi panik oluşturabilecek bir metod çağrısının, uygulamanızda hataları nasıl ele almak isteyeceğinize dair **bir yer tutucu (placeholder)** olarak kullanıldığı kabul edilir. Bu yaklaşım, uygulamanın geri kalanının ne yaptığına bağlı olarak değişebilir.
++ Benzer şekilde, henüz hataların nasıl ele alınacağına karar vermediğiniz prototip aşamasında `unwrap` ve `expect` metotları oldukça kullanışlıdır. Bu metotlar, programınızı daha sağlam (robust) hâle getirmeye hazır olduğunuzda, kodun hangi noktalarında iyileştirme yapılması gerektiğini açıkça gösteren işaretler bırakır.
++ Eğer bir **test** içinde bir metod çağrısı başarısız olursa, o metod test edilen asıl işlev olmasa bile tüm testin başarısız olmasını istersiniz. Bir testin başarısız olarak işaretlenme yolu `panic!` olduğu için, `unwrap` veya `expect` çağırmak tam olarak yapılması gereken şeydir.
+
+
+> [!tip]
+> "Örnekler" ile kastedilen, **eğitim amaçlı, bir konsepti açıklamak için yazılan kod parçalarıdır**.
+
+### 9.3.2. Derleyiciden Daha Fazla Bilgiye Sahip Olduğunuz Durumlar
+
++ `Result` değerinin bir `Ok` değerine sahip olacağını garanti eden başka bir mantığınız varsa, ancak derleyici bu mantığı anlayamıyorsa, `expect` çağırmak yine uygun olacaktır.
++ Genel olarak çağırdığınız işlem başarısız olma ihtimaline sahip olsa bile, sizin özel durumunuzda bu mantıksal olarak imkansız olabilir; yine de ele almanız gereken bir `Result` değerine sahip olacaksınız.
+	- Yani, çağırdığınız işlem genel olarak başarısız olma ihtimaline sahiptir; yani hâlâ ele alınması gereken bir `Result` değeri döner. Ancak **sizin özel durumunuzda**, mantıksal olarak bu hatanın gerçekleşmesi **imkânsızdır**. Derleyici bu mantığı anlayamadığı için `Err` olasılığını varsaymaya devam eder.
++ Eğer kodu manuel olarak inceleyerek asla bir `Err` varyantı almayacağınızdan emin olabiliyorsanız, `expect` çağırmak ve argüman metnine neden asla bir `Err` varyantı almayacağınızı düşündüğünüzü belgelemek (dokümante etmek) tamamen kabul edilebilirdir. İşte bir örnek:
+	- Yani, eğer kodu **manuel olarak inceleyerek** hiçbir zaman `Err` varyantının oluşmayacağından eminseniz, `expect` kullanmak tamamen kabul edilebilir bir yaklaşımdır. Bu durumda, `expect` metoduna verdiğiniz metinle **neden `Err` beklemediğinizi belgelemek** iyi bir uygulamadır.
++ Burada, sabit kodlanmış (*hardcoded*) bir dizgiyi (*string*) ayrıştırarak bir `IpAddr` örneği oluşturuyoruz. `127.0.0.1` adresinin geçerli bir IP adresi olduğunu görebiliyoruz, bu yüzden burada `expect` kullanmak kabul edilebilirdir.
++ Eğer IP adresi dizgisi programın içine sabit kodlanmış olmak yerine bir kullanıcıdan gelseydi ve dolayısıyla hata ihtimali olsaydı, `Result`ı kesinlikle daha sağlam bir şekilde ele almak isterdik. Bu IP adresinin sabit kodlanmış olduğu varsayımını `expect` içinde belirtmek, gelecekte IP adresini başka bir kaynaktan almamız gerekirse, `expect` yapısını daha iyi bir hata yönetimi koduyla değiştirmemiz gerektiğini bize hatırlatacaktır.
+
+### 9.3.3. Hata Yönetimi İçin Genel Kılavuzlar
+
++ Kodunuzun **kötü bir duruma (bad state)** girmesi mümkünse, bu durumda `panic!` kullanmanız tavsiye edilir.
++ Bu bağlamda "kötü durum"; bir varsayımın, garantinin, sözleşmenin veya değişmezin (invariant) bozulmasıdır. Örneğin; kodunuza geçersiz, çelişkili veya eksik değerlerin geçilmesi ve buna ek olarak şu durumlardan bir veya daha fazlasının gerçekleşmesidir:
+	- Kötü durum, bir kullanıcının veriyi yanlış formatta girmesi gibi ara sıra olması muhtemel bir şeyin aksine, **beklenmedik** bir şeydir.
+	- Bu noktadan sonraki kodunuzun, her adımda problemi kontrol etmek yerine, bu kötü durumda **olmadığınıza güvenmesi** gerekiyordur.
+	- Kullandığınız tiplerde bu bilgiyi kodlamanın (encode etmenin) iyi bir yolu yoktur. (Bunun ne anlama geldiğini Bölüm 18'deki "[Durumları ve Davranışları Tip Olarak Kodlamak](https://doc.rust-lang.org/book/ch18-03-oo-design-patterns.html#encoding-states-and-behavior-as-types)" kısmında inceleyeceğiz.)
+---
++ Eğer birisi kodunuzu çağırır ve mantıksız değerler geçerse, kütüphanenizi kullanan kişinin ne yapmak istediğine karar verebilmesi için mümkünse bir hata(`Result` ) döndürmek en iyisidir. (`Result`)
++ Ancak, devam etmenin **güvensiz veya zararlı** olabileceği durumlarda en iyi seçenek `panic!` çağırmak ve kütüphanenizi kullanan kişiyi kodlarındaki hata (*bug*) konusunda uyarmaktır; böylece bunu geliştirme aşamasında düzeltebilirler.(`panic`)
++ Benzer şekilde, **kontrolünüz dışında olan harici bir kodu** çağırıyorsanız ve bu kod **geçersiz bir durum** döndürüyorsa ve sizin bunu düzeltme imkânınız yoksa, `panic!` kullanmak çoğu zaman uygundur.(`panic`)
+---
++ Ancak, başarısızlık **beklenen** bir şey olduğunda, `panic!` yerine `Result` döndürmek daha uygundur.
+	- Bir ayrıştırıcıya (parser) bozuk veri verilmesi veya 
+	- bir HTTP isteğinin hız sınırına (rate limit) takıldığınızı belirten bir durum döndürmesi buna örnektir.
++ Bu durumlarda `Result` döndürmek, başarısızlığın beklenen bir olasılık olduğunu ve çağıran kodun bunu nasıl ele alacağına karar vermesi gerektiğini gösterir.
+---
++ Eğer kodunuz, **geçersiz değerlerle çağrıldığında kullanıcıyı riske atabilecek** bir işlem yapıyorsa, önce bu değerlerin geçerli olup olmadığını doğrulamalı ve geçerli değillerse `panic!` etmelidir.
+	- Bu, büyük ölçüde **güvenlik** ile ilgilidir: Geçersiz veriler üzerinde işlem yapmak, kodunuzu güvenlik açıklarına maruz bırakabilir.
+	- Standart kütüphanenin, sınırların dışında bir bellek erişimi yapılmaya çalışıldığında `panic!` çağırmasının temel sebebi de budur. Sahip olunmayan belleğe erişmeye çalışmak, yaygın ve ciddi bir güvenlik problemidir.
+---
++ Fonksiyonların genellikle **sözleşmeleri (contracts)** vardır:
+	- Davranışları ancak girdiler belirli gereksinimleri karşılıyorsa garanti edilir.
+	- Sözleşme ihlal edildiğinde paniklemek mantıklıdır; çünkü bir sözleşme ihlali her zaman **çağıran taraflı bir yazılım hatasını (bug)** gösterir ve bu, çağıran kodun açıkça ele almasını isteyeceğiniz türden bir hata değildir.
+	- Aslında, çağıran kodun bunu telafi etmesinin makul bir yolu yoktur; programcıların kodu düzeltmesi gerekir.
+	- Bir fonksiyonun sözleşmeleri, özellikle bir ihlal paniğe yol açacaksa, fonksiyonun API dokümantasyonunda açıklanmalıdır.
+
+---
+
++ Ancak, tüm fonksiyonlarınızda çok sayıda hata kontrolü yapmak kelime kalabalığı yaratır ve can sıkıcı olur.
++ Neyse ki, kontrollerin çoğunu sizin yerinize yapması için **Rust'ın tip sistemini** (ve dolayısıyla derleyicinin yaptığı tip kontrolünü) kullanabilirsiniz.
++ Fonksiyonunuzun parametresi belirli bir tipse, derleyicinin geçerli bir değere sahip olduğunuzu zaten garanti ettiğini bilerek kodunuzun mantığına devam edebilirsiniz.
++ Örneğin, `Option` yerine doğrudan bir tipe sahipseniz, programınız "hiç birşey - *nothing* (`None`)" yerine "bir şey - *something*" gelmesini bekler.
+	- Bu durumda kodunuz `Some` ve `None` varyantları için iki durumu ele almak zorunda kalmaz: Kesinlikle bir değere sahip olduğu tek bir durumu olur.
++ Fonksiyonunuza "hiçlik" (null/nothing) geçirmeye çalışan kod derlenmeyecektir bile; dolayısıyla fonksiyonunuzun çalışma zamanında (runtime) bu durumu kontrol etmesine gerek kalmaz.
++ Başka bir örnek, parametrenin asla negatif olmamasını sağlayan `u32` gibi işaretsiz bir tam sayı tipi kullanmaktır.
+
+### 9.3.4. Doğrulama için Özel Tüpler (Custom Types for Validation)
+
++ Rust’un tür sistemini kullanarak geçerli bir değere sahip olduğumuzu garanti etme fikrini bir adım daha ileri götürelim ve **doğrulama için özel bir tür (custom type)** oluşturmayı inceleyelim.
++ Bölüm 2'deki, tahmin oyunu örneğini hatırlayın: Kodumuz kullanıcıdan 1 ile 100 arasında bir sayı tahmin etmesini istiyordu.
++ Ancak, tahmini gizli sayıyla karşılaştırmadan önce kullanıcının girdiği sayının gerçekten bu aralıkta olup olmadığını doğrulamıyorduk; yalnızca tahminin pozitif olup olmadığını kontrol ediyorduk.
++ Bu durumda sonuçlar çok da müthiş değildi: "Çok büyük" veya "Çok küçük" çıktıları hâlâ doğru oluyordu. Ancak, kullanıcıyı geçerli tahminlere yönlendirmek ve kullanıcının **aralık dışı bir sayı girmesi** ile **örneğin harfler yazması** gibi durumlarda farklı davranışlar sergilemek faydalı bir geliştirme olurdu.
++ Bunu yapmanın bir yolu, tahmini yalnızca `u32` yerine `i32` olarak ayrıştırmak (parse etmek) olabilir; böylece potansiyel olarak negatif sayılara da izin verilir ve ardından sayının belirlenen aralıkta olup olmadığı kontrol edilir. Örneğin:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use rand::Rng;
+use std::cmp::Ordering;
+use std::io;
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::rng().random_range(1..=100);
+
+    loop {
+        // --snip--
+
+        println!("Please input your guess.");
+
+        let mut guess = String::new();
+
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
+
+        let guess: i32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => continue,
+        };
+
+        if guess < 1 || guess > 100 {
+            println!("The secret number will be between 1 and 100.");
+            continue;
+        }
+
+        match guess.cmp(&secret_number) {
+            // --snip--
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
+                break;
+            }
+        }
+    }
+}
+```
+
+
+> [!TIP]
+> #### `trim()` fonksiyonu:
+> + `trim()`, bir **string slice (`&str`)** üzerindeki:
+> 	- baştaki (leading)
+> 	- sondaki (trailing)
+> + **boşluktaki karakterleri** (space, tab, newline, `\n`, `\r\n` vb.) temizler.
+> + Standart kütüphane adresi: [`trim()`](https://doc.rust-lang.org/std/primitive.str.html#method.trim) 
+> ##### Nereden gelir?
+> + `trim()` → **`&str` tipi**nin metodudur.
+> + `String` üzerinde çağrıldığında, otomatik olarak `&str`’e dönüştürülür.
+> ```rust
+> let s = "   42\n";
+> let cleaned = s.trim();
+> assert_eq!(cleaned, "42");
+> ```
+
+
+> [!TIP]
+> + `parse()` bir **string slice’i (`&str`) başka bir tipe dönüştürmeye** çalışır.
+> 	- Başarılı olursa → `Ok(T)`
+> 	- Başarısız olursa → `Err(...)`
+> +  Hedef tip `FromStr` trait’ini uygulamış olmalı
+> + `i32`, `u32`, `f64`, `IpAddr` vb. hepsi bunu uygular
+> ```rust
+> let n: i32 = "42".parse().unwrap();
+> ```
+> + Standart kütüphane adresi: [`parse()`](https://doc.rust-lang.org/std/primitive.str.html#method.parse)
+
+
+
+|Fonksiyon|Ne yapar|Tür|
+|---|---|---|
+|`trim()`|Baş/son boşlukları temizler|`&str -> &str`|
+|`parse()`|String’i tipe çevirir|`&str -> Result<T, E>`|
+
++ `if` ifadesi, değerin aralık dışında olup olmadığını kontrol eder, kullanıcıya sorun hakkında bilgi verir ve `continue` çağrısıyla döngünün bir sonraki yinelemesine geçerek kullanıcıdan yeni bir tahmin ister. Bu `if` ifadesinden sonra, `guess` ile gizli sayı arasındaki karşılaştırmalara güvenle devam edebiliriz; çünkü bu noktada `guess`’in 1 ile 100 arasında olduğunu biliyoruz.
++ Ancak bu ideal bir çözüm değildir: Eğer programın sadece 1 ile 100 arasındaki değerlerle çalışması mutlak surette kritik olsaydı ve bu gereksinime sahip birçok fonksiyonunuz bulunsaydı, her fonksiyonda böyle bir kontrol yapmak hem can sıkıcı olurdu (hem de performansı etkileyebilirdi).
+
+---
+
++ Bunun yerine, özel bir modül içerisinde yeni bir tip oluşturabilir ve doğrulamaları her yerde tekrarlamak yerine, o tipin bir örneğini (*instance*) oluşturan bir fonksiyonun içine koyabiliriz.
++ Bu sayede, fonksiyonların kendi imzalarında (*signatures*) bu yeni tipi kullanmaları ve aldıkları değerleri güvenle kullanmaları emniyetli hale gelir.
++ `Liste 9-13`, yalnızca `new` fonksiyonu 1 ile 100 arasında bir değer aldığında bir `Guess` örneği(*instance*) oluşturacak olan `Guess` tipini tanımlamanın bir yolunu göstermektedir.
+
+**Dosya adı:** `src/guessing_game.rs`
+
+```rust
+pub struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 || value > 100 {
+            panic!("Guess value must be between 1 and 100, got {value}.");
+        }
+
+        Guess { value }
+    }
+
+    pub fn value(&self) -> i32 {
+        self.value
+    }
+}
+```
+
+> **Liste 9-13**: Sadece 1 ile 100 arasındaki değerlerle devam edecek bir `Guess` tipi
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+pub mod guessing_game;
+use crate::guessing_game::Guess;
+
+use std::io;
+use rand::Rng;
+use std::cmp::Ordering;
+
+
+fn main() {
+
+    let secret_number = rand::rng().random_range(1..=100);
+    println!("{}",secret_number);
+
+    loop {
+        println!("Please input your guess.");
+        let mut input = String::new();
+
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+
+        let number: i32 = match input.trim().parse() {
+            Ok(n) => n,
+            Err(_) => {
+                println!("Lütfen sayı giriniz.");
+                continue;
+            }
+        };
+
+        let guess = Guess::new(number);
+
+        match guess.value().cmp(&secret_number) {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
+                break;
+            }
+        }
+    }
+}
+```
+
++ Burada tanımladığımız `Guess` struct'ının `value` adında `i32` tutan bir alanı (field) vardır; sayı burada saklanacaktır.
+
+
+> [!CAUTION]
+> + Bu kodun, burada gösterilmeyen ancak `src/lib.rs` dosyasına eklenmiş bir `mod guessing_game;` modül bildirimine bağlı olduğunu unutmayın.
+> + Bu yeni modül dosyasında, içinde `value` adlı bir alan(`field`) bulunan `Guess` isimli bir yapı (`struct`) tanımlarız. Bu alan `i32` türündedir ve sayının kendisini tutar.
+
++ Daha sonra, `Guess` üzerinde, `Guess` değerlerinin örneklerini(`instance`) oluşturan `new` adında **ilişkili bir fonksiyon**(`a associated function`) uyguluyoruz.
++ `new` fonksiyonu, `i32` tipinde `value` adlı bir parametre alacak ve bir `Guess` döndürecek şekilde tanımlanır.
++ `new` fonksiyonunun gövdesindeki kod, `value`'nun 1 ile 100 arasında olduğundan emin olmak için test eder.
++ Eğer `value` bu testi geçmezse, bir `panic!` çağrısı yaparız, bu da çağrı yapan kodu yazan programcıyı düzeltmesi gereken bir hata olduğu konusunda uyarır, çünkü bu aralığın dışında bir değerle bir `Guess` oluşturmak, `Guess::new`'in dayandığı sözleşmeyi ihlal eder.
++ `Guess::new`'in panik yapabileceği koşullar, kamuya açık API dokümantasyonunda tartışılmalıdır; Bölüm 14'te oluşturacağınız API dokümantasyonunda bir `panic!` olasılığını belirten dokümantasyon kurallarını ele alacağız.
++ Eğer `value` testi geçerse, `value` alanı `value` parametresine ayarlanmış yeni bir `Guess` oluşturur ve `Guess`'i döndürürüz.
++ Ardından, `self`'i ödünç alan(`&self`), başka parametresi olmayan ve bir `i32` döndüren `value` adlı bir metot uyguluyoruz.
++ Bu tür bir metot bazen _getter_ (alıcı) olarak adlandırılır çünkü amacı alanlarından(`field`) bazı verileri almak ve döndürmektir.
++ Bu *public* (kamuya açık) metot gereklidir çünkü `Guess` *struct*'ının `value` alanı(`field`) *private*'dır (özeldir).
++ `value` alanının private olması önemlidir, böylece `Guess` struct'ını kullanan kod `value`'yu doğrudan ayarlayamaz:
+	- `guessing_game` modülü dışındaki kod, bir `Guess` örneği oluşturmak için `Guess::new` fonksiyonunu kullanmak zorundadır, böylece bir `Guess`'in `Guess::new` fonksiyonundaki koşullar tarafından kontrol edilmemiş bir `value`'ya sahip olmasının hiçbir yolu olmadığından emin olunur.
++ Sadece 1 ile 100 arasındaki sayıları parametre olarak alan veya döndüren bir fonksiyon, imzasında `i32` yerine `Guess` aldığını veya döndürdüğünü belirtebilir ve gövdesinde herhangi bir ek kontrol yapmasına gerek kalmaz.
+	- Yani, Bir fonksiyon yalnızca 1–100 arası sayılarla çalışacaksa, `i32` yerine `Guess` tipini kullanabilir; böylece fonksiyonun içinde tekrar tekrar kontrol (doğrulama) yapmasına gerek kalmaz.
+
+
+> [!TIP]
+> #### Fonksiyon imzasında ne değişir?
+> ##### ❌ Eski yaklaşım:
+> ```rust
+> fn process_guess(value: i32) {
+> 	// tekrar kontrol gerekir 
+> }
+> ```
+> ##### ✅ Yeni yaklaşım:
+> ```rust
+> fn process_guess(guess: Guess) {
+> 	// Kontrol gerekmez.
+> }
+> ```
+> + Bu imza şunu söyler:
+> 	- "Bu fonksiyon yanlış bir değer almaz."
+
++ Rust'ın hata yönetimi özellikleri, daha sağlam (*robust*) kodlar yazmanıza yardımcı olmak için tasarlanmıştır.
++ `panic!` makrosu, programınızın yönetemediği bir durumda olduğunu belirtir ve geçersiz veya yanlış değerlerle devam etmeye çalışmak yerine süreci durdurmanıza olanak tanır.
++ `Result` *enum* yapısı, operasyonların kodunuzun telafi edebileceği (kurtarabileceği) bir şekilde başarısız olabileceğini belirtmek için *Rust*'ın tip sistemini kullanır.
++ Sizin kodunuzu çağıran diğer kodlara, potansiyel başarı veya başarısızlık durumlarını ele almaları gerektiğini bildirmek için de `Result` kullanabilirsiniz.
++ Uygun durumlarda `panic!` ve `Result` kullanmak, kodunuzu kaçınılmaz sorunlar karşısında daha güvenilir hale getirecektir.
++ Artık standart kütüphanenin `Option` ve `Result` enum'larıyla generic'leri kullanmasının yararlı yollarını gördüğünüze göre, generic'lerin nasıl çalıştığından ve onları kodunuzda nasıl kullanabileceğinizden bahsedeceğiz.
 
 # 10. Jenerik Türler, Özellikler (Trait’ler) ve Yaşam Süreleri(Lifetimes)
 
++ Her programlama dili, kavramların tekrarını etkili bir şekilde yönetmek için çeşitli araçlara sahiptir.
++ Rust’ta bu araçlardan biri **generic** yapılardır: somut (*concrete*) tiplerin veya diğer özelliklerin yerine geçen soyut temsilciler.
++ Kodu derlerken ve çalıştırırken yerlerinde ne olacağını bilmeden, *generic*'lerin davranışını veya diğer *generic*'lerle nasıl ilişkilendiklerini ifade edebiliriz.
 
-## 10.3. Ömürler (Lifetimes) ile Referansları Doğrulama:
+---
+
++ Fonksiyonlar; `i32` veya `String` gibi somut bir tür yerine, herhangi bir generic türde parametreler alabilirler. Bu, aynı kodun birden fazla somut değer üzerinde çalışması için bilinmeyen değerlere sahip parametreler almalarına benzer.
++ Aslında, 6. Bölümde `Option<T>`, 8. Bölümde `Vec<T>` ve `HashMap<K, V>`, 9. Bölümde ise `Result<T, E>` ile *generic*'leri zaten kullanmıştık.
++ Bu bölümde, kendi türlerinizi, fonksiyonlarınızı ve metotlarınızı *generic*'lerle nasıl tanımlayacağınızı keşfedeceksiniz!
+
+
+> [!NOTE]
+> 1. İlk olarak, kod tekrarını azaltmak için bir fonksiyonun nasıl dışarı çıkarılacağını (*extract*) inceleyeceğiz.
+> 2. Ardından, sadece parametre türleri bakımından farklılık gösteren iki fonksiyondan *generic* bir fonksiyon oluşturmak için aynı tekniği kullanacağız.
+> 3. Ayrıca, `struct` (yapı) ve `enum` (numaralandırma) tanımlarında *generic* türlerin nasıl kullanılacağını açıklayacağız.
+> 4. Daha sonra, davranışı *generic* bir şekilde tanımlamak için **trait**'leri (özellikleri) nasıl kullanacağınızı öğreneceksiniz.
+> 	+ Bir generic türü, sadece herhangi bir türü değil, yalnızca belirli bir davranışa sahip olan türleri kabul edecek şekilde kısıtlamak için traitleri generic türlerle birleştirebilirsiniz.
+> 5. Son olarak, **lifetimes** (yaşam süreleri) konusunu ele alacağız:
+> 	+ Bunlar, derleyiciye referansların birbirleriyle nasıl ilişkili olduğu hakkında bilgi veren bir generic türüdür.
+> 	+ Yaşam süreleri, ödünç alınan (borrowed) değerler hakkında derleyiciye yeterli bilgiyi vermemizi sağlar; böylece derleyici, referansların bizim yardımımız olmadan sağlayabileceğinden daha fazla durumda geçerli olmasını garanti edebilir.
+
+
+> [!TIP]
+> + Metni daha iyi anlamanız için Rust ekosisteminde kullanılan bazı terimlerin karşılıkları şunlardır:
+> 	1. **Generic Types:** Genel Türler (Herhangi bir türün yerini tutabilen yapılar).
+> 	2. **Traits:** Özellikler (Bir türün neler yapabileceğini tanımlayan arayüzler).
+> 	3. **Lifetimes:** Yaşam Süreleri (Bir referansın bellekte ne kadar süre geçerli kalacağını belirten kurallar).
+> 	4. **Concrete Type:** Somut Tür (Örn: Tam sayı, metin gibi net tanımlanmış türler).
+
+### 10.a. Bir Fonksiyonu Dışarı Çıkararak Tekrarı Kaldırma
+
++ *Generic* yapılar, kod tekrarını ortadan kaldırmak için belirli (spesifik) türlerin yerine birden fazla türü temsil eden bir **yer tutucu (placeholder)** kullanmamıza olanak tanır.
++ *Generic* sözdizimine (*syntax*) dalmadan önce, ilk olarak *generic* türleri içermeyen bir yönteme bakalım: Belirli değerleri, birden fazla değeri temsil eden bir yer tutucuyla değiştiren bir **fonksiyon oluşturma** (*extracting a function*) yöntemiyle tekrarı nasıl gidereceğimizi göreceğiz.
++ Ardından, aynı tekniği *generic* bir fonksiyon oluşturmak(*extracting a function*) için uygulayacağız!
++ Kod içinde tekrarlanan ve bir fonksiyona dönüştürülebilecek yapıları nasıl fark edeceğimizi öğrendikçe, *generic*’lerin kullanılabileceği tekrarlanan kodları da daha kolay fark etmeye başlayacaksınız.
++ Başlangıç olarak, Liste 10-1’de yer alan ve bir sayı listesindeki **en büyük sayıyı bulan** kısa bir programla başlayalım.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let number_list = vec![34, 50, 25, 100, 65];
+
+    let mut largest = &number_list[0];
+
+    for number in &number_list {
+        if number > largest {
+            largest = number;
+        }
+    }
+
+    println!("The largest number is {largest}");
+    assert_eq!(*largest, 100);
+}
+```
+
+> **Liste 10-1:** Bir sayı listesindeki en büyük sayıyı bulma
+
++ Tam sayılardan oluşan bir listeyi `number_list` değişkeninde saklıyoruz ve listedeki ilk sayının referansını `largest` adlı bir değişkene yerleştiriyoruz.
++ Ardından listedeki tüm sayıları sırayla geziyoruz; eğer mevcut sayı `largest` değişkeninde saklanan sayıdan büyükse, o değişkendeki referansı yenisiyle değiştiriyoruz.
++ Ancak, mevcut sayı şimdiye kadar görülen en büyük sayıdan küçük veya ona eşitse, değişken değişmez ve kod listedeki bir sonraki sayıya geçer.
++ Listedeki tüm sayılar değerlendirildikten sonra, `largest` en büyük sayıya işaret etmelidir ki bu örnekte bu sayı 100'dür.
++ Şimdi iki farklı sayı listesindeki en büyük sayıyı bulmakla görevlendirildik.
+	- Bunu yapmak için, `Liste 10-1`'deki kodu kopyalayıp `Liste 10-2`'de gösterildiği gibi programın iki farklı yerinde aynı mantığı kullanmayı seçebiliriz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let number_list = vec![34, 50, 25, 100, 65];
+
+    let mut largest = &number_list[0];  // <--- 
+
+    for number in &number_list {
+        if number > largest {
+            largest = number;
+        }
+    }
+
+    println!("The largest number is {largest}");
+
+    let number_list = vec![102, 34, 6000, 89, 54, 2, 43, 8];
+
+    let mut largest: &i32 = &number_list[0];  // <--- &i32(Dikkat)
+
+    for number in &number_list {
+        if number > largest {
+            largest = number;
+        }
+    }
+
+    println!("The largest number is {largest}");
+}
+```
+
+> **Liste 10-2:** İki farklı sayı listesinde en büyük sayıyı bulan kod
+
++ Bu kod çalışıyor olsa da, kodu tekrar etmek hem zahmetlidir hem de hata yapmaya açıktır. Ayrıca, kodda bir değişiklik yapmak istediğimizde, bu değişikliği birden fazla yerde güncellememiz gerektiğini de unutmamamız gerekir.
++ Bu tekrarları ortadan kaldırmak için, parametre olarak kendisine verilen herhangi bir tamsayı listesini işleyen bir fonksiyon tanımlayarak bir **soyutlama (abstraction)** oluşturacağız.
++ Bu çözüm, kodumuzu daha anlaşılır hale getirir ve bir listedeki en büyük sayıyı bulma kavramını soyut bir şekilde ifade etmemizi sağlar.
+---
++ `Liste 10-3`’te, en büyük sayıyı bulan kodu `largest` adlı bir fonksiyonun içine çıkarıyoruz.
++ Ardından, `Liste 10-2`’deki iki farklı liste için en büyük sayıyı bulmak üzere bu fonksiyonu çağırıyoruz.
++ Ayrıca, gelecekte sahip olabileceğimiz başka `i32` değerlerinden oluşan listelerde de bu fonksiyonu kullanabiliriz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn largest(list: &[i32]) -> &i32 {
+    let mut largest = &list[0];
+
+    for item in list {
+        if item > largest {
+            largest = item;
+        }
+    }
+
+    largest
+}
+
+fn main() {
+    let number_list = vec![34, 50, 25, 100, 65];
+
+    let result = largest(&number_list);
+    println!("The largest number is {result}");
+    assert_eq!(*result, 100);
+
+    let number_list = vec![102, 34, 6000, 89, 54, 2, 43, 8];
+
+    let result = largest(&number_list);
+    println!("The largest number is {result}");
+    assert_eq!(*result, 6000);
+}
+```
+
+> **Liste 10-3:** İki listede en büyük sayıyı bulmak için soyutlanmış kod
+
+
+> [!TIP]
+> #### Hatırlatma: `list: &[i32]` neyi ifade eder?
+> Bu ifade **“i32 türünden elemanlar içeren bir dilimin (slice) referansı”** anlamına gelir.
+> + **Sahiplik (ownership) taşınmaz:** Fonksiyona vektörün kendisini değil, sadece **okuma amaçlı bir referansını** veriyoruz.
+> + **Performanslıdır:** Kopyalama yoktur, sadece bellek adresi gönderilir.
+> ##### Fonksiyon bağlamında anlamı:
+> ```rust
+> fn largest(list: &[list]) -> &i32
+> ```
+> - Kendisine verilen sayı listesini **sahiplenmez**.
+> - Listeyi **sadece okur**
+> - Listenin içinden **en büyük elemana ait referansı** geri döndürür
+> ##### Özet:
+> + `&[i32]`, “Bu fonksiyon i32 listesini kullanacak ama ona sahip olmayacak” demenin Rust’taki doğru ve güvenli yoludur.
+
++ `largest` fonksiyonunun `list` adında bir parametresi vardır; bu parametre fonksiyona geçirebileceğimiz herhangi bir somut `i32` dilimini (slice) temsil eder. Sonuç olarak, fonksiyonu çağırdığımızda kod, içine gönderdiğimiz spesifik değerler üzerinde çalışır.
++ Özetle, Liste 10-2’deki kodu Liste 10-3’e dönüştürmek için şu adımları izledik:
+	1. Tekrar eden kodu tespit et.
+	2. Tekrar eden kodu fonksiyon gövdesine taşı ve bu kodun girdi ve çıktılarını fonksiyon imzasında (signature) belirt.
+	3. Tekrarlanan kodun iki örneğini, bunun yerine fonksiyonu çağıracak şekilde güncelle.
++ Bir sonraki adımda, kod tekrarını azaltmak için bu adımların aynısını **generic** yapılarla uygulayacağız.
++ Fonksiyon gövdesinin belirli değerler(`i32`, `f64`, `char` vb.) yerine soyut bir `list` üzerinde çalışabilmesi gibi; *generic* yapılar da kodun **soyut türler** üzerinde çalışmasına olanak tanır.
+
+
+> [!TIP]
+> #### 1. Somut(Concrete) Türler:
+> + Somut türler, bilgisayarın hafızada ne kadar yer kaplayacağını ve onunla tam olarak ne yapacağını bildiği, **kesinleşmiş** türlerdir.
+> 	- **Örnekler:** `i32` (32-bit tam sayı), `f64` (64-bit ondalıklı sayı), `String` (metin), `char` (karakter).
+> #### 2. Soyut (Abstract) Yapılar (Genericler):
+> + Soyutlama, bir mantığın **türden bağımsız** hale getirilmesidir. "Şu an hangi tür olduğunu bilmiyorum ama bu türün X özelliklerine sahip olduğunu varsayıyorum" demektir.
+> 	- **Örnekler:** `T`, `U`, `V` gibi yer tutucular (Genericler).
+
++ Örneğin, biri `i32` dilimindeki(*slice of `i32` values*) en büyük elemanı bulan, diğeri ise `char`(karakter) dilimindeki(*slice of `char` values*) en büyük elemanı bulan iki fonksiyonumuz olduğunu varsayalım. Bu tekrarları nasıl ortadan kaldırabiliriz? 
++ Şimdi bunu inceleyelim.
+
+## 10.1. Genel Veri Türleri (Generic Data Types)
+
++ *Generic*'leri; fonksiyon imzaları veya `struct` gibi öğeler için tanımlar oluşturmak amacıyla kullanırız. Bu tanımlar, daha sonra birçok farklı **somut (concrete) veri türü** ile birlikte kullanılabilir. Önce, *Generic*'leri; kullanarak **fonksiyonların, struct’ların, enum’ların ve metotların** nasıl tanımlandığına bakacağız. Ardından, *Generic*'leri; **kod performansını** nasıl etkilediğini ele alacağız.
+### 10.1.1. Fonksiyon Tanımlarında (In Function Definitions)
+
+
+> [!caution]
+> #### A. Function Definition (Fonksiyon Tanımlama)
+> + Sıfırdan yeni bir fonksiyon oluşturmaktır. Fonksiyonun adını, parametrelerini, dönüş tipini ve gövdesini yazarsınız.
+> #### B. Function Extract (Fonksiyon Çıkarma)
+> + Mevcut kodda **tekrarlanan** veya **belirli bir işi yapan** kod parçasını alıp, onu ayrı bir fonksiyona dönüştürmektir. Yani kod zaten var, siz onu bir fonksiyon haline getiriyorsunuz.
+
++ *Generic*'leri kullanan bir fonksiyon tanımlarken, *generic*'leri fonksiyonun imzasında(*signature*), normalde parametrelerin ve dönüş değerinin veri tiplerini belirttiğimiz yere yerleştiririz.
++ Bunu yapmak kodumuzu daha esnek hale getirir ve kod tekrarını önlerken fonksiyonumuzu çağıranlara daha fazla işlevsellik sağlar.
++ `largest` fonksiyonumuza devam edersek, `Liste 10-4`’te her ikisi de bir dilim (*slice*) içindeki en büyük değeri bulan iki ayrı fonksiyon gösterilmektedir.
++ Daha sonra bunları *generic*'leri kullanan **tek bir fonksiyonda** birleştireceğiz.
+
+```rust
+fn largest_i32(list: &[i32]) -> &i32 {
+    let mut largest = &list[0];
+
+    for item in list {
+        if item > largest {
+            largest = item;
+        }
+    }
+
+    largest
+}
+
+fn largest_char(list: &[char]) -> &char {
+    let mut largest = &list[0];
+
+    for item in list {
+        if item > largest {
+            largest = item;
+        }
+    }
+
+    largest
+}
+
+fn main() {
+    let number_list = vec![34, 50, 25, 100, 65];
+
+    let result = largest_i32(&number_list);
+    println!("The largest number is {result}");
+    assert_eq!(*result, 100);
+
+    let char_list = vec!['y', 'm', 'a', 'q'];
+
+    let result = largest_char(&char_list);
+    println!("The largest char is {result}");
+    assert_eq!(*result, 'y');
+}
+```
+
+> **Liste 10-4:**  Yalnızca **isimleri** ve **fonksiyon imzalarındaki türleri** farklı olan iki fonksiyon
+
+
+> [!INFO]
+> #### Hatırlatma: Karakter karşılaştırması
+> + Bu fonksiyonda **karakter karşılaştırması**, Rust’ta `char` türünün sahip olduğu **doğal sıralama kuralına** göre yapılır. Bu kural, karakterlerin **Unicode kod noktalarına (code point)** dayanır.
+> ##### Basit Örnek:
+> ```rust
+> fn main() {
+> 	let a = 'a';
+> 	let b = 'z';
+> 	println!("{}", b > a); // true
+> }
+> ```
+> + Çünkü **Unicode değerleri** şöyledir:
+> 	- `'a'` → 97
+> 	- `'z'` → 122
+> + **Sonuç:** `122 > 97` olduğu için:
+
++ `largest_i32` fonksiyonu, `Liste 10-3`'te bir dilim (*slice*) içindeki en büyük `i32` değerini bulmak için dışarı çıkardığımız fonksiyondur.
++ `largest_char` fonksiyonu ise bir dilim içindeki en büyük `char` değerini bulur.
++ Fonksiyon gövdeleri aynı koda sahiptir; bu nedenle tek bir fonksiyona **generic (genel) bir tür parametresi** dahil ederek bu tekrarı ortadan kaldıralım.
+---
++ Yeni ve tek bir fonksiyondaki türleri parametreleştirmek için, tıpkı bir fonksiyona verilen değer parametrelerinde yaptığımız gibi, tür parametresini isimlendirmemiz gerekir.
++ Tür parametresi ismi olarak herhangi bir tanımlayıcı kullanabilirsiniz. Ancak biz `T` harfini kullanacağız; çünkü Rust'ta geleneksel olarak tür parametresi isimleri kısadır (genellikle tek bir harf) ve Rust'ın tür isimlendirme kuralı `UpperCamelCase` (Büyük Deve Hörgücü) şeklindedir.
++ "Type" (Tür) kelimesinin kısaltması olan `T`, çoğu Rust programcısının varsayılan seçimidir.
+---
++ Fonksiyonun gövdesinde bir parametre kullandığımızda, derleyicinin bu adın ne anlama geldiğini bilmesi için parametre adını imzada bildirmemiz gerekir.
++ Benzer şekilde, bir fonksiyon imzasında bir tür parametresi adı kullandığımızda, onu kullanmadan önce tür parametre adını bildirmemiz gerekir.
++ *Generic* `largest` fonksiyonunu tanımlamak için, tür adı bildirimlerini açılı ayraçlar `<>` içine, fonksiyonun adı ile parametre listesi arasına şöyle yerleştiririz:
+
+```rust
+fn largest<T>(list: &[T]) -> &T {
+```
+
+> + Bu tanımı şöyle okuruz:
+> 	- "`largest` fonksiyonu, **T adlı bir tür üzerinde generic'tir**."
+> 	- Bu fonksiyonun `list` adlı tek bir parametresi vardır ve bu parametre, **T türünden değerlerin bir dilimidir** (`&[T]`).
+> 	- `largest` fonksiyonu, yine **aynı T türünden bir değere referans** döndürür.
+
++ **Liste 10-5**, imzasında (signature) **generic veri türü** kullanan birleştirilmiş `largest` fonksiyon tanımını göstermektedir.
++ Bu liste ayrıca, fonksiyonu hem `i32` değerlerinden oluşan bir dilimle(*slice*) hem de `char` değerleriyle nasıl çağırabileceğimizi de gösterir.
+
+> [!CAUTION]
+>  + Ancak bu kodun **henüz derlenmeyeceğini** unutmayın.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn largest<T>(list: &[T]) -> &T {
+    let mut largest = &list[0];
+
+    for item in list {
+        if item > largest {
+            largest = item;
+        }
+    }
+
+    largest
+}
+
+fn main() {
+    let number_list = vec![34, 50, 25, 100, 65];
+
+    let result = largest(&number_list);
+    println!("The largest number is {result}");
+
+    let char_list = vec!['y', 'm', 'a', 'q'];
+
+    let result = largest(&char_list);
+    println!("The largest char is {result}");
+}
+```
+
+> **Liste 10-5:** *Generic* tür parametreleri kullanan `largest` fonksiyonu; bu haliyle henüz derlenmez.
+
++ Eğer bu kodu şu an derlersek, şu hatayı alırız:
+
+```rust
+$ cargo run
+   Compiling chapter10 v0.1.0 (file:///projects/chapter10)
+error[E0369]: binary operation `>` cannot be applied to type `&T`
+ --> src/main.rs:5:17
+  |
+5 |         if item > largest {
+  |            ---- ^ ------- &T
+  |            |
+  |            &T
+  |
+help: consider restricting type parameter `T` with trait `PartialOrd`
+  |
+1 | fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> &T {
+  |             ++++++++++++++++++++++
+
+For more information about this error, try `rustc --explain E0369`.
+error: could not compile `chapter10` (bin "chapter10") due to 1 previous error
+```
+
++ Yardım metni, bir *trait* olan `std::cmp::PartialOrd`'dan bahsediyor ve bir sonraki bölümde *trait*'ler hakkında konuşacağız.
++ Şimdilik, bu hatanın `largest`'ın gövdesinin `T`'nin olabileceği tüm olası türler için çalışmayacağını belirttiğini bilin.
++ Gövdede `T` türündeki değerleri karşılaştırmak istediğimiz için, yalnızca değerleri **sıralanabilen(ordered)** türleri kullanabiliriz.
++ Karşılaştırmaları etkinleştirmek için, standart kütüphane türlerle uygulayabileceğiniz `std::cmp::PartialOrd` *trait*'ine sahiptir (bu *trait* hakkında daha fazla bilgi için Ek C'ye bakın).
+	- Yani, Karşılaştırmaları etkinleştirmek için standart kütüphanede, türler üzerinde uygulayabileceğiniz (*implement*) `std::cmp::PartialOrd` *trait*'i bulunur
++ `Liste 10-5`'i düzeltmek için, yardım metninin önerisini takip edebilir ve `T` için geçerli türleri yalnızca `PartialOrd`'u uygulayan türlerle kısıtlayabiliriz.
++ Liste daha sonra derlenecektir, çünkü standart kütüphane hem `i32` hem de `char` üzerinde `PartialOrd`'u uygular.
+
+
+> [!TIP]
+> + Rust derleyicisi çok titizdir. Siz `fn largest<T>` dediğinizde, derleyiciye şunu demiş olursunuz: "Bu fonksiyon **herhangi bir** türle çalışabilir."
+> + Ancak fonksiyonun içinde `>` (büyüktür) operatörünü kullanıyorsunuz. Derleyici ise haklı olarak şunu sorar:
+> 	- "Ya kullanıcı buraya büyüktür/küçüktür kavramı olmayan bir tür (örneğin bir dosya yapısı veya karmaşık bir veri) gönderirse ne olacak? Her tür birbiriyle kıyaslanamaz!"
+> + İşte bu yüzden derleyici bizden `T` türünü biraz daha spesifik hale getirmemizi istiyor.
+
+### 10.1.2. Struct Tanımlarında Generic Kullanımı
+
++ `<>` sözdizimini kullanarak, bir veya daha fazla alanında **generic tür parametresi** kullanan *struct*’lar da tanımlayabiliriz.
++ **Liste 10-6**, `x` ve `y` koordinat değerlerini **herhangi bir türde** tutabilen bir `Point<T>` *struct*’ını tanımlar.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+fn main() {
+    let integer = Point { x: 5, y: 10 };
+    let float = Point { x: 1.0, y: 4.0 };
+}
+```
+
+> **Liste 10-6:** `x` ve `y` değerlerini `T` türünde tutan bir `Point<T>` *struct*’ı
+
++ *Struct* tanımlarında *generic*'leri kullanmanın sözdizimi, fonksiyon tanımlarında kullanılan sözdizimine(*syntax*) benzerdir.
++ Öncelikle, tür parametresinin adını(`T`), *struct* adından hemen sonra açılı ayraçlar (`<>`) içinde tanımlarız. Ardından, normalde somut (*concrete*) veri türlerini belirteceğimiz(`x: T` ve `y: T`) yerlerde bu *generic* türü struct tanımı içinde kullanırız.
+
+> [!NOTE]
+> + `Point<T>` yapısını tanımlamak için yalnızca tek bir generic tür kullandığımıza dikkat edin;
+> + bu tanım, `Point<T>` yapısının bir `T` türü üzerinde generic olduğunu ve `x` ile `y` alanlarının (bu tür her ne olursa olsun) **her ikisinin de aynı türden** olduğunu söyler.
+> + Eğer `Liste 10-7`'de olduğu gibi farklı türlerde değerlere sahip bir `Point<T>` örneği (*instance*) oluşturmaya çalışırsak kodumuz derlenmeyecektir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+fn main() {
+    let wont_work = Point { x: 5, y: 4.0 };
+}
+```
+
+> **Liste 10-7:** x ve y alanları aynı *generic* veri türü T'ye sahip oldukları için aynı türden olmak zorundadır.
+
++ Bu örnekte, `x` değişkenine 5 tam sayı değerini atadığımızda, derleyiciye bu `Point<T>` örneği (*instance*) için *generic* `T` türünün bir tam sayı(*integer*) olacağını bildirmiş oluruz. 
++ Ardından, `x` ile aynı türde olacağını tanımladığımız `y` için 4.0 değerini belirttiğimizde, şu şekilde bir tür uyumsuzluğu hatası alırız:
+
+```rust
+$ cargo run
+   Compiling chapter10 v0.1.0 (file:///projects/chapter10)
+error[E0308]: mismatched types
+ --> src/main.rs:7:38
+  |
+7 |     let wont_work = Point { x: 5, y: 4.0 };
+  |                                      ^^^ expected integer, found floating-point number
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `chapter10` (bin "chapter10") due to 1 previous error
+```
+
++ Hem `x` hem de `y`'nin generic olduğu ancak **farklı türlere** sahip olabildiği bir `Point` yapısı tanımlamak için, birden fazla generic tür parametresi kullanabiliriz.
++ Örneğin `Liste 10-8`'de, `Point` tanımını `x`'in `T` türünde, `y`'nin ise `U` türünde olduğu `T` ve `U` türleri üzerinden *generic* olacak şekilde değiştiriyoruz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct Point<T, U> {
+    x: T,
+    y: U,
+}
+
+fn main() {
+    let both_integer = Point { x: 5, y: 10 };
+    let both_float = Point { x: 1.0, y: 4.0 };
+    let integer_and_float = Point { x: 5, y: 4.0 };
+}
+```
+
+> **Liste 10-8:** x ve y'nin farklı türlerde değerler alabilmesi için iki tür üzerinden *generic* olan bir `Point<T, U>` yapısı
+
++ Artık gösterilen tüm `Point` örneklerine(*instance*) izin verilir!
++ Bir tanım(Point yapısı) içerisinde istediğiniz kadar *generic* tür parametresi kullanabilirsiniz, ancak birkaç taneden fazlasını kullanmak kodunuzun okunmasını zorlaştırır.
+
+> [!TIP]
+> + Eğer kodunuzda çok sayıda generic türe ihtiyaç duyduğunuzu fark ediyorsanız, bu durum kodunuzun daha küçük parçalara bölünerek yeniden yapılandırılması gerektiğine dair bir işaret olabilir.
+
+### 10.1.3. Enum Tanımlarında Generic Kullanımı
+
++ *Struct*'larda yaptığımız gibi, *enum*'ları da varyantlarında (kollarında) *generic* veri türleri tutacak şekilde tanımlayabiliriz.
++ Standart kütüphanenin sunduğu ve 6. Bölümde kullandığımız `Option<T>` *enum*'ına tekrar bakalım:
+
+```rust
+#![allow(unused)]
+fn main() {
+	enum Result<T, E> {
+	    Ok(T),
+	    Err(E),
+	}
+}
+```
+
++ Bu tanım artık sizin için daha anlamlı olmalıdır. Gördüğünüz gibi `Option<T>` *enum*’u, `T` türü üzerinde *generic*'tir ve iki varyanta sahiptir:
+	- `Some`, `T` türünde tek bir değer tutar,
+	- `None` ise hiçbir değer tutmaz.
++ `Option<T>` *enum*’unu kullanarak "*opsiyonel* (var olabilir ya da olmayabilir) bir değer" kavramını *soyut* olarak ifade edebiliriz.
+
+> [!TIP]
+> + Burada **“soyut”** denmesinin nedeni, `Option<T>`’nin **belirli bir somut veri türünü değil**, türden bağımsız bir **kavramı** temsil etmesidir.
+> + Günlük hayattan kısa benzetme:
+> 	- **Somut:** "Cebimde 10 TL olabilir ya da olmayabilir"
+> 	- **Soyut:** "Cebimde _bir şey_ olabilir ya da olmayabilir"
+
++ `Option<T>` *generic* olduğu için, bu soyutlamayı *opsiyonel* değerin türü ne olursa olsun kullanabiliriz.
++ Enum'lar da birden fazla generic tür kullanabilirler. 9. Bölümde kullandığımız `Result` enum'ının tanımı buna bir örnektir:
+
+```rust
+#![allow(unused)]
+fn main() {
+	enum Result<T, E> {
+	    Ok(T),
+	    Err(E),
+	}
+}
+```
+
++ `Result` enum’u iki tür üzerinde *generic*'tir: `T` ve `E`. İki varyanta sahiptir:
+	- `Ok`, `T` türünde bir değer tutar,
+	- `Err`, `E` türünde bir hata değeri tutar.
++ Bu tanım, başarılı olma ihtimali olan (T türünde bir değer döndüren) ya da başarısız olma ihtimali olan (E türünde bir hata döndüren) işlemler için `Result` *enum*’unu kullanmayı son derece pratik hale getirir.
++ Nitekim bu yapıyı, Dosya açma örneğinde (`Liste 9-3`) kullandık: 
+	- dosya başarıyla açıldığında `T` yerine `std::fs::File`, 
+	- dosya açılırken bir sorun oluştuğunda ise `E` yerine `std::io::Error` türü kullanıldı.
++ Kodunuzda, sadece tuttukları değerlerin türleri bakımından farklılık gösteren birden fazla *struct* veya *enum* tanımı olduğunu fark ettiğinizde, *generic* türler kullanarak bu tekrardan kaçınabilirsiniz.
+
+### 10.1.4. Metod Tanımlarında Generic Kullanımı
+
++ Struct ve enum’lar üzerinde metotlar tanımlayabiliriz (Bölüm 5’te yaptığımız gibi) ve bu metot tanımlarında da **generic türleri** kullanabiliriz.
++ Liste 10-9, Liste 10-6’da tanımladığımız `Point<T>` struct’ını ve bu struct üzerinde tanımlanmış `x` adlı bir metodu göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Point<T> {
+    fn x(&self) -> &T {
+        &self.x
+    }
+}
+
+fn main() {
+    let p = Point { x: 5, y: 10 };
+
+    println!("p.x = {}", p.x());
+}
+```
+
+> **Liste 10-9:** `Point<T>` *struct*’ı üzerinde, `T` türündeki `x` alanına(*field*) bir referans döndüren `x` adlı bir metodun uygulanması
+
+**Kod Çıktısı:**
+
+```rust
+p.x = 5
+```
+
++ Burada, `Point<T>` üzerinde `x` alanındaki(*field*) veriye referans döndüren `x` isimli bir metot tanımladık.
++ `Point<T>` tipi üzerinde metotlar tanımladığımızı belirtebilmek için, `T` harfini `impl` kelimesinden hemen sonra beyan etmemiz gerektiğine dikkat edin.
++ `T`'yi `impl`'den sonra *generic* bir tür olarak beyan ederek, Rust'ın `Point` yanındaki açılı ayraçlar içindeki türün somut bir tür değil, *generic* bir tür olduğunu anlamasını sağlarız.
++ Bu *generic* parametre için *struct* tanımındakinden farklı bir isim seçebilirdik, ancak aynı ismi kullanmak gelenekseldir(*convention*).
+
+
+> [!NOTE]
+> #### Farklı isim kullanmak da **mümkün** (ama önerilmez)
+> ```rust
+> struct Point<T> {
+>    x: T,
+>    y: T,
+> }
+>
+> impl<U> Point<U> {
+>    fn x(&self) -> &U {
+>        &self.x
+>    }
+> }
+> ```
+> + ✅ Bu kod **tamamen geçerlidir**
+> + ❌ Ancak okuyan kişi için daha kafa karıştırıcıdır
+> + Çünkü zihinde şu soru oluşur: "*Struct* `T` kullanıyor, *impl* neden `U` kullanıyor? Farklı bir şey mi?"
+
++ Eğer generic bir tür beyan eden bir `impl` bloğu içinde metot yazarsanız, bu metot, *generic* türün yerine hangi somut tür gelirse gelsin o tipin tüm örnekleri (instances) üzerinde tanımlanmış olacaktır.
+	- Yani, *Generic* bir `impl<T>` bloğu içinde yazılan metot, `T` yerine hangi somut tür(`i32`, `f64`, `String`, vb.) gelirse gelsin, o türün tüm örnekleri için geçerli olur.
+
+---
+
++ **Metot Tanımlarında Kısıtlamalar**
++ Bir tür üzerinde metotlar tanımlarken *generic* türler üzerine kısıtlamalar da getirebiliriz.
++ **Örneğin**, herhangi bir generic türe sahip `Point<T>` örnekleri yerine, yalnızca `Point<f32>` örnekleri üzerinde çalışan metotlar uygulayabiliriz.
++ Liste 10-10'da somut (*concrete*) bir tür olan `f32`'yi kullanıyoruz; bu da `impl` kelimesinden sonra herhangi bir tür beyan etmediğimiz anlamına gelir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Point<T> {
+    fn x(&self) -> &T {
+        &self.x
+    }
+}
+
+impl Point<f32> {
+    fn distance_from_origin(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+
+fn main() {
+    let p = Point { x: 5, y: 10 };
+
+    println!("p.x = {}", p.x());
+}
+```
+
+> Liste 10-10: Sadece generic tür parametresi `T`'nin belirli bir somut türde(`f32`) olduğu durumlar için geçerli olan bir `impl` bloğu
+
+
+> [!WARNING]
+> + Bu kod, `Point<f32>` türünün `distance_from_origin` (merkez noktasına uzaklık) adında bir metoda sahip olacağı; ancak `T` türünün `f32` olmadığı diğer `Point<T>` örneklerinin bu metoda sahip olmayacağı anlamına gelir.
+> #####  ✅  `distance_from_origin(&self) -> f32` metottu kullanılabilir:
+> ```rust
+> let p = Point { x: 3.0_f32, y: 4.0_f32 };
+> ```
+> ##### ❌ `distance_from_origin(&self) -> f32` metottu kullanılmaz:
+> ```rust
+> let p = Point { x: 3, y: 4 };
+> ```
+> + Bu metot, noktamızın `(0.0, 0.0)` koordinatlarındaki noktaya olan uzaklığını ölçer ve yalnızca *ondalıklı sayı (floating-point)* türleri için geçerli olan matematiksel işlemleri kullanır.
+
+
+> [!NOTE]
+> #### Neden Önemli?
+> Burada Rust'ın çok güçlü bir özelliğini görüyoruz:
+> 
+> 1. `impl<T> Point<T>` bloğu ile **tüm** Point türlerine ortak özellikler veriyoruz (örneğin `x()` metodunu her tür kullanabilir).
+> 2. `impl Point<f32>` bloğu ile **sadece** ondalıklı sayılara özel yetenekler tanımlıyoruz.
+> 
+> Bu ayrım sayesinde, tam sayılardan (`i32`) oluşan bir noktada karekök (`sqrt`) alma gibi anlamsız (veya desteklenmeyen) işlemlerin yapılmasını derleme aşamasında engellemiş oluyoruz.
+
+---
+
++ Bir *struct* tanımındaki *generic* tür parametreleri, her zaman o *struct*'ın metot imzalarında kullandığınız parametrelerle aynı olmak zorunda değildir.
+	- Yani, Bir struct tanımındaki *generic* tip parametreleri, aynı *struct*'ın metot imzalarında kullandıklarınızla her zaman aynı değildir.
++ `Liste 10-11`, **örneği** daha net hale getirmek için `Point` *struct*'ı için `X1` ve `Y1` *generic* türlerini, `mixup` metot imzası için ise `X2` ve `Y2` türlerini kullanmaktadır.
++ Bu metod; `self` (çağıran) `Point` nesnesinden gelen `x` değerini (`X1` türünde) ve parametre olarak dışarıdan gelen `Point` nesnesinden gelen `y` değerini (`Y2` türünde) kullanarak yeni bir `Point` örneği oluşturur.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct Point<X1, Y1> {
+    x: X1,
+    y: Y1,
+}
+
+impl<X1, Y1> Point<X1, Y1> {
+    fn mixup<X2, Y2>(self, other: Point<X2, Y2>) -> Point<X1, Y2> {
+        Point {
+            x: self.x,
+            y: other.y,
+        }
+    }
+}
+
+fn main() {
+    let p1 = Point { x: 5, y: 10.4 };
+    let p2 = Point { x: "Hello", y: 'c' };
+
+    let p3 = p1.mixup(p2);
+
+    println!("p3.x = {}, p3.y = {}", p3.x, p3.y);
+}
+```
+
+> **Liste 10-11:** *Struct* tanımından farklı *generic* türler kullanan bir metot
+
+**Kod Çıktısı:**
+
+```
+p3.x = 5, p3.y = c
+```
+
+
+> [!TIP]
+> + **`X1, Y1`** → `self` olan **mevcut Point’in türleridir.**
+> + **`X2, Y2`** → metoda **parametre olarak gelen `other` Point’in türleridir.**
+> ```rust
+> self: Point<X1, Y1>
+> other: Point<X2, Y2>
+> ```
+> + Bu iki `Point` **aynı türlere sahip olmak zorunda değildir**. İşte bu yüzden **ayrı generic isimler kullanılır**.
+	
++ `main` fonksiyonunda;
+	- `x` alanı(*field*) `i32` (değeri `5`) ve `y` alanı(*field*) `f64` (değeri `10.4`) olan bir `Point` tanımlıyoruz.
+	- `p2` değişkeni, `x` için bir *string* dilimi (değeri "Hello" olan) ve `y` için bir `char` (değeri 'c' olan) içeren bir `Point` *struct*'ıdır.(*string* dilimi = `&str`)
+	- `p1` üzerinde `p2` argümanıyla `mixup` metodunu çağırmak bize `p3`'ü verir; `p3`'ün `x` değeri `i32` olacaktır çünkü `x`, `p1`'den gelmiştir.
+	- `p3` değişkeninin `y` değeri ise bir `char` olacaktır çünkü `y`, `p2`'den gelmiştir.
+	- `println!` makro çağrısı `p3.x = 5, p3.y = c` çıktısını verecektir.
++ **Bu örneğin amacı,**
+	- bazı *generic* parametrelerin `impl` ile ve bazılarının metot tanımıyla bildirildiği bir durumu göstermektir.
+	- Burada `X1` ve `Y1` *generic* parametreleri `impl`'den sonra beyan edilmiştir çünkü bunlar *struct* tanımıyla uyumludur.
+	- *Generic* parametreler `X2` ve `Y2`, `fn mixup`'tan sonra bildirilir çünkü yalnızca metotla ilgilidir.
+
+
+> [!important]
+> + **`impl<X1, Y1>`**: Bu kısım, metodun hangi struct üzerinde (`Point<X1, Y1>`) çalışacağını belirler.
+> + **`fn mixup<X2, Y2>`**: Bu kısım, metodun kendisine özel, dışarıdan gelecek yeni türleri tanımlar.
+> + **Sonuç Türü**: `Point<X1, Y2>` dönerek, ilk noktanın `x` türünü ve ikinci noktanın `y` türünü miras aldığını açıkça belirtir.
+
+### 10.1.5. Generic Kullanan Kodun Performansı
+
++ Generic tür parametreleri kullanmanın çalışma zamanında (runtime) bir maliyeti olup olmadığını merak ediyor olabilirsiniz. İyi haber şu ki; generic türleri kullanmak, programınızı somut türler kullandığınız durumdan daha yavaş çalıştırmaz.
++ Rust bunu, derleme zamanında generic kod üzerinde **monomorphization** (somutlaştırma) işlemini gerçekleştirerek başarır.
+
+> [!info]
+> + **Monomorphization**, generic kodun, derleme sırasında kullanılan somut türlerle doldurularak spesifik koda dönüştürülmesi sürecidir.
+> + Bu süreçte derleyici, Liste 10-5'teki *generic* fonksiyonu oluşturmak için izlediğimiz adımların tam tersini yapar:
+> + Derleyici, generic kodun çağrıldığı tüm yerlere bakar ve generic kodun hangi somut türlerle çağrıldığını tespit ederek o türlere özel (ayrı ayrı) kod üretir.
+
++ Bunun nasıl çalıştığına standart kütüphanenin *generic* `Option<T>` *enum*'ını kullanarak bakalım:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let integer = Some(5);
+	let float = Some(5.0);
+}
+```
+
++ Rust bu kodu derlediğinde *monomorphization* işlemini gerçekleştirir.
+	- Bu süreçte derleyici, `Option<T>` örneklerinde(*instances*) kullanılan değerleri okur ve iki tür `Option<T>` tanımlar: Biri `i32`, diğeri ise `f64`.
+	- Bu doğrultuda, `Option<T>`'nin *generic* tanımını `i32` ve `f64` için özelleşmiş iki tanıma genişleterek, *generic* tanımı bu spesifik olanlarla değiştirir.
++ Kodun somutlaştırılmış (monomorphized) versiyonu şuna benzer görünür(derleyici burada gösterim için kullandığımızdan farklı isimler kullanır yani, derleyici gerçekte burada kullandığımız isimlerden farklı isimler kullanır; bu sadece açıklama amaçlıdır)
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+enum Option_i32 {
+    Some(i32),
+    None,
+}
+
+enum Option_f64 {
+    Some(f64),
+    None,
+}
+
+fn main() {
+    let integer = Option_i32::Some(5);
+    let float = Option_f64::Some(5.0);
+}
+```
+
++ Generic `Option<T>`, derleyici tarafından oluşturulan spesifik tanımlarla değiştirilir.
++ Rust, *generic* kodu her bir örnekteki(*instance*) türü belirten koda dönüştürdüğü için, *generic* kullanmanın çalışma zamanında hiçbir maliyeti olmaz.
++ Kod çalıştığında, her tanımı elle çoğaltmış olsaydık nasıl performans gösteriyorsa tam olarak öyle performans gösterir.
++ *Monomorfizasyon* süreci, Rust’taki *generic*’lerin çalışma zamanında son derece verimli olmasını sağlar.
+
+
+> [!NOTE]
+> #### Pekiştirme: Generic  ➡️ monomorphization
+> ```rust
+> fn largest<T: PartialOrd>(list: &[T]) -> &T {
+>    let mut largest = &list[0];
+>
+>    for item in list {
+>        if item > largest {
+>            largest = item;
+>        }
+>    }
+>
+>    largest
+>}
+> ```
+> ##### Derleyicinin yaptığı monomorphization
+> + 🔹 **i32 için üretilen kod (temsili)**
+> ```rust
+> fn largest_i32(list: &[i32]) -> &i32 {
+>    let mut largest = &list[0];
+>
+>    for item in list {
+>        if item > largest {
+>            largest = item;
+>        }
+>    }
+>
+>    largest
+>}
+> ```
+> + 🔹 **char için üretilen kod (temsili)**
+> ```rust
+> fn largest_char(list: &[char]) -> &char {
+>    let mut largest = &list[0];
+>
+>    for item in list {
+>        if item > largest {
+>            largest = item;
+>        }
+>    }
+>
+>    largest
+>}
+> ```
+> + **Dikkat:** 📌 Bu isimler (`largest_i32`, `largest_char`) **gerçek değil**, öğretici temsildir. Derleyici içerde farklı sembol isimleri kullanır.
+
+## 10.2. Traits ile Paylaşılan Davranışı Tanımlamak
+
++ Bir **trait**, belirli bir türün sahip olduğu ve diğer türlerle paylaşabileceği işlevselliği tanımlar.
++ Paylaşılan davranışı soyut bir şekilde tanımlamak için *trait*'leri kullanabiliriz.
++ Bir *generic* türün, belirli bir davranışa sahip olan herhangi bir tür olabileceğini belirtmek için **trait bounds** (*trait* kısıtlamaları) yapısını kullanabiliriz.
+
+> [!NOTE]
+> **Traitler**, bazı farklılıkları olsa da, diğer dillerde genellikle **interface** (arayüz) olarak adlandırılan özelliğe benzerler.
+
+### 10.2.1. Bir Trait Tanımlamak
+
++ Bir türün davranışı, o tür üzerinde çağırabileceğimiz metotlardan oluşur.
++ Eğer tüm bu türler üzerinde aynı metotları çağırabiliyorsak, farklı türler aynı davranışı paylaşıyor demektir.
++ *Trait* tanımları, belirli bir amacı gerçekleştirmek için gerekli olan bir dizi davranışı tanımlamak amacıyla metot imzalarını bir araya getirmenin bir yoludur.
++ Örneğin, çeşitli tür(*kind*) ve miktarlarda metin tutan birden fazla *struct*'ımız (yapı) olduğunu varsayalım:
+	- Belirli bir konumda kaydedilmiş bir haberi tutan bir `NewsArticle` (HaberMakalesi) *struct*'ı ve 
+	- en fazla 280 karakter olabilen ayrıca yeni bir gönderi mi, bir yeniden paylaşım mı yoksa başka bir gönderiye yanıt mı olduğunu belirten meta verileri içeren bir `SocialPost` (SosyalMedyaGönderisi) *struct*'ı.
++ Biz, `NewsArticle` veya `SocialPost` örneklerinde(*instance*) saklanabilecek verilerin özetlerini gösterebilen, `aggregator` adlı bir medya toplayıcı kütüphane (_library crate_) oluşturmak istiyoruz.
++ Bunu yapabilmek için her türden bir özet almamız gerekir ve bu özeti, bir örnek üzerinde `summarize` metodunu çağırarak isteyeceğiz.
++ Liste 10-12, bu davranışı ifade eden herkese açık (`public`) bir `Summary` trait’inin tanımını göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+```
+
+> **Liste 10-12:** `summarize` adlı bir metot tarafından sağlanan davranıştan oluşan bir `Summary` *trait*’i
+
++ Burada, `trait` anahtar kelimesini ve ardından *trait*’in adını (bu örnekte `Summary`) kullanarak bir *trait* tanımlıyoruz.
++ Ayrıca, bu *crate*’e bağımlı olan diğer *crate*’lerin de bu *trait*’ten yararlanabilmesi için *trait*’i `pub` olarak bildiriyoruz; bunu ilerleyen örneklerde göreceğiz.
++ Süslü parantezlerin içinde, bu *trait*’i uygulayan türlerin sahip olması gereken davranışları tanımlayan metot imzalarını bildiriyoruz; bu örnekte bu imza `fn summarize(&self) -> String` şeklindedir.
++ Metot imzasından sonra, süslü parantezler içinde bir uygulama(*implementation*) vermek yerine noktalı virgül (`;`) kullanırız.
+	- Bu *trait*’i uygulayan her tür, metot gövdesi için kendine özgü bir davranış sağlamak zorundadır.
+	- Derleyici, `Summary` *trait*’ine sahip olan her türün, tam olarak bu imzaya sahip bir `summarize` metodunu tanımladığını zorunlu kılar.
+	- Bir trait, gövdesinde birden fazla metot barındırabilir: Metot imzaları satır satır listelenir ve her satır noktalı virgül ile sona erer.
+
+### 10.2.2. Bir Tür Üzerinde Trait Uygulamak
+
++ Artık `Summary` trait’inin metot imzalarını tanımladığımıza göre, bu trait’i medya toplayıcımızdaki türler üzerinde uygulayabiliriz(*implement-impl*).
++ Liste 10-13, `Summary` trait’inin `NewsArticle` yapısı için nasıl uygulandığını göstermektedir.
+	- Bu uygulamada(*implement*), `summarize` metodunun dönüş değeri; başlık (_headline_), yazar (_author_) ve konum (_location_) bilgileri kullanılarak oluşturulur.
++ `SocialPost` yapısı için ise `summarize` metodunu, kullanıcı adı ve ardından gönderinin tüm metni gelecek şekilde tanımlıyoruz (gönderi içeriğinin zaten 280 karakterle sınırlı olduğunu varsayıyoruz).
+
+
+> [!TIP]
+> #### Hatırlatma: `main.rs` ve `lib.rs` birlikte oluşturma
+> ```shell
+> cargo new aggregator
+> ```
+> ```shell
+> cd aggregator; touch src/lib.rs
+> ```
+> + Oluşturulan ağaç yapısı:
+> ```shell
+> aggregator
+> ├── Cargo.toml
+> └── src
+>     ├── lib.rs
+>     └── main.rs
+> 1 directory, 3 files
+> ```
+> + Cargo bu yapıyı **otomatik olarak tanır**, ek bir ayar gerekmez.
+
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub repost: bool,
+}
+
+impl Summary for SocialPost {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+```
+
+> **Liste 10-13:** `Summary` *trait*’inin `NewsArticle` ve `SocialPost` türleri için uygulanması
+
++ Bir tür üzerinde trait uygulamak, normal metodları uygulamaya benzer. Fark şudur: `impl` kelimesinden sonra uygulamak istediğimiz **trait adını** yazarız, ardından `for` anahtar kelimesini kullanırız ve son olarak trait'i hangi **tür** için uygulamak istiyorsak onun adını belirtiriz.
+
++ `impl` bloğunun içine, trait tanımında yer alan metod imzalarını yerleştiririz.
+	- Her imzanın sonuna noktalı virgül koymak yerine, süslü parantezler kullanır ve metodun gövdesini, o belirli tür için sahip olmasını istediğimiz özel davranışla doldururuz.
+
++ `Summary` *trait*’i artık `NewsArticle` ve `SocialPost` üzerinde uygulanmış olduğuna göre, bu crate’i kullanan kişiler `NewsArticle` ve `SocialPost` örnekleri üzerinde *trait* metotlarını, tıpkı normal metotları çağırır gibi çağırabilirler.
++ Tek fark, kullanıcının hem ilgili **türleri** hem de **trait’i** kapsama alanına (_scope_) dahil etmesi gerekmesidir.
++ Aşağıda, bir ikili (_binary_) crate’in bizim `aggregator` kütüphane *crate*’imizi nasıl kullanabileceğine dair bir örnek yer almaktadır:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use aggregator::{SocialPost, Summary};
+
+fn main() {
+    let post = SocialPost {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        repost: false,
+    };
+
+    println!("1 new post: {}", post.summarize());
+}
+```
+
++ Bu kodun çıktısı şu olacaktır:
+
+```
+1 new post: horse_ebooks: of course, as you probably already know, people.
+```
+
+
+> [!CAUTION]
+> + `aggregator` kütüphanesine(*crate*) bağımlı olan diğer kütüphaneler(*crate*) de `Summary` *trait*'ini kapsama dahil ederek kendi türleri üzerinde `Summary` *trait*'ini uygulayabilirler.
+> + Dikkat edilmesi gereken bir kısıtlama şudur: Bir trait'i bir tür üzerinde ancak **trait ya da türden en az biri (veya her ikisi) bizim kütüphanemize(*crate*) yerel (local) ise** uygulayabiliriz.
+> 	- Örneğin, `SocialPost` türü bizim kütüphanemize yerel olduğu için, standart kütüphane trait'i olan `Display`'i `SocialPost` üzerinde uygulayabiliriz.
+> 	- Aynı şekilde, `Summary` trait'i bizim kütüphanemize yerel olduğu için `Summary`'yi `Vec<T>` üzerinde uygulayabiliriz.
+> + Ancak, dışarıdan gelen (external) bir trait'i, dışarıdan gelen bir tür üzerinde uygulayamayız.
+> 	- Örneğin, `Display` trait'ini `Vec<T>` üzerinde `aggregator` kütüphanemiz içinde uygulayamayız; çünkü hem `Display` hem de `Vec<T>` standart kütüphanede tanımlanmıştır ve bizim kütüphanemize yerel değildir.
+> + Bu kısıtlama, **tutarlılık (coherence)** özelliğinin ve daha spesifik olarak **yetim kuralı (orphan rule)** olarak adlandırılan kuralın bir parçasıdır; bu isim, ebeveyn türün orada bulunmamasından dolayı verilmiştir.
+> 	- Bu kural, başkalarının yazdığı kodun sizin kodunuzu bozmasını (veya tam tersini) engeller.
+> 	- Bu kural olmasaydı, iki farklı kütüphane aynı tür için aynı *trait*'i uygulayabilirdi ve Rust hangi uygulamayı kullanacağını bilemezdi.
+
+
+> [!INFO]
+> #### Kendi trait’imiz + standart kütüphane türü → Serbest
+> ##### `Display` implementasyonu
+> **Dosya adı:** `src/lib.rs`
+> ```rust
+> use std::fmt
+> 
+> pub struct Article {
+> 	pub title: String,
+> }
+> 
+> impl fmt::Display for Article {
+> 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+> 		write!(f, "Makale başlığı: {}", self.title)
+> 	}
+> }
+> ```
+> **Dosya adı:** `src/main.rs`
+> ```rust
+> fn main() {
+> 	let article = Article {
+> 		title: String::from("Rust Traits"),
+> 	};
+> 	println!("{}", article);
+> }
+> ```
+> **Çıktı:**
+> ```
+> Makale başlığı: Rust Traits
+> ```
+
+
+> [!INFO]
+> #### Standart trait + standart tür → ❌ YASAK (Orphan Rule)
+> İşte **yasak olan** durum tam olarak budur.
+> ```rust
+> use std::fmt;
+> 
+> // ❌ DERLENMEZ
+> impl fmt::Display for Vec<String> {
+> 	fn fmt(&self, f: &mut fmt::Formatter<'_'>) -> fmt::Result {
+> 		write!(f, "Vec içinde {} eleman var", self.len())
+> 	}
+> }
+> ```
+> **❌ HATA**
+> + Trait standart kütüphaneden(`Display`)
+> + Tür standart kütüphaneden(`Vec`)
+> + **İkisi de bize ait değil**
+> 
+> Rust burada durur ve der ki:
+> 
+> 	"Buna izin veremem; başka bir crate de aynısını yaparsa hangisini seçeceğimi bilemem."
+
+| **Trait Kaynağı** | **Tür (Type) Kaynağı**             | **Uygulanabilir mi?** |
+| ----------------- | ---------------------------------- | --------------------- |
+| Yerel (Sizin)     | Yerel (Sizin)                      | **Evet**              |
+| Yerel (Sizin)     | Dışarıdan (Standart Kütüphane vb.) | **Evet**              |
+| Dışarıdan         | Yerel (Sizin)                      | **Evet**              |
+| Dışarıdan         | Dışarıdan                          | **HAYIR**             |
+
++ Bazen, bir trait içindeki metotların tamamı için her türde ayrı ayrı uygulama yazmak yerine, bu metotların bir kısmı ya da tamamı için **varsayılan bir davranış** tanımlamak faydalı olabilir.
++ Bu sayede, trait’i belirli bir tür üzerinde uygularken her bir metodun varsayılan davranışını aynen kullanabilir ya da istersek bu davranışı geçersiz kılabiliriz (_override_).
++ Liste 10-14’te, Liste 10-12’de yaptığımız gibi yalnızca metot imzasını tanımlamak yerine, `Summary` trait’inin `summarize` metodu için varsayılan bir string değeri belirtiyoruz.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
+
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub repost: bool,
+}
+
+impl Summary for SocialPost {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+```
+
+> **Liste 10-14:** `summarize` metodunun varsayılan bir uygulamasıyla `Summary` trait'ini tanımlama
+
++ `NewsArticle` örneklerini varsayılan uygulamayı kullanarak özetlemek için, `impl Summary for NewsArticle {}` şeklinde **boş bir `impl` bloğu** tanımlamamız yeterlidir. Bu durumda `NewsArticle`, `Summary` trait’inin `summarize` metodu için sağlanan varsayılan davranışı aynen kullanır.
+
+---
+
++ `NewsArticle` üzerinde artık `summarize` metodunu doğrudan tanımlamıyor olsak bile, bu metot için bir **varsayılan uygulama** sağlamış ve `NewsArticle`’ın `Summary` *trait*’ini uyguladığını belirtmiş durumdayız.
++ Bunun sonucunda, aşağıdaki örnekte görüldüğü gibi, `NewsArticle` türünden bir örnek(instance) üzerinde yine de `summarize` metodunu çağırabiliriz:
+
+```rust
+use aggregator::{self, NewsArticle, Summary};
+
+fn main() {
+    let article = NewsArticle {
+        headline: String::from("Penguins win the Stanley Cup Championship!"),
+        location: String::from("Pittsburgh, PA, USA"),
+        author: String::from("Iceburgh"),
+        content: String::from(
+            "The Pittsburgh Penguins once again are the best \
+             hockey team in the NHL.",
+        ),
+    };
+
+    println!("New article available! {}", article.summarize());
+}
+```
+
++ Bu kodun çıktısı şu şekildedir:
+
+```
+`New article available! (Read more...)`.
+```
+
++ Varsayılan bir uygulama oluşturmak, `Liste 10-13`’teki `SocialPost` için yazılmış `Summary` uygulamasında herhangi bir değişiklik yapmamızı gerektirmez.
++ Bunun nedeni, varsayılan bir uygulamayı **geçersiz kılma (*override*)** sözdiziminin, varsayılanı olmayan bir *trait* metodunu uygularken kullanılan sözdizimiyle **aynı olmasıdır**.
+
+
+> [!TIP]
+> **Özet:**
+> + **Boş Uygulama Bloğu:** `impl Summary for NewsArticle {}` yazarak Rust'a "Bu yapı için varsayılan davranışları kabul ediyorum," demiş olursunuz.
+> + **Geçersiz Kılma (Overriding):** `SocialPost` örneğinde olduğu gibi metot gövdesini kendiniz yazarsanız, varsayılan kod devre dışı kalır ve sizin yazdığınız kod çalışır.
+
++ Varsayılan uygulamalar, aynı trait içindeki diğer metotları —bu diğer metotların varsayılan bir uygulaması olmasa bile— çağırabilirler.
++ Bu sayede bir *trait*, kullanıcıya çok sayıda yararlı işlevsellik sunabilir ve bu *trait*'i uygulayanlardan sadece küçük bir kısmı (temel metotları) tanımlamalarını bekler.
++ Örneğin, `Summary` *trait*'ini, uygulanması zorunlu olan bir `summarize_author` metoduna sahip olacak şekilde tanımlayabiliriz; ardından `summarize_author` metodunu çağıran varsayılan bir `summarize` metodu tanımlayabiliriz:
+
+```rust
+pub trait Summary {
+	// Bu metodun varsayılan uygulaması YOK - herkes kendisi yazmalı
+    fn summarize_author(&self) -> String;
+	// Bu metodun varsayılan uygulaması VAR
+	// Ve üstteki metodu çağırıyor!
+    fn summarize(&self) -> String {
+        format!("(Read more from {}...)", self.summarize_author())
+    }
+}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub repost: bool,
+}
+
+impl Summary for SocialPost {
+    fn summarize_author(&self) -> String {
+        format!("@{}", self.username)
+    }
+}
+```
+
++ `Summary` *trait*'inin bu versiyonunu kullanmak için, *trait*'i bir tür üzerinde uygularken sadece `summarize_author` metodunu tanımlamamız yeterlidir:
+
+```rust
+pub trait Summary {
+    fn summarize_author(&self) -> String;
+
+    fn summarize(&self) -> String {
+        format!("(Read more from {}...)", self.summarize_author())
+    }
+}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub repost: bool,
+}
+
+impl Summary for SocialPost {
+	// Sadece bunu yazmak zorundayız
+    fn summarize_author(&self) -> String {
+        format!("@{}", self.username)
+    }
+    // summarize metodunu yazmadık ama kullanabiliriz!
+}
+```
+
+> [!TIP]
+> ##### Ne Demek İstiyor?
+> + **Senaryo:** Bir trait'te birden fazla metot var. Bunlardan bazıları varsayılan (default) uygulamaya sahip, bazıları yok.
+> + **Önemli nokta:** Varsayılan uygulaması OLAN bir metot, varsayılan uygulaması OLMAYAN başka bir metodu çağırabilir.
+> ##### Bu Ne İşe Yarar?
+> + **Fayda:** Trait'i uygulayan kişi sadece `summarize_author` metodunu yazmak zorunda. `summarize` metodu otomatik olarak hazır geliyor.
+> ##### Özet
+> + Trait tasarımcısı: "10 metottan 9'unu ben hazır vereyim, siz sadece 1 tanesini yazın yeter" diyor. Böylece trait'i kullanmak kolaylaşıyor.
+
++ `summarize_author` metodunu tanımladıktan sonra, `SocialPost` yapısının örnekleri üzerinde `summarize` metodunu çağırabiliriz; böylece `summarize` metodunun varsayılan uygulaması, bizim sağladığımız `summarize_author` tanımını çağıracaktır.
++ Sadece `summarize_author` metodunu uyguladığımız için, `Summary` *trait*'i bize daha fazla kod yazmamıza gerek kalmadan `summarize` metodunun davranışını kazandırmış olur.
++ Şöyle görünür:
+
+```rust
+use aggregator::{self, SocialPost, Summary};
+
+fn main() {
+    let post = SocialPost {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        repost: false,
+    };
+
+    println!("1 new post: {}", post.summarize());
+}
+```
+
+
+> [!warning]
+> + Bir metodun üzerine yazılmış (overriding) bir uygulama içerisinden, aynı metodun varsayılan uygulamasını çağırmak mümkün değildir.
+
+### 10.2.3. Trait’leri Parametre Olarak Kullanmak
+
++ Trait'leri tanımlamayı ve uygulamayı öğrendiğinize göre, artık birçok farklı türü kabul eden fonksiyonlar tanımlamak için trait'leri nasıl kullanabileceğimizi inceleyebiliriz.
++ Liste 10-13'te `NewsArticle` ve `SocialPost` türleri üzerinde uyguladığımız `Summary` *trait*'ini kullanarak, `item` parametresi üzerinde `summarize` metodunu çağıran bir `notify` (bildir) fonksiyonu tanımlayacağız.
++ Bu `item` parametresi, `Summary` trait'ini uygulayan herhangi bir türde olacaktır.
++ Bunu yapmak için şu şekilde `impl Trait` söz dizimini kullanırız:
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub repost: bool,
+}
+
+impl Summary for SocialPost {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+
+pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+
++ `item` parametresi için somut(*concrete*) bir tür belirtmek yerine, `impl` anahtar kelimesini ve *trait* adını belirtiyoruz.
++ Bu parametre, belirtilen *trait*'i uygulayan **herhangi bir türü** kabul eder.
++ `notify` fonksiyonunun gövdesinde, `item` üzerinde `Summary` *trait*'inden gelen `summarize` gibi herhangi bir metodu çağırabiliriz.
++ `notify` fonksiyonunu çağırabilir ve içine herhangi bir `NewsArticle` veya `SocialPost` örneği gönderebiliriz.
+
+> [!caution]
+> + Fonksiyonu `String` veya `i32` gibi başka bir türle çağıran kodlar derlenmeyecektir; çünkü bu türler `Summary` trait'ini uygulamazlar.
+
+
+> [!NOTE]
+> #### Çağıran tarafta ne olur?
+> ```rust
+> fn main() {
+>    let article = NewsArticle {
+>        headline: "Rust 1.75 Released".to_string(),
+>        location: "Internet".to_string(),
+>        author: "Rust Team".to_string(),
+>        content: "Lots of improvements".to_string(),
+>    };
+>
+>    let post = SocialPost {
+>        username: "tanju".to_string(),
+>        content: "Rust traits are powerful".to_string(),
+>        reply: false,
+>        repost: false,
+>    };
+>
+>    notify(&article);
+>    notify(&post);
+>}
+> ```
+> + Bu yaklaşım şunu sağlar:
+> 	- Fonksiyon **somut tipe bağımlı değildir**
+> 	- Sadece **davranışa (trait’e)** bağımlıdır
+> 	- Bu da **polymorphism (çok biçimlilik)** sağlar
+
+
+> [!TIP]
+> #### HATIRLATMA
+> ##### 1. `"Rust 1.75 Released"` aslında ne tür?
+> + Bu ifade;
+> ```rust
+> "Rust 1.75 Released"
+> ```
+> + bir **string literal**’dır ve tipi şudur:
+> ```rust
+> &'static str
+> ```
+> ##### 2. `String` ile `&str` aynı şey değildir
+> + Rust **otomatik dönüşüm yapmaz**. Dolayısıyla şunu yazamazsın:
+> ```rust
+> headline: "Rust 1.75 Released", // ❌ &str ≠ String
+> ```
+> ##### 3. `to_string()` ne yapar?
+> ```rust
+> "Rust 1.75 Released".to_string()
+> ```
+> + `&str` → `String` dönüşümü yapar
+> + *Heap*’te yeni bir `String` oluşturur
+> + *Struct* alanı artık **verinin sahibi** olur
+ 
+#### 10.2.3.1. Trait Bound (Trait Kısıtlaması) Sözdizimi
+
++ `impl Trait` sözdizimi basit durumlar için kullanışlıdır, ancak aslında **trait bound** olarak bilinen daha uzun bir formun "*syntax sugar*" (yazım kolaylığı sağlayan basitleştirilmiş hali) versiyonudur; şöyle görünür:
+
+```rust
+pub fn notify<T: Summary>(item: &T) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+
++ Bu uzun form, bir önceki bölümdeki örnekle eşdeğerdir ancak daha ayrıntılıdır(*verbose*).
++ *Trait* kısıtlamalarını(*trait bound*), generic tür parametresinin beyanıyla birlikte, iki nokta üst üste işaretinden sonra ve açılı ayraçların (`<>`) içinde belirtiriz.
++ `impl Trait` sözdizimi basit durumlarda daha kullanışlıdır ve daha **kısa ve okunabilir** kod yazmamızı sağlar. Buna karşılık, tam trait bound sözdizimi daha **karmaşık gereksinimleri** ifade etmemize olanak tanır.
++ Örneğin, `Summary` *trait*'ini uygulayan iki parametremiz olabilir. Bunu `impl Trait` sözdizimiyle yapmak şöyle görünür:
+
+```rust
+pub fn notify(item1: &impl Summary, item2: &impl Summary) {
+```
+
++ `impl Trait` kullanımı, bu fonksiyonun `item1` ve `item2` için **farklı türler** kabul etmesine olanak tanır (her iki tür de `Summary` trait’ini uyguladığı sürece).
++ Ancak, her iki parametrenin de **aynı somut tipe** sahip olmasını zorunlu kılmak istersek, trait bound kullanmamız gerekir:
+
+```rust
+pub fn notify<T: Summary>(item1: &T, item2: &T) {
+```
+
++ Burada `item1` ve `item2` parametrelerinin türü olarak belirtilen generic `T`, fonksiyonu şu şekilde kısıtlar:
+	- `item1` ve `item2` için geçirilen değerlerin **somut türü aynı olmak zorundadır**.
+
+
+> [!tip]
+> #### `impl Trait` kullanan fonksiyon (FARKLI TÜRLERE İZİN VERİR)
+> ```rust
+> fn notify(item1: &impl Summary, item2: &impl Summary) {
+>    println!("{}", item1.summarize());
+>    println!("{}", item2.summarize());
+>}
+> ```
+> Kullanım (DERLENİR ✅)
+> ```rust
+> notify_same(&article, &post); // ✔ Farklı türler ama sorun yok
+> ```
+> #### Trait bound kullanan fonksiyon (`T: Summary`)
+> ```rust
+> fn notify_same<T: Summary>(item1: &T, item2: &T) {
+>    println!("{}", item1.summarize());
+>    println!("{}", item2.summarize());
+>}
+> ```
+> Kullanım (DERLENMEZ ❌)
+> ```rust
+> notify_same(&article, &post);
+> ```
+> - **notify_same(&article, &post);**
+> 	+ `item1` → `NewsArticle`
+> 	+ `item2` → `SocialPost`
+> 	+ Ama `T` **tek bir somut tür** olmak zorunda
+
+#### 10.2.3.2. `+` Sözdizimi ile Birden Fazla Trait Bound Kullanımı
+
++ Birden fazla *trait bound* belirtmek de mümkündür.
++ Diyelim ki `notify` fonksiyonunun `item` üzerinde hem `summarize` (özetleme) metodunu kullanmasını hem de `display` (ekrana yazdırma) biçimlendirmesini kullanmasını istiyoruz:
+	- `notify` tanımında, `item`'ın hem `Display` hem de `Summary` *trait*'lerini uygulaması gerektiğini belirtiriz.
+	- Bunu `+` sözdizimini kullanarak yapabiliriz:
+
+```rust
+pub fn notify(item: &(impl Summary + Display)) {
+```
+
++ `+` sözdizimi, *generic* türler üzerindeki *trait* kısıtlamalarıyla (*trait bounds*) birlikte de geçerlidir:
+
+```rust
+pub fn notify<T: Summary + Display>(item: &T) {
+```
+
++ Bu iki *trait bound* belirtildiğinde, `notify` fonksiyonunun gövdesinde hem `summarize` metodunu çağırabiliriz hem de `{}` kullanarak `item`’ı biçimlendirebiliriz.
+
+##### Örnek 1:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use aggregator::{NewsArticle, notify};
+
+
+fn main() {
+    let article = NewsArticle{
+        headline: "Rust 1.75 Released".to_string(),
+        location: "Internet".to_string(),
+        author: "Rust Team".to_string(),
+        content: "Lots of improvements".to_string(),
+    };
+
+    notify(&article);
+}
+```
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+use core::fmt;
+
+// Basit bir `Summary` trait’i tanımlayalım
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+// Bir struct tanımlayalım
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+// `Summary` trait’ini implemente edelim
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!(
+            "{}, by {} ({})", self.headline, self.author, self.location
+        )
+    }
+}
+
+// Aynı struct için `Display` trait’ini implemente edelim
+impl fmt::Display for NewsArticle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "News Article: {}", self.headline)
+    }
+}
+
+// İKİ TRAIT’İ BİRDEN İSTEYEN fonksiyon
+// `+` kullanarak (asıl konu burası 👇)
+pub fn notify(item: &(impl Summary + fmt::Display)) {
+    println!("Display ile: {}", item);
+    println!("Summary ile: {}", item.summarize());
+}
+```
+
+**Kod Çıktısı:**
+
+```
+Display ile: News Article: Rust 1.75 Released
+Summary ile: Rust 1.75 Released, by Rust Team (Internet)
+```
+
+#### 10.2.3.3. `where` Koşulları ile Daha Okunaklı Trait Bound’lar
+
++ Çok sayıda *trait bound* kullanmanın bazı dezavantajları vardır.
++ Her *generic* türün kendine ait *trait bound*’ları olduğu için, birden fazla *generic* tür parametresi içeren fonksiyonlarda, fonksiyon adının ile parametre listesinin arasında çok fazla *trait bound* bilgisi yer alabilir.
++ Bu durum, fonksiyon imzasını (signature) okumayı zorlaştırır.
++ Bu nedenle Rust, trait bound’ları fonksiyon imzasından sonra yer alan bir **`where` bloğu** içinde belirtmemize olanak tanıyan alternatif bir sözdizimi sunar.
++ Örneğin, aşağıdaki gibi yazmak yerine:
+
+```rust
+fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32 {
+```
+
++ şu şekilde bir `where` bloğu kullanabiliriz:
+
+```rust
+fn some_function<T, U>(t: &T, u: &U) -> i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{
+    unimplemented!()
+}
+```
+
++ Bu kullanımda fonksiyon imzası daha sade ve düzenlidir: fonksiyon adı, parametre listesi ve dönüş tipi birbirine daha yakın durur.
++ Böylece, çok sayıda *trait bound* içeren fonksiyonlar bile, çok sayıda *trait bound* içermeyen fonksiyonlara benzer şekilde daha okunabilir hâle gelir.
+
+##### Örnek:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use aggregator::{NewsArticle, SocialPost, notify};
+
+fn main() {
+    let article = NewsArticle{
+    headline: String::from("Rust 2026 Yayında!"),
+    author: String::from("Gemini"),
+    };
+
+    let post = SocialPost {
+    username: String::from("@rust_dili"),
+    content: String::from("Traitler çok güçlüdür!"),
+    };
+
+// Fonksiyonu çağırıyoruz 
+// T = NewsArticle, U = SocialPost oldu. 
+// Her ikisi de hem Summary hem Display uyguladığı için Rust buna izin verir.
+    notify(&article, &post);
+}
+```
+
+**Dosya adı: `src/lib.rs`**
+
+```rust
+use core::fmt;
+
+// 1. Trait Tanımları:
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+// 2. Veri Yapıları:
+pub struct NewsArticle {
+    pub headline: String,
+    pub author: String,
+}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+}
+
+// 3. Trait Uygulamaları (Summary):
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!(
+            "{} (Yazar: {})", self.headline, self.author
+        )
+    }
+}
+
+impl Summary for SocialPost {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+
+// 4. Trait Uygulamaları (Display - println! içindeki {} için zorunludur)
+/*
+impl fmt::Display for NewsArticle {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Haber Başlığı: {}", self.headline)
+    }
+}
+*/
+
+impl fmt::Display for NewsArticle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "News Article: {}", self.headline)
+    }
+}
+
+
+impl fmt::Display for SocialPost {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Gönderi sahibi: {}", self.username)
+    }
+}
+
+// 'where' kullanan fonksiyon
+pub fn notify<T, U>(item1: &T, item2: &U) 
+where 
+    T: Summary + fmt::Display,
+    U: Summary + fmt::Display,
+{
+    println!(
+        "News 1 summery: {} - Detay: {}", item1.summarize(), item1
+    );
+    println!(
+        "News 2 Summary: {} - Detay: {}", item2.summarize(), item2
+    );
+}
+```
+
+**Kod Çıktısı:**
+
+```
+News 1 summery: Rust 2026 Yayında! (Yazar: Gemini) - Detay: News Article: Rust 2026 Yayında!
+News 2 Summary: @rust_dili: Traitler çok güçlüdür! - Detay: Gönderi sahibi: @rust_dili
+```
+
+### 10.2.4. Trait Uygulayan Türleri Döndürmek
+
++ `impl Trait` sözdizimini, burada gösterildiği gibi bir *trait*'i uygulayan bir türün değerini döndürmek için **dönüş türü** (*return position*) kısmında da kullanabiliriz:
+	- `impl Trait` sözdizimini, dönüş (*return*) konumunda da kullanabiliriz. Bu sayede, bir *trait*’i uygulayan _herhangi bir türden_ bir değer döndürebiliriz. Aşağıdaki örnekte bu kullanım gösterilmektedir:
+
+**Dosya adı:** `scr/lib.rs`
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub repost: bool,
+}
+
+impl Summary for SocialPost {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+
+fn returns_summarizable() -> impl Summary {
+    SocialPost {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        repost: false,
+    }
+}
+```
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use aggregator::{notify, return_summarizable};
+
+fn main() {
+    
+    let post = return_summarizable();
+    
+    // println!("{}", post.summarize());
+    
+	notify(&post);
+}
+```
+
++ Dönüş tipinde `impl Summary` kullanarak, `returns_summarizable` fonksiyonunun **`Summary` trait’ini uygulayan bir tür** döndürdüğünü belirtmiş oluruz; ancak somut (concrete) türün adını açıkça yazmamıza gerek kalmaz. Bu örnekte fonksiyon aslında bir `SocialPost` döndürmektedir, fakat bu fonksiyonu çağıran kodun bunu bilmesine gerek yoktur.
+
+
+> [!TIP]
+> #### Gelecekte kodu değiştirme özgürlüğü verir
+> ##### Bugün:
+> ```rust
+> fn returns_summarizable() -> impl Summary {
+>    SocialPost { ... }
+>}
+> ```
+> ##### Yarın:
+> ```rust
+> fn returns_summarizable() -> impl Summary {
+>    NewsArticle { ... }
+>}
+> ```
+> + ⚠️ Dışarıdan bakan hiçbir kod farkı hissetmez.
+> 
+> Bu şu anlama gelir:
+> + Kütüphane geliştiricisi için **büyük avantaj**
+> + Kullanıcı kodları **kırılmaz**
+
++ Bir fonksiyonun dönüş tipini, yalnızca uyguladığı trait üzerinden belirtme yeteneği; özellikle **closure**’lar ve **iterator**’lar bağlamında oldukça kullanışlıdır.
++ Bu konuları 13. Bölüm’de ele alacağız.
++ *Closure*’lar ve *iterator*’lar, ya yalnızca derleyicinin bildiği türler üretir ya da yazılması çok uzun ve karmaşık türler oluşturur.
++ `impl Trait` sözdizimi, bir fonksiyonun `Iterator` trait’ini uygulayan _herhangi bir tür_ döndürdüğünü, çok uzun bir tür adını yazmak zorunda kalmadan, kısa ve net bir şekilde ifade etmemizi sağlar.
+
+---
+
++ **Ancak** `impl Trait` yalnızca **tek bir somut tür** döndürülüyorsa kullanılabilir.
++ **Örneğin**, dönüş tipi `impl Summary` olarak belirtilmiş bir fonksiyonun, koşula bağlı olarak **ya `NewsArticle` ya da `SocialPost`** döndürmesi mümkün değildir.
++ Aşağıdaki kod bu nedenle çalışmaz:
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub repost: bool,
+}
+
+impl Summary for SocialPost {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+
+fn returns_summarizable(switch: bool) -> impl Summary {
+    if switch {
+        NewsArticle {
+            headline: String::from(
+                "Penguins win the Stanley Cup Championship!",
+            ),
+            location: String::from("Pittsburgh, PA, USA"),
+            author: String::from("Iceburgh"),
+            content: String::from(
+                "The Pittsburgh Penguins once again are the best \
+                 hockey team in the NHL.",
+            ),
+        }
+    } else {
+        SocialPost {
+            username: String::from("horse_ebooks"),
+            content: String::from(
+                "of course, as you probably already know, people",
+            ),
+            reply: false,
+            repost: false,
+        }
+    }
+}
+```
+
++ `impl Trait` sözdiziminin derleyici içindeki uygulanma biçimine yönelik kısıtlamalar nedeniyle, bir fonksiyonun bu şekilde **iki farklı somut tür** (`NewsArticle` veya `SocialPost`) döndürmesine izin verilmez
++ Bu tür bir davranışın nasıl gerçekleştirileceğini, 18. Bölüm’deki **"Paylaşılan Davranış Üzerinde Soyutlama Yapmak için Trait Object’lerin Kullanılması"** başlığı altında ele alacağız.
+
+### 10.2.5. Trait Bound’ları Kullanarak Metotları Koşullu Olarak Uygulamak
+
++ Generic tür parametreleri kullanan bir `impl` bloğunda trait bound’lar kullanarak, belirli trait’leri uygulayan türler için **koşullu olarak metotlar tanımlayabiliriz**.
++ **Örneğin**,` Liste 10-15`’teki `Pair<T>` türü her zaman `new` fonksiyonunu uygular; bu fonksiyon yeni bir `Pair<T>` örneği(*instance*) döndürür (5. Bölüm’deki _Method Syntax_ kısmından hatırlayacağınız üzere, `Self`, `impl` bloğunun türü için bir tür takma adıdır; bu örnekte `Pair<T>`’dir).
+
+
+> [!TIP]
+> + Bir struct generic ise (`Pair<T>` gibi), bazı metotlar **her `T` için geçerli**, bazı metotlar ise **sadece `T` belli özelliklere sahipse** kullanılabilir.
+> + Yani;
+> 	- "Herkese açık" metotlar
+> 	- "Şartlı" metotlar vardır
+
+
+> [!NOTE]
+> #### `impl<T> Pair<T>` bloğu (herkes için geçerli)
+> + `T` **ne olursa olsun** (`i32`, `String`, `bool`, özel struct…)
+> + `Pair<T>::new` **her zaman vardır**
+> + Çünkü:
+> 	- `new` metodu `T` ile ilgili **hiçbir özel şey istemiyor**
+> 	- Karşılaştırma yok
+> 	- Yazdırma yok
+> #### İkinci `impl` bloğu (şartlı metot)
+> + **Bu çok kritik nokta:**
+> + Bu `cmp_display` metodu **her `Pair<T>` için yoktur**.
+> + Sadece şu durumda vardır:
+> 	- `T` karşılaştırılabiliyorsa (`PartialOrd`)
+> 	- `T` ekrana yazdırılabiliyorsa (`Display`)
+> + Çünkü `cmp_display` şunları yapıyor:
+> ```rust
+> if self.x >= self.y { ... }
+> println!("{}", self.x);
+> ```
+> Bu işlemler:
+> + Karşılaştırma (`>=`) → `PartialOrd`
+> + Yazdırma (`{}`) → `Display`
+> 
+> Eğer `T` bu trait’leri **uygulamıyorsa**, bu metodu vermek **mantıksız ve hatalı** olurdu.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+use std::fmt::Display;
+
+struct Pair<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Pair<T> {
+    fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
+impl<T: Display + PartialOrd> Pair<T> {
+    fn cmp_display(&self) {
+        if self.x >= self.y {
+            println!("The largest member is x = {}", self.x);
+        } else {
+            println!("The largest member is y = {}", self.y);
+        }
+    }
+}
+```
+
+> **Liste 10-15:** *Trait bound*’lara bağlı olarak *generic* bir tür üzerinde metotların koşullu biçimde uygulanması
+
+> [!NOTE]
+> #### Somut örnekle netleştirelim
+> ##### ✅ Çalışır
+> ```rust
+> let p = Pair::new(3, 5);
+> p.cmp_display();
+> ```
+> Çünkü:
+> + `i32` → `Display` + `PartialOrd`
+> ##### ❌ Çalışmaz
+> ```rust
+> struct Foo;
+> 
+> let p = Pair::new(Foo, Foo);
+> p.cmp_display(); // DERLEME HATASI
+> ```
+> + Çünkü: `Foo` ne karşılaştırılabilir ne de yazdırılabilir.
 
 
 
-# 15. Referansı Takip Ederek Değere Ulaşma:
-## Kaynak:
+> [!TIP]
+> #### `Self` OLMADAN yazsaydık nasıl olurdu?
+> + Aynı kodu `Self` kullanmadan yazalım:
+> ```rust
+>  impl<T> Pair<T> {
+>     fn new(x: T, y: T) -> Pair<T> {
+>         Pair { x, y }
+>     }
+> }
+> ```
+> Gördüğünüz gibi:
+> + `Self` yerine açıkça `Pair<T>` yazdık
+> + Mantık **tamamen aynı**
+
+
+
+> [!TIP]
+> **Dosya adı:** `src/main.rs`
+> ```rust
+> use trait_tutorial::User;
+>
+> fn main() {
+>    let u = User::new(String::from("Tanju"));
+>    println!("{u:?}");
+>}
+> ```
+> **Dosya adı:** `src/lib.rs`
+> ```rust
+> #[derive(Debug)]
+> pub struct User {
+>     pub name: String,
+> }
+>
+> impl User {
+>     pub fn new(name: String) -> Self {
+>         Self { name }
+>     }
+> }
+> ```
+> + `Self` → `User`
+> + `new` fonksiyonu bir `User` oluşturur
+> + Bu örnekte: `Self == User`
+> 	- Derleyici bunu otomatik olarak bilir.
+
++ Ayrıca, **başka bir trait’i uygulayan tüm türler için bir trait’i koşullu olarak uygulamak** da mümkündür.
++ Belirli *trait bound*’ları sağlayan her tür için yapılan bu tür uygulamalara _blanket implementation_ (genel uygulama) denir ve Rust standart kütüphanesinde yaygın biçimde kullanılır.
++ Örneğin, standart kütüphane `Display` *trait*’ini uygulayan **her tür** için `ToString` trait’ini uygular. Standart kütüphanedeki `impl` bloğu aşağıdaki koda benzer:
+
+```rust
+impl<T: Display> ToString for T {
+    // --snip--
+}
+```
+
+#### 10.2.5.1. Blanket implementation (genel uygulama):
+
+
+> [!NOTE]
+> Şu ifade merkezde:
+> ```rust
+> impl<T: Display> ToString for T {
+> 	// ...
+> }
+> ```
+> Bu kod şunu söyler:
+> + Display trait’ini uygulayan her T tipi için, ToString trait’i zaten uygulanmış kabul edilir.
+> ##### Bunu günlük dille anlatalım
+> Şöyle düşün:
+> + Eğer bir şey **ekranda yazdırılabiliyorsa** (`Display`)
+> + Rust diyor ki:
+> 	- "O zaman ben bunu **string’e çevirebilmeyi** de garanti ederim (`ToString`)"
+> 
+> Yani **tek tek her tipe `ToString` yazmaya gerek yok**.
+
+
+> [!TIP]
+> #### Neden buna "blanket implementation" deniyor?
+> + Çünkü:
+> 	- Tek bir `impl` yazıyorsun
+> 	- Ama bu `impl`, **şartı sağlayan tüm türleri kapsıyor**
+> 	- Üzerine bir battaniye (blanket) gibi örtülüyor
+
+**Somut Örnek:**
+
+```rust
+use std::fmt::Display;
+
+struct User {
+    name: String,
+}
+
+impl Display for User {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "User: {}", self.name)
+    }
+}
+```
+
++ Burada dikkat et: Biz `ToString` yazmadık Ama şu kod çalışır:
+
+```rust
+fn main() {
+	let u = User { name: String::from("Tanju") };
+	
+	let s = u.to_string();  // <-- Bu nasıl çalıştı?
+}
+```
+
++ Cevap:
+	- `User` → `Display` uyguluyor.
+	- `Display` uygulayan her şey → otomatik `ToString` alıyor
+	- Bu da **blanket implementation** sayesinde
+
+
+> [!IMPORTANT]
+> + `to_string()` sihirli değil, Arkasında şu kural var:
+> ```rust
+> impl<T: Display> ToString for T
+> ```
+
+
+
+> [!NOTE]
+> #### Öğretici Örnek
+> **Dosya adı:** `src/main.rs`
+> ```rust
+> // Bu trait şunu söylüyor: "Beni uygulayan bir şey konuşabilir."
+> pub trait Speak {
+>     fn speak(&self) -> String;
+> }
+>
+> // Bu da: “Yüksek sesle konuşabilir.”
+> pub trait LoudSpeak {
+>     fn load_speak(&self) -> String;
+> }
+> 
+> // Speak trait’ini uygulayan HER T tipi, 
+> // otomatik olarak LoudSpeak’i de uygular.
+> impl<T: Speak> LoudSpeak for T {
+>     fn load_speak(&self) -> String {
+>         self.speak().to_uppercase()
+>     }
+> }
+>
+> pub struct Human {
+>     pub name: String,
+> }
+>
+> impl Speak for Human {
+>     fn speak(&self) -> String {
+>         format!("Merhaba, ben {}", self.name)
+>     }
+> }
+> ```
+> **Dosya adı:** `src/main.rs`
+> ```rust
+> use trait_tutorial::{Human, LoudSpeak, Speak};
+>
+> fn main() {
+>     let h = Human{
+>         name: String::from("Tanju"),
+>     };
+> 
+>     println!("{}", h.speak());
+>     println!("{}", h.load_speak());
+> }
+> ```
+> 
+> **Önemli Nokta:** Human struct'ı için Speak uygulaması(`impl`) tanımlanmış ama LoudSpeak uygulaması(`impl`) tanımlanmadığı halde `h.loud_speak()` metodu çalışmaktadır. Neden?
+> **Çünkü:** `impl<T: Speak> LoudSpeak for T` Speak'i olan HER ŞEY, LoudSpeak'i de alır. 
+> #### Rust standart kütüphane ile bağlantı
+> + Bu yaptığımız şey, Rust'ın şunu yapmasıyla birebir aynıdır:
+> ```rust
+> impl<T: Display> ToString for T
+> ```
+> Yani:
+> + `Display` → varsa
+> + `to_string()` → otomatik gelir.
+
++ Standart kütüphane bu *blanket implementation*'ine sahip olduğu için, `Display` trait'ini uygulayan herhangi bir tür üzerinde `ToString` trait'i tarafından tanımlanan `to_string` metodunu çağırabiliriz.
++ Örneğin, tam sayılar `Display` uyguladığı için onları şu şekilde `String` değerlerine dönüştürebiliriz:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let s = 3.to_string();
+}
+```
+
++ *Blanket implementation*'ler  dokümantasyonda trait'in "*Implementors*" bölümünde görünür. Örneğin; [`ToString trait`](https://doc.rust-lang.org/std/string/trait.ToString.html)
++ Trait’ler ve *trait bound*’lar, *generic* tür parametreleri kullanarak **kod tekrarını azaltmamıza** olanak tanırken, aynı zamanda derleyiciye *generic* türün **belirli bir davranışı** sağlaması gerektiğini açıkça belirtmemizi sağlar.
++ Derleyici de bu *trait bound* bilgilerini kullanarak, kodumuzda kullanılan tüm somut türlerin gerekli davranışları gerçekten sağladığını denetler.
++ Dinamik tipli dillerde, bir tür üzerinde tanımlı olmayan bir metodu çağırırsak bu hatayı **çalışma zamanında (runtime)** alırız. Rust ise bu hataları **derleme zamanına (compile time)** taşır; böylece kodumuz çalıştırılmadan önce sorunları düzeltmek zorunda kalırız.
++ Ayrıca, davranışları çalışma zamanında kontrol eden ek kodlar yazmamıza gerek kalmaz; çünkü bu kontroller zaten derleme aşamasında yapılmıştır. Bu yaklaşım, *generic*’lerin sağladığı esnekliği kaybetmeden **daha yüksek performans** elde etmemizi sağlar.
+## 10.3. Yaşam Süreleri (Lifetimes) ile Referansları Doğrulamak:
+
++ Yaşam süreleri, halihazırda kullanmakta olduğumuz başka bir **generic** türüdür.
++ Yaşam süreleri, bir türün istediğimiz davranışa sahip olmasını sağlamaktan ziyade, referansların ihtiyaç duyduğumuz sürece geçerli kalmasını sağlar.
++ Bölüm 4'teki "Referanslar ve Ödünç Alma" kısmında tartışmadığımız bir detay şudur: Rust'taki her referansın bir **yaşam süresi** (lifetime) vardır; bu, söz konusu referansın geçerli olduğu kapsamdır (scope).
++ Çoğu zaman, tıpkı türlerin çıkarımlanması gibi, yaşam süreleri de örtüktür(implicit) ve derleyici tarafından çıkarımlanır(inferred).(infer = çıkarım yapmak, sonuç çıkarmak)
+	- Yani, çoğu zaman, yaşam süreleri örtük ve çıkarımsaldır, tıpkı çoğu zaman türlerin çıkarımsal olması gibi.
++ Bizden sadece birden fazla türün mümkün olduğu durumlarda türleri açıkça belirtmemiz istenir.
++ Benzer şekilde, referansların yaşam süreleri birbirleriyle birkaç farklı şekilde ilişkili olabildiğinde, bu yaşam sürelerini belirtmek (annotate) zorundayızdır:
++ Rust, çalışma zamanında(*runtime*) kullanılan *gerçek referansların* kesinlikle geçerli olacağından emin olmak için, generic yaşam süresi parametrelerini kullanarak bu ilişkileri belirtmemizi şart koşar.
+	- *Gerçek referanslar* = çalışma anında gerçekten kullanılan, geçerli olması gereken referanslar. (Gerçek (geçerli) referansın tersi → _Dangling reference_)
+	- Gerçek referanslar: program **çalışırken (runtime)** bellekte **fiilen kullanılan**, yani **soyut veya teorik değil**, gerçekten var olan ve bir değeri işaret eden referanslar demektir.
++ Yaşam sürelerini açıkça belirtme kavramı, çoğu başka programlama dilinde bulunmaz; bu nedenle ilk başta yabancı gelebilir. Bu bölümde Yaşam sürelerini tüm ayrıntılarıyla ele almayacağız; ancak kavrama alışabilmeniz için, karşılaşmanız muhtemel yaygın yaşam süreleri sözdizimlerini (syntax) inceleyeceğiz.
+
+
+> [!TIP]
+> #### Yaşam Sürelerinin Amacı Nedir?
+> Yaşam sürelerinin temel amacı, Rust'ın en büyük düşmanlarından biri olan **"Dangling References"** (Askıda Kalan Referanslar) sorununu önlemektir.
+> + **Askıda Kalan Referans:** Bir verinin bellekten silinmesine rağmen, o veriyi gösteren bir referansın (pointer) hala var olmaya devam etmesi durumudur. Bu referansı kullanmaya çalışmak programın çökmesine veya güvenlik açıklarına yol açar.
+> + **Rust'ın Çözümü:** Rust derleyicisi (Borrow Checker), "Baktığın verinin ömrü, senin referansının ömründen daha mı uzun?" diye kontrol eder. Eğer veri, referanstan önce ölecekse kod derlenmez.
+
+### 10.3.1. Dangling References (Askıda Kalan / Geçersiz Referanslar)
+
++ Yaşam sürelerinin(lifetimes) temel amacı, **askıda kalan referansları (dangling references)** önlemektir.
++ Eğer bu tür referansların var olmasına izin verilseydi, bir programın **amaçladığı veriden farklı bir veriyi** işaret etmesine(hatalı bellek bölgesine erişmesine) neden olurlardı.
++ Bir dış kapsamı (*outer scope*) ve bir iç kapsamı (*inner scope*) olan Liste 10-16'daki programı inceleyelim.
+
+```rust
+// Bu kod derlenmez!
+fn main() {
+    let r;                // ---------+-- 'a (r'nin yaşam süresi başlar)
+                          //          |
+    {                     //          |
+        let x = 5;        // --+-- 'b | (x'in yaşam süresi başlar)
+        r = &x;           //   |      |
+    }                     // --+      | (x kapsam dışına çıkar ve ölür)
+                          //          |
+    println!("r: {r}");   //          | (r burada kullanılmaya çalışılıyor!)
+}                         // ---------+
+```
+
+> **Liste 10-16:** Kapsamı (scope) sona ermiş bir değere ait referansı kullanma girişimi
+
+
+> [!WARNING]
+> + 10-16, 10-17 ve 10-23 numaralı listelerdeki örnekler, değişkenleri **başlangıç değeri vermeden** tanımlar; böylece değişken adı dış kapsamı(*outer scope*) içinde var olur.
+> + İlk bakışta bu durum, Rust’ta **null değerlerin olmamasıyla çelişiyor gibi** görünebilir.
+> + Ancak bir değişkene değer atanmadan önce onu kullanmaya çalışırsak, **derleme zamanında (compile-time) bir hata alırız**. 
+> + Bu da Rust’ın gerçekten **null değerlere izin vermediğini** gösterir.
+
++ Dış kapsam (*outer scope*), başlangıç değeri olmayan `r` adlı bir değişken tanımlar; iç kapsam (*inner scope*) ise başlangıç değeri `5` olan `x` adlı bir değişken tanımlar.
++ İç kapsamdayken(*inner scope*), `r` değişkeninin değerini `x`’e bir referans olacak şekilde ayarlamaya çalışırız.
++ Daha sonra iç kapsam(*inner scope*) sona erer ve `r` içindeki değeri yazdırmaya çalışırız.
++ Bu kod **derlenmez**, çünkü `r`’nin referans verdiği değer, onu kullanmaya çalışmadan önce kapsam (scope) dışına çıkmıştır.
++ Aşağıda hata mesajı yer almaktadır:
+
+```rust
+$ cargo run
+   Compiling chapter10 v0.1.0 (file:///projects/chapter10)
+error[E0597]: `x` does not live long enough
+ --> src/main.rs:6:13
+  |
+5 |         let x = 5;
+  |             - binding `x` declared here
+6 |         r = &x;
+  |             ^^ borrowed value does not live long enough
+7 |     }
+  |     - `x` dropped here while still borrowed
+8 |
+9 |     println!("r: {r}");
+  |                   - borrow later used here
+
+For more information about this error, try `rustc --explain E0597`.
+error: could not compile `chapter10` (bin "chapter10") due to 1 previous error
+```
+
++ Hata mesajı, `x` değişkeninin "yeterince uzun yaşamadığını" (does not live long enough) söyler. Bunun nedeni, 7. satırda iç kapsam sona erdiğinde `x`'in kapsam dışı kalacak olmasıdır.
++ Ancak `r`, dış kapsam için hala geçerlidir; kapsamı daha geniş olduğu için `r`'nin "daha uzun yaşadığını" söyleriz.
++ Eğer Rust bu kodun çalışmasına izin verseydi, `r` değişkeni, `x` değişkeninin kapsam dışına çıktığında serbest bırakılan (*deallocated*) bir bellek bölgesine referans veriyor olacaktı ve `r` değişkeni ile yapmaya çalıştığımız hiçbir şey doğru çalışmayacaktı.
++ Peki, Rust bu kodun geçersiz olduğunu nasıl anlar? Bir **ödünç alma denetleyicisi** (borrow checker) kullanarak.
+### 10.3.2. Borrow Checker (Ödünç Alma Denetleyicisi)
+
++ Rust derleyicisi, tüm ödünç almaların (borrow) geçerli olup olmadığını belirlemek için kapsamları (scope) karşılaştıran bir **borrow checker**’a sahiptir.
++ 10-17 numaralı listede, 10-16 numaralı listedeki kodun aynısı yer almakta; ancak bu kez değişkenlerin ömür sürelerini (lifetimes) gösteren ek açıklamalar (annotations) ile birlikte sunulmaktadır.
+
+```rust
+// Bu kod derlenmez!
+fn main() {
+    let r;                // ---------+-- 'a (r'nin ömrü)
+                          //          |
+    {                     //          |
+        let x = 5;        // -+-- 'b  | (x'in ömrü)
+        r = &x;           //  |       |
+    }                     // -+       |
+                          //          |
+    println!("r: {r}");   //          |
+}                         // ---------+ 
+```
+
+**Liste 10-17:** sırasıyla 'a ve 'b olarak adlandırılan r ve x değişkenlerinin yaşam sürelerinin gösterimi
+
++ Burada, `r`'nin yaşam süresini `'a`, `x`'in yaşam süresini ise `'b` ile işaretledik. 
++ Gördüğünüz gibi, içteki `'b` bloğu, dıştaki `'a` yaşam süresi bloğundan çok daha küçüktür. 
++ Derleme zamanında Rust, bu iki yaşam süresinin boyutunu karşılaştırır ve `r`'nin `'a` yaşam süresine sahip olduğunu ancak `'b` yaşam süresine sahip bir belleğe referans verdiğini görür. 
++ Program reddedilir çünkü `'b`, `'a`'dan daha kısadır: **Referansın konusu olan veri, referansın kendisi kadar uzun yaşamamaktadır.** Başka bir deyişle, **referansın işaret ettiği değer, referansın kendisi kadar uzun yaşamamaktadır**.
+
+---
+
++ Liste 10-18, kodu askıda kalan bir referans (*dangling reference*) içermeyecek şekilde düzeltir ve kod hatasız bir şekilde derlenir:
+
+```rust
+fn main() {
+    let x = 5;            // ----------+-- 'b (x'in ömrü)
+                          //           |
+    let r = &x;           // --+-- 'a  | (r'nin ömrü)
+                          //   |       |
+    println!("r: {r}");   //   |       |
+                          // --+       |
+}                         // ----------+
+```
+
+> **Liste 10-18:** Geçerli bir referans; çünkü veri, referanstan daha uzun bir yaşam süresine sahip
+
+**Kod Çıktısı:**
+
+```
+r: 5
+```
+
++ Burada `x`, bu örnekte `'a`'dan daha büyük olan `'b` yaşam süresine sahiptir. Bu, `r`'nin `x`'e referans verebileceği anlamına gelir; çünkü Rust, `x` geçerli olduğu sürece `r` içindeki referansın her zaman geçerli olacağını bilir.
++ Artık referansların yaşam sürelerinin nerede olduğunu ve Rust'ın referansların her zaman geçerli olmasını sağlamak için yaşam sürelerini nasıl analiz ettiğini öğrendiğinize göre, şimdi fonksiyon parametrelerindeki ve dönüş değerlerindeki **generic yaşam sürelerini** inceleyelim.
+
+### 10.3.3. Fonksiyonlarda Generic Yaşam Süreleri(Generic Lifetimes in Functions)
+
++ İki string diliminden (string slice) daha uzun olanını döndüren bir fonksiyon yazacağız. Bu fonksiyon iki string dilimi alacak ve tek bir string dilimi döndürecek.
++ `longest` fonksiyonunu uyguladığımızda, Liste 10-19'daki kodun ekrana `En uzun string: abcd` yazdırmasını bekliyoruz.
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let string1 = String::from("abcd");
+    let string2 = "xyz";
+
+    let result = longest(string1.as_str(), string2);
+    println!("The longest string is {result}");
+}
+```
+
+> **Liste 10-19:** İki *string* diliminden daha uzun olanı bulmak için *longest* fonksiyonunu çağıran bir main fonksiyonu
+
+
+> [!tip]
+> #### `as_str()` metodu
+> + `as_str()` **`String` tipine ait bir metottur** ve şunu yapar: Bir `String`’i sahipliği taşımayan (`borrowed`) bir `&str` dilimine dönüştürür.
+> + Tanımı kavramsal olarak şöyledir:
+> ```rust
+> pub const fn as_str(&self) -> &str {
+>    self
+> }
+> ```
+> #### `&string` ile `string.as_str()` arasında fark
+> Kitaptaki çağrı:
+> ```rust
+> result = longest(string1.as_str(), string2.as_str());
+> ```
+> Aslında **şu da tamamen geçerlidir**:
+> ```rust
+> result = longest(&string1, &string2);
+> ```
+> Çünkü:
+> + `&String` → `&str` (deref coercion)
+> + Fonksiyon imzası: `fn longest(x: &str, y: &str) -> &str`
+> + Rust bunu kabul eder.
+> 
+> Yani kitap burada: bilinçli olarak açık yazımı tercih etmiştir. Lifetime konusunu daha görünür kılmak istemiştir.
+
+
+> [!CAUTION]
+> + Fonksiyonun parametre olarak sahiplik (`ownership`) almasını istemediğimiz için, `string` yerine referans olan string dilimlerini(`string slice`) almasını istediğimize dikkat edin.
+> + Liste 10-19'da kullandığımız parametre türlerinin neden tercih edildiğiyle ilgili daha fazla tartışma için Bölüm 4'teki "Parametre Olarak String Dilimleri" bölümüne bakabilirsiniz.
+
++ Eğer `longest` fonksiyonunu Liste 10-20'de gösterildiği gibi uygulamaya çalışırsak, kod derlenmeyecektir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let string1 = String::from("abcd");
+    let string2 = "xyz";
+
+    let result = longest(string1.as_str(), string2);
+    println!("The longest string is {result}");
+}
+
+fn longest(x: &str, y: &str) -> &str {
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+> **Liste 10-20:** İki string slice arasından daha uzun olanı döndüren, ancak henüz derlenmeyen `longest` fonksiyonunun bir uygulaması
+
++ Bunun yerine, yaşam sürelerinden bahseden şu hatayı alırız:
+
+```rust
+$ cargo run
+   Compiling chapter10 v0.1.0 (file:///projects/chapter10)
+error[E0106]: missing lifetime specifier
+ --> src/main.rs:9:33
+  |
+9 | fn longest(x: &str, y: &str) -> &str {
+  |               ----     ----     ^ expected named lifetime parameter
+  |
+  = help: this function's return type contains a borrowed value, but the signature does not say whether it is borrowed from `x` or `y`
+help: consider introducing a named lifetime parameter
+  |
+9 | fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+  |           ++++     ++          ++          ++
+
+For more information about this error, try `rustc --explain E0106`.
+error: could not compile `chapter10` (bin "chapter10") due to 1 previous error
+```
+
++ Yardım metni, dönüş türünün üzerinde generic bir yaşam süresi parametresine ihtiyaç duyulduğunu ortaya koyuyor; çünkü Rust, döndürülen referansın `x`'i mi yoksa `y`'yi mi işaret ettiğini anlayamaz. Aslında bunu biz de bilmiyoruz, çünkü fonksiyonun gövdesindeki `if` bloğu `x`'e, `else` bloğu ise `y`'ye bir referans döndürüyor!
+
++ Bu fonksiyonu tanımlarken, fonksiyona hangi somut değerlerin geçirileceğini bilmeyiz; bu nedenle `if` durumunun mu yoksa `else` durumunun mu çalışacağını bilemeyiz.
++ Ayrıca içeri aktarılacak referansların somut yaşam sürelerini de bilmeyiz; dolayısıyla döndüreceğimiz referansın her zaman geçerli olup olmayacağını belirlemek için Liste 10-17 ve 10-18'de yaptığımız gibi kapsamları (scopes) inceleyemeyiz.
++ Ödünç alma denetleyicisi (*borrow checker*) de bunu belirleyemez, çünkü `x` ve `y`'nin yaşam sürelerinin dönüş değerinin yaşam süresiyle nasıl bir ilişkisi olduğunu bilmez.
++ Bu hatayı düzeltmek için, referanslar arasındaki ilişkiyi tanımlayan *generic* yaşam süresi parametreleri ekleyeceğiz; böylece ödünç alma denetleyicisi analizini gerçekleştirebilecek.
+
+
+> [!tip]
+> #### Neden Hata Alıyoruz? (Mantıksal Analiz)
+> Rust'ın buradaki ikilemi şudur:
+> 1. **Girdi Belirsizliği:** Fonksiyon iki tane referans alıyor. Biri 10 saniye, diğeri 5 saniye yaşayabilir.
+> 2. **Çıktı Belirsizliği:** Fonksiyon bunlardan birini geri döndürüyor. Ama hangisini?
+> 3. **Güvenlik Riski:** Eğer fonksiyon 5 saniye yaşayanı döndürürse ama biz sonucu 10 saniye boyunca kullanmaya çalışırsak program çöker.
+> 
+> Derleyici diyor ki: _"Bana bu ikisinin ömürleri arasındaki ilişkiyi söyle (örneğin: 'ikisi de en az sonuç kadar yaşamalı'), aksi takdirde hafıza güvenliğini garanti edemem."_
+
+### 10.3.4. Yaşam Süresi Belirleme (Annotation) Sözdizimi
+
++ Yaşam süresi belirteçleri, referansların ne kadar süre yaşayacağını **değiştirmez**. Bunun yerine, referansların ömürlerini etkilemeden, birden fazla referansın yaşam sürelerinin birbirleriyle olan **ilişkisini** tanımlarlar.
++ Fonksiyonların, imzasında generic bir tür parametresi belirtildiğinde herhangi bir türü kabul edebilmesi gibi; fonksiyonlar, generic bir yaşam süresi parametresi belirtildiğinde de herhangi bir yaşam süresine sahip referansları kabul edebilirler.
++ Yaşam süresi belirteçlerinin biraz sıra dışı bir sözdizimi vardır: Yaşam süresi parametrelerinin isimleri bir kesme işareti (`'`) ile başlamalıdır ve genellikle generic türlerde olduğu gibi tamamen küçük harf ve çok kısadır.
++ Çoğu kişi ilk yaşam süresi belirteci için `'a` ismini kullanır. Yaşam süresi parametre belirteçlerini, referansın `&` işaretinden sonra yerleştiririz ve belirteci referansın türünden ayırmak için bir boşluk kullanırız.
++ Aşağıda bazı örnekler yer almaktadır: 
+	- Yaşam süresi parametresi olmayan bir `i32` referansı, 
+	- `'a` adlı açık bir yaşam süresi parametresi olan bir `i32` referansı ve 
+	- yine `'a` yaşam süresine sahip, değiştirilebilir (*mutable*) bir `i32` referansı:
+
+```rust
+&i32        // bir referans
+&'a i32     // açıkça belirtilmiş yaşam süresine sahip bir referans
+&'a mut i32 // açıkça belirtilmiş yaşam süresine sahip, değiştirilebilir bir referans
+```
+
++ Tek başına bir yaşam süresi belirtecinin pek bir anlamı yoktur; çünkü bu belirteçlerin(örneğin `'a`) amacı Rust'a, birden fazla referansın, *generic* yaşam süresi parametrelerinin birbirleriyle nasıl ilişkili olduğunu söylemektir.
++ Şimdi, `longest` fonksiyonu bağlamında yaşam süresi belirteçlerinin(örneğin `'a`) birbirleriyle nasıl ilişkilendiğini inceleyelim.
+
+
+> [!tip]
+> + Yaşam süresi belirteçlerini (örneğin `'a`), Rust'a "bu değişkeni daha uzun yaşat" demek için kullanmazsınız. Bu mümkün değildir.
+> + Bunun yerine, derleyiciye bir **söz** verirsiniz:
+> 	- **`&'a i32`:** "Bu referansın işaret ettiği verinin ömrü, en az `'a` etiketiyle işaretlediğim diğer şeyler kadar uzun olacak."
+
+### 10.3.5. Fonksiyon İmzalarında Yaşam Süreleri
+
++ Fonksiyon imzalarında yaşam süresi belirteçlerini kullanmak için, tıpkı generic tür parametrelerinde yaptığımız gibi, generic yaşam süresi parametrelerini fonksiyon ismi ile parametre listesi arasındaki açılı ayraçlar (`<>`) içinde beyan etmemiz gerekir.
++ İmzanın şu kısıtlamayı(*constraint*) ifade etmesini istiyoruz: Döndürülen referans, her iki parametre de geçerli olduğu sürece geçerli olacaktır.
++ Parametrelerin yaşam süreleri ile dönüş değerinin yaşam süresi arasındaki ilişki budur.
++ Bu yaşam süresini `'a` olarak adlandıracağız ve ardından Liste 10-21'de gösterildiği gibi her bir referansa ekleyeceğiz.
+
+```rust
+fn main() {
+    let string1 = String::from("abcd");
+    let string2 = "xyz";
+
+    let result = longest(string1.as_str(), string2);
+    println!("The longest string is {result}");
+}
+
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+> **Liste 10-21:** İmzadaki tüm referansların aynı 'a yaşam süresine sahip olması gerektiğini belirten longest fonksiyonu tanımı
+
+```bash
+The longest string is abcd
+```
+
++ Bu kod derlenmeli ve Liste 10-19'daki `main` fonksiyonu ile kullanıldığında istediğimiz sonucu üretmelidir.
+
++ Fonksiyon imzası artık Rust'a şunu söyler: Belirli bir `'a` yaşam süresi için fonksiyon iki parametre alır ve her iki parametre de (string dilimleri) en az `'a` yaşam süresi kadar yaşar.
++ Fonksiyon imzası ayrıca Rust'a, fonksiyondan döndürülen string diliminin de en az `'a` yaşam süresi kadar yaşayacağını söyler.
++ Pratikte bu, `longest` fonksiyonu tarafından döndürülen referansın yaşam süresinin, **fonksiyon argümanları tarafından başvurulan değerlerin yaşam sürelerinden küçük olanıyla aynı** olduğu anlamına gelir.
++ Rust'ın bu kodu analiz ederken kullanmasını istediğimiz ilişkiler bunlardır.
+
+
+> [!WARNING]
+> + Unutmayın, bu fonksiyon imzasında yaşam süresi parametrelerini belirttiğimizde, içeri aktarılan veya döndürülen hiçbir değerin yaşam süresini değiştirmiyoruz.
+> + Aksine, ödünç alma denetleyicisinin (borrow checker) bu kısıtlamalara uymayan her türlü değeri reddetmesi gerektiğini belirtiyoruz.
+> + `longest` fonksiyonunun `x` ve `y`'nin tam olarak ne kadar yaşayacağını bilmesine gerek yoktur; sadece bu imzayı karşılayabilecek bir kapsamın (scope) `'a` yerine geçebileceğini bilmesi yeterlidir.
+
+
+> [!tip]
+> Buradaki en kritik nokta, döndürülen değerin ömrünün girdilerin ömürlerinin **kesişimi (en küçüğü)** kadar olmasıdır.
+> 
+> + Eğer `x` 10 satır boyunca geçerliyse ve `y` 5 satır boyunca geçerliyse, fonksiyonun döndürdüğü sonuç (`'a`) en fazla 5 satır boyunca geçerli olabilir.
+
++ Fonksiyonlarda yaşam sürelerini belirtirken, işaretlemeler fonksiyon gövdesine değil, fonksiyon imzasına yazılır.
++ Yaşam süresi(*lifetime*) işaretlemeleri(`'a`), tıpkı imzadaki türler gibi fonksiyonun sözleşmesinin (contract) bir parçası haline gelir.
++ Fonksiyon imzalarının yaşam süresi sözleşmesini(*lifetime contract*) içermesi, Rust derleyicisinin yaptığı analizin daha basit olmasını sağlar. 
++ Eğer bir fonksiyonun işaretlenme biçiminde veya çağrılma şeklinde bir sorun varsa, derleyici hataları kodumuzun ilgili kısmını ve kısıtlamaları daha kesin bir şekilde işaret edebilir.
++ Eğer bunun yerine Rust derleyicisi, yaşam süreleri arasındaki ilişkiler hakkında bizim neyi amaçladığımıza dair daha fazla çıkarım yapsaydı(*inference*), derleyici sorunun kaynağından çok uzak bir noktadaki kullanımı hata olarak gösterebilirdi.
++ `longest` fonksiyonuna somut (concrete) referanslar verdiğimizde, `'a` yerine geçen somut yaşam süresi; `x`’in kapsamının `y`’nin kapsamıyla **örtüşen (overlap eden)** kısmıdır.
++ Başka bir deyişle, generic `'a` yaşam süresi, `x` ve `y`'nin yaşam sürelerinden küçük olanına eşit olan somut yaşam süresini alacaktır.
++ Döndürülen referansı da aynı `'a` yaşam süresi parametresiyle işaretlediğimiz için, döndürülen referans da `x` ve `y`'nin yaşam sürelerinden küçük olanının süresi boyunca geçerli olacaktır.
++ **Farklı somut yaşam sürelerine sahip referanslar geçirerek**, yaşam süresi işaretlemelerinin(`'a`) `longest` fonksiyonunu nasıl kısıtladığına(*restrict*) bakalım.
++ Liste 10-22 buna dair doğrudan bir örnektir.
+
+```rust
+fn main() {
+    let string1 = String::from("long string is long");
+
+    {
+        let string2 = String::from("xyz");
+        let result = longest(string1.as_str(), string2.as_str());
+        println!("The longest string is {result}");
+    }
+}
+
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+> **Liste 10-22:** Farklı somut yaşam sürelerine sahip *String* değerlerine referanslar vererek *longest* fonksiyonunun kullanılması
+
++ Bu örnekte, `string1` dış kapsamın sonuna kadar, `string2` iç kapsamın sonuna kadar geçerlidir ve `result` değişkeni, iç kapsamın sonuna kadar geçerli olan bir şeye referans verir.
++ Bu kodu çalıştırdığınızda ödünç alma denetleyicisinin (borrow checker) onay verdiğini göreceksiniz; kod derlenecek ve `The longest string is long string is long` yazdıracaktır.
+
+
+> [!tip]
+> Derleyicinin burada yaptığı "küçük olan yaşam süresini seçme" işlemini şu şekilde hayal edebiliriz:
+> + **string1:** Maratona katılan ve bitiş çizgisine kadar koşan bir koşucu.
+> + **string2:** Sadece yarışın son 100 metresinde koşan bir koşucu.
+> + **'a (Kesişim):** Fonksiyonun güvenle "geçerlidir" diyebileceği süre, her iki koşucunun da aynı anda pistte olduğu o son 100 metredir.
+
+---
+
++ Sırada, `result` içindeki referansın yaşam süresinin, iki argümanın yaşam sürelerinden daha küçük olanına eşit olması gerektiğini gösteren bir örnek deneyelim.
++ `result` değişkeninin beyanını (*declaration*) dış kapsamda bırakıp, değer atamasını `string2` ile birlikte iç kapsamda yapacağız.
++ Ardından, `result` değişkenini kullanan `println!` satırını, iç kapsam sona erdikten sonraya, yani dış kapsama taşıyacağız.
++ Liste 10-23'teki kod derlenmeyecektir.
+
+```rust
+// BU KOD DERLENMEZ!
+fn main() {
+    let string1 = String::from("uzun string uzundur");
+    let result;
+    {
+        let string2 = String::from("xyz");
+        result = longest(string1.as_str(), string2.as_str());
+    } // string2 burada bellekten silinir (dropped)
+    println!("En uzun string: {result}");
+}
+
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+> **Liste 10-23:** *string2* kapsam dışına çıktıktan sonra *result*'ı kullanma girişimi
+
++ Bu kodu derlemeye çalıştığımızda şu hatayı alırız:
+
+```rust
+$ cargo run
+   Compiling chapter10 v0.1.0 (file:///projects/chapter10)
+error[E0597]: `string2` does not live long enough
+ --> src/main.rs:6:44
+  |
+5 |         let string2 = String::from("xyz");
+  |             ------- binding `string2` declared here
+6 |         result = longest(string1.as_str(), string2.as_str());
+  |                                            ^^^^^^^ borrowed value does not live long enough
+7 |     }
+  |     - `string2` dropped here while still borrowed
+8 |     println!("The longest string is {result}");
+  |                                      ------ borrow later used here
+
+For more information about this error, try `rustc --explain E0597`.
+error: could not compile `chapter10` (bin "chapter10") due to 1 previous error
+```
+
++ Hata, `result` değişkeninin `println!` ifadesi için geçerli olabilmesi için `string2`'nin de dış kapsamın sonuna kadar geçerli olması gerektiğini gösteriyor.
++ Rust bunu biliyor çünkü fonksiyon parametrelerinin ve dönüş değerlerinin yaşam sürelerini aynı `'a` yaşam süresi parametresini kullanarak işaretledik.
+
+---
+
++ Bir insan olarak bu koda baktığımızda, `string1`’in `string2`’den daha uzun ömürlü olduğunu ve dolayısıyla `result`’ın `string1`’e bir referans tutacağını görebiliriz.
++ `string1` henüz kapsam dışına çıkmadığı için `string1`’e bir referans, `println!` ifadesi sırasında hâlâ geçerli olacaktır.
++ Ancak derleyici bu durumu bu özel örnekte **göremez**.
++ Biz Rust’a, `longest` fonksiyonundan dönen referansın ömür süresinin, fonksiyona verilen referansların ömür süreleri arasında **daha kısa olanıyla aynı** olduğunu söyledik.
++ Bu nedenle *borrow checker*, 10-23 numaralı listedeki kodu **potansiyel olarak geçersiz bir referans içerdiği** gerekçesiyle reddeder.
+
+
+> [!TIP]
+> Rust, bir referansın **ne zaman kullanıldığına** bakar, **ne zaman oluşturulduğuna değil**. Bu nedenle problem:
+> ```rust
+> result = longest(string1.as_str(), string2.as_str());
+> ```
+> satırında **değil**, referansın **son kullanıldığı yer** olan:
+> ```rust
+> println!("The longest string is {result}");
+> ```
+> satırında ortaya çıkar.
+> ##### Neden böyle?
+> Borrow checker’ın temel kuralı şudur:
+> + **Bir referans, kullanıldığı tüm süre boyunca işaret ettiği veri hayatta olmalıdır.**
+> 
+> Bu yüzden Rust şu soruyu sorar:
+> + `result` referansı **en son nerede kullanılıyor?**
+> + Cevap:
+> ```rust
+> println!("The longest string is {result}");
+> ```
+> İşte Rust, lifetime’ı **bu noktaya kadar** geçerli varsayar.
+> ##### Özet:
+> + **Lifetime analizi, fonksiyon çağrıldığı yerde değil, referansın kullanıldığı yerde yapılır.** 
+> + Bu yüzden referans alınan satır: `println!("The longest string is {result}");`
+> + Rust, `longest(...)` çağrısına değil, `result` referansının **en son kullanıldığı yere** bakar; çünkü referansın güvenli olması gereken süre, **kullanım süresidir**, oluşturulma anı değil.
+
++ Son olarak, `longest` fonksiyonuna verilen referansların değerlerini ve ömür sürelerini değiştirerek daha fazla deney tasarlamayı deneyin. Kodun derlenmeden önce borrow checker’dan geçip geçmeyeceğine dair tahminlerde bulunun; ardından derleyip tahminlerinizin doğru olup olmadığını kontrol edin.
+
+### 10.3.6. İlişkiler (Relationships)
+
++ Yaşam süresi(*lifetime*) parametrelerini belirtme şekliniz, fonksiyonunuzun ne yaptığına bağlıdır.
++ Örneğin, `longest` fonksiyonunun uygulamasını, en uzun olanı bulmak yerine her zaman ilk parametreyi döndürecek şekilde değiştirseydik, `y` parametresi için bir yaşam süresi belirtmemize gerek kalmazdı.
++ Aşağıdaki kod derlenecektir:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let string1 = String::from("abcd");
+    let string2 = "efghijklmnopqrstuvwxyz";
+
+    let result = longest(string1.as_str(), string2);
+    println!("The longest string is {result}");
+}
+
+fn longest<'a>(x: &'a str, y: &str) -> &'a str {
+    x
+}
+```
+
++ Burada `x` parametresi ve dönüş türü için bir `'a` yaşam süresi parametresi belirttik, ancak `y` parametresi için belirtmedik; çünkü `y`'nin yaşam süresinin `x`'in yaşam süresiyle veya dönüş değeriyle herhangi bir **ilişkisi** yoktur.
++ Bir fonksiyondan referans döndürürken, dönüş türü için belirlenen yaşam süresi parametresinin, parametrelerden en az biriyle eşleşmesi gerekir.
+
++ Eğer döndürülen referans, parametrelerden hiçbirine referans vermiyorsa, o zaman fonksiyonun **kendi içinde oluşturulmuş** bir değere referans veriyor demektir.
++ Ancak bu durumda; değer, fonksiyonun sonunda kapsam dışına çıkacağı için bu bir **askıda kalan referans (dangling reference)** olacaktır.
++ Derlenemeyecek `longest` fonksiyonun bu uygulama girişimini ele alalım:
+
+```rust
+fn main() {
+    let string1 = String::from("abcd");
+    let string2 = "xyz";
+
+    let result = longest(string1.as_str(), string2);
+    println!("The longest string is {result}");
+}
+
+fn longest<'a>(x: &str, y: &str) -> &'a str {
+    let result = String::from("really long string");
+    result.as_str()
+}
+```
+
++ Burada, dönüş türü için bir `'a` yaşam süresi parametresi belirtmiş olsak bile, bu uygulama derlenemeyecektir; çünkü dönüş değerinin yaşam süresi parametrelerin yaşam süresiyle hiçbir şekilde ilişkili değildir. Aldığımız hata mesajı şöyledir:
+
+```rust
+$ cargo run
+   Compiling chapter10 v0.1.0 (file:///projects/chapter10)
+error[E0515]: cannot return value referencing local variable `result`
+  --> src/main.rs:11:5
+   |
+11 |     result.as_str()
+   |     ------^^^^^^^^^
+   |     |
+   |     returns a value referencing data owned by the current function
+   |     `result` is borrowed here
+
+For more information about this error, try `rustc --explain E0515`.
+error: could not compile `chapter10` (bin "chapter10") due to 1 previous error
+
+```
+
++ Sorun şudur: `result` değişkeni `longest` fonksiyonunun sonunda kapsam dışına çıkar ve temizlenir.
++ Biz ise fonksiyondan `result`'a giden bir referans döndürmeye çalışıyoruz.
++ Askıda kalan referansı(*dangling reference*) düzeltebilecek herhangi bir yaşam süresi parametresi belirlememizin imkanı yoktur ve Rust, askıda kalan(*dangling reference*), bir referans oluşturmamıza izin vermez.
++ Bu durumda en iyi çözüm, bir referans yerine **sahipli bir veri türü (owned data type)** döndürmektir; böylece değeri temizleme sorumluluğu fonksiyonu çağıran kişiye geçer.
+
+
+> [!NOTE]
+> #### Sorunun özü
+> Problem şudur:
+> + `result`, `longest` fonksiyonu sona erdiğinde scope dışına çıkar ve bellekten temizlenir
+> + Ancak fonksiyon, bu yerel değişkene (`result`) ait bir referansı döndürmeye çalışmaktadır
+> + Bu, kaçınılmaz olarak **dangling reference** üretir
+> 
+> Bu durumu lifetime parametreleriyle düzeltmenin **hiçbir yolu yoktur** ve Rust buna izin vermez.
+> #### Doğru yaklaşım:
+> Bu tür durumlarda en doğru çözüm, **referans döndürmek yerine sahipliği (ownership) olan bir veri tipi döndürmektir**. Böylece:
+> + Döndürülen değerin yaşam süresinden çağıran fonksiyon sorumlu olur
+> + Bellek güvenliği garanti altına alınır
+
++ Nihayetinde yaşam süresi sözdizimi, fonksiyonların çeşitli parametreleri ile dönüş değerlerinin yaşam sürelerini birbirine bağlamakla ilgilidir. Bunlar birbirine bağlandığında Rust, bellek açısından güvenli işlemlere izin vermek ve askıda kalan işaretçiler oluşturacak veya bellek güvenliğini ihlal edecek işlemleri engellemek için yeterli bilgiye sahip olur.
+
+
+> [!NOTE]
+> #### Genel Sonuç
+> Özetle, lifetime sözdizimi; fonksiyonların parametreleri ve dönüş değerleri arasındaki **lifetime ilişkilerini birbirine bağlamak** için vardır. Bu ilişkiler doğru şekilde tanımlandığında Rust:
+> + Bellek açısından güvenli işlemlere izin verir
+> + *Dangling pointer* oluşabilecek durumları ise derleme aşamasında engeller
+> 
+> Bu mekanizma, Rust’ın bellek güvenliğini **çöp toplayıcıya ihtiyaç duymadan** sağlamasının temel nedenlerinden biridir.
+
+#### 10.3.6.1. Owership ile tekrar yazma:
+
++ Bu duruma göre kodun **doğru ve Rust’a uygun şekilde** yeniden yazılması gerekir. Temel kuralı netleştirelim ve ardından kodu gösterelim.
+
+
+> [!NOTE]
+> ##### Kural:
+> Fonksiyon içinde oluşturulan bir değere referans döndürülemez.  Bu durumda **referans (`&str`) değil, sahipliği olan (`String`) bir değer döndürülmelidir.**
+
+##### ❌ Hatalı yaklaşım (neden çalışmaz)
+
+```rust
+fn longest<'a>(x: &str, y: &str) -> &'a str {
+    let result = String::from("really long string");
+    result.as_str() // ❌ dangling reference
+}
+```
+
+**Sebep:**
++ `result` fonksiyon içinde oluşturuluyor
++ Fonksiyon bitince `result` drop ediliyor
++ Ama sen onun referansını dışarı vermeye çalışıyorsun
+
+#####  ✅ Doğru yaklaşım 1: `String` döndürmek (en yaygın ve doğru çözüm)
+
+```rust
+fn longest(x: &str, y: &str) -> String {
+    if x.len() > y.len() {
+        x.to_string()
+    } else {
+        y.to_string()
+    }
+}
+```
+
+**Kullanımı:**
+
+```rust
+fn main() {
+    let string1 = String::from("abcd");
+    let string2 = "xyz";
+
+    let result = longest(string1.as_str(), string2);
+    println!("The longest string is {result}");
+}
+```
+
+**Neden doğru?**
++  Fonksiyon **yeni bir `String` oluşturup sahipliğini çağırana veriyor**
++ Bellek güvenliği problemi yok
++ Lifetime annotation’a gerek yok
+
+##### ✅ Doğru yaklaşım 2: Sabit bir string döndürmek (özel durum)
+
+Eğer döndürülen değer **string literal** ise:
+
+```rust
+fn longest() -> &'static str {
+    "really long string"
+}
+```
+
+Bu sadece şu yüzden çalışır:
++ String literal’ler `'static` lifetime’a sahiptir
++ Program boyunca bellekten silinmezler
+
+⚠️ Ancak bu bizim örneğindeki problem için **genel çözüm değildir**.
+
+### 10.3.7. Struct Tanımlarında Yaşam Süreleri(In Struct Definitions)
+
++ Şimdiye kadar tanımladığımız yapıların (*struct*) tümü "sahipli" (*owned*) türleri tutuyordu.
++ **Referans tutan yapılar(*structs*) da tanımlayabiliriz; ancak bu durumda, yapı(*struct*) tanımındaki her referans için bir yaşam süresi belirteci (*lifetime annotation*) eklememiz gerekir.**
++ `Liste 10-24`'te, bir *string slice* (`&str`) tutan `ImportantExcerpt` isimli bir *struct* yer almaktadır.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+fn main() {
+    let novel = String::from("Call me Ishmael. Some years ago...");
+    let first_sentence = novel.split('.').next().unwrap();
+    let i = ImportantExcerpt {
+        part: first_sentence,
+    };
+}
+```
+
+> **Liste 10-24:** Bir referans tutan ve bu nedenle lifetime annotation’ı gerektiren bir struct
+
++ Bu *struct*, `part` adlı tek bir alana sahiptir ve bu alan bir *string slice*, yani bir **referans** tutar.
++ Generic veri türlerinde olduğu gibi, *generic lifetime* parametresinin adını *struct* adından sonra, köşeli parantezler (`<>`) içinde tanımlarız.
++ Böylece bu *lifetime* parametresini *struct* tanımının gövdesinde kullanabiliriz.
+
+> [!CAUTION] 
+> Bu annotation şu anlama gelir:
+> - `ImportantExcerpt` türünden oluşturulan bir nesne, `part` alanında tuttuğu referanstan daha uzun süre yaşayamaz.
+
++ Buradaki `main` fonksiyonu, `novel` değişkenine ait `String`’in ilk cümlesine referans tutan bir `ImportantExcerpt` örneği(*instance*) oluşturur.
++ `novel` içindeki veri, `ImportantExcerpt` örneği oluşturulmadan önce mevcuttur.
++ Ayrıca `novel`, `ImportantExcerpt` örneği scope dışına çıkana kadar yaşamaya devam eder. Bu nedenle, `ImportantExcerpt` içindeki referans **geçerli ve güvenlidir**.
+
+
+> [!NOTE]
+> #### Hatırlatma:
+> #####  `split` Metodu
+> + `split` metodu, bir string'i belirli bir ayırıcıya (delimiter) göre parçalara bölen bir metoddur.
+> + Söz Dizimi:
+> ```rust
+> str.split(pattern)
+> ```
+> ##### Return Değeri:
+> + `split` metodu **`Split` iterator'ı** döndürür. Bu bir iterator olduğu için direkt olarak bir dizi veya vektör değildir, ancak üzerinde iterator metodları kullanabilirsiniz.
+> ##### Örnek:
+> ```rust
+> fn main() { 
+> 	let text = "elma,armut,muz"; 
+> 	let fruits = text.split(','); // Iterator olduğu için döngüde kullanılabilir 
+> 	for fruit in fruits { 
+> 		println!("{}", fruit); 
+> 		} 
+> }
+> ```
+> ##### Önemli Notktalar:
+> + `split` **ödünç alınmış** string slice'ları (`&str`) döndürür
+> + Lazy evaluation kullanır (ihtiyaç duyulana kadar hesaplama yapmaz)
+
+
+> [!TIP]
+> #### Özet:
+> + Bir struct içinde referans sakladığınızda, Rust'a şu sözü vermiş olursunuz:
+> 	- **"Bu struct, içindeki referansın işaret ettiği veri öldüğü an ölmelidir."**
+> + Eğer bu `'a` işaretini koymazsanız, derleyici şu riskten korkar: Ya içindeki veri (`novel`) bellekten silinirse ama siz hala `i` (struct örneği) üzerinden o veriye erişmeye çalışırsanız?
+> + `'a` belirteci, bu ikisinin ömrünü birbirine bağlayarak bellek hatasını imkansız hale getirir.
+> + **Pratik bir kural:** Bir struct içinde `&` işareti görüyorsanız, mutlaka bir `'a` (veya benzeri bir isim) görmeniz gerekir.
+
+### 10.3.8. Yaşam Süresi İhmali (Lifetime Elision)
+
++ Her referansın bir yaşam süresi olduğunu ve referans kullanan fonksiyonlar veya yapılar (*struct*) için yaşam süresi parametreleri belirtmeniz gerektiğini öğrendiniz.
++ Ancak, `Liste 4-9`'da yer alan (ve burada `Liste 10-25`'te tekrar gösterilen) fonksiyon, yaşam süresi belirteçleri(*lifetime annotation*) olmadan derlenebilmişti.
+
+```rust
+fn first_word(s: &str) -> &str {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+
+    &s[..]
+}
+
+fn main() {
+    let my_string = String::from("hello world");
+
+    // first_word works on slices of `String`s
+    let word = first_word(&my_string[..]);
+
+    let my_string_literal = "hello world";
+
+    // first_word works on slices of string literals
+    let word = first_word(&my_string_literal[..]);
+
+    // Because string literals *are* string slices already,
+    // this works too, without the slice syntax!
+    let word = first_word(my_string_literal);
+}
+```
+
+> **Liste 10-25:** Parametresi ve dönüş değeri referans olmasına rağmen *lifetime annotation*’ı olmadan derlenen bir fonksiyon
+
+
+> [!NOTE]
+> #### `as_bytes()` metodu nedir?
+> ```rust
+> s.as_bytes()
+> ```
+> + 👉 Bir *string*’i *byte* (u8) dizisi olarak görmemizi sağlar.
+> #### Ne Yapar?
+> + `String` veya `&str` → **`&[u8]`** döndürür.
+> + **Kopyalama yapmaz**
+> + Sadece string’in bellekteki **ham byte temsilini** verir
+> ```rust
+> let s = "hello";
+> let bytes = s.as_bytes();
+> println!("{:?}", bytes);
+> ```
+
+
+> [!NOTE]
+> ```rust
+> for (i, &item) in bytes.iter().enumerate() {
+> ```
+> + `bytes.iter()` - byte'lar üzerinde iterator oluşturur.
+> + `enumerate()` - her elemana **index** (i) ekler.
+> + `(i, &item)` - i=index, &item=byte değeri
+> + Örnek: `(0, 104)`, `(1, 101)`, `(2, 108)`...
+
++ Bu fonksiyonun yaşam süresi belirteçleri(*lifetime annotation*) olmadan derlenmesinin nedeni tarihseldir:
++ Rust'ın erken versiyonlarında (1.0 öncesi), bu kod derlenmezdi çünkü her referansın açıkça belirtilmiş bir yaşam süresine(*lifetime*) ihtiyacı vardı. O zamanlar, fonksiyon imzası şu şekilde yazılırdı:
+
+```rust
+fn first_word<'a>(s: &'a str) -> &'a str {
+```
+
++ Çok fazla Rust kodu yazdıktan sonra, Rust ekibi, programcıların belirli durumlarda aynı yaşam süresi belirteçlerini(*lifetime annotation*) tekrar tekrar yazdığını fark etti.
++ Bu durumlar tahmin edilebilirdi ve birkaç belirgin kalıbı(*deterministic patterns*) takip ediyordu.
+
+
+> [!NOTE]
+> #### Deterministic patterns nedir?
+> Sonucu önceden kesin olan, her zaman aynı girdiye aynı çıktıyı veren yapı/desen.
+
++ Geliştiriciler, bu kalıpları derleyicinin koduna programladılar; böylece ödünç alma denetleyicisi (*borrow checker*) bu durumlarda yaşam sürelerini tahmin edebilir hale geldi ve açıkça belirtme ihtiyacı ortadan kalktı.
++ **Rust tarihindeki bu bilgi önemlidir, çünkü gelecekte daha fazla belirgin kalıp(deterministik kalıp) ortaya çıkabilir ve derleyiciye eklenebilir. İleride daha da az yaşam süresi belirteci(lifetime annotation) yazmamız gerekebilir.**
++ Rust'ın referans analizine programlanmış bu kalıplara **lifetime elision kuralları** denir.
++ Bunlar programcıların uyması gereken kurallar değildir; derleyicinin dikkate alacağı bir dizi özel durumdur. Eğer kodunuz bu durumlara uyuyorsa, yaşam sürelerini(*lifetime*) açıkça yazmanıza gerek kalmaz.
++ *Elision kuralları* tam bir çıkarım (*inference*) sağlamaz.
++ Eğer Rust kuralları uyguladıktan sonra referansların hangi yaşam sürelerine sahip olduğu konusunda hala bir belirsizlik varsa, derleyici geri kalan referansların yaşam süresinin ne olması gerektiği konusunda tahmin yürütmez.
++ Tahmin yürütmek yerine, derleyici yaşam süresi belirteçleri(*lifetime annotation*) ekleyerek çözebileceğiniz bir hata verir.
++ Fonksiyon veya metot parametrelerindeki yaşam sürelerine **girdi yaşam süreleri (input lifetimes)**, dönüş değerlerindeki yaşam sürelerine ise **çıktı yaşam süreleri (output lifetimes)** denir.
++ Derleyici, açık belirteçlerin(*annotation*) olmadığı durumlarda referansların yaşam sürelerini(*lifetime*) çözmek için üç kural kullanır.
+	- İlk kural girdi yaşam sürelerine,
+	- ikinci ve üçüncü kurallar ise çıktı yaşam sürelerine uygulanır.
++ Eğer derleyici üç kuralın sonuna gelir de hala yaşam sürelerini çözemediği referanslar kalırsa, bir hata vererek durur.
++ Bu kurallar hem `fn` tanımları hem de `impl` blokları için geçerlidir.
++ **İlk kural,**  
+	- derleyicinin referans olan her parametreye bir yaşam süresi parametresi atamasıdır. Başka bir deyişle, bir parametresi olan bir fonksiyon bir yaşam süresi parametresi alır: `fn foo<'a, 'b>(x: &'a i32, y: &'b i32)` ve bu böyle devam eder.
+
+> [!tip]
+> #### Birinci Kural: Özet
+> Derleyici, **referans olan her parametreye ayrı bir lifetime parametresi atar**.
+> Başka bir deyişle:
+> + Tek parametreli bir fonksiyon → **tek lifetime**
+> ```rust
+> fn foo<'a>(x: &'a i32);
+> ```
+> + İki parametreli bir fonksiyon → **iki ayrı lifetime**
+> ```rust
+> fn foo<'a, 'b>(x: &'a i32, y: &'b i32);
+> ```
+> 
+> Ve bu şekilde devam eder.
+
++ **İkinci kural,**
+	- eğer tam olarak bir tane girdi yaşam süresi (*input lifetime*) parametresi varsa, o yaşam süresi tüm çıktı yaşam süresi (*output lifetime*) parametrelerine atanır: `fn foo<'a>(x: &'a i32) -> &'a i32`.
+
+
+> [!tip]
+> #### İkinci kural: Özet
+> Eğer **yalnızca bir tane input lifetime** (girdi lifetime’ı) varsa, **bu lifetime tüm output lifetime’lara (dönüş referanslarına) atanır**.
+> **Örnek:**
+> ```rust
+> fn foo<'a>(x: &'a i32) -> &'a i32;
+> ```
+
++ **Üçüncü kural**,
+	- eğer birden fazla girdi yaşam süresi parametresi varsa ancak bu bir metot olduğu için parametrelerden biri `&self` veya `&mut self` ise, `self`'in yaşam süresi tüm çıktı yaşam süresi parametrelerine atanır.
+	- Bu üçüncü kural, metotların okunmasını ve yazılmasını çok daha keyifli hale getirir çünkü daha az sembol gerektirir.
+
+> [!tip]
+> #### Basit Örnek:
+> ```rust
+> struct Text {
+> 	contenxt: String,
+> }
+> impl Text {
+> 	fn get(&self, other: &str) -> &str {
+> 		self.content.as_str()
+> 	}
+> }
+> ```
+> **Burada neler var?**
+> + `&self` → **bir input reference**
+> + `other: &str` → **ikinci input reference**
+> + `-> &str` → **referans döndürülüyor**
+> + Lifetime **hiç yazılmadı** ama kod **geçerli**
+> #### Derleyicinin Gördüğü Gerçek İmza (Zihinsel Model):
+> Derleyici bunu aslında şöyle anlıyor:
+> ```rust
+> fn get<'a, 'b>(&'a self, other: &'b str) -> &'a str
+> ```
+> 🔴 Dikkat et:
+> + `other`’ın lifetime’ı (`'b`) **önemsenmedi**
+> + Dönüş değeri **`self`’in lifetime’ına (`'a`) bağlandı**
+> 
+> İşte bu **üçüncü lifetime elision kuralı**dır.
+
+---
+
++ Hadi derleyiciymişiz gibi davranalım.
++ Bu kuralları, `Liste 10-25`'teki `first_word` fonksiyonunun imzasındaki referansların yaşam sürelerini bulmak için uygulayalım.
++ İmza, referanslarla ilişkili herhangi bir yaşam süresi(*lifetime*) olmadan başlar:
+
+```rust
+fn first_word(s: &str) -> &str
+```
+
++ Ardından derleyici, her parametrenin kendi yaşam süresini almasını öngören **birinci kuralı** uygular.
++ Her zamanki gibi buna `'a` diyelim, böylece imza şu hale gelir:
+
+```rust
+fn first_word<'a>(s: &'a str) -> &str {
+```
+
++ Tam olarak bir tane girdi yaşam süresi(*lifetime*) olduğu için **ikinci kural** geçerlidir. **İkinci kural**, tek girdi parametresinin yaşam süresinin(*lifetime*) çıktı yaşam süresine atanacağını belirtir, dolayısıyla imza şimdi şöyledir:
+
+```rust
+fn first_word<'a>(s: &'a str) -> &'a str {
+```
+
++ Artık bu fonksiyon imzasındaki tüm referansların yaşam süreleri var ve derleyici, programcının bu fonksiyon imzasındaki yaşam sürelerini açıklamasına gerek kalmadan analizine devam edebilir.
+
+---
+
++ Başka bir örneğe bakalım, bu sefer `Listing 10-20`'de üzerinde çalışmaya başladığımızda yaşam süresi parametreleri olmayan `longest` fonksiyonunu kullanalım:
+
+```rust
+fn longest(x: &str, y: &str) -> &str {
+```
+
++ Birinci kuralı uygulayalım: Her parametre kendi yaşam süresini alır. Bu sefer bir yerine iki parametremiz var, dolayısıyla iki yaşam süremiz var:
+
+```rust
+fn longest<'a, 'b>(x: &'a str, y: &'b str) -> &str {
+```
+
++ Birden fazla girdi yaşam süresi olduğu için ikinci kuralın geçerli olmadığını görebilirsiniz.
++ Üçüncü kural da geçerli değildir, çünkü `longest` bir metot değil bir fonksiyondur, dolayısıyla parametrelerin hiçbiri `self` değildir.
++ Üç kuralın hepsini uyguladıktan sonra, hala dönüş tipinin yaşam süresinin ne olduğunu bulamamış durumdayız.
++ Bu yüzden `Listing 10-20`'deki kodu derlemeye çalışırken hata aldık:
+	- Derleyici yaşam süresi çıkarım kurallarını(*lifetime elision rules*) uyguladı ama yine de imzadaki referansların tüm yaşam sürelerini çözemedi.
++ Üçüncü kural esas olarak yalnızca **metot imzalarında** geçerli olduğu için, bir sonraki bölümde lifetime’ları bu bağlamda ele alacağız. Böylece bu kural sayesinde neden metot imzalarında çoğu zaman *lifetime anotasyonu* yazmamıza gerek olmadığını göreceğiz.
++ Burada iki girdi yaşam süresi (input lifetime) vardır; bu yüzden Rust **birinci yaşam süresi ihmal kuralını** uygular ve hem `&self`'e hem de `announcement` parametresine kendi yaşam sürelerini verir.
+
+### 10.3.9. Metot Tanımlarında Yaşam Süreleri
+
++ Yaşam sürelerine(*lifetime*) sahip bir yapı üzerinde metotlar uygularken, `Liste 10-11`'de gösterildiği gibi *generic* tür parametreleriyle aynı sözdizimini kullanırız.
++ Yaşam süresi parametrelerini nerede beyan edip nerede kullanacağımız; 
+	+ bunların yapının alanlarıyla(*struct fields*) mı yoksa 
+	+ metodun parametreleri ve dönüş değerleriyle mi ilgili olduğuna bağlıdır.
++ Yapı alanları(*struct fields*) için kullanılan yaşam süresi isimlerinin her zaman `impl` anahtar kelimesinden sonra beyan edilmesi ve ardından yapının(*struct*) isminden sonra kullanılması gerekir; çünkü bu yaşam süreleri yapının türünün bir parçasıdır.
++ `impl` bloğu içindeki metot imzalarında, referanslar yapının alanlarındaki referansların yaşam süresine bağlı olabilir veya onlardan bağımsız olabilir.
++ Ek olarak, yaşam süresi *lifetime elision* kuralları sayesinde metot imzalarında yaşam süresi belirteçleri(*lifetime anotation*) genellikle gerekli olmaz.
++ Liste 10-24'te tanımladığımız `ImportantExcerpt` yapısını kullanarak bazı örneklere bakalım.
+
++ İlk olarak, tek parametresi `self`'e bir referans olan ve dönüş değeri hiçbir şeye referans vermeyen bir `i32` olan `level` isimli bir metodu inceleyelim:
+
+```rust
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+// Yukarıda açıklanan metot:
+impl<'a> ImportantExcerpt<'a> {   // <---
+    fn level(&self) -> i32 {      // <---
+        3                         // <---
+    }                             // <---
+}                                 // <---
+
+impl<'a> ImportantExcerpt<'a> {
+    fn announce_and_return_part(&self, announcement: &str) -> &str {
+        println!("Attention please: {announcement}");
+        self.part
+    }
+}
+
+fn main() {
+    let novel = String::from("Call me Ishmael. Some years ago...");
+    let first_sentence = novel.split('.').next().unwrap();
+    let i = ImportantExcerpt {
+        part: first_sentence,
+    };
+}
+```
+
++ `impl`'den sonraki yaşam süresi parametresi beyanı ve bunun tür isminden sonra kullanılması zorunludur; ancak **birinci elision kuralı** nedeniyle, `self` referansının yaşam süresini işaretlememiz gerekmez.
+
+
+> [!NOTE]
+> ##### ✅ Birinci lifetime elision kuralı
+> + Her referans parametre kendi lifetime’ını alır.
+> + Yani derleyici bunu yapar:
+> ```rust
+> fn level<'b>(&'b self) -> i32
+> ```
+> Ama:
+> + `'b` **hiçbir yere bağlanmadığı** ve dönüşte referans olmadığı için
+> +  👉 lifetime **tamamen yerel kalır** ve bizim yazmamıza gerek yoktur.
+> ```rust
+> impl<'a> ImportantExcerpt<'a> {
+>    fn level(&self) -> i32 {
+>        3
+>    }
+>}
+> ```
+> **Kritik noktalar**
+> + Girdi (input): `&self` → **referans**
+> + Çıktı (output): `i32` → **referans değil**
+
++ İşte **üçüncü lifetime elision kuralının** uygulandığı bir örnek:
+
+```rust
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+impl<'a> ImportantExcerpt<'a> {
+    fn level(&self) -> i32 {
+        3
+    }
+}
+
+// Yukarıda açıklanan metot:
+impl<'a> ImportantExcerpt<'a> {
+    fn announce_and_return_part(&self, announcement: &str) -> &str {
+        println!("Attention please: {announcement}");
+        self.part
+    }
+}
+
+fn main() {
+    let novel = String::from("Call me Ishmael. Some years ago...");
+    let first_sentence = novel.split('.').next().unwrap();
+    let i = ImportantExcerpt {
+        part: first_sentence,
+    };
+}
+```
+
+Bu metotta:
++ **İki adet input lifetime vardır**:
+	- biri `&self`
+	- diğeri `announcement: &str`
++ Rust, önce **birinci elision kuralını** uygular ve her iki parametreye de ayrı lifetime’lar atar.
+
+Ardından, parametrelerden biri `&self` olduğu için **üçüncü lifetime elision kuralı** devreye girer:
+
+> Eğer bir metotta birden fazla input lifetime varsa ve bunlardan biri `&self` veya `&mut self` ise, **dönüş değerinin lifetime’ı `self`’in lifetime’ı olur**.
+
+Bu sayede, dönüş tipi olan `&str`’nin lifetime’ı otomatik olarak `&self`’in lifetime’ına bağlanır ve tüm lifetime ilişkileri netleşmiş olur.
+
+`main` fonksiyonu
+
+```rust
+fn main() {
+    let novel = String::from("Call me Ishmael. Some years ago...");
+    let first_sentence = novel.split('.').next().unwrap();
+    let i = ImportantExcerpt {
+        part: first_sentence,
+    };
+}
+```
+
++ Burada `ImportantExcerpt` örneği, `novel` değişkenine ait bir veriye referans tutar.
++ `novel`, `i` değişkeninden daha uzun süre yaşadığı için, struct içindeki referans **geçerlidir**.
+### 10.3.10. Statik Yaşam Süresi (The Static Lifetime)
+
++ Tartışmamız gereken özel bir yaşam süresi de `'static`'tir; bu, etkilenen referansın **programın tüm süresi boyunca** yaşayabileceğini ifade eder.
++ Tüm *string literal*'leri, `'static` yaşam süresine sahiptir ve bunu şu şekilde açıklayabiliriz:
+
+```rust
+#![allow(unused)]
+fn main() {
+	let s: &'static str = "I have a static lifetime.";
+}
+```
+
++ Bu string’in metni doğrudan **programın derlenmiş binary dosyasının içine** yerleştirilir ve bu veri **her zaman erişilebilir durumdadır**.
++ Bu nedenle, **tüm string literal’lerin lifetime’ı `'static`tir**.
++ Hata mesajlarında `'static` yaşam süresini kullanmanız yönünde öneriler görebilirsiniz. Ancak bir referans için yaşam süresi olarak `'static` belirtmeden önce, elinizdeki referansın gerçekten programınızın tüm ömrü boyunca yaşayıp yaşamadığını ve bunu isteyip istemediğinizi düşünün.
++ Çoğu zaman, `'static` yaşam süresini öneren bir hata mesajı, askıda kalan bir referans (dangling reference) oluşturma girişiminden veya mevcut yaşam sürelerinin uyuşmazlığından kaynaklanır. 
++ Bu gibi durumlarda çözüm, `'static` yaşam süresini belirtmek değil, bu sorunları düzeltmektir.
+
+### 10.3.11. Generic Tür Parametreleri, Trait Bound’lar ve Lifetime'lar
+
++ *Generic* tür parametrelerini, *trait* sınırlarını (*trait bounds*) ve yaşam sürelerini tek bir fonksiyonda belirtmenin sözdizimine kısaca bir göz atalım!
+
+```rust
+fn main() {
+    let string1 = String::from("abcd");
+    let string2 = "xyz";
+
+    let result = longest_with_an_announcement(
+        string1.as_str(),
+        string2,
+        "Today is someone's birthday!",
+    );
+    println!("The longest string is {result}");
+}
+
+use std::fmt::Display;
+
+fn longest_with_an_announcement<'a, T>(
+    x: &'a str,
+    y: &'a str,
+    ann: T,
+) -> &'a str
+where
+    T: Display,
+{
+    println!("Announcement! {ann}");
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+**Kod Çıktısı:**
+
+```
+Announcement! Today is someone's birthday!
+The longest string is abcd
+```
+
++ Bu, `Liste 10-21`'deki iki *string slice*’tan daha uzun olanını döndüren `longest` fonksiyonudur.
++ Ancak şimdi, `where` cümlesinde belirtildiği üzere `Display` trait'ini uygulayan herhangi bir türle doldurulabilen, `T` generic türünde `ann` isimli fazladan bir parametreye sahiptir.
++ Bu ekstra parametre `{}` kullanılarak yazdırılacaktır; bu yüzden `Display` *trait bound* gereklidir.
++ Yaşam süreleri de birer generic tür olduğu için, `'a` yaşam süresi parametresi ile `T` generic tür parametresinin beyanları, fonksiyon isminden sonraki açılı ayraçlar içinde aynı liste içinde yer alır.
+
+
+> [!NOTE]
+> + Burada `where` cümleciği şunu söyler:
+> 	- **"T jenerik tipi, Display trait'ini implement etmek zorundadır"**
+> + Bu gereklidir çünkü fonksiyon içinde `println!("Announcement! {ann}")` satırı `ann` parametresini yazdırıyor.
+> + Bir değeri `{}` ile yazdırabilmek için o tipin `Display` trait'ini implement etmiş olması gerekir.
+> ##### Alternatif Yazım Şekli:
+> + Aynı şeyi şöyle de yazabilirdik:
+> ```rust
+>  fn longest_with_an_announcement<'a, T: Display>(
+>     x: &'a str,
+>     y: &'a str,
+>     ann: T,
+> ) -> &'a str
+>{
+>    println!("Announcement! {ann}");
+>    if x.len() > y.len() { x } else { y }
+>}
+> ```
+
+### 10.3.12. Özet
+
++ Bu bölümde oldukça fazla konu ele aldık!
++ Artık **generic tür parametreleri**, **trait’ler ve trait bound’lar** ile **generic lifetime parametreleri** hakkında bilgi sahibi olduğunuza göre, **tekrar içermeyen** ve **birçok farklı durumda çalışabilen** kodlar yazmaya hazırsınız.
+	- *Generic* tür parametreleri, aynı kodu farklı türlere uygulamanıza olanak tanır.
+	- *Trait*’ler ve *trait bound*’lar ise, türler *generic* olsa bile, kodun ihtiyaç duyduğu **davranışlara** sahip olduklarını garanti eder.
+	- **Yaşam süresi belirteçlerini (lifetime annotations)** kullanarak, bu esnek kodun askıda kalan referanslar (dangling references) oluşturmamasını sağlamayı öğrendiniz.
++ Üstelik tüm bu analizler **derleme zamanında** gerçekleşir, bu da çalışma zamanı (runtime) performansını asla etkilemez!
++ İster inanın ister inanmayın, bu bölümde tartıştığımız konular hakkında öğrenilecek daha çok şey var:
+	- Bölüm 18, trait'leri kullanmanın başka bir yolu olan **trait nesnelerini (trait objects)** ele alıyor.
++ Ayrıca, yalnızca çok ileri düzey senaryolarda ihtiyaç duyacağınız, Yaşam süresi belirteçlerini (lifetime annotations) içeren daha karmaşık senaryolar da mevcuttur; bunlar için _Rust Reference_ (Rust Kılavuzu) kitabını okumalısınız.
++ Ancak bir sonraki adımda, kodunuzun olması gerektiği gibi çalıştığından emin olabilmeniz için Rust'ta nasıl **test yazacağınızı** öğreneceksiniz.
+# 11. Otomatik Testler Yazmak
+
++ Edsger W. Dijkstra, 1972 tarihli "Mütevazı Programcı" (*The Humble Programmer*) adlı makalesinde şöyle demiştir:
+
+> "Program test etmenin hataların varlığını göstermede çok etkili bir yol olabileceğini, ancak hataların yokluğunu göstermede umutsuz derecede yetersiz olduğunu"
+
++ Bu durum, elimizden geldiğince test yapmaktan vazgeçmemiz gerektiği anlamına gelmez!
++ Programlarımızdaki **doğruluk** (correctness), kodumuzun niyet ettiğimiz şeyi ne ölçüde gerçekleştirdiğidir.
++ Rust, program doğruluğuna yüksek derecede önem verecek şekilde tasarlanmıştır; ancak doğruluk karmaşıktır ve kanıtlanması kolay değildir.
++ Rust'ın tip sistemi bu yükün büyük bir kısmını üstlense de her şeyi yakalayamaz. Bu nedenle Rust, otomatik yazılım testleri yazmanız için gerekli desteği bünyesinde barındırır.
++ Örneğin, kendisine aktarılan her sayıya 2 ekleyen `add_two` adında bir fonksiyon yazdığımızı varsayalım. Bu fonksiyonun imzası parametre olarak bir tam sayı kabul eder ve sonuç olarak bir tam sayı döndürür.
++ Bu fonksiyonu uygulayıp derlediğimizde Rust; fonksiyona bir `String` değeri veya geçersiz bir referans geçirilmediğinden emin olmak için öğrendiğiniz tüm tip denetimlerini ve sahiplik (borrow checking) kontrollerini yapar.
++ **Ancak Rust, bu fonksiyonun tam olarak bizim niyet ettiğimiz şeyi yapıp yapmadığını; yani parametreye 10 eklemek veya 50 çıkarmak yerine gerçekten 2 ekleyip eklemediğini kontrol edemez! İşte testler burada devreye girer.**
++ `add_two` fonksiyonuna 3 değerini gönderdiğimizde, dönen değerin 5 olduğunu doğrulayan (assert) testler yazabiliriz. Kodumuzda her değişiklik yaptığımızda bu testleri çalıştırarak, mevcut doğru davranışların değişmediğinden emin olabiliriz.
++ Test yazmak karmaşık bir beceridir:
+	- Tek bir bölümde iyi test yazmanın her detayını kapsayamasak da, bu bölümde Rust'ın test imkanlarının mekaniğini tartışacağız.
++ Test yazarken kullanabileceğiniz 
+	- notasyonlardan (annotations) ve makrolardan, 
+	- testleri çalıştırmak için sunulan varsayılan davranışlardan ve seçeneklerden; 
+	- ayrıca testlerin **birim testler** (unit tests) ve **entegrasyon testleri** (integration tests) 
++ olarak nasıl organize edileceğinden bahsedeceğiz.
+
+## 11.1. Testler Nasıl Yazılır?
+
++ Testler, test amaçlı olmayan (asıl) kodun(*non-test code*) beklenen şekilde çalışıp çalışmadığını doğrulayan Rust fonksiyonlarıdır.
+
+
+> [!NOTE]
+> Test fonksiyonlarının gövdeleri genellikle şu üç eylemi gerçekleştirir:
+> 1. Gerekli verileri veya durumu hazırlar (**Setup**).
+> 2. Test etmek istediğiniz kodu çalıştırır.
+> 3. Sonuçların beklediğiniz gibi olduğunu doğrular (**Assert**).
+
++ Şimdi Rust'ın bu eylemleri gerçekleştirmek için özel olarak sunduğu özelliklere bakalım; bunlar arasında `test` özniteliği (attribute), birkaç makro ve `should_panic` özniteliği(attribute) yer alır.
+
+### 11.1.1. Test Fonksiyonlarını Kurma
+
++ En basit haliyle Rust'ta bir test, `test` özniteliği ile işaretlenmiş (annotated) bir fonksiyondur.
++ Öznitelikler, Rust kod parçaları hakkındaki meta verilerdir; Bölüm 5'te struct'lar ile kullandığımız `derive` özniteliği buna bir örnektir.
++ Bir fonksiyonu test fonksiyonuna dönüştürmek için, `fn` satırından önceki satıra `#[test]` ekleyin.
++ Testlerinizi `cargo test` komutuyla çalıştırdığınızda, Rust bu işaretlenmiş fonksiyonları çalıştıran bir "test çalıştırıcı" (*test runner*) ikili dosyası (*binary*) oluşturur ve her bir test fonksiyonunun geçip geçmediğini raporlar.
++ Cargo ile her yeni kütüphane projesi oluşturduğumuzda, içinde bir test fonksiyonu bulunan bir test modülü bizim için otomatik olarak oluşturulur.
++ Bu modül, her yeni projeye başladığınızda tam yapıyı ve sözdizimini tekrar tekrar araştırmak zorunda kalmamanız için size bir şablon sunar.
++ İstediğiniz kadar ek test fonksiyonu ve test modülü ekleyebilirsiniz.
+
+
+> [!NOTE]
+> + Cargo otomatik olarak size hazır bir test şablonu oluşturur, böylece her yeni projede "test nasıl yazılıyordu?" diye düşünmenize gerek kalmaz.
+> + Şablon OLMASAYDI: Her yeni proje oluşturduğunuzda şunları hatırlamanız gerekirdi.
+> 	- Hmm, test modülü nasıl başlıyordu?
+> 	- `#[cfg(test)]` mi yazıyorduk?
+> 	- mod tests mi? mod test mi?
+> 	- `use super::*;` gerekli miydi?
+> 	- `#[test]` niteliği nereye geliyordu?
+
++ Gerçek bir kodu test etmeden önce, şablon test üzerinde denemeler yaparak testlerin nasıl çalıştığının bazı yönlerini keşfedeceğiz.
++ Ardından, yazdığımız bir kodu çağıran ve davranışının doğru olduğunu doğrulayan gerçek dünya testleri yazacağız.
++ Daha sonra, yazdığımız bazı kodları çağıran ve davranışlarının doğru olduğunu doğrulayan gerçek dünya(*real-world*) testleri yazacağız.
++ Hadi, iki sayıyı toplayacak `adder` adında yeni bir kütüphane projesi oluşturalım:
+
+```bash
+$ cargo new adder --lib
+     Created library `adder` project
+$ cd adder
+```
+
++ `adder` kütüphanenizdeki `src/lib.rs` dosyasının içeriği `Liste 11-1`'deki gibi görünmelidir.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+}
+```
+
+> **Liste 11-1**: `cargo new` tarafından otomatik olarak oluşturulan kod.
+
++ Şimdilik sadece `it_works` fonksiyonuna odaklanalım.
++ `#[test]` notasyonuna(*annotation*) dikkat edin:
+	- Bu öznitelik(*attribute*), bunun bir test fonksiyonu olduğunu belirtir, böylece test çalıştırıcısı(*test runner*) bu fonksiyonu bir test olarak ele alacağını bilir.
++ Test modülünde, ortak senaryoları kurmaya yardımcı olan veya ortak işlemleri gerçekleştiren test dışı fonksiyonlar da bulunabilir. Bu nedenle, hangi fonksiyonların test olduğunu her zaman özellikle belirtmemiz gerekir.
+
+> [!TIP]
+> + **`tests` modülünün içinde sadece test fonksiyonları olmak zorunda değildir.**
+> + Yani, Bazı fonksiyonlar **test değildir**. Ama testlere **yardımcı olmak için** yazılır
+>
+> **Küçük ve net örnek**
+> ```rust
+> #[cfg(test)]
+> mod tests {
+>    use super::*;
+>
+>    // ❌ Bu bir test DEĞİL
+>    fn setup() -> i32 {
+>        10
+>    }
+>
+>    // ✅ Bu bir TEST
+>    #[test]
+>    fn test_add() {
+>        let base = setup();          // yardımcı fonksiyon kullanılıyor
+>        let result = add(base, 5);
+>    assert_eq!(result, 15);
+>     }
+> }
+> ```
+
++ Örnek fonksiyon gövdesi, `add` fonksiyonunun 2 ve 2 ile çağrılmasından elde edilen sonucu içeren `result` değişkeninin 4'e eşit olduğunu doğrulamak (assert) için `assert_eq!` makrosunu kullanır.
++ Bu doğrulama, tipik bir test formatına örnek teşkil eder. Hadi, bu testin geçtiğini görmek için testi çalıştıralım.
++ `cargo test` komutu, Liste 11-2'de gösterildiği gibi projemizdeki tüm testleri çalıştırır.
+
+```shell
+$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.57s
+     Running unittests src/lib.rs (target/debug/deps/adder-01ad14159ff659ab)
+
+running 1 test
+test tests::it_works ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+> **Liste 11-2:** Otomatik olarak oluşturulan testin çalıştırılması sonucu elde edilen çıktı
+
++ Cargo testi derledi ve çalıştırdı.
++ `running 1 test` (1 test çalıştırılıyor) satırını görüyoruz.
++ Bir sonraki satır, oluşturulan test fonksiyonunun adını (`tests::it_works`) ve bu testi çalıştırma sonucunun `ok` (tamam) olduğunu gösterir.
++ Genel özet olan `test result: ok.` ifadesi tüm testlerin geçtiği anlamına gelir; `1 passed; 0 failed` (1 geçti; 0 kaldı) kısmı ise geçen veya kalan testlerin toplam sayısını verir.
++ Bir testi, belirli bir durumda çalışmaması için "yok sayıldı" (*ignored*) olarak işaretlemek mümkündür; buna bu bölümün ilerleyen kısımlarındaki "Özellikle İstenmediği Sürece Testleri Yok Saymak" başlığında değineceğiz. Burada böyle bir işlem yapmadığımız için özet kısmında `0 ignored` (0 yok sayıldı) görünüyor.
++ Ayrıca, `cargo test` komutuna bir argüman göndererek sadece adı bir dizgeyle (*string*) eşleşen testleri de çalıştırabiliriz; buna **"filtreleme"** denir ve bunu "İsme Göre Testlerin Bir Kısmını Çalıştırmak" bölümünde inceleyeceğiz. Burada çalıştırılan testleri filtrelemediğimiz için özetin sonunda `0 filtered out` (0 elendi/filtrelendi) yazmaktadır.
++ `0 measured` (0 ölçüldü) istatistiği, performansı ölçen kıyaslama testleri (**benchmark tests**) içindir. Kıyaslama testleri, bu yazının yazıldığı an itibarıyla yalnızca **Nightly Rust** (geliştirme aşamasındaki sürüm) üzerinde kullanılabilmektedir. Daha fazla bilgi için [kıyaslama testleri hakkındaki dokümantasyona](https://doc.rust-lang.org/unstable-book/library-features/test.html) bakabilirsiniz.
+
+---
+
++ Test çıktısının `Doc-tests adder` ile başlayan bir sonraki bölümü, dökümantasyon testlerinin sonuçları içindir.
++ Henüz herhangi bir dökümantasyon testimiz yok, ancak Rust, API dokümantasyonumuzda görünen kod örneklerini derleyebilir.
+
+> [!tip]
+> #### API (Application Programming Interface) nedir?
+> + **API**, bir kütüphanenin (library) veya modülün **dış dünyaya sunduğu arayüzdür**.
+> + Rust özelinde bu şunları kapsar:
+> 	- `pub fn` → dışarıya açık fonksiyonlar
+> 	- `pub struct` → dışarıya açık yapılar
+> 	- `pub enum` → dışarıya açık enum’lar
+> 	- `pub trait` → dışarıya açık trait’ler
+> + bunların **nasıl kullanılacağını anlatan dokümantasyon**
+> #### "API dokümantasyonunuzda" ne demek?
+> + API dokümantasyonunuzda yer alan kod örnekleri
+> + 👉 Başkalarının senin kütüphaneni kullanırken okuyacağı açıklamalar ve örnekler
+> ```rust
+> /// İki sayıyı toplar.
+> ///
+> /// # Örnek
+> /// \`\`\`
+> /// let result = mylib::add(2, 3);
+> /// assert_eq!(result, 5);
+> /// \`\`\`
+>  pub fn add(left: u64, right: u64) -> u64 {
+>    left + right
+> }
+> ```
+
++ Bu özellik, dökümanlarınızın ve kodunuzun birbiriyle senkronize kalmasına yardımcı olur!
++ Dökümantasyon testlerinin nasıl yazılacağını Bölüm 14'teki "Test Olarak Dökümantasyon Yorumları" bölümünde tartışacağız. Şimdilik `Doc-tests` çıktısını görmezden geleceğiz.
+
+---
+
++ Gelin, testi kendi ihtiyaçlarımıza göre özelleştirmeye başlayalım. Önce `it_works` fonksiyonunun adını `exploration` gibi farklı bir isimle değiştirelim:
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn exploration() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+}
+```
+
++ Ardından, `cargo test` komutunu tekrar çalıştırın. Çıktı artık `it_works` yerine `exploration` ismini gösterecektir:
+
+```rust
+$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.59s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 1 test
+test tests::exploration ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
++ Şimdi başka bir test ekleyelim, ancak bu sefer başarısız olan bir test yapalım!
++ Test fonksiyonundaki bir şey **paniklediğinde** (panic) testler başarısız olur.
++ Her test yeni bir iş parçacığında (**thread**) çalıştırılır ve ana iş parçacığı bir test iş parçacığının öldüğünü gördüğünde, test başarısız olarak işaretlenir.
+
+> [!TIP]
+> #### Önemli nokta (çoğu kişinin karıştırdığı yer)
+> > ❌ “Her test ayrı CPU çekirdeğinde çalışır”
+> >  ✅ **Yanlış**
+> 
+> > ✅ “Her test ayrı OS thread’inde çalışır”
+> > ✅ “Her test ayrı OS thread’inde çalışır”
+> 
+> ##### Küçük şema ile düşün
+> ```mathematica
+> CPU Core 1 ──┐
+> CPU Core 2 ──┼── OS Scheduler ── Test Thread 1
+> CPU Core 3 ──┼── OS Scheduler ── Test Thread 2
+> CPU Core 4 ──┘                   Test Thread 3
+>                                  Test Thread 4
+> ```
+> ##### Rust neden thread kullanıyor?
+> Testler:
+> - birbirinden izole olsun
+> - biri çökerse diğerleri etkilenmesin
+> - mümkünse paralel çalışsın
+> 
+> Bu yüzden thread kullanımı ideal.
+
++ Bölüm 9'da, paniklemenin en basit yolunun `panic!` makrosunu çağırmak olduğundan bahsetmiştik.
++ `another` adında yeni bir fonksiyon ekleyin, böylece `src/lib.rs` dosyanız `Liste 11-3`'teki gibi görünecektir.
+
+```rust
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn exploration() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+
+    #[test]
+    fn another() {
+        panic!("Make this test fail");
+    }
+}
+```
+
+> **Liste 11-3:** `panic!` makrosu çağrıldığı için başarısız olacak ikinci bir test eklenmesi
+
++ Testleri tekrar `cargo test` komutuyla çalıştırın. Çıktı, `exploration` testinin geçtiğini, `another` testinin ise başarısız olduğunu gösteren` Liste 11-4`’e benzer olacaktır.
+
+```rust
+$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.72s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 2 tests
+test tests::another ... FAILED
+test tests::exploration ... ok
+
+failures:
+
+---- tests::another stdout ----
+
+thread 'tests::another' panicked at src/lib.rs:17:9:
+Make this test fail
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::another
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+```
+
++ `ok` yerine, `test tests::another` satırı `FAILED` (BAŞARISIZ) gösteriyor.
++ Bireysel sonuçlar(Tek tek test sonuçları) ile özet arasında iki yeni bölüm belirir: 
+	- İlki, her test hatasının ayrıntılı nedenini görüntüler.
+	- Bu durumda, `tests::another` testinin `src/lib.rs` dosyasının 17. satırında "*Make this test fail*" mesajıyla paniklediği ayrıntısını alıyoruz.
+	- Bir sonraki bölüm, yalnızca başarısız olan tüm testlerin adlarını listeler; bu, çok sayıda test ve çok sayıda ayrıntılı hata çıktısı olduğunda kullanışlıdır.
++ Hata ayıklamayı kolaylaştırmak için başarısız bir testin adını kullanarak yalnızca o testi çalıştırabiliriz(Başarısız olan bir testin adını kullanarak yalnızca o testi çalıştırabilir ve hatayı daha kolay ayıklayabiliriz.); testleri çalıştırma yolları hakkında "11.2. Testlerin Nasıl Çalıştırılacağını Kontrol Etmek" bölümünde daha fazla konuşacağız.
++ Özet satırı en sonda görüntülenir: Genel olarak test sonucumuz **FAILED** (BAŞARISIZ). Bir testimiz geçti ve bir testimiz kaldı.
++ Farklı senaryolarda test sonuçlarının nasıl göründüğünü incelediğimize göre, şimdi testlerde yararlı olan `panic!` dışındaki diğer makrolara göz atalım.
+
+###  11.1.2. `assert!` ile Sonuçları Kontrol Etme
+
++ Standart kütüphane tarafından sağlanan `assert!` makrosu, bir testteki belirli bir koşulun `true` (doğru) olarak değerlendirildiğinden emin olmak istediğinizde kullanışlıdır.
++ `assert!` makrosuna Boolean (doğru/yanlış) değer üreten bir argüman veririz.
+	- Eğer değer `true` ise hiçbir şey olmaz ve test geçer.
+	- Eğer değer `false` ise, `assert!` makrosu testi başarısız kılmak için `panic!` fonksiyonunu çağırır.
++ `assert!` makrosunu kullanmak, kodumuzun niyet ettiğimiz şekilde çalışıp çalışmadığını kontrol etmemize yardımcı olur.
++ Bölüm 5, `Liste 5-15`'te bir `Rectangle` (Dikdörtgen) struct'ı ve bir `can_hold` (içine alabilir mi) metodu kullanmıştık; bunlar `Liste 11-5`'te tekrar edilmiştir.
++ Bölüm 5, Liste 5-15'te bir `Rectangle` (Dikdörtgen) struct'ı ve bir `can_hold` (içine alabilir mi) metodu kullanmıştık; bunlar Liste 11-5'te tekrar edilmiştir. Hadi bu kodu `src/lib.rs` dosyasına koyalım ve ardından `assert!` makrosunu kullanarak onun için bazı testler yazalım.
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+```
+
+> **Liste 11-5:** Bölüm 5'ten Rectangle struct'ı ve can_hold metodu.
+
++ `can_hold` metodu bir Boolean döndürür, bu da onun `assert!` makrosu için mükemmel bir kullanım durumu olduğu anlamına gelir.
++ `Liste 11-6`'da, genişliği 8 ve yüksekliği 7 olan bir `Rectangle` örneği oluşturarak ve bunun genişliği 5, yüksekliği 1 olan başka bir `Rectangle` örneğini içine alabileceğini doğrulayarak (asserting) `can_hold` metodunu sınayan bir test yazıyoruz.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn larger_can_hold_smaller() {
+        let larger = Rectangle {
+            width: 8,
+            height: 7,
+        };
+        let smaller = Rectangle {
+            width: 5,
+            height: 1,
+        };
+
+        assert!(larger.can_hold(&smaller));
+    }
+}
+```
+
+> **Liste 11-6:** Büyük bir dikdörtgenin küçük bir dikdörtgeni gerçekten içine alıp alamayacağını kontrol eden bir `can_hold` testi.
+
++ `tests` modülü içindeki `use super::*;` satırına dikkat edin.
++ `tests` modülü, Bölüm 7'deki "*7.3. Modül ağacındaki öğelere erişim yolları*" bölümünde ele aldığımız olağan görünürlük kurallarını izleyen normal bir modüldür.
+
+
+> [!TIP]
+>  ##### `tests` modülü … normal bir modüldür
+>  + `#[cfg(test)] mod tests { ... }` ile yazdığımız `tests`, özel veya sihirli bir yapı **değildir**.
+>  + Rust’taki herhangi bir `mod` neyse, `tests` de odur.
+> ##### olağan görünürlük kurallarını izler
+> + Rust’ta bir modül:
+> 	- Üst (parent) modülündeki öğelere **doğrudan erişemez**
+> 	- `pub` olmayan şeyler normalde **görünmezdir**
+> + Yani `tests` modülü, dışarıdaki fonksiyonlara/struct’lara erişmek için **açıkça onları içeri almak zorundadır**.
+> ##### Bu yüzden şu satır gerekir:
+> ```rust
+> use super::*;
+> ```
+> + `super` → bir üst modül (genelde `lib.rs`)
+> + `*` → oradaki her şeyi içeri al
+> Yani:
+> > “Test modülü, test ettiği kodu otomatik olarak görmez; biz onu özellikle içeri almak zorundayız.”
+
++ `tests` modülü bir iç modül olduğundan, dış modüldeki test edilen kodu iç modülün kapsamına (*scope*) almamız gerekir.
++ Burada bir "*glob*" (`*`) kullanıyoruz, böylece dış modülde tanımladığımız her şey bu `tests` modülü için kullanılabilir hale gelir.
++ Testimize `larger_can_hold_smaller` adını verdik ve ihtiyacımız olan iki `Rectangle` örneğini oluşturduk. Ardından `assert!` makrosunu çağırdık ve ona `larger.can_hold(&smaller)` çağrısının sonucunu ilettik. Bu ifadenin `true` dönmesi gerekir, bu yüzden testimiz geçmelidir. Hadi öğrenelim!
+
+```rust
+$ cargo test
+   Compiling rectangle v0.1.0 (file:///projects/rectangle)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+     Running unittests src/lib.rs (target/debug/deps/rectangle-6584c4561e48942e)
+
+running 1 test
+test tests::larger_can_hold_smaller ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rectangle
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
++ Geçti! Şimdi başka bir test ekleyelim; bu sefer küçük bir dikdörtgenin büyük bir dikdörtgeni **içine alamayacağını** doğrulayalım:
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn larger_can_hold_smaller() {
+        // --snip--
+        let larger = Rectangle {
+            width: 8,
+            height: 7,
+        };
+        let smaller = Rectangle {
+            width: 5,
+            height: 1,
+        };
+
+        assert!(larger.can_hold(&smaller));
+    }
+
+    #[test]
+    fn smaller_cannot_hold_larger() {
+        let larger = Rectangle {
+            width: 8,
+            height: 7,
+        };
+        let smaller = Rectangle {
+            width: 5,
+            height: 1,
+        };
+
+        assert!(!smaller.can_hold(&larger));
+    }
+}
+```
+
++ Bu durumda `can_hold` fonksiyonunun doğru sonucu `false` olduğu için, bu sonucu `assert!` makrosuna iletmeden önce tersine çevirmemiz (ünlem işareti `!` ile değilini almamız) gerekir. Sonuç olarak, `can_hold` fonksiyonu `false` dönerse testimiz geçecektir:
+
+```rust
+$ cargo test
+   Compiling rectangle v0.1.0 (file:///projects/rectangle)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+     Running unittests src/lib.rs (target/debug/deps/rectangle-6584c4561e48942e)
+
+running 2 tests
+test tests::larger_can_hold_smaller ... ok
+test tests::smaller_cannot_hold_larger ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rectangle
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
++ İki test de geçti! Şimdi kodumuza bir hata (bug) eklediğimizde test sonuçlarımıza ne olduğuna bakalım. 
++ Genişlikleri karşılaştırırken büyüktür işaretini (`>`), küçüktür işareti (`<`) ile değiştirerek `can_hold` metodunun uygulanışını değiştirelim:
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+// --snip--
+impl Rectangle {                                               // <--
+    fn can_hold(&self, other: &Rectangle) -> bool {            // <-- 
+        self.width < other.width && self.height > other.height // <--
+    }                                                          // <--
+}                                                              // <--
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn larger_can_hold_smaller() {
+        let larger = Rectangle {
+            width: 8,
+            height: 7,
+        };
+        let smaller = Rectangle {
+            width: 5,
+            height: 1,
+        };
+
+        assert!(larger.can_hold(&smaller));
+    }
+
+    #[test]
+    fn smaller_cannot_hold_larger() {
+        let larger = Rectangle {
+            width: 8,
+            height: 7,
+        };
+        let smaller = Rectangle {
+            width: 5,
+            height: 1,
+        };
+
+        assert!(!smaller.can_hold(&larger));
+    }
+}
+```
+
++ Testleri tekrar çalıştırdığımızda:
+
+```rust
+$ cargo test
+   Compiling rectangle v0.1.0 (file:///projects/rectangle)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+     Running unittests src/lib.rs (target/debug/deps/rectangle-6584c4561e48942e)
+
+running 2 tests
+test tests::larger_can_hold_smaller ... FAILED
+test tests::smaller_cannot_hold_larger ... ok
+
+failures:
+
+---- tests::larger_can_hold_smaller stdout ----
+
+thread 'tests::larger_can_hold_smaller' panicked at src/lib.rs:28:9:
+assertion failed: larger.can_hold(&smaller)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::larger_can_hold_smaller
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+```
+
++ Testlerimiz hatayı yakaladı! Çünkü `larger.width` değeri 8, `smaller.width` değeri ise 5’tir. `can_hold` içindeki genişlik karşılaştırması artık **false** döndürmektedir; çünkü 8, 5’ten küçük değildir.
+
+### 11.1.3. `assert_eq!` ve `assert_ne!` ile Eşitlik Testi
+
++ İşlevselliği doğrulamanın yaygın bir yolu, test edilen kodun sonucu ile kodun döndürmesini beklediğiniz değer arasında bir eşitlik testi yapmaktır. Bunu `assert!` makrosunu kullanarak ve ona `==` operatörünü içeren bir ifade göndererek yapabilirsiniz.
++ Ancak bu o kadar yaygın bir testtir ki, standart kütüphane bu testi daha kolay yapabilmeniz için bir çift makro sunar: `assert_eq!` ve `assert_ne!`. Ayrıca, doğrulama başarısız olursa her iki değeri de yazdırırlar; bu da testin neden başarısız olduğunu görmeyi kolaylaştırır.
++ Aksine `assert!` makrosu, `==` ifadesi için sadece `false` değeri aldığını belirtir, ancak bu `false` değerine yol açan değerleri yazdırmaz.
+
+---
+
++ `Liste 11-7`'de, parametresine 2 ekleyen `add_two` adında bir fonksiyon yazıyoruz ve ardından bu fonksiyonu `assert_eq!` makrosunu kullanarak test ediyoruz.
+
+**Dosya adı:** `scr/lib.rs`
+
+```rust
+pub fn add_two(a: u64) -> u64 {
+    a + 2
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_adds_two() {
+        let result = add_two(2);
+        assert_eq!(result, 4);
+    }
+}
+```
+
+> **Liste 11-7:** `add_two` fonksiyonunun `assert_eq!` makrosu ile test edilmesi.
+
++ Testin geçtiğini kontrol edelim!
+
+```rust
+$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 1 test
+test tests::it_adds_two ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
++ `add_two(2)` çağrısının sonucunu tutan `result` adlı bir değişken oluşturduk. Ardından, `result` ve `4` değerlerini `assert_eq!` makrosuna argüman olarak gönderdik. Bu testin çıktı satırı `test tests::it_adds_two ... ok` şeklindedir ve `ok` metni testimizin geçtiğini gösterir!
++ `assert_eq!` başarısız olduğunda nasıl göründüğünü anlamak için kodumuza bir hata (bug) ekleyelim. `add_two` fonksiyonunun uygulamasını, 2 yerine 3 ekleyecek şekilde değiştirelim:
+
+```rust
+pub fn add_two(a: u64) -> u64 {
+    a + 3
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_adds_two() {
+        let result = add_two(2);
+        assert_eq!(result, 4);
+    }
+}
+```
+
++ Testleri tekrar çalıştıralım:
+
+```rust
+$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 1 test
+test tests::it_adds_two ... FAILED
+
+failures:
+
+---- tests::it_adds_two stdout ----
+
+thread 'tests::it_adds_two' panicked at src/lib.rs:12:9:
+assertion `left == right` failed
+  left: 5
+ right: 4
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::it_adds_two
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+```
+
++ Testimiz hatayı yakaladı!
+	- `tests::it_adds_two` testi başarısız oldu ve mesaj bize başarısız olan doğrulamanın `left == right` (sol == sağ) olduğunu, ayrıca sol ve sağ değerlerin ne olduğunu söyler.
+	- Bu mesaj hata ayıklamaya (*debugging*) başlamamıza yardımcı olur: `add_two(2)` çağrısının sonucuna sahip olan `left` (sol) argümanı 5 idi, ancak `right` (sağ) argümanı 4 idi.
+	- Çok sayıda testin çalıştığı bir senaryoda bunun ne kadar yararlı olacağını tahmin edebilirsiniz.
++ Bazı dillerde ve test çatılarında (*framework*), eşitlik doğrulama fonksiyonlarının parametrelerine `expected` (beklenen) ve `actual` (gerçekleşen) denir ve argümanları belirttiğimiz sıra önemlidir. Ancak Rust'ta bunlar `left` ve `right` olarak adlandırılır; beklediğimiz değer ile kodun ürettiği değeri hangi sırada yazdığımızın bir önemi yoktur. Bu testteki doğrulamayı `assert_eq!(4, result)` şeklinde de yazabilirdik; bu da yine aynı `assertion left == right failed` hata mesajını üretirdi.
++ `assert_ne!` makrosu, verdiğimiz iki değer birbirine eşit **değilse** geçecek, eşitse başarısız olacaktır.
+	- Bu makro, en çok bir değerin ne olacağından emin olmadığımız ama kesinlikle ne **olmaması** gerektiğini bildiğimiz durumlarda kullanışlıdır.
+	- Örneğin, girdisini bir şekilde değiştirmesi garanti edilen ancak girdinin nasıl değiştirileceğinin testin çalıştırıldığı haftanın gününe bağlı olduğu bir fonksiyonu test ediyorsak, doğrulanacak en iyi şey fonksiyonun çıktısının girdisine eşit olmadığıdır.
+
+
+> [!NOTE]
+> #### `assert_ne!`  makrosunu pekiştirme
+> + Diyelim ki bir "günün mesajı" fonksiyonumuz var. Bu fonksiyon, verilen bir metni alıyor ve haftanın gününe göre farklı şekillerde değiştiriyor:
+> ```rust
+> use chrono::Datelike;
+>
+> pub fn gunun_mesaji(mesaj: &str) -> String {
+>    use chrono::Weekday;
+>    let gun = chrono::Local::now().weekday();
+>    
+>    match gun {
+>        Weekday::Mon => format!("🌟 {}", mesaj),
+>        Weekday::Tue => format!("{} ✨", mesaj),
+>        Weekday::Wed => mesaj.to_uppercase(),
+>        Weekday::Thu => mesaj.to_lowercase(),
+>        Weekday::Fri => format!("🎉 {} 🎉", mesaj),
+>        Weekday::Sat => mesaj.chars().rev().collect(),
+>        Weekday::Sun => format!("😴 {}", mesaj),
+>    }
+>}
+>
+>#[cfg(test)]
+>mod tests {
+>    use super::*;
+>
+>    #[test]
+>    fn mesaj_degistirilir() {
+>        let girdi = "merhaba";
+>        let sonuc = gunun_mesaji(girdi);
+>        
+>        // Tam olarak ne olacağını bilmiyoruz (hangi gün olduğuna bağlı)
+>        // ama kesinlikle orijinal mesajdan farklı olmalı
+>        assert_ne!(sonuc, girdi);
+>    }
+>}
+> ```
+> Bu testte:
+> + Fonksiyonun girdisini **mutlaka** değiştireceğini biliyoruz
+> + Ama **nasıl** değiştireceğini bilmiyoruz (testin çalıştığı güne bağlı)
+> + O yüzden `assert_eq!` kullanamayız (bekleneni bilmiyoruz)
+> + Sadece `assert_ne!` kullanarak "çıktı, girdiden farklı olmalı" diyebiliriz
+
++ Perde arkasında `assert_eq!` ve `assert_ne!` makroları sırasıyla `==` ve `!=` operatörlerini kullanır.
++ Doğrulamalar başarısız olduğunda, bu makrolar argümanlarını **debug** formatını kullanarak yazdırır; bu da karşılaştırılan değerlerin `PartialEq` ve `Debug` *trait*'lerini (özelliklerini) uygulamış olması gerektiği anlamına gelir.
++ Tüm ilkel (*primitive*) tipler ve standart kütüphane tiplerinin çoğu bu *trait*'leri uygular.
++ Kendi tanımladığınız *struct* veya *enum*'lar için, bu tiplerin eşitliğini doğrulamak adına `PartialEq` trait'ini uygulamanız gerekecektir.
++ Doğrulama başarısız olduğunda değerleri yazdırmak için `Debug` trait'ini de uygulamanız gerekir.
++ Bölüm 5,` Liste 5-12`'de belirtildiği gibi, her iki *trait* de türetilebilir (*derivable*) olduğundan, bu genellikle *struct* veya *enum* tanımınızın üzerine `#[derive(PartialEq, Debug)]` notasyonunu(*annotation*) eklemek kadar basittir.
++ Bu ve diğer türetilebilir özellikler (derivable traits) hakkında daha fazla ayrıntı için Ek C, **'["Derivable Traits,"](https://doc.rust-lang.org/book/appendix-03-derivable-traits.html) bölümüne bakınız.**
+#### Örnek:
+
++ **Trait'ler Olmadan (Hata Verir)**
+
+```rust
+struct Kisi {
+    isim: String,
+    yas: u32,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn kisi_testi() {
+        let kisi1 = Kisi {
+            isim: String::from("Ahmet"),
+            yas: 25,
+        };
+        let kisi2 = Kisi {
+            isim: String::from("Ahmet"),
+            yas: 25,
+        };
+        
+        // HATA! Kisi, PartialEq implement etmiyor
+        assert_eq!(kisi1, kisi2);
+    }
+}
+```
+
+Bu kod **derlenmez** ve şu hatayı verir:
+
+```
+error: binary operation `==` cannot be applied to type `Kisi`
+```
+
++ **Trait'lerle (Çalışır)**
+
+```rust
+#[derive(PartialEq, Debug)]  // Bu satırı ekledik!
+struct Kisi {
+    isim: String,
+    yas: u32,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn kisi_testi() {
+        let kisi1 = Kisi {
+            isim: String::from("Ahmet"),
+            yas: 25,
+        };
+        let kisi2 = Kisi {
+            isim: String::from("Ahmet"),
+            yas: 25,
+        };
+        
+        // Şimdi çalışır!
+        assert_eq!(kisi1, kisi2);
+    }
+
+    #[test]
+    fn kisi_testi_hatali() {
+        let kisi1 = Kisi {
+            isim: String::from("Ahmet"),
+            yas: 25,
+        };
+        let kisi2 = Kisi {
+            isim: String::from("Mehmet"),
+            yas: 30,
+        };
+        
+        assert_eq!(kisi1, kisi2);
+        // Test başarısız olur ve Debug sayesinde değerleri gösterir:
+        // left: Kisi { isim: "Ahmet", yas: 25 }
+        // right: Kisi { isim: "Mehmet", yas: 30 }
+    }
+}
+```
+
+### 11.1.4. Özel Hata (Failure) Mesajları Ekleme
+
++ `assert!`, `assert_eq!` ve `assert_ne!` makrolarına isteğe bağlı argümanlar ekleyerek, başarısızlık durumunda yazdırılacak **özel mesajlar** oluşturabilirsiniz.
++ Zorunlu argümanlardan sonra belirtilen tüm ek argümanlar, (Bölüm 8'deki "format! ile Birleştirme" kısmında tartışılan) `format!` makrosuna iletilir.
++ Böylece `{}` yer tutucuları ve bu tutuculara gelecek değerleri içeren format string kullanabilirsiniz.
++ Özel mesajlar, bir doğrulamanın (assertion) ne anlama geldiğini dökümante etmek için kullanışlıdır; bir test başarısız olduğunda, koddaki sorunun ne olduğu hakkında daha iyi bir fikre sahip olursunuz.
++ **Örneğin**, insanları isimleriyle selamlayan bir fonksiyonumuz olduğunu ve fonksiyona ilettiğimiz ismin çıktıda görünüp görünmediğini test etmek istediğimizi varsayalım:
+
+```rust
+pub fn greeting(name: &str) -> String {
+    format!("Hello {name}!")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn greeting_contains_name() {
+        let result = greeting("Carol");
+        assert!(result.contains("Carol"));
+    }
+}
+```
+
++ Bu programın gereksinimleri henüz tam olarak netleşmedi ve selamlamanın başındaki ``Hello`` metninin değişeceğinden oldukça eminiz.
++ Gereksinimler değiştiğinde testi sürekli güncellemek zorunda kalmak istemiyoruz.
++ Bu yüzden `greeting` fonksiyonundan dönen değerle tam bir eşitlik kontrolü yapmak yerine, sadece çıktının girdi parametresindeki metni içerip içermediğini doğruluyoruz.
+
+> [!tip]
+> + **`contains`**, bir metnin (String / &str) içinde **belirli bir alt metin geçiyor mu** diye kontrol eder.
+> ```rust
+> result.contains("Carol")
+> ```
+> + ➡️ `result` adlı metnin içinde `"Carol"` kelimesi varsa **`true`**, yoksa **`false`** döner.
+> Testlerde şu anlama gelir:
+> > "Fonksiyonun ürettiği çıktı, beklediğim kelimeyi içeriyor mu?"
+
++ Şimdi `greeting` fonksiyonunu `name` dışarıda bırakacak şekilde değiştirerek bir hata (*bug*) ekleyelim ve varsayılan test başarısızlığı çıktısının nasıl göründüğüne bakalım:
+
+```rust
+pub fn greeting(name: &str) -> String {
+    String::from("Hello!")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn greeting_contains_name() {
+        let result = greeting("Carol");
+        assert!(result.contains("Carol"));
+    }
+}
+```
+
++ Bu testi çalıştırdığımızda şu çıktıyı alırız:
+
+```
+$ cargo test
+   Compiling greeter v0.1.0 (file:///projects/greeter)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.91s
+     Running unittests src/lib.rs (target/debug/deps/greeter-170b942eb5bf5e3a)
+
+running 1 test
+test tests::greeting_contains_name ... FAILED
+
+failures:
+
+---- tests::greeting_contains_name stdout ----
+
+thread 'tests::greeting_contains_name' panicked at src/lib.rs:12:9:
+assertion failed: result.contains("Carol")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::greeting_contains_name
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+```
+
++ Bu sonuç sadece doğrulamanın başarısız olduğunu ve hangi satırda olduğunu gösterir.
++ Daha kullanışlı bir hata mesajı, `greeting` fonksiyonundan gelen değeri de yazdırırdı. Hadi, `greeting` fonksiyonundan aldığımız gerçek değeri içeren ve bir yer tutucuya sahip(`{result}`), özel bir hata mesajı ekleyelim:
+
+```rust
+pub fn greeting(name: &str) -> String {
+    String::from("Hello!")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn greeting_contains_name() {
+        let result = greeting("Carol");
+        assert!(
+            result.contains("Carol"),
+            "Greeting did not contain name, value was `{result}`"
+        );
+    }
+}
+```
+
++ Şimdi testi çalıştırdığımızda, daha bilgilendirici bir hata mesajı alacağız:
+
+```bash
+$ cargo test
+   Compiling greeter v0.1.0 (file:///projects/greeter)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.93s
+     Running unittests src/lib.rs (target/debug/deps/greeter-170b942eb5bf5e3a)
+
+running 1 test
+test tests::greeting_contains_name ... FAILED
+
+failures:
+
+---- tests::greeting_contains_name stdout ----
+
+thread 'tests::greeting_contains_name' panicked at src/lib.rs:12:9:
+Greeting did not contain name, value was `Hello!`
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::greeting_contains_name
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+```
+
++ Test çıktısında gerçekten hangi değerin döndüğünü görebiliyoruz; bu da beklediğimiz şey yerine gerçekte ne olduğunu anlayarak hatayı ayıklamamıza (*debug*) yardımcı olur.
+
+### 11.1.5. `should_panic` ile Panikleri Kontrol Etmek
+
++ Dönüş değerlerini kontrol etmenin yanı sıra, kodumuzun hata durumlarını beklediğimiz şekilde ele alıp almadığını kontrol etmek de önemlidir.
++ **Örneğin,** Bölüm 9 Liste 9-13'te oluşturduğumuz `Guess` (Tahmin) tipini düşünün.
++ `Guess` yapısını kullanan diğer kodlar, `Guess` örneklerinin(*instance*) yalnızca 1 ile 100 arasındaki değerleri içereceği garantisine dayanır.
++ Bu aralığın dışındaki bir değerle `Guess` örneği(*instance*) oluşturma girişiminin paniklediğinden (panic) emin olan bir test yazabiliriz.
++ Bunu, test fonksiyonumuza `should_panic` özniteliğini(*attribute*) ekleyerek yaparız.
+	- Eğer fonksiyon içindeki kod paniklerse test geçer;
+	- eğer fonksiyon içindeki kod paniklemezse test başarısız olur.
++ `Liste 11-8`, `Guess::new` fonksiyonunun hata koşullarının beklediğimiz zaman gerçekleşip gerçekleşmediğini kontrol eden bir testi göstermektedir.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 || value > 100 {
+            panic!("Guess value must be between 1 and 100, got {value}.");
+        }
+
+        Guess { value }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+}
+```
+
+> **Liste 11-8:** Bir koşulun paniklemeye (*panic!*) sebep olup olmayacağını test etmek.
+
+
+> [!CAUTION]
+> + `#[should_panic]` özniteliğini, `#[test]` özniteliğinden sonra ve uygulandığı test fonksiyonundan önce yerleştiririz.
+
++ Bu test başarılı olduğunda elde edilen sonuca bakalım:
+
+```rust
+$ cargo test
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running unittests src/lib.rs (target/debug/deps/guessing_game-57d70c3acb738f4d)
+
+running 1 test
+test tests::greater_than_100 - should panic ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests guessing_game
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
++ Harika görünüyor! Şimdi, `new` fonksiyonunun değer 100'den büyük olduğunda paniklemesi gereken koşulu kaldırarak kodumuza bir hata (*bug*) ekleyelim:
+
+```rust
+pub struct Guess {
+    value: i32,
+}
+
+// --snip--
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 {
+            panic!("Guess value must be between 1 and 100, got {value}.");
+        }
+
+        Guess { value }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+}
+```
+
++ Liste 11-8'deki testi şimdi çalıştırdığımızda başarısız olacaktır:
+
+```rust
+$ cargo test
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+     Running unittests src/lib.rs (target/debug/deps/guessing_game-57d70c3acb738f4d)
+
+running 1 test
+test tests::greater_than_100 - should panic ... FAILED
+
+failures:
+
+---- tests::greater_than_100 stdout ----
+note: test did not panic as expected at src/lib.rs:21:8
+
+failures:
+    tests::greater_than_100
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+```
+
++ Bu durumda çok yardımcı bir mesaj almayız, ancak test fonksiyonuna baktığımızda `#[should_panic]` ile işaretlendiğini görürüz.
++ Aldığımız başarısızlık (FAILED) sonucu, test fonksiyonundaki kodun bir paniğe yol açmadığı anlamına gelir.
+---
++ `should_panic` kullanan testler bazen **yeterince kesin olmayabilir**. Çünkü bir `should_panic` testi, **beklediğimiz nedenden farklı bir sebeple panic oluşsa bile** başarılı sayılır.
++ `should_panic` testlerini daha hassas yapmak için, `should_panic` attribute’una **isteğe bağlı bir `expected` parametresi** ekleyebiliriz. Test mekanizması, oluşan hata mesajının sağlanan metni içerdiğinden emin olacaktır.
++ **Örneğin,** `Liste 11-9`’daki güncellenmiş `Guess` kodunu ele alalım.
++ Bu sürümde `new` fonksiyonu, değerin çok küçük ya da çok büyük olmasına göre **farklı panic mesajları** üretmektedir.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub struct Guess {
+    value: i32,
+}
+
+// --snip--
+
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 {
+            panic!(
+                "Guess value must be greater than or equal to 1, got {value}."
+            );
+        } else if value > 100 {
+            panic!(
+                "Guess value must be less than or equal to 100, got {value}."
+            );
+        }
+
+        Guess { value }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic(expected = "less than or equal to 100")]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+}
+```
+
+> **Liste 11-9:** Belirli bir alt string(substring) içeren bir panik mesajı için test yapmak.
+
++ Bu test **başarılı olur**, çünkü `should_panic` attribute’undaki `expected` parametresine verdiğimiz metin, `Guess::new` fonksiyonunun panic mesajının **bir alt parçasıdır (substring)**.
++ Beklediğimiz panik mesajının tamamını da belirtebilirdik; bu durumda mesaj şu olurdu:
+
+```rust
+Guess value must be greater than or equal to 1, got 200.
+```
+
++ Ne kadarını yazacağımız:
+	- Panic mesajının ne kadar **benzersiz veya dinamik** olduğuna
+	- Testi ne kadar **hassas** yapmak istediğimize
++ bağlıdır. Burada yalnızca bir alt metni kontrol etmek, test fonksiyonunun gerçekten `value > 100` durumuna girdiğini garanti etmek için yeterlidir.
++ `expected` mesajı içeren bir `should_panic` testi başarısız olduğunda ne olduğunu görmek için, `if value < 1` ve `else if value > 100` bloklarının içeriklerini birbirleriyle değiştirerek kodumuza tekrar bir hata ekleyelim:
+
+```rust
+pub struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 {           // <--
+            panic!(
+                "Guess value must be less than or equal to 100, got {value}." // <--
+            );
+        } else if value > 100 {  // <--
+            panic!(
+                "Guess value must be greater than or equal to 1, got {value}." // <--
+            );
+        }
+
+        Guess { value }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic(expected = "less than or equal to 100")]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+}
+```
+
++ Bu durumda testi çalıştırdığımızda başarısız olacaktır:
+
+```bash
+$ cargo test
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+     Running unittests src/lib.rs (target/debug/deps/guessing_game-57d70c3acb738f4d)
+
+running 1 test
+test tests::greater_than_100 - should panic ... FAILED
+
+failures:
+
+---- tests::greater_than_100 stdout ----
+
+thread 'tests::greater_than_100' panicked at src/lib.rs:12:13:
+Guess value must be greater than or equal to 1, got 200.
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+note: panic did not contain expected string
+      panic message: "Guess value must be greater than or equal to 1, got 200."
+ expected substring: "less than or equal to 100"
+
+failures:
+    tests::greater_than_100
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+```
+
++ Hata mesajı, bu testin gerçekten de beklediğimiz gibi panikle sonuçlandığını, ancak panik mesajının beklenen `less than or equal to 100` string'ini içermediğini gösteriyor.
++ Bu durumda aldığımız panik mesajı `Guess value must be greater than or equal to 1, got 200` idi.
++ Artık hatamızın (bug) nerede olduğunu çözmeye başlayabiliriz!
+
+### 11.1.6. Testlerde `Result<T, E>` Kullanımı
+
++ Şimdiye kadar incelediğimiz tüm testler, başarısız olduklarında panikliyorlardı (panic).
++ Ancak `Result<T, E>` kullanan testler de yazabiliriz!
++ Aşağıda, Liste 11-1’deki testin `panic` etmek yerine `Result<T, E>` kullanacak ve hata durumunda `Err` döndürecek şekilde yeniden yazılmış hâlini görebilirsiniz:
+
+```rust
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() -> Result<(), String> {
+        let result = add(2, 2);
+
+        if result == 4 {
+            Ok(())
+        } else {
+            Err(String::from("two plus two does not equal four"))
+        }
+    }
+}
+```
+
++ `it_works` fonksiyonu artık `Result<(), String>` dönüş tipine sahip.
++ Fonksiyonun gövdesinde, `assert_eq!` makrosunu çağırmak yerine;
+	- test başarılı olduğunda `Ok(())`,
+	- test başarısız olduğunda ise içinde bir `String` bulunan `Err` döndürürüz.
++ Testleri `Result<T, E>` döndürecek şekilde yazmak, test gövdesi içinde **soru işareti (`?`) operatörünü** kullanmanıza olanak tanır. Bu, içindeki herhangi bir işlem `Err` varyantı döndürdüğünde başarısız olması gereken testleri yazmanın pratik bir yoludur.
+
+
+> [!TIP]
+>  Yukarıdaki cümleye basit örnek:
+> ```rust
+> fn divide(a: i32, b: i32) -> Result<i32, String> {
+>     if b == 0 {
+>         Err(String::from("Sıfıra bölünemez!"))
+>     } else {
+>         Ok(a / b)
+>     }
+> }
+> 
+> 
+> 
+> #[cfg(test)]
+> mod tests {
+>     use super::*;
+> 
+>     #[test]
+>     fn tes_with_question_mark() -> Result<(), String> {
+>         let result1 = divide(10, 2)?;  // ✅ Başarılı: result1 = 5
+>         let result2 = divide(20, 4)?;  // ✅ Başarılı: result2 = 5
+>         let result3 = divide(8, 4)?;   // ❌ HATA! Burada test durur ve Err döner
+> 
+> 		// Buraya asla gelemez çünkü üstte hata oldu
+>         assert_eq!(result1, 5);
+>         Ok(())
+>     }
+> }
+> ```
+
+
+> [!CAUTION]
+> + `Result<T, E>` kullanan testlerde `#[should_panic]` notasyonunu kullanamazsınız.
+> + Bir işlemin `Err` varyantı döndürdüğünü doğrulamak (assert) istiyorsanız, o `Result<T, E>` değeri üzerinde soru işareti operatörünü kullanmayın.
+> + Bunun yerine `assert!(deger.is_err())` ifadesini kullanın.
+
+
+
+> [!TIP]
+> 
+> ```rust
+> 
+> fn check_age(age: i32) -> Result<(), String> {
+>     if age < 18 {
+>         Err(String::from("Çok gençsin"))
+>     } else {
+>         Ok(())
+>     }
+> }
+> 
+> #[cfg(test)]
+> #[test]
+> fn test_young_age_correct() -> Result<(), String> {
+>     let result = check_age(15);
+> 
+>     assert!(result.is_err());
+> 
+>     Ok(())
+> }
+> ```
+
+**Karşılaştırma**
+
+| Durum                           | Ne yapmalı?                               |
+| ------------------------------- | ----------------------------------------- |
+| Hata bekliyorsak                | `assert!(result.is_err())`                |
+| Başarı bekliyorsak              | `assert!(result.is_ok())` veya `?` kullan |
+| Belirli hata mesajı bekliyorsak | `assert_eq!(result, Err(...))`            |
+
++ Artık testleri yazmanın birkaç yolunu bildiğinize göre, testlerimizi çalıştırdığımızda neler olduğuna bakalım ve `cargo test` ile kullanabileceğimiz farklı seçenekleri keşfedelim.
+
+## 11.2. Testlerin Nasıl Çalıştırılacağını Kontrol Etmek
+
++ `cargo run` komutunun kodunuzu derleyip ardından oluşan ikili dosyayı (binary) çalıştırması gibi, `cargo test` de kodunuzu test modunda derler ve oluşan test ikili dosyasını çalıştırır.
++ `cargo test` tarafından üretilen ikili dosyanın varsayılan davranışı, tüm testleri paralel olarak çalıştırmak ve test çalıştırmaları sırasında üretilen çıktıyı yakalamaktır; bu da çıktının görüntülenmesini engeller(yani, testler başarılı olduğunda, testlerin içindeki print komutlarının çıktıları ekrana yazdırılmaz, gizlenir.) ve test sonuçlarıyla ilgili çıktıyı okumayı kolaylaştırır.
++ Ancak, bu varsayılan davranışı değiştirmek için komut satırı seçeneklerini belirtebilirsiniz.
+---
++ Bazı komut satırı seçenekleri
+	- doğrudan `cargo test` komutuna iletilirken,
+	- bazıları ise oluşan test ikili dosyasına iletilir.
++ Bu iki tür argümanı birbirinden ayırmak için; önce `cargo test`'e giden argümanları listeler, ardından `--` ayırıcısını koyar ve sonrasında test ikili dosyasına giden argümanları eklersiniz.
++ `cargo test --help` komutunu çalıştırmak `cargo test` ile kullanabileceğiniz seçenekleri görüntülerken, `cargo test -- --help` komutunu çalıştırmak ayırıcıdan sonra kullanabileceğiniz seçenekleri görüntüler.
++ Bu seçenekler ayrıca ["The rustc Book"un "Tests" (Testler)](https://doc.rust-lang.org/rustc/tests/index.html) bölümünde dökümante edilmiştir.
+### 11.2.1. Testleri Paralel veya Ardışık Olarak Çalıştırma
+
++ Birden fazla testi çalıştırdığınızda, varsayılan olarak bu testler iş parçacıkları (threads) kullanılarak **paralel** bir şekilde çalıştırılır; bu da testlerin daha hızlı tamamlanmasını ve daha çabuk geri bildirim almanızı sağlar.
++ Testler aynı anda çalıştığı için, testlerinizin birbirine veya mevcut çalışma dizini ya da çevre değişkenleri (environment variables) gibi paylaşılan herhangi bir duruma (shared state) bağımlı olmadığından emin olmalısınız.
++ **Örneğin,** her testinizin disk üzerinde `test-output.txt` adında bir dosya oluşturan ve bu dosyaya veri yazan bir kod çalıştırdığını varsayalım. Ardından, her test bu dosyadaki veriyi okuyor ve dosyanın her test için farklı olan belirli bir değeri içerdiğini doğruluyor (assert). Testler aynı anda çalıştığı için, bir testin dosyayı yazması ile okuması arasındaki sürede, başka bir test bu dosyanın üzerine yazabilir. Bu durumda ikinci test başarısız olacaktır; ancak bu başarısızlık kodun yanlış olmasından değil, paralel çalışan testlerin birbirine müdahale etmesinden kaynaklanır. Çözümlerden biri, her testin farklı bir dosyaya yazmasını sağlamaktır; bir diğeri ise testleri tek tek çalıştırmaktır.
++ Eğer testleri paralel çalıştırmak istemiyorsanız ya da kullanılan thread sayısı üzerinde daha ayrıntılı bir kontrol istiyorsanız, test ikili dosyasına `--test-threads` bayrağını ve kullanmak istediğiniz thread sayısını gönderebilirsiniz. Aşağıdaki örneğe göz atın:
+
+```rust
+$ cargo test -- --test-threads=1
+```
+
++ Burada test thread sayısını **1** olarak ayarlıyoruz; bu da programa hiçbir paralellik kullanmamasını söylüyor. Testleri tek bir thread ile çalıştırmak, paralel çalıştırmaya kıyasla daha uzun sürecektir; ancak testler paylaşılan bir durumu kullanıyorsa, birbirleriyle **çakışmayacaklardır**.
+
+### 11.2.2. Fonksiyon Çıktısını Göstermek
+
++ Varsayılan olarak, bir test geçerse Rust'ın test kütüphanesi standart çıktıya (standard output) yazdırılan her şeyi yakalar (capture).
+	- **Örneğin**, bir testte `println!` çağırırsak ve test geçerse, terminalde `println!` çıktısını görmeyiz; yalnızca testin geçtiğini belirten satırı görürüz.
+	- Eğer bir test başarısız olursa, standart çıktıya yazdırılan her şeyi hata mesajının geri kalanıyla birlikte görürüz.
++ Bir örnek olarak, `Liste 11-10`'da parametresinin değerini yazdıran ve 10 döndüren basit bir fonksiyonun yanı sıra, biri geçen diğeri kalan iki test bulunmaktadır.
+
+**Dosya adı:** `src/lib.rs`
+*Bu kod panic üretir!*
+
+```rust
+fn prints_and_returns_10(a: i32) -> i32 {
+    println!("I got the value {a}");
+    10
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn this_test_will_pass() {
+        let value = prints_and_returns_10(4);
+        assert_eq!(value, 10);
+    }
+
+    #[test]
+    fn this_test_will_fail() {
+        let value = prints_and_returns_10(8);
+        assert_eq!(value, 5);
+    }
+}
+```
+
+> **Liste 11-10:** `println!` çağıran bir fonksiyon için testler.
+
++ Bu testleri `cargo test` ile çalıştırdığımızda aşağıdaki çıktıyı görürüz:
+
+```rust
+$ cargo test
+   Compiling silly-function v0.1.0 (file:///projects/silly-function)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running unittests src/lib.rs (target/debug/deps/silly_function-160869f38cff9166)
+
+running 2 tests
+test tests::this_test_will_fail ... FAILED
+test tests::this_test_will_pass ... ok
+
+failures:
+
+---- tests::this_test_will_fail stdout ----
+I got the value 8
+
+thread 'tests::this_test_will_fail' panicked at src/lib.rs:19:9:
+assertion `left == right` failed
+  left: 10
+ right: 5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::this_test_will_fail
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+```
+
++ Dikkat ederseniz bu çıktının hiçbir yerinde, başarılı olan test çalıştığında yazdırılan **`I got the value 4`** satırı yoktur. Bu çıktı yakalanmıştır.
++ Başarısız olan testin çıktısı olan **`I got the value 8`** ise, test özet çıktısında ve testin neden başarısız olduğunu gösteren bölümde yer alır.
++ Eğer **başarılı testler için de** yazdırılan değerleri görmek istiyorsak, Rust’a `--show-output` seçeneğiyle başarılı testlerin çıktısını da göstermesini söyleyebiliriz:
+
+```rust
+$ cargo test -- --show-output
+```
+
++ `Liste 11-10`’daki testleri `--show-output` bayrağı ile tekrar çalıştırdığımızda şu çıktıyı görürüz:
+
+```rust
+$ cargo test -- --show-output
+   Compiling silly-function v0.1.0 (file:///projects/silly-function)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running unittests src/lib.rs (target/debug/deps/silly_function-160869f38cff9166)
+
+running 2 tests
+test tests::this_test_will_fail ... FAILED
+test tests::this_test_will_pass ... ok
+
+successes:
+
+---- tests::this_test_will_pass stdout ----
+I got the value 4
+
+
+successes:
+    tests::this_test_will_pass
+
+failures:
+
+---- tests::this_test_will_fail stdout ----
+I got the value 8
+
+thread 'tests::this_test_will_fail' panicked at src/lib.rs:19:9:
+assertion `left == right` failed
+  left: 10
+ right: 5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::this_test_will_fail
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+```
+
++ Bu sefer, başarılı testin (`this_test_will_pass`) çalışması sırasında yazdırılan **`I got the value 4`** çıktısı da açıkça gösterilmektedir.
+
+### 11.2.3. Testlerin Bir Alt Kümesini İsme Göre Çalıştırma
+
++ Tüm test paketini çalıştırmak bazen uzun sürebilir. Eğer kodun belirli bir bölümü üzerinde çalışıyorsanız, yalnızca o koda ait testleri çalıştırmak isteyebilirsiniz.
++ Çalıştırmak istediğiniz testin ya da testlerin **adını**, `cargo test` komutuna argüman olarak vererek hangi testlerin çalışacağını seçebilirsiniz.
++ Testlerin bir alt kümesini(yani, bir kısmını) nasıl çalıştıracağımızı göstermek için, önce `add_two` fonksiyonu için Liste 11-11’de gösterildiği gibi üç test oluşturacağız ve ardından hangilerini çalıştıracağımızı seçeceğiz.
+
+```rust
+pub fn add_two(a: u64) -> u64 {
+    a + 2
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn add_two_and_two() {
+        let result = add_two(2);
+        assert_eq!(result, 4);
+    }
+
+    #[test]
+    fn add_three_and_two() {
+        let result = add_two(3);
+        assert_eq!(result, 5);
+    }
+
+    #[test]
+    fn one_hundred() {
+        let result = add_two(100);
+        assert_eq!(result, 102);
+    }
+}
+```
+
+> **Liste 11-11:** Üç farklı isme sahip üç test
+
++ Daha önce gördüğümüz gibi, testleri herhangi bir argüman vermeden çalıştırırsak, tüm testler **paralel** olarak çalıştırılır:
+
+```rust
+$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 3 tests
+test tests::add_three_and_two ... ok
+test tests::add_two_and_two ... ok
+test tests::one_hundred ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+#### 11.2.3.1. Tek Bir Testi Çalıştırma
+
++ Herhangi bir test fonksiyonunun adını `cargo test` komutuna argüman olarak vererek yalnızca o testin çalışmasını sağlayabiliriz:
+
+```shell
+$ cargo test one_hundred
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.69s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 1 test
+test tests::one_hundred ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+```
+
++ Yalnızca `one_hundred` ismine sahip olan test çalıştı; diğer iki test bu isimle eşleşmedi.
++ Test çıktısı, sonunda `2 filtered out` (2 elendi/filtrelendi) ifadesini görüntüleyerek, çalıştırılmayan başka testlerimiz olduğunu bize bildirir.
++ Bu yöntemi kullanarak birden fazla test adını tek tek belirterek yazamayız; `cargo test` komutuna verilen yalnızca ilk değer dikkate alınacaktır. Ancak, birden fazla testi aynı anda çalıştırmanın bir yolu vardır.
+
+####  11.2.3.2. Birden Fazla Testi Çalıştırmak İçin Filtreleme Yapmak
+
++ Bir test adının bir kısmını belirtebiliriz; böylece adı bu değerle eşleşen tüm testler çalıştırılacaktır.
++ **Örneğin,** testlerimizden ikisinin adı `add` içerdiği için, `cargo test add` komutunu çalıştırarak bu iki testi çalıştırabiliriz:
+
+```bash
+$ cargo test add
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 2 tests
+test tests::add_three_and_two ... ok
+test tests::add_two_and_two ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+```
+
++ Bu komut, adında `add` geçen tüm testleri çalıştırdı ve `one_hundred` adlı testi filtreleyerek dışarıda bıraktı.
+
+> [!CAUTION]
+>  Ayrıca, bir testin içinde bulunduğu modülün de test adının bir parçası haline geldiğini unutmayın; bu sayede bir modülün adıyla filtreleme yaparak o modül içindeki tüm testleri çalıştırabilirsiniz.
+
+### 11.2.4. Özellikle İstenmediği Sürece Testleri Yok Saymak
+
++ Bazen belirli bazı testlerin çalıştırılması çok zaman alabilir, bu nedenle `cargo test` komutunu çoğu kez çalıştırdığınızda bu testleri hariç tutmak isteyebilirsiniz.
++ Çalıştırmak istediğiniz tüm testleri argüman olarak tek tek listelemek yerine, zaman alan testleri `ignore` (yok say) özniteliğiyle(*attribute*) işaretleyerek onları dışarıda bırakabilirsiniz:
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+
+    #[test]
+    #[ignore]
+    fn expensive_test() {
+        // code that takes an hour to run
+    }
+}
+```
+
++ Hariç tutmak istediğimiz testin üzerine `#[test]` satırından sonra `#[ignore]` satırını ekleriz. Şimdi testlerimizi çalıştırdığımızda `it_works` çalışır, ancak `expensive_test` çalışmaz:
+
+```bash
+$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 2 tests
+test tests::expensive_test ... ignored
+test tests::it_works ... ok
+
+test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
++ `expensive_test` fonksiyonu `ignored` (yok sayıldı) olarak listelenir. Eğer sadece yok sayılan testleri çalıştırmak istersek, `cargo test -- --ignored` komutunu kullanabiliriz:
+
+```shell
+$ cargo test -- --ignored
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 1 test
+test tests::expensive_test ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
++ Hangi testlerin çalışacağını kontrol ederek, `cargo test` sonuçlarınızın hızlı bir şekilde dönmesini sağlayabilirsiniz.
++ `ignored`(Yok sayılan) testlerin sonuçlarını kontrol etmenin mantıklı olduğu ve sonuçları beklemek için vaktiniz olduğu bir noktada, bunun yerine `cargo test -- --ignored` çalıştırabilirsiniz.
++ Eğer yok sayılıp sayılmadığına bakmaksızın tüm testleri çalıştırmak isterseniz, `cargo test -- --include-ignored` komutunu kullanabilirsiniz.
+
+## 11.3. Testlerin Organizasyonu
+
++ Bölümün başında da belirtildiği gibi, test etme süreci karmaşık bir disiplindir ve farklı kişiler farklı terminoloji ve organizasyon yaklaşımları kullanır.
++ Rust topluluğu testleri iki ana kategoriye ayırır: **birim testleri (unit tests)** ve **entegrasyon testleri (integration tests)**.
+	- **Birim testleri**, küçük ve daha odaklıdır; genellikle tek bir modülü izole şekilde test ederler ve **özel (private) arayüzleri** de test edebilirler.
+	- **Entegrasyon testleri** ise kütüphanenizin tamamen dışındadır ve kodunuzu, herhangi bir dış kodun kullanacağı şekilde kullanır. Yalnızca **public arayüzü** kullanırlar ve bir test içinde birden fazla modülü birlikte çalıştırabilirler.
++ Her iki test türünü de yazmak önemlidir; çünkü bu sayede kütüphanenizin parçalarının hem ayrı ayrı hem de birlikte beklediğiniz gibi çalıştığından emin olabilirsiniz.
+
+**Temel Farklar Özeti:**
+
+| **Özellik** | **Birim Testleri (Unit Tests)**       | **Entegrasyon Testleri (Integration Tests)** |
+| ----------- | ------------------------------------- | -------------------------------------------- |
+| **Odak**    | Tek bir modül / fonksiyon             | Tüm kütüphane ve modüllerin uyumu            |
+| **Erişim**  | Private ve Public her şeye erişebilir | Sadece Public API'ye erişebilir              |
+| **Konum**   | `src` içindeki dosyalarda             | Ayrı bir `tests` dizininde                   |
+
+> [!TIP]
+> Birim testleri, kodun iç mantığının (parçaların) doğruluğunu kontrol ederken; entegrasyon testleri, bu parçalar birleştiğinde ortaya çıkan bütünün (makinenin) düzgün çalışıp çalışmadığını kontrol eder.
+
+### 11.3.1. Birim Testleri (Unit Tests)
+
++ Birim testlerinin amacı, kodun her bir parçasını (*unit*) diğer kodlardan **izole şekilde** test ederek, kodun nerede beklendiği gibi çalışıp nerede çalışmadığını hızlıca tespit etmektir.
++ Birim testlerini, test ettikleri kodla birlikte **`src` dizininde**, ilgili dosyanın içinde yazarsınız.
++ Yaygın kullanım (convention), her dosyada test fonksiyonlarını içeren `tests` adında bir modül oluşturmak ve bu modülü `#[cfg(test)]` ile işaretlemektir.
+#### 11.3.1.1. `tests` Modülü ve `#[cfg(test)]`
+
++ `tests` modülü üzerindeki `#[cfg(test)]` notasyonu(*annotation*), Rust'a bu test kodunu yalnızca `cargo test` çalıştırdığınızda derlemesini ve çalıştırmasını söyler; `cargo build` çalıştırdığınızda değil.
+
+
+> [!TIP]
+> Bu yaklaşımın iki avantajı vardır:
+> + Sadece kütüphaneyi derlemek istediğinizde derleme süresinden tasarruf sağlar.
+> + Derlenen son çıktının (artifact) boyutunu küçültür; çünkü test kodları dahil edilmez.
+
++ Entegrasyon testleri farklı bir dizinde bulunduğu için `#[cfg(test)]` anotasyonuna ihtiyaç duymaz. Ancak birim testleri, kodla aynı dosyada yer aldığı için, derleme sonucuna dahil edilmemeleri gerektiğini belirtmek amacıyla `#[cfg(test)]` kullanılır.
++ Bu bölümün ilk kısmında yeni `adder` projesini oluşturduğumuzda, Cargo'nun bizim için ürettiği kodu hatırlayın:
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+}
+```
+
++ Otomatik olarak oluşturulan `tests` modülündeki `cfg` niteliği (attribute), "configuration" (yapılandırma) anlamına gelir ve 
++ Rust'a, takip eden öğenin yalnızca belirli bir yapılandırma seçeneği verildiğinde dahil edilmesi gerektiğini söyler.(Bu kod parçasını normalde görmezden gel, ama eğer sana 'test modunda çalış' dersem onu da pakete dahil et. `#[cfg(test)]` bu modülün **yalnızca `cargo test` çalıştırıldığında** derlenmesini sağlar. `cargo build` yapıldığında bu kod tamamen yok sayılır.)
++ Buradaki yapılandırma seçeneği `test`tir ve Rust tarafından testleri derlemek ve çalıştırmak için sağlanır.
++ `cfg` özniteliği(*attribute*) sayesinde Cargo, test kodumuzu yalnızca `cargo test` ile testleri gerçekten çalıştırdığımızda derler.
++ Bu durum yalnızca `#[test]` ile işaretlenmiş fonksiyonları değil, modül içindeki yardımcı (helper) fonksiyonları da kapsar.
+
+> [!TIP]
+> #### Yardımcı(Helper) fonskiyonları
+> + Bir sayının çift olup olmadığını kontrol edip mesaj yazdıran bir program düşünelim:
+> ```rust
+> fn is_even(n: i32) -> bool {
+> 	n % 2 == 0
+> }
+> 
+> fn print_number_info(n: i32) {
+> 	if is_even(n) {
+> 		println!("Sayı çifttir");
+> 	} else {
+> 		println!("Sayı tektir");
+> 	}
+> }
+> ```
+> Burada
+> + `print_number_info` → ana işlev
+> + `is_even` → yardımcı (helper) fonksiyon
+> + `is_even` tek başına büyük bir iş yapmaz; ana fonksiyona destek olur.
+> ---
+> + Özellikle test yazarken helper fonksiyonlar sık kullanılır:
+> ```rust
+> // Yardımcı(Helper) fonksiyonu
+> fn setup() -> i32 {
+>    42
+>}
+>
+>#[test]
+>fn test_value() {
+>    let value = setup();
+>    assert_eq!(value, 42);
+>}
+> ```
+> Burada `setup()`:
+> + Test öncesi hazırlık yapar
+> + Test kodunu sadeleştirir
+> + Tekrarı önler
+
+#### 11.3.1.2. Özel (Private) Fonksiyonların Test Edilmesi
+
++ Test topluluğunda, özel (private) fonksiyonların doğrudan test edilip edilmemesi gerektiği konusunda tartışmalar vardır. Bazı dillerde özel fonksiyonları test etmek zor ya da imkânsızdır.
++ Hangi test yaklaşımını benimserseniz benimseyin, Rust’ın gizlilik (privacy) kuralları özel fonksiyonları test etmenize **izin verir**.
++ Liste 11-12’deki `internal_adder` adlı private fonksiyonu ele alalım:
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn add_two(a: u64) -> u64 {
+    internal_adder(a, 2)
+}
+
+fn internal_adder(left: u64, right: u64) -> u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn internal() {
+        let result = internal_adder(2, 2);
+        assert_eq!(result, 4);
+    }
+}
+```
+
+> **Liste 11-12:** Bir private(özel) fonksiyonun test edilmesi
+
++ Burada dikkat edilmesi gereken nokta: `internal_adder` fonksiyonu `pub` olarak işaretlenmemiştir, yani private’tır.
++ Ancak testler de normal Rust kodudur ve `tests` modülü de sıradan bir modüldür. Daha önce "7.3. Modül Ağacında Bir Öğeye Referans Vermek İçin Yollar" bölümünde tartıştığımız gibi, bir alt modül (*child module*), üst modülündeki (*ancestor module*) öğelere erişebilir.
++ Bu testte, `use super::*;` ifadesiyle `tests` modülünün üst modülündeki(*parent module*) tüm öğeleri kapsam içine alıyoruz. Böylece test, `internal_adder` fonksiyonunu çağırabilir.
++ Eğer *private* fonksiyonların test edilmemesi gerektiğini düşünüyorsanız, Rust sizi bunu yapmaya zorlamaz; ancak dili tasarlayanlar, test yazan geliştiriciye bu imkânı bilinçli olarak sağlamıştır.
+### 11.3.2. Entegrasyon Testleri
+
++ Rust’ta **entegrasyon testleri**, kütüphanenizin tamamen dışındadır.(Entegrasyon testleri, kütüphane kodunun _içinde_ değil, ayrı bir yerde konumlanır.)
++ Kütüphanenizi, herhangi başka bir kodun kullanacağı şekilde kullanırlar; bu da yalnızca kütüphanenizin **public API’sinde** yer alan fonksiyonları çağırabilecekleri anlamına gelir.
++ **Amaçları, kütüphanenizin birçok parçasının birlikte doğru çalışıp çalışmadığını test etmektir.**
++ Tek başına doğru çalışan kod birimleri, birlikte kullanıldıklarında sorun çıkarabilirler. Bu nedenle entegre edilmiş kodun test kapsamı da önemlidir. Entegrasyon testleri oluşturmak için önce bir `tests` dizinine ihtiyacınız vardır.
+
+#### 11.3.2.1. tests Dizini
+
++ Proje dizinimizin en üst seviyesinde, `src` dizininin yanında bir `tests` dizini oluştururuz. Cargo, entegrasyon testi dosyalarını bu dizinde arayacağını bilir.
++ Ardından istediğimiz kadar test dosyası oluşturabiliriz; Cargo bu dosyaların her birini ayrı bir **crate** (paket birimi) olarak derleyecektir.
++ Hadi bir entegrasyon testi oluşturalım. `Liste 11-12`'deki kod hala `src/lib.rs` dosyasındayken, bir `tests` dizini açın ve `tests/integration_test.rs` adında yeni bir dosya oluşturun. Dizin yapınız şu şekilde görünmelidir:
+
+```
+adder
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   └── lib.rs
+└── tests
+    └── integration_test.rs
+```
+
++ `tests/integration_test.rs` dosyasına `Listing 11-13`’teki kodu girin.
+
+**Dosya adı:** `tests/integration_test.rs`
+
+```rust
+use adder::add_two;
+
+#[test]
+fn it_adds_two() {
+    let result = add_two(2);
+    assert_eq!(result, 4);
+}
+```
+
+> **Listing 11-13:** adder crate’indeki bir fonksiyonun entegrasyon testi
+
+> [!TIP]
+> **Dosya adı:** `src/lib.rs`
+> ```rust
+> pub fn add_two(left: u64, right: u64) -> u64 {
+> 	left + right
+> }
+> ```
+
++ `tests` dizinindeki her dosya ayrı bir crate'tir, bu nedenle kütüphanemizi her bir test crate'inin kapsamına dahil etmemiz gerekir. Bu sebeple, birim testlerinde ihtiyaç duymadığımız `use adder::add_two;` satırını kodun en üstüne ekliyoruz.
++ `tests/integration_test.rs` dosyasındaki herhangi bir kodu `#[cfg(test)]` ile işaretlememize gerek yoktur. Cargo, `tests` dizinine özel davranır ve bu dizindeki dosyaları yalnızca `cargo test` çalıştırıldığında derler.
++ Şimdi `cargo test` komutunu çalıştırın:
+
+```rust
+$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.31s
+     Running unittests src/lib.rs (target/debug/deps/adder-1082c4b063a8fbe6)
+
+running 1 test
+test tests::internal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration_test.rs (target/debug/deps/integration_test-1082c4b063a8fbe6)
+
+running 1 test
+test it_adds_two ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+> [!NOTE]
+> Çıktının üç bölümü vardır:
+> 1. Birim testleri
+> 2. Entegrasyon testleri
+> 3. Dokümantasyon testleri (doc tests)
+
+> [!CAUTION]
+> + Unutmayın, bir bölümdeki herhangi bir test başarısız olursa, sonraki bölümler çalıştırılmaz.
+> + Örneğin, bir birim testi başarısız olursa, entegrasyon ve döküman testleri için herhangi bir çıktı oluşmaz çünkü bu testler yalnızca tüm birim testleri geçtiğinde çalıştırılır.
+
++ Entegrasyon testleri bölümü `Running tests/integration_test.rs` satırı ile başlar.
++ Ardından, bu entegrasyon testindeki her test fonksiyonu için bir satır ve özet satırı gelir.
++ Her entegrasyon testi dosyasının kendi bölümü vardır, bu nedenle `tests` dizinine daha fazla dosya eklersek daha fazla entegrasyon testi bölümü göreceğiz.
+
+> [!NOTE]
+> + Rust, `tests` klasörü içindeki her bir `.rs` dosyasını birbirinden tamamen bağımsız küçük programlar (crate) gibi ele alır.
+> + `cargo test` komutunu çalıştırdığınızda Rust, testleri gruplara ayırarak raporlar. Eğer `tests` klasöründe birden fazla dosyanız varsa, her biri için ayrı bir başlık ve özet tablosu görürsünüz.
+> + Örneğin, `tests` klasöründe iki dosyanız olduğunu varsayalım:
+> 	- `tests/setup_tests.rs`
+> 	- `tests/api_tests.rs`
+> + Çıktı şu şekilde bölümlere ayrılacaktır:
+> ```
+> Running unittests src/lib.rs  <-- (1. Bölüm: Birim Testleri)
+> ... (sonuçlar)
+>
+>     Running tests/setup_tests.rs  <-- (2. Bölüm: İlk Entegrasyon Dosyası)
+> test it_works ... ok
+> ... (sonuçlar)
+>
+>      Running tests/api_tests.rs    <-- (3. Bölüm: İkinci Entegrasyon Dosyası)
+> test api_responds ... ok
+> ... (sonuçlar)
+> ```
+> + Yani her dosya, kendi "başarılı/başarısız" istatistiğine sahip bağımsız birer blok oluşturur.
+
++ Belirli bir entegrasyon test fonksiyonunu çalıştırmak için, test fonksiyonunun adını `cargo test` komutuna argüman olarak verebilirsiniz.
++ Belirli bir entegrasyon testi dosyasındaki tüm testleri çalıştırmak için ise `cargo test` komutundan sonra `--test` argümanını ve ardından dosyanın adını kullanın:
+
+```shell
+$ cargo test --test integration_test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.64s
+     Running tests/integration_test.rs (target/debug/deps/integration_test-82e7799c1bc62298)
+
+running 1 test
+test it_adds_two ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
++ Bu komut yalnızca `tests/integration_test.rs` dosyasındaki testleri çalıştıracaktır.
+#### 11.3.2.2. Entegrasyon Testlerinde Alt Modüller (Submodules)
+
++ Daha fazla entegrasyon testi ekledikçe, bunları organize etmeye yardımcı olmak için `tests` dizininde daha fazla dosya oluşturmak isteyebilirsiniz; örneğin, test fonksiyonlarını test ettikleri işlevselliğe göre gruplandırabilirsiniz.
++ Daha önce de belirtildiği gibi, testler dizinindeki her dosya ayrı bir crate olarak derlenir; bu da son kullanıcıların *crate*'inizi kullanma şeklini daha yakından taklit etmek için ayrı kapsamlar oluşturmak açısından faydalıdır.
+	- Yani, Daha önce söylediğimiz gibi, `tests` klasöründeki her dosya ayrı bir *crate* gibi derlenir. Bu sayede testler, kütüphaneyi gerçek bir kullanıcının kullanacağı şekilde kullanmak zorunda kalır. Bu da daha gerçekçi testler yazmamızı sağlar.(Biraz daha açıklayıcı bir versiyon: `tests` klasöründeki her dosya bağımsız bir crate olarak derlendiği için, ana kütüphanenin iç yapısına doğrudan erişemez. Sadece public olan kısımları kullanabilir. Bu durum, testlerin kütüphaneyi dışarıdan bir kullanıcı gibi kullanmasını sağlar.)
++ Ancak bu aynı zamanda `tests` dizinindeki dosyaların, `src` içindeki dosyalarla aynı davranışı paylaşmadığı anlamına gelir. Bölüm 7’de kodu modüllere ve dosyalara ayırma konusunu incelerken bunu öğrenmiştiniz.
++ `tests` dizinindeki dosyaların farklı davranışı en çok şu durumda fark edilir: Birden fazla entegrasyon test dosyasında kullanılacak yardımcı (helper) fonksiyonlarınız vardır ve bunları Bölüm 7’deki “Modülleri Farklı Dosyalara Ayırma” bölümünde anlatıldığı gibi ortak bir modüle çıkarmaya çalışırsınız.
++ Örneğin `tests/common.rs` dosyasını oluşturup içine `setup` adında bir fonksiyon koyduğumuzu varsayalım. Bu fonksiyona, birden fazla test dosyasındaki test fonksiyonlarından çağırmak istediğimiz bazı hazırlık (setup) kodlarını ekleyebiliriz:
+
+**Dosya adı:** `tests/common.rs`
+
+```rust
+pub fn setup() {
+    // setup code specific to your library's tests would go here
+}
+```
+
++ Testleri tekrar çalıştırdığımızda, `common.rs` dosyası için çıktı içinde yeni bir bölüm görürüz. Oysa bu dosya hiçbir test fonksiyonu içermemektedir ve `setup` fonksiyonunu da hiçbir yerden çağırmamışızdır:
+
+```shell
+$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.89s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 1 test
+test tests::internal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/common.rs (target/debug/deps/common-92948b65e88960b4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration_test.rs (target/debug/deps/integration_test-92948b65e88960b4)
+
+running 1 test
+test it_adds_two ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+
+> [!CAUTION]
+> 
+> + `common` dosyasının test sonuçlarında görünmesi ve `running 0 tests` yazması istediğimiz bir durum değildir. Biz sadece diğer entegrasyon test dosyalarıyla bazı kodları paylaşmak istemiştik.
+> + Bunun önüne geçmek için `tests/common.rs` oluşturmak yerine `tests/common/mod.rs` oluştururuz. Proje dizini artık şöyle görünür:
+
+```shell
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   └── lib.rs
+└── tests
+    ├── common
+    │   └── mod.rs
+    └── integration_test.rs
+```
+
++ Bu, Bölüm 7’de "Alternatif Dosya Yolları(7.5. Modülleri Farklı Dosyalara Ayırma)" kısmında bahsedilen eski isimlendirme kuralıdır ve Rust bunu hâlâ destekler. Dosyayı bu şekilde adlandırmak, Rust’a `common` modülünü bir entegrasyon test dosyası olarak ele almamasını söyler.
++ `setup` fonksiyonunu `tests/common/mod.rs` dosyasına taşıyıp `tests/common.rs` dosyasını sildiğimizde, test çıktısında artık `common` için ayrı bir bölüm görünmez. `tests` dizininin alt dizinlerindeki dosyalar ayrı crate olarak derlenmez ve test çıktısında ayrı bölüm oluşturmaz.
++ `tests/common/mod.rs` dosyasını oluşturduktan sonra, onu herhangi bir entegrasyon testi dosyasından bir modül olarak kullanabiliriz. İşte `tests/integration_test.rs` içindeki `it_adds_two` testinden `setup` fonksiyonunu çağırma örneği:
+
+**Dosya adı:** `tests/integration_test.rs`
+
+```rust
+use adder::add_two;
+
+mod common;
+
+#[test]
+fn it_adds_two() {
+    common::setup();
+
+    let result = add_two(2);
+    assert_eq!(result, 4);
+}
+```
+
++ `mod common;` deklarasyonunun Bölüm 7'de gösterdiğimiz modül deklarasyonuyla aynı olduğuna dikkat edin. Ardından, test fonksiyonu içinde `common::setup()` fonksiyonunu çağırabiliriz.
+#### 11.3.2.3. Binary Crate'ler (main.rs) için Entegrasyon Testleri
+
++ Projemiz yalnızca bir `src/main.rs` dosyası içeren ve `src/lib.rs` dosyası olmayan bir **binary crate** (çalıştırılabilir paket) ise, `tests` dizininde entegrasyon testleri oluşturamayız ve `src/main.rs` içinde tanımlanan fonksiyonları bir `use` ifadesiyle kapsama dahil edemeyiz.
++ Çünkü yalnızca **library crate’ler** başka crate’lerin kullanabileceği fonksiyonları dışa açar. Binary crate’ler kendi başlarına çalıştırılmak üzere tasarlanmıştır.
++ Bu, binary (çalıştırılabilir dosya) sağlayan Rust projelerinin, mantığı `src/lib.rs` içinde tutan ve bunu çağıran basit bir `src/main.rs` dosyasına sahip olmasının nedenlerinden biridir.
+	 - İşte bu yüzden, çalıştırılabilir program üreten Rust projelerinde genellikle şu yöntem kullanılır: Ana mantık `src/lib.rs`'ye yazılır, `src/main.rs` ise bu mantığı çağıran basit bir dosya olarak tutulur.
+
+> [!TIP]
+> Bu nedenle Rust projelerinde yaygın yapı şudur:
+> + `src/main.rs` → yalnızca programı başlatır
+> + Asıl iş mantığı → `src/lib.rs` içinde yer alır
+
++ Bu yapıyı kullanarak entegrasyon testleri, önemli işlevselliği kullanılabilir hale getirmek için `use` ile kütüphane crate'ini test edebilir. Eğer önemli işlevler çalışıyorsa, `src/main.rs` içindeki küçük miktar kod da çalışacaktır ve bu küçük kodun test edilmesine gerek kalmaz.
+
+### 11.3.3. Özet
+
++ Rust’ın test özellikleri, kodunuzun nasıl çalışması gerektiğini açıkça tanımlamanıza olanak tanır. Böylece kod üzerinde değişiklikler yaptığınızda, hâlâ beklediğiniz gibi çalıştığından emin olabilirsiniz.
+	1. **Birim testleri(unit tests)**: Kütüphanenin farklı parçalarını ayrı ayrı test eder ve private (özel) uygulama detaylarını test edebilir.
+	2. **Entegrasyon testleri (integration tests):** kütüphanenin birçok parçasının birlikte doğru çalışıp çalışmadığını kontrol eder ve kodu, dış kodların kullanacağı şekilde test etmek için kütüphanenin genel (public) API'sini kullanır.
++ Rust’ın tip sistemi ve ownership kuralları bazı hata türlerini engellemeye yardımcı olur; ancak kodunuzun beklenen davranışıyla ilgili mantıksal (logic) hataları azaltmak için testler yine de kritik öneme sahiptir.
+
+
+# 15. Referansı Takip Ederek Değere Ulaşma
+
+
+## 18.2. Paylaşılan Davranış Üzerinde Soyutlama Yapmak için Trait Object’lerin Kullanılması
+
+
+# Kaynak:
 
 + [READ THE BOOK!](https://doc.rust-lang.org/book/ch05-01-defining-structs.html)

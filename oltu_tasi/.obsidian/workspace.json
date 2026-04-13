@@ -56,63 +56,17 @@
             }
           },
           {
-            "id": "0cc553557c336f92",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/PHP/PHP 8 Apps.md",
-                "mode": "source",
-                "source": false
-              },
-              "pinned": true,
-              "icon": "lucide-file",
-              "title": "PHP 8 Apps"
-            }
-          },
-          {
-            "id": "847ee99bf70d8473",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/PHP/PHP 8.md",
-                "mode": "source",
-                "source": false
-              },
-              "pinned": true,
-              "icon": "lucide-file",
-              "title": "PHP 8"
-            }
-          },
-          {
-            "id": "15ca63e8f3577b81",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Docker/Dockerfile.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Dockerfile"
-            }
-          },
-          {
             "id": "e693118b95d15f24",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Programlama/Python/Database_py/Python PostgreSQL.md",
+                "file": "DevOps/Vagrant/Tutorials/Quick Start.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Python PostgreSQL"
+              "title": "Quick Start"
             }
           },
           {
@@ -121,30 +75,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Database/PostgreSQL/PostgreSQL Giriş.md",
+                "file": "Programlama/Rust/🦀 Rust Pratikleri.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "PostgreSQL Giriş"
+              "title": "🦀 Rust Pratikleri"
             }
           },
           {
-            "id": "c3277e963cc32fd0",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Programlama/Rust/🦀 Rust Postgres.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "🦀 Rust Postgres"
-            }
-          },
-          {
-            "id": "854b9cf4da78bd46",
+            "id": "2344091d1c4baa4d",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -158,21 +98,21 @@
             }
           },
           {
-            "id": "fd190a8c583db079",
+            "id": "e01aa0dfb26d4361",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Windows Commands/CMD.md",
+                "file": "Programlama/PHP/PHP 8.5 (PHP Manual).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "CMD"
+              "title": "PHP 8.5 (PHP Manual)"
             }
           }
         ],
-        "currentTab": 9
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -195,7 +135,7 @@
                 "autoReveal": false
               },
               "icon": "lucide-folder-closed",
-              "title": "Files"
+              "title": "Dosya Gezgini"
             }
           },
           {
@@ -229,7 +169,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 285.5
   },
   "right": {
     "id": "1413189cf439f38e",
@@ -297,7 +237,7 @@
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 🦀 Rust'a Giriş"
+              "title": "🦀 Rust'a Giriş ana hatları"
             }
           }
         ],
@@ -305,68 +245,68 @@
       }
     ],
     "direction": "horizontal",
-    "width": 273.5
+    "width": 254.5
   },
   "left-ribbon": {
     "hiddenItems": {
-      "bases:Create new base": false,
-      "switcher:Open quick switcher": false,
-      "graph:Open graph view": false,
-      "canvas:Create new canvas": false,
-      "daily-notes:Open today's daily note": false,
-      "templates:Insert template": false,
-      "command-palette:Open command palette": false
+      "switcher:Hızlı geçişi aç": false,
+      "graph:Grafik görünümünü aç": false,
+      "canvas:Yeni tuval oluşturun": false,
+      "daily-notes:Bugünün Notunu Aç": false,
+      "templates:Şablon ekle": false,
+      "command-palette:Komut paletini aç": false,
+      "bases:Yeni taban oluştur": false
     }
   },
-  "active": "854b9cf4da78bd46",
+  "active": "f36ea74e416a148d",
   "lastOpenFiles": [
-    "Windows Commands/CMD.md",
+    "Programlama/Rust/Pictures/not_desired_behavior.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 577070.crdownload",
+    "Programlama/Rust/Pictures/panics.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 819346.crdownload",
+    "Programlama/Rust/Pictures/does_not_compile.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 959955.crdownload",
+    "Programlama/PHP/PHP 8.5 (PHP Manual).md",
     "Programlama/Rust/🦀 Rust'a Giriş.md",
+    "DevOps/Vagrant/Tutorials/Quick Start.md",
+    "Docker/Dockerfile.md",
+    "Programlama/PHP/PHP 8.md",
+    "Programlama/PHP/PHP 8 Apps.md",
+    "Windows Commands/CMD.md",
+    "Windows Commands/Winget Komutları.md",
     "K8s/K8s Kurulumu.md",
-    "Programlama/Rust/🦀 Rust Postgres.md",
-    "Database/PostgreSQL/PostgreSQL Giriş.md",
+    "Programlama/Rust/Pictures/trpl04-07.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 119973.crdownload",
+    "Programlama/Rust/🦀 Rust Pratikleri.md",
+    "Programlama/Rust/Pictures/trpl04-06.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 810775.crdownload",
+    "Linux Command/Linux komutları.md",
+    "Programlama/Rust/Pictures/trpl04-05.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 110745.crdownload",
+    "Programlama/Rust/Pictures/trpl04-04.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 500808.crdownload",
+    "Programlama/Rust/Pictures/trpl04-03.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 162984.crdownload",
+    "Programlama/Rust/Pictures/trpl04-02.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 665019.crdownload",
+    "Programlama/Rust/Pictures/trpl04-01.svg",
+    "Programlama/Rust/Pictures/Onaylanmayan 551271.crdownload",
+    "Web Servers/html/HTML.md",
+    "Windows Commands/WSL2.md",
     "Programlama/Python/Database_py/Python PostgreSQL.md",
+    "DevOps/Grafana/Pictures/Eklem.png",
+    "Database/PostgreSQL/PostgreSQL Giriş.md",
+    "Programlama/Rust/🦀 Rust Postgres.md",
     "Git/Git Dersi.md",
     "Linux Command/SSH.md",
     "Windows Commands/PowerShell.md",
     "Ansible/ansible.cfg.md",
     "Programlama/Python/Python Giriş.md",
-    "Programlama/Rust/🦀 Rust Pratikleri.md",
-    "Programlama/Python/Database_py",
     "Linux Command/tmux.md",
     "Linux Command/fzf.md",
     "Linux Command/Vim.md",
     "Windows Commands/Kısayollar.md",
-    "Windows Commands/Winget Komutları.md",
-    "DevOps/Grafana/Grafana - Prometheus ve Docker Compose.md",
-    "Terminal/File Manager/Yazi File Manager.md",
-    "Programlama/PHP/PHP 8.md",
-    "Terminal/File Manager",
-    "Programlama/PHP/PHP 8 Apps.md",
-    "Programlama/Rust",
-    "Docker/Dockerfile.md",
-    "Programlama/Python/Python Projeler/Mail Gönderme.md",
-    "Web Servers/html/HTML.md",
-    "Programlama/Python/Python Projeler/Pictures/app_password_final.png",
-    "Programlama/Python/Python Projeler/Pictures/app_password_google.png",
-    "Programlama/Python/Python Projeler/Pictures",
-    "Programlama/Python/Python Projeler",
-    "DevOps/Grafana/README.md",
-    "DevOps/Grafana/Pictures/grafana_slack_bot_7.png",
-    "DevOps/Grafana/Pictures/Grafana_slack_bot_6.png",
-    "DevOps/Grafana/Pictures/Grafana_slack_bot_5.png",
-    "DevOps/Grafana/Pictures/Grafana_slack_bot_4.png",
-    "DevOps/Grafana/Pictures/Grafana_slack_bot_3.png",
-    "Web Servers/Nginx/Nginx Config File.md",
-    "DevOps/Grafana/Pictures/grafana_slack_bot_2.png",
-    "DevOps/Grafana/Pictures/grafana_slack_bot_1.png",
-    "DevOps/Grafana/Pictures/docker_compose_grafana_dashboard4.png",
-    "Pictures",
-    "Archlinux/Untitled.base",
     "Archlinux/Untitled.canvas",
-    "Terminal",
-    "Linux Command/Pictures",
-    "Linux Command/Yeni klasör",
     "Untitled.canvas"
   ]
 }

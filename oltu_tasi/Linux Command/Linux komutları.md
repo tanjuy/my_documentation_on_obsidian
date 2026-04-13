@@ -165,6 +165,32 @@ $ grep -v "ankara" /usr/share/dict/words
 $ grep -n "Istanbul" /usr/share/dict/words
 ```
 
+### Örnek 5: grep -r parametresi
+
++ Linux’ta bir dizin içindeki **tüm dosyaların içeriklerinde** belirli bir kelimeyi aramak için temel araç **`grep`**’tir.
+
+```shell
+$ grep -r "password" /etc
+```
+
+Bu komut:
+- `/etc` dizini altında
+- Tüm alt dizinler dahil (`-r` = recursive)
+- Dosya içeriklerinde `"password"` kelimesini arar.
+
+#### Örnek 5.1. grep ve diğer parametreler
+
+```shell
+grep -rnw /dizin/yolu -e "aranacak_kelime"
+```
+
+**Parametreler:**
++ `-r` → recursive
++ `-n` → satır numarasını gösterir.
++ `-w` → tam kelime eşleşmesi
++ `-e` → arama deseni belirtir
+
+
 ## 8. who
 ```
 $ who

@@ -188,8 +188,87 @@ The value of x is 10 and value of y is 5
 
 ## Örnek 4: 
 
-+ Aşağıdaki hatayı en az değişiklikle düzeltin.
+```rust
+// `define_x` kullanımındaki hatayı düzeltin.
+fn main() {
+    println!("{}, world", x);
+}
+
+fn define_x() {
+    let x = "hello";
+}
+```
+
+### Çözüm 4.1:
+
+```rust
+fn main() {
+    define_x();
+}
+
+fn define_x() {
+    let x = "hello";
+    println!("{}, world", x);
+}
+```
+
+**Kod Çıktısı:**
+
+```bash
+hello, world
+```
+
+## Örnek 5:
+
++ Önceki bir değişkenle aynı ada sahip yeni bir değişken tanımlayabilirsiniz, burada ilkinin ikincisi tarafından gölgelendiğini (shadowed) söyleyebiliriz.
+
+```rust
+// `println!` işlevinin çalışması için `assert_eq!` ifadesini değiştirmeniz yeterlidir (terminalde `42` yazdırın).
+
+fn main() {
+    let x: i32 = 5;
+    {
+        let x = 12;
+        assert_eq!(x, 5);
+    }
+
+    assert_eq!(x, 12);
+
+    let x = 42;
+    println!("{}", x); // Prints "42".
+}
+```
+
+### Çözüm 5.1:
+
+```rust
+fn main() {
+    let x: i32 = 5;
+    {
+        let x = 12;
+        assert_eq!(x, 12);
+    }
+
+    assert_eq!(x, 5);
+
+    let x = 42;
+    println!("{}", x); // Prints "42".
+}
+```
+
+**Kod Çıktısı:**
+
+```bash
+42
+```
+
+## Örnek 6:
 
 ```rust
 
 ```
+
+# Kaynak:
+
+1.  [Learn Rust Programming - Complete Course 🦀](https://www.youtube.com/watch?v=BpPEoZW5IiY)
+2. 
