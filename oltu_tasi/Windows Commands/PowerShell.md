@@ -9,6 +9,35 @@ PS C:\Users\tanju> Copy-Item -Path <Kaynak> -Destination <Hedef>
 ```
 
 ## `Get-` 
+
+### Get-Content:
+
+**Amaç:** Bir dosyanın içeriğini satır satır okuyup çıktı olarak verir (nesne akışı olarak).
+
+#### 1. Temel Sözdizimi:
+
+```powershell
+Get-Content
+    [-Path] <String[]>
+    [-ReadCount <Int64>]
+    [-TotalCount <Int64>]
+    [-Tail <Int32>]
+    [-Filter <String>]
+    [-Include <String[]>]
+    [-Exclude <String[]>]
+    [-Force]
+    [-Credential <PSCredential>]
+    [-Delimiter <String>]
+    [-Wait]
+    [-Raw]
+    [-Encoding <Encoding>]
+    [-AsByteStream]
+    [-Stream <String>]
+    [<CommonParameters>]
+```
+
+https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-content?view=powershell-7.6
+
 ### Get-Command:
 
 +  PowerShell'de **`Get-Command`**, sistemde mevcut olan komutları, cmdlet'leri, fonksiyonları(Function) ve uygulamaları(Application) bulmak için kullanılır.
@@ -159,6 +188,45 @@ PSComputerName        :
 > bileşenlerinin **WinSAT tarafından ölçülen performans skorlarını** içerir.
 > + Bu skorlar, eski adıyla **Windows Experience Index (WEI)** verileridir.
 
+
+### Get-FileHash:
+
+`Get-FileHash`, PowerShell'de bir dosyanın **kriptografik özetini (hash değerini)** hesaplayan cmdlet'tir. Bu hash değeri, dosyanın içeriğini temsil eden sabit uzunlukta bir karakter dizisidir.
+
+Bu komut genellikle şu amaçlarla kullanılır:
+
+- Dosyanın değiştirilip değiştirilmediğini doğrulamak.
+- İndirilen dosyanın bütünlüğünü (integrity) kontrol etmek.
+- Bir dosyanın orijinal olup olmadığını doğrulamak.
+- Güvenlik analizleri ve adli bilişim (digital forensics) çalışmalarında dosya kimliği oluşturmak.
+
+#### Örnek 1:
+
+```powershell
+Get-FileHash ".\Rocky-10.2-x86_64-minimal.iso" -Algorithm SHA256
+```
+
+Hash değerleri aynıysa:
+- Dosya bozulmamıştır.
+- İndirme sırasında veri kaybı yaşanmamıştır.
+- Dosya büyük olasılıkla yayınlanan dosyanın aynısıdır.
+
+
+> [!TIP]
+> #### Büyük Dosyalarda Performans
+> `Get-FileHash` dosyanın tamamını okuyarak hash hesaplar. Bu nedenle:
+> - 1 GB dosya → tamamı okunur.
+> - 100 GB dosya → tamamı okunur.
+> 
+> Ancak dosyanın tamamı belleğe yüklenmez; akış (stream) halinde okunur. Bu sayede çok büyük dosyalar için de bellek kullanımı düşük kalır, ancak okuma süresi dosya boyutuna bağlı olarak artar.
+
+| Özellik                  | Açıklama                                                           |
+| ------------------------ | ------------------------------------------------------------------ |
+| Amaç                     | Dosyanın hash değerini hesaplamak                                  |
+| Varsayılan algoritma     | SHA256                                                             |
+| Desteklenen algoritmalar | SHA1, SHA256, SHA384, SHA512, MD5                                  |
+| Kullanım alanı           | Dosya bütünlüğü doğrulama, güvenlik, adli bilişim, yedek doğrulama |
+| Büyük dosyalar           | Dosya akış halinde okunur; tamamı RAM'e yüklenmez                  |
 
 ## Remove-Item:
 + Dosya silme ve Dosya silme işlemi yapar.

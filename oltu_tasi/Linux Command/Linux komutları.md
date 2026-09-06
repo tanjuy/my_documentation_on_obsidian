@@ -1,4 +1,46 @@
 #linux_commands
+
+# 1. Network Komutları
+
+## 1.1. nmcli komutu:
+
+### 1.1.1. nmcli ile statik IP atama
+
+Rocky Linux'ta statik IP vermek için en pratik yol `nmcli` kullanmak. AlmaLinux'ta yaptığın `nmcli` çalışmasına benzer bir mantık, çünkü ikisi de NetworkManager kullanıyor.
+
+#### 1.1.1.1. Bağlantı adını bul
+
+```bash
+nmcli connection show
+```
+
+Çıktıda arayüz adını göreceksin (örneğin `eth0`, `ens160`, `enp0s3` gibi).
+#### 1.1.1.2.  Statik IP, ağ geçidi ve DNS ayarla
+
+```bash
+sudo nmcli connection modify "ens160" \
+  ipv4.addresses 192.168.1.50/24 \
+  ipv4.gateway 192.168.1.1 \
+  ipv4.dns "8.8.8.8 8.8.4.4" \
+  ipv4.method manual
+```
+
++ `"ens160"` yerine kendi bağlantı adını yaz
++ `192.168.1.50/24` → kendi IP ve subnet maskeni (`24 = 255.255.255.0`)
++ `192.168.1.1` → ağ geçidin (router)
++ DNS'i istediğin gibi değiştirebilirsin
+#### 1.1.1.3. Bağlantıyı yeniden başlat
+
+```bash
+sudo nmcli connection up "ens160"
+```
+#### 1.1.1.4.  Kontrol et
+
+```bash
+ip a
+nmcli connection show "ens160"
+```
+
 ## 1. curl
 ##### 1.1`-I` parametresi:
 ```bash
@@ -32,10 +74,56 @@ curl https://mirror.pseudoform.org/iso/2024.12.01/archlinux-2024.12.01-x86_64.is
 #### Örnek 2:
 
 + `curl` ile bir ISO dosyası indirirken bağlantı kesildiğinde kaldığınız yerden devam etmek için `-C -` (continue) parametresini kullanabilirsiniz.
++ Evet, `curl` bunu destekliyor. Bunun için `-C -` (`--continue-at -`) parametresini kullanabilirsin. Bu seçenek, mevcut dosyanın boyutunu kontrol eder ve indirmeye kaldığı yerden devam eder.
 
 ```shell
+curl -C - -O https://download.rockylinux.org/pub/rocky/10/isos/x86_64/Rocky-10.0-x86_64-dvd.iso
+```
+
+veya dosya adını kendin belirlemek istersen:
+
+```bash
+curl -C - -o Rocky-10.0-x86_64-dvd.iso \
+https://download.rockylinux.org/pub/rocky/10/isos/x86_64/Rocky-10.0-x86_64-dvd.iso
+```
+
+> [!NOTE]
+> #### Parametrelerin anlamı
+> + `-C -`
+> 	- İndirme yarıda kaldıysa kaldığı byte konumundan devam eder.
+> 	- Dosya yoksa sıfırdan indirir.
+> + `-O`
+> 	- Sunucudaki dosya adını kullanır.
+> + `-o`
+> 	- Dosyayı istediğin isimle kaydeder.
+
+##### Sunucunun desteğini kontrol etme
+
+Bu özelliğin çalışabilmesi için sunucunun HTTP Range isteklerini desteklemesi gerekir. Kontrol etmek için:
+
+```bash
+curl -I https://download.rockylinux.org/pub/rocky/10/isos/x86_64/Rocky-10.0-x86_64-dvd.iso
+```
+
+Çıktıda şunu görürsen:
 
 ```
+Accept-Ranges: bytes
+```
+
+kaldığı yerden devam etme destekleniyor demektir. Rocky Linux'un resmi indirme sunucuları genellikle bunu destekler.
+
+
+> [!WARNING]
+> #### İndirme tamamlandıktan sonra doğrulama
+> ISO büyük olduğu için indirme bittikten sonra SHA256 özetini kontrol etmeni öneririm:
+> ```bash
+> sha256sum Rocky-10.0-x86_64-dvd.iso
+> ```
+> Sonucu Rocky Linux'un yayınladığı SHA256 değeriyle karşılaştırarak dosyanın eksiksiz ve bozulmadan indiğini doğrulayabilirsin.
+
+
+
 
 ## 2. update-alternative
 ```shell

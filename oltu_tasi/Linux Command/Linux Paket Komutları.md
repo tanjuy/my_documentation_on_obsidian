@@ -11,6 +11,24 @@ $ sudo dnf check-update
 > + apt-get temeli linux dağıtımlarında ise: `sudo apt update`
 
 ### 2. makecache
+
+`dnf makecache`, **DNF paket yöneticisinin paket deposu (repository) önbelleğini (metadata cache) oluşturan veya güncelleyen** bir komuttur.
+
+
+> [!NOTE]
+> #### Ne işe yarar?
+> DNF, paketleri arayabilmek ve hangi sürümlerin mevcut olduğunu görebilmek için her repository'nin metadata bilgilerini indirir. Bu metadata içerisinde örneğin:
+> + Paket isimleri
+> + Paket sürümleri
+> + Bağımlılıklar (dependencies)
+> + Paket açıklamaları
+> + Dosya listeleri (bazı depolarda)
+> + Repository bilgileri
+> 
+> bulunur.
+> `dnf makecache` komutu bu bilgileri indirerek yerel önbelleğe kaydeder.
+
+
 ```sh
 $ dnf makecache
 ```
@@ -26,15 +44,72 @@ $ dnf updateinfo
 > **Explanation:**
 
 ### 4. upgrade:
-```sh
+
+`dnf uugrade` (yeni sürümlerde `dnf update` ile eş anlamlıdır), **sistemde kurulu olan paketlerin, etkin (enabled) repository'lerde bulunan en yeni sürümlerine güncellenmesini** sağlayan DNF komutudur.
+
+#### 4.a. Temel kullanım:
+
+```bash
 $ sudo dnf upgrade
 ```
-> **Explanation:**
-> + REHL temeli sistemleri günceller
-> + `sudo dnf update` komut birebir aynı işlemi yapar.
-> + Bu komut, depolarda bulunan tüm güncellemeleri indirir ve kurar. Hem *güvenlik güncellemelerini* hem de *hata düzeltmeleri* ve *yeni özellikleri içeren* tüm paket güncellemelerini kapsar.
+ 
+ veya
 
-###### 1. `upgrade --assumeno`:
+```bash
+$ sudo dnf update 
+```
+
+Her iki komut da güncel DNF sürümlerinde aynı işi yapar.
+
+> [!NOTE]
+> #### Nasıl Çalışır?
+> `dnf update` çalıştırıldığında sırasıyla şu işlemleri yapar:
+> 1. Repository metadata'sını kontrol eder.
+> 2. Gerekirse güncel metadata'yı indirir.
+> 3. Kurulu paketleri repository'deki sürümlerle karşılaştırır.
+> 4. Güncellenebilir paketleri belirler.
+> 5. Bağımlılıkları (dependencies) hesaplar.
+> 6. Sizden onay ister.
+> 7. RPM paketlerini indirir.
+> 8. Eski paketleri yenileriyle değiştirir.
+#### 4.b. Metadata güncel değilse ne olur?
+
+Önceden `dnf makecache` çalıştırmadıysanız bile sorun olmaz. `dnf update`, gerekiyorsa metadata'yı kendisi yeniler.
+
+Yani, `sudo dnf update` gerekirse arka planda şu işlemi de yapmış olur: 
+
+```bash
+dnf makecache
+```
+#### 4.c. dnf update ile dnf upgrade arasında farklar
+
+**Güncel DNF sürümlerinde (`DNF 4` ve `DNF 5`) `dnf update` ile `dnf upgrade` arasında pratikte bir fark yoktur.** İkisi de aynı işlemi gerçekleştirir.
+
+##### 4.c.1.  Peki neden iki farklı komut var?
+
+Bu, tarihsel nedenlerden kaynaklanır.
+
++ **YUM** döneminde (`yum update` ve `yum upgrade`) iki komut arasında küçük teknik farklar vardı. Özellikle çok eski YUM sürümlerinde `upgrade`, bazı eski paketleri kaldırarak daha kapsamlı yükseltme yapabiliyordu.
++ **DNF**, YUM'un yerini aldığında bu farkı kaldırdı ve iki komutu eş anlamlı (alias) yaptı.
+
+
+> [!TIP]
+> #### Hangisini kullanmalıyım?
+> Resmî DNF belgelerinde artık genellikle **`dnf upgrade`** tercih edilir. Ancak:
+> + `dnf update` kullanmanız tamamen doğrudur.
+> + Çoğu sistem yöneticisi alışkanlıktan dolayı hâlâ `dnf update` yazar.
+> + İki komut da gelecekte de desteklenmeye devam edecektir.
+> #### Rocky Linux, AlmaLinux, Fedora, RHEL'de durum
+> Aşağıdaki dağıtımlarda ikisi de aynı davranışı gösterir:
+> + Rocky Linux 8 / 9 / 10
+> + AlmaLinux 8 / 9 / 10
+> + RHEL 8 / 9 / 10
+> + Fedora
+> + CentOS Stream
+
+
+
+#### 4.1. `upgrade --assumeno`:
 ```sh
 $ sudo dnf upgrade --assumeno
 ```

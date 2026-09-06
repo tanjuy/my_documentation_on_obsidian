@@ -170,6 +170,27 @@ $ xcode-select --install
 ```
 
 Linux kullanıcıları ise genellikle dağıtımlarının belgelerine göre GCC veya Clang kurmalıdır. Örneğin, Ubuntu kullanıyorsanız **build-essential** paketini kurabilirsiniz.
+
+
+> [!TIP]
+> #### Rock linux ve Alma linux için linker
+> ```bash
+> sudo dnf groupinstall "Development Tools"
+> ``` 
+> Bu paket grubunun içinde `gcc`, `make`, `binutils` gibi Rust'ın ihtiyaç duyabileceği temel araçlar bulunur.
+> Daha minimal olarak sadece GCC de kurabilirsin:
+> ```bash
+> sudo dnf install gcc
+> ```
+> ##### `cc` artık bulunuyor mu kontrol et
+> ```bash
+> which cc  # Çıktı: /usr/bin/cc
+> ```
+> Başka bir yöntem olarak;
+> ```bash
+> cc --version
+> ```
+
 ###  1.1.2. Windows’ta rustup Kurulumu
 
 Windows’ta [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install) adresine gidin ve Rust’ı kurmak için verilen talimatları izleyin. Kurulumun bir aşamasında sizden **Visual Studio** yüklemeniz istenecektir. Bu, programları derlemek için gereken bir bağlayıcıyı (linker) ve yerel kütüphaneleri (native libraries) sağlar. Bu adımda daha fazla yardıma ihtiyacınız olursa, [https://rust-lang.github.io/rustup/installation/windows-msvc.html](https://rust-lang.github.io/rustup/installation/windows-msvc.html) sayfasına bakabilirsiniz.
@@ -21383,7 +21404,1956 @@ license = "MIT OR Apache-2.0"
 
 Bir hesap oluşturduğunuza, API token'ınızı kaydettiğinize, crate'iniz için bir isim seçtiğinize ve gerekli metadata bilgilerini belirttiğinize göre artık yayımlamaya hazırsınız! Bir crate'i yayımlamak, belirli bir sürümünü diğer insanların kullanabilmesi için [crates.io](https://crates.io/)'ya yüklemek anlamına gelir.
 
-Dikkatli olun, çünkü bir yayımlama işlemi **kalıcıdır**. Belirli bir sürümün üzerine asla tekrar yazılamaz ve belirli durumlar haricinde kod silinemez.
+Dikkatli olun, çünkü bir yayımlama işlemi **kalıcıdır**. Belirli bir sürümün üzerine asla tekrar yazılamaz ve belirli durumlar haricinde kod silinemez. Crates.io'nun en önemli hedeflerinden biri, crates.io'daki crate'lere bağımlı olan tüm projelerin derleme işlemlerinin (build) çalışmaya devam edebilmesi için kalıcı bir kod arşivi olarak hizmet etmektir. Sürüm silmelerine izin vermek, bu hedefi gerçekleştirmeyi imkansız hale getirirdi. Ancak, yayımlayabileceğiniz crate sürümü sayısında bir sınır yoktur.
+
+`cargo publish` komutunu tekrar çalıştırın. Artık başarıyla tamamlanması gerekir:
+
+```
+$ cargo publish
+    Updating crates.io index
+   Packaging guessing_game v0.1.0 (file:///projects/guessing_game)
+    Packaged 6 files, 1.2KiB (895.0B compressed)
+   Verifying guessing_game v0.1.0 (file:///projects/guessing_game)
+   Compiling guessing_game v0.1.0
+(file:///projects/guessing_game/target/package/guessing_game-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s
+   Uploading guessing_game v0.1.0 (file:///projects/guessing_game)
+    Uploaded guessing_game v0.1.0 to registry `crates-io`
+note: waiting for `guessing_game v0.1.0` to be available at registry
+`crates-io`.
+You may press ctrl-c to skip waiting; the crate should be available shortly.
+   Published guessing_game v0.1.0 at registry `crates-io`
+```
+
+Tebrikler! Artık kodunuzu Rust topluluğuyla paylaştınız ve herkes sizin crate'inizi kendi projesine kolayca bir bağımlılık (*dependency*) olarak ekleyebilir.
+
+### 14.2.6. Mevcut Bir Crate'in Yeni Bir Sürümünü Yayımlama
+
+Crate'inizde değişiklikler yaptığınızda ve yeni bir sürümü yayımlamaya hazır olduğunuzda, `Cargo.toml` dosyanızda belirtilen `version` değerini değiştirir ve yeniden yayımlarsınız. Yaptığınız değişikliklerin türüne bağlı olarak, bir sonraki uygun sürüm numarasının ne olduğuna karar vermek için [Semantik Sürüm Oluşturma(*Semantic Versioning*)](https://semver.org/) kurallarını kullanın. Ardından, yeni sürümü yüklemek için `cargo publish` komutunu çalıştırın.
+
+
+> [!TIP]
+> #### Semantic Versioning (SemVer)
+> Burada **Semantic Versioning (SemVer)** şu sürüm formatını ifade eder:
+> ```
+> MAJOR.MINOR.PATCH
+> ```
+> Örneğin: `1.4.2`
+> - **PATCH** (`1.4.2 → 1.4.3`) : Hata düzeltmeleri
+> - **MINOR** (`1.4.2 → 1.5.0`) : Geriye dönük uyumlu yeni özellikler
+> - **MAJOR** (`1.4.2 → 2.0.0`) : Geriye dönük uyumluluğu bozan değişiklikler
+> 
+> Rust'ın Cargo sistemi, bağımlılık yönetiminde bu sürüm numaralarını dikkate aldığı için doğru sürüm numarasını seçmek önemlidir.
+
+### 14.2.7. Crates.io'daki Sürümleri Kullanımdan Kaldırma (Deprecating Versions)
+
+Bir crate'in önceki sürümlerini tamamen silemeseniz de, gelecekteki yeni projelerin bunları yeni bir bağımlılık (dependency) olarak eklemesini engelleyebilirsiniz. Bu, bir crate sürümünün bir nedenle veya başka bir nedenle bozuk olduğu durumlarda kullanışlıdır. Bu gibi durumlarda Cargo, bir crate sürümünün **yank** edilmesini (yayından çekilmesini) destekler.
+
+Bir sürümü yank etmek, ona bağımlı olan tüm mevcut projelerin çalışmaya devam etmesine izin verirken yeni projelerin o sürüme bağımlı olmasını önler. Esasen, bir yank, bir Cargo.lock dosyasına sahip tüm projelerin bozulmayacağı ve oluşturulacak gelecekteki herhangi bir Cargo.lock dosyasının yank edilen sürümü kullanmayacağı anlamına gelir.
+
+Bir crate'in belirli bir sürümünü yank etmek için, daha önce yayınladığınız o crate'in dizinine gidin, `cargo yank` komutunu çalıştırın ve hangi sürümü yank etmek istediğinizi belirtin. Örneğin, `guessing_game` adında bir crate'in `1.0.1` sürümünü yayımladıysak ve bunu yank etmek istiyorsak, `guessing_game` projesinin dizininde şu komutu çalıştırırız:
+
+```
+$ cargo yank --vers 1.0.1
+    Updating crates.io index
+        Yank guessing_game@1.0.1
+```
+
+Komuta `--undo` ekleyerek, bir yank işlemini geri alabilir ve projelerin yeniden bir sürüme bağımlı olmasına izin verebilirsiniz:
+
+```
+$ cargo yank --vers 1.0.1 --undo
+    Updating crates.io index
+      Unyank guessing_game@1.0.1
+```
+
+Bir yank, hiçbir kodu silmez. Örneğin, yanlışlıkla yüklenen gizli bilgileri (secrets) silemez. Eğer böyle bir şey olursa, o gizli bilgileri hemen sıfırlamanız (reset) gerekir.
+## 14.3. Cargo Çalışma Alanları (Workspaces)
+
+Bölüm 12'de, bir ikili (*binary*) crate ve bir kütüphane (*library*) crate'i içeren bir paket oluşturduk. Projeniz geliştikçe, kütüphane crate'inin büyümeye devam ettiğini fark edebilir ve paketinizi daha da küçük parçalara ayırarak birden fazla kütüphane crate'i elde etmek isteyebilirsiniz. Cargo, birlikte geliştirilen birden fazla ilişkili paketi yönetmeye yardımcı olabilecek çalışma alanları (workspaces) adlı bir özellik sunar.
+### 14.3.1. Bir Çalışma Alanı (Workspace) Oluşturma
+
+Bir **çalışma alanı (workspace)**, aynı **Cargo.lock** dosyasını ve aynı derleme çıktı dizinini (**output directory**) paylaşan paketler kümesidir(**Output directory nedir?** **Cevap:** Derleme sonucunda oluşan dosyaların (binary, .o dosyaları vb.) kaydedildiği klasör. `target/` klasörüne!). Hadi bir çalışma alanı(_workspace_) kullanarak bir proje yapalım — çalışma alanının yapısına odaklanabilmek için basit kod kullanacağız. Bir çalışma alanını yapılandırmanın birden fazla yolu vardır, bu yüzden sadece yaygın bir yolu göstereceğiz. Bir ikili(_binary_) ve iki kütüphane(_library_) içeren bir çalışma alanımız olacak. Ana işlevselliği sağlayacak olan **binary crate**, bu iki **library crate**'e bağımlı olacaktır. Bir kütüphane bir `add_one` fonksiyonu, diğeri ise bir `add_two` fonksiyonu sağlayacak. Bu üç crate, aynı çalışma alanının(_workspace_) parçası olacak. Çalışma alanı(_workspace_) için yeni bir dizin oluşturarak başlayacağız:
+
+```shell
+$ mkdir add
+$ cd add
+```
+
+Ardından, `add` dizini içinde tüm çalışma alanını(*workspace*) yapılandıracak olan `Cargo.toml` dosyasını oluşturuyoruz. Bu dosyada bir `[package]` bölümü olmayacak. Bunun yerine, çalışma alanına üyeler (members) eklememize olanak tanıyacak bir `[workspace]` bölümü ile başlayacaktır. Ayrıca, `resolver` değerini `"3"` olarak ayarlayarak çalışma alanımızda Cargo'nun çözümleyici (resolver) algoritmasının en yeni ve en gelişmiş sürümünü kullanmaya özen gösteriyoruz:
+
+**Dosya adı:** `Cargo.toml`
+
+```toml
+[workspace]
+resolver = "3"
+```
+
+> [!TIP]
+> #### Resolver nedir?
+> **Resolver**, Cargo'nun **bağımlılık çözümleyicisi (dependency resolver)** anlamına gelir.
+> Bir Rust projesinde `Cargo.toml` dosyasına bağımlılıkları yazarsınız:
+> ```toml
+> [dependencies]
+> serde = "1.0"
+> tokio = "1"
+> ```
+> Ancak bu bağımlılıkların da kendi bağımlılıkları vardır. Cargo, tüm bu bağımlılık ağını inceleyerek:
+> + Hangi crate sürümlerinin kullanılacağını,
+> + Hangi özelliklerin (**features**) etkinleştirileceğini,
+> + Hangi bağımlılıkların paylaşılacağını,
+> 
+> belirlemek zorundadır. İşte bu işi yapan algoritmaya **resolver** denir.
+> ##### Örnek:
+> ```
+> my_app
+> ├── crate_a
+> │   └── serde = "1.0"
+> └── crate_b
+>     └── serde = "1.0"
+> ```
+> Cargo şunu hesaplar:
+> + İkisi de aynı `serde` sürümünü kullanabilir mi?
+> + Ayrı ayrı mı derlenmeli?
+> + Hangi feature'lar etkin olmalı?
+> 
+> Bu kararların tamamını **resolver** verir.
+> ##### `resolver = "3"` ne demektir?
+> Bu çalışma alanında Cargo'nun üçüncü nesil bağımlılık çözümleme algoritmasını kullan.
+> ##### Resolver sürümleri
+> + **Resolver 1**: Eski algoritma (Rust 1.50 öncesi davranış).
+> + **Resolver 2**: Feature çözümlemesini önemli ölçüde iyileştirdi ve uzun süre varsayılan olarak kullanıldı.
+> + **Resolver 3**: Daha yeni Cargo sürümlerinde gelen, özellikle workspace'lerde ve bağımlılık yönetiminde daha gelişmiş davranış sunan en güncel algoritmadır.
+> 
+> **`features`** = Bir crate'in opsiyonel parçalarını açıp kapatma sistemi. Sadece ihtiyacınız olan kodu derleyerek hem derleme süresini hem de programınızın boyutunu küçültür! 🎯
+
+Ardından, `add` dizininde `cargo new` çalıştırarak `adder` ikili (binary) crate'ini oluşturacağız:
+
+```
+$ cargo new adder
+     Created binary (application) `adder` package
+      Adding `adder` as member of workspace at `file:///projects/add`
+```
+
+Bir çalışma alanı (workspace) içinde `cargo new` komutunu çalıştırmak, yeni oluşturulan paketi otomatik olarak çalışma alanının(*workspace*) `Cargo.toml` dosyasındaki `[workspace]` tanımı altında yer alan `members` anahtarına da ekler; şu şekilde:
+
+```toml
+[workspace]
+resolver = "3"
+members = ["adder"]
+```
+
+Bu noktada, `cargo build` komutunu çalıştırarak çalışma alanını(workspace) derleyebiliriz. `add` dizininizdeki dosyalar şu şekilde görünmelidir:
+
+```
+├── Cargo.lock
+├── Cargo.toml
+├── adder
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs
+└── target
+```
+
+Çalışma alanının(*workspace*) üst düzeyde(_top level_), derlenmiş yapıların (_compiled artifacts_) yerleştirileceği bir `target` dizini vardır; `adder` paketinin kendi `target` dizini yoktur. `adder` dizininin içinden `cargo build` çalıştırsak bile, derlenmiş yapılar yine `add/adder/target` yerine `add/target`'a yerleşecektir. Cargo, bir çalışma alanındaki `target` dizini yapısını bu şekilde kurar çünkü bir çalışma alanındaki crate'lerin birbirine bağımlı olması amaçlanır. Eğer her crate'in kendi `target` dizini olsaydı, her crate, çıktıları kendi `target` dizinine yerleştirebilmek için çalışma alanındaki diğer tüm crate'leri her seferinde yeniden derlemek (recompile) zorunda kalırdı. Crate'ler, tek bir `target` dizinini paylaşarak gereksiz yere yeniden derleme (rebuilding) işlemlerinden kaçınmış olurlar.
+
+### 14.3.2. Çalışma Alanında İkinci Paketi Oluşturma
+
+Şimdi çalışma alanında (**workspace**) yer alacak bir başka üye paketi oluşturalım ve adını **`add_one`** koyalım. Bunun için **`add_one`** adında yeni bir **library crate** oluşturun:
+
+```
+$ cargo new add_one --lib
+     Created library `add_one` package
+      Adding `add_one` as member of workspace at `file:///projects/add`
+```
+
+Üst seviyedeki (kök dizindeki) `Cargo.toml` dosyası artık `members` listesinde `add_one` yolunu da (path) içerecektir:
+
+**Dosya adı:** `Cargo.toml`
+
+```toml
+[workspace]
+resolver = "3"
+members = ["adder", "add_one"]
+```
+
+`add` dizininizde artık şu dizinler ve dosyalar bulunmalıdır:
+
+```
+├── Cargo.lock
+├── Cargo.toml
+├── add_one
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── adder
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs
+└── target
+```
+
+`add_one/src/lib.rs` dosyasında, bir `add_one` fonksiyonu ekleyelim:
+
+**Dosya adı:** `add_one/src/lib.rs`
+
+```rust
+pub fn add_one(x: i32) -> i32 {
+    x + 1
+}
+```
+
+Artık **binary crate**'imizi içeren `adder` paketinin, **library crate**'imizi içeren `add_one` paketine bağımlı olmasını sağlayabiliriz. Bunun için ilk olarak, `adder/Cargo.toml` dosyasına `add_one` için bir **path bağımlılığı (path dependency)** eklememiz gerekir.
+
+**Dosya adı:** `adder/Cargo.toml`
+
+```toml
+[dependencies]
+add_one = { path = "../add_one" }
+```
+
+Cargo, bir çalışma alanındaki (_workspace_) crate'lerin birbirine bağımlı olacağını varsaymaz; bu nedenle, bağımlılık ilişkilerini açıkça (_explicitly_) belirtmemiz gerekir.
+Ardından, `adder` crate'i içinde (`add_one` crate'inden gelen) `add_one` fonksiyonunu kullanalım. `adder/src/main.rs` dosyasını açın ve `main` fonksiyonunu `liste 14-7`'de olduğu gibi `add_one` fonksiyonunu çağıracak şekilde değiştirin.
+
+(`add_one` crate'ini crates.io'dan indirme; bunun yerine `../add_one` dizinindeki yerel crate'i kullan.)
+
+**Dosya adı:** `adder/src/main.rs`
+
+```rust
+fn main() {
+    let num = 10;
+    println!("Hello, world! {num} plus one is {}!", add_one::add_one(num));
+}
+```
+
+> **[Liste 14-7](https://doc.rust-lang.org/stable/book/ch14-03-cargo-workspaces.html#listing-14-7)**: `adder` crate'inden `add_one` kütüphane crate'ini kullanma
+
+Şimdi, en üst düzeyde(_top-level_) bulunan `add` dizininde `cargo build` komutunu çalıştırarak çalışma alanını (**workspace**) derleyelim!
+
+```
+$ cargo build
+   Compiling add_one v0.1.0 (file:///projects/add/add_one)
+   Compiling adder v0.1.0 (file:///projects/add/adder)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
+```
+
+`add` dizininden **binary crate**'i çalıştırmak için, `cargo run` komutuyla birlikte `-p` seçeneğini ve çalıştırmak istediğimiz workspace paketinin adını belirtebiliriz:
+
+```
+$ cargo run -p adder
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running `target/debug/adder`
+Hello, world! 10 plus one is 11!
+```
+
+Bu işlem, `add_one` crate'ine bağımlı olan `adder/src/main.rs` dosyasındaki kodu çalıştırır.
+### 14.3.3. Harici Bir Pakete Bağımlı Olmak (Depending on an External Package)
+
+Workspace'te, her crate dizininde ayrı bir `Cargo.lock` dosyası bulunmak yerine, yalnızca en üst düzeyde tek bir `Cargo.lock` dosyası bulunduğuna dikkat edin. Bu durum, tüm crate'lerin tüm bağımlılıklar için aynı sürümü kullanmasını garanti altına alır. Eğer `rand` paketini hem `adder/Cargo.toml` hem de `add_one/Cargo.toml` dosyalarına eklersek, Cargo bunların her ikisini de `rand` paketinin tek bir sürümüne çözümleyecek ve bunu o tek `Cargo.lock` dosyasına kaydedecektir. Çalışma alanındaki tüm crate'lerin aynı bağımlılıkları kullanmasını sağlamak, crate'lerin birbirleriyle her zaman uyumlu (compatible) olacağı anlamına gelir. Gelin, `rand` crate'ini `add_one` crate'i içinde kullanabilmek için `add_one/Cargo.toml` dosyasındaki `[dependencies]` bölümüne ekleyelim:
+
+**Dosya adı:** `add_one/Cargo.toml`
+
+```toml
+[dependencies]
+rand = "0.8.5"
+```
+
+Artık `add_one/src/lib.rs` dosyasına `use rand;` satırını ekleyebiliriz; `add` dizininde `cargo build` komutunu çalıştırarak tüm çalışma alanını (workspace) derlemek, `rand` crate'ini projeye dahil edecek ve derleyecektir. Kapsama (scope) dahil ettiğimiz `rand` paketine kod içinde henüz atıfta bulunmadığımız (kullanmadığımız) için bir adet uyarı (warning) alacağız:
+
+```
+$ cargo build
+    Updating crates.io index
+  Downloaded rand v0.8.5
+   --snip--
+   Compiling rand v0.8.5
+   Compiling add_one v0.1.0 (file:///projects/add/add_one)
+warning: unused import: `rand`
+ --> add_one/src/lib.rs:1:5
+  |
+1 | use rand;
+  |     ^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: `add_one` (lib) generated 1 warning (run `cargo fix --lib -p add_one` to apply 1 suggestion)
+   Compiling adder v0.1.0 (file:///projects/add/adder)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.95s
+```
+
+Üst düzey `Cargo.lock` artık `add_one`'ın `rand`'a olan bağımlılığı hakkında bilgi içermektedir. Ancak, `rand` çalışma alanının (workspace) içinde bir yerlerde kullanılıyor olsa bile, kendi `Cargo.toml` dosyalarına `rand` crate'ni eklemediğimiz sürece bunu çalışma alanındaki diğer crate'ler içinde kullanamayız. Örneğin, `adder` paketi için `adder/src/main.rs` dosyasına `use rand;` satırını eklersek bir hata alırız:
+
+```
+$ cargo build
+  --snip--
+   Compiling adder v0.1.0 (file:///projects/add/adder)
+error[E0432]: unresolved import `rand`
+ --> adder/src/main.rs:2:5
+  |
+2 | use rand;
+  |     ^^^^ no external crate `rand`
+```
+
+
+> [!TIP]
+> #### Güvenli İzolasyon ve Explicit (Açık) Beyan İlkesi
+> Cargo'nun bu davranışı, Rust'ın en güçlü olduğu konulardan birini—**kesin bağımlılık izolasyonunu**—gözler önüne serer. Kök dizindeki `Cargo.lock` dosyasının içinde `rand` paketinin kayıtlı olması, o paketin tüm çalışma alanı tarafından kontrolsüzce ithal edilebileceği anlamına gelmez.
+> **Crate Sınırları Korunur:** `add_one` paketinin `rand` kütüphanesini kullanması tamamen onun kendi iç işidir. Eğer `adder` binary paketi de `rand` fonksiyonlarına erişmek istiyorsa, bunu kendi `adder/Cargo.toml` dosyasındaki `[dependencies]` altına açıkça yazarak beyan etmek zorundadır.
+
+Bunu düzeltmek için, `adder` paketinin `Cargo.toml` dosyasını düzenleyin ve `rand` crate'inin bu paket için de bir bağımlılık olduğunu belirtin. `adder` paketini derlediğinizde, `Cargo.lock` dosyasındaki `adder` paketinin bağımlılıkları listesine `rand` eklenecektir; ancak `rand` crate'inin ek bir kopyası indirilmeyecektir. Cargo, çalışma alanındaki (**workspace**) her pakette bulunan ve `rand` crate'ini kullanan tüm crate'lerin, **`rand` için birbiriyle uyumlu sürümler belirtilmiş olduğu sürece**, aynı `rand` sürümünü kullanmasını sağlar. Bu sayede hem depolama alanından tasarruf edilir hem de çalışma alanındaki crate'lerin birbiriyle uyumlu olması garanti altına alınır.
+
+Eğer çalışma alanındaki crate'ler aynı bağımlılığın uyumsuz sürümlerini belirtirse, Cargo her birini çözümleyecektir ancak yine de mümkün olduğunca az sürüm çözümlemeye çalışacaktır.
+### 14.3.4. Çalışma Alanına Test Ekleme (Adding a Test to a Workspace)
+
+Başka bir geliştirme olarak, `add_one` crate'i içine `add_one::add_one` fonksiyonunu test eden bir test ekleyelim:
+
+**Dosya adı:** `add_one/src/lib.rs`
+
+```rust
+pub fn add_one(x: i32) -> i32 {
+    x + 1
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        assert_eq!(3, add_one(2));
+    }
+}
+```
+Şimdi en üst seviyedeki `add` dizininde `cargo test` komutunu çalıştırın. Bu şekilde düzenlenmiş(structured) bir **workspace** içinde `cargo test` komutunu çalıştırmak, çalışma alanındaki tüm crate'lerin testlerini çalıştıracaktır.
+
+```bash
+$ cargo test
+   Compiling add_one v0.1.0 (file:///projects/add/add_one)
+   Compiling adder v0.1.0 (file:///projects/add/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.20s
+     Running unittests src/lib.rs (target/debug/deps/add_one-93c49ee75dc46543)
+
+running 1 test
+test tests::it_works ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/adder-3a47283c568d2b6a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests add_one
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+Çıktının ilk bölümü, `add_one` crate'i içindeki `it_works` testinin başarıyla geçtiğini (passed) gösterir. Sonraki bölüm `adder` crate'i içinde sıfır test bulunduğunu gösterir ve ardından son bölüm de `add_one` crate'i içinde sıfır dokümantasyon testi (documentation test) bulunduğunu gösterir.
+
+Ayrıca, `-p` bayrağını (flag) kullanıp test etmek istediğimiz crate'in adını belirterek, üst seviyedeki (kök) dizinden çalışma alanındaki (workspace) tek bir belirli crate için de testleri çalıştırabiliriz:
+
+> [!TIP]
+> Eğer yalnızca belirli bir paketin testlerini çalıştırmak isterseniz ise şu komutu kullanabilirsiniz:
+> ```bash
+> cargo test -p add_one
+> ```
+> Bu komut yalnızca `add_one` paketinin testlerini çalıştırır.
+
+```bash
+$ cargo test -p add_one
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running unittests src/lib.rs (target/debug/deps/add_one-93c49ee75dc46543)
+
+running 1 test
+test tests::it_works ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests add_one
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+Bu çıktı, `cargo test` komutunun yalnızca `add_one` crate'inin testlerini çalıştırdığını, `adder` crate'inin testlerini ise çalıştırmadığını göstermektedir.
+
+Eğer çalışma alanındaki (workspace) crate'leri [crates.io](https://crates.io/) üzerinde yayınlarsanız (publish), çalışma alanındaki her bir crate'in ayrı ayrı yayınlanması gerekecektir. Tıpkı `cargo test` komutunda olduğu gibi, `-p` bayrağını (flag) kullanıp yayınlamak istediğimiz crate'in adını belirterek çalışma alanımızdaki belirli bir crate'i yayınlayabiliriz.
+
+> [!TIP]
+> **Bağımsız Yayınlama (Publishing):** Çalışma alanındaki her bir kütüphane bağımsız birer paket olduğu için, örneğin `add_one` kütüphaneniz çok popüler olursa, ana uygulamanız olan `adder`'dan tamamen bağımsız bir şekilde `crates.io` üzerinde topluluğun kullanımına sunabilirsiniz:
+> ```bash
+> $ cargo publish -p add_one
+> ```
+
+Ekstra pratik yapmak için, bu çalışma alanına `add_one` crate'ine benzer bir şekilde bir `add_two` crate'i ekleyin!
+
+Projeniz büyüdükçe, bir çalışma alanı kullanmayı düşünün: Bu, tek bir büyük kod yığını(**big blob of code**) yerine daha küçük, anlaşılması daha kolay bileşenlerle çalışmanızı sağlar. Ayrıca, aynı anda sık sık değiştirilen crate'ler varsa, bunların aynı çalışma alanı(workspace) içinde bulunması crate'ler arasındaki koordinasyonu da kolaylaştırır.
+
+## 14.4. `cargo install` ile Binary Crate'leri Kurma
+
+`cargo install` komutu, **binary crate**'leri bilgisayarınıza yerel olarak kurmanıza ve kullanmanıza olanak tanır. Bu komutun amacı sistem paketlerinin (apt, brew vb.) yerini almak değildir; Rust geliştiricilerinin, başkalarının [crates.io](https://crates.io/) üzerinde paylaştığı araçları rahatça yükleyebilmeleri için pratik bir yol sağlamaktır. Yalnızca `binary targets` olan paketleri yükleyebileceğinizi unutmayın. **Binary target**, crate'in `src/main.rs` dosyasına veya binary olarak belirtilmiş başka bir dosyaya sahip olması durumunda oluşturulan çalıştırılabilir programdır. Buna karşılık, **library target** tek başına çalıştırılamaz; bunun yerine başka programlar tarafından kullanılmak üzere tasarlanmıştır. Genellikle bir crate'in yalnızca bir kütüphane mi olduğu, bir binary target içerip içermediği ya da her ikisini de içerip içermediği bilgisi crate'in **README** dosyasında belirtilir.
+
+`cargo install` ile yüklenen tüm ikili(_binaries_) dosyalar, yükleme kök dizininin (installation root) `bin` klasöründe saklanır. Eğer Rust'ı `rustup.rs` kullanarak yüklediyseniz ve herhangi bir özel yapılandırmanız(_configuration_) yoksa, bu dizin `$HOME/.cargo/bin` olacaktır.  `cargo install` ile yüklediğiniz programları çalıştırabilmek için bu dizinin `$PATH` ortam değişkeninizde (environment variable) ekli olduğundan emin olun.
+
+Örneğin, Bölüm 12'de dosya aramak için `grep` aracının `ripgrep` adında Rust ile yazılmış bir uygulaması olduğundan bahsetmiştik. `ripgrep` yüklemek için şu komutu çalıştırabiliriz:
+
+```
+$ cargo install ripgrep
+    Updating crates.io index
+  Downloaded ripgrep v14.1.1
+  Downloaded 1 crate (213.6 KB) in 0.40s
+  Installing ripgrep v14.1.1
+--snip--
+   Compiling grep v0.3.2
+    Finished `release` profile [optimized + debuginfo] target(s) in 6.73s
+  Installing ~/.cargo/bin/rg
+   Installed package `ripgrep v14.1.1` (executable `rg`)
+```
+
+Çıktının **sondan bir önceki satırı**, kurulan **binary** dosyanın adını ve bulunduğu konumu gösterir. `ripgrep` örneğinde bu binary'nin adı **`rg`**'dir. Daha önce belirtildiği gibi, yükleme dizini `$PATH` ortam değişkeninizde ekli olduğu sürece, `rg --help` komutunu çalıştırabilir ve dosyaları aramak için daha hızlı, daha Rustvari (Rustier) bir aracı kullanmaya başlayabilirsiniz!
+
+> [!TIP]
+> #### Neden Kütüphaneler Yüklenemez?
+> `cargo install` komutunu `rand` veya `serde` gibi bir kütüphane için çalıştırmayı denerseniz Cargo hata verir. 
+> Çünkü kütüphanelerin çalıştırılabilir bir `main` fonksiyonu yoktur; onlar sadece kod içinde çağrılmak üzere tasarlanmıştır. 
+> Yalnızca çalıştırılabilir (`src/main.rs` barındıran) araçlar kurulabilir.
+
+## 14.5. Özel Komutlarla Cargo'yu Genişletme
+
+Cargo, kendisini değiştirmek zorunda kalmadan yeni **alt komutlarla (subcommands)** genişletilebilecek şekilde tasarlanmıştır. `$PATH`'inizdeki bir ikili dosya `cargo-something` adına sahipse, `cargo something` çalıştırarak onu sanki bir Cargo alt komutuymuş gibi çalıştırabilirsiniz. Bunun gibi özel komutlar, `cargo --list` çalıştırdığınızda da listelenir. `cargo install`'ı kullanarak eklentiler yükleyebilmek ve ardından bunları yerleşik Cargo araçları gibi çalıştırabilmek, Cargo'nun tasarımının son derece kullanışlı bir avantajıdır!
+
+
+> [!TIP]
+> Cargo'nun en güzel özelliklerinden biri, **eklenti (plugin) sistemi** gibi çalışabilmesidir.
+> Örneğin bilgisayarınızda şu program olduğunu düşünelim: 
+> ```bash
+> cargo-tree
+> ```
+> Bu program aslında Cargo'nun içinde yazılı değildir. Normal bir Rust programıdır.
+> Ancak adı **`cargo-`** ile başladığı için Cargo onu otomatik olarak tanır.
+> Bu nedenle şunu yazabilirsiniz:
+> ```bash
+> cargo tree
+> ```
+> Cargo aslında arka planda şunu çalıştırır:
+> ```bash
+> cargo-tree
+> ```
+> Yani Cargo, adı **`cargo-`** ile başlayan ve `$PATH` içinde bulunan her çalıştırılabilir programı **kendi alt komutlarından biriymiş gibi** çalıştırır.
+> Bu tasarım sayesinde Cargo'nun kaynak kodunu değiştirmeden yeni komutlar eklemek mümkündür. Rust ekosistemindeki pek çok popüler araç (`cargo-expand`, `cargo-watch`, `cargo-audit`, `cargo-deny` vb.) bu mekanizma sayesinde Cargo ile doğal bir bütünlük içinde çalışır.
+
+## 14.4. Özet
+
+Kodları Cargo ve [crates.io](https://crates.io/) aracılığıyla paylaşmak, Rust ekosistemini birçok farklı görev için kullanışlı kılan unsurlardan biridir. Rust'ın **standart kütüphanesi (standard library)** küçük ve kararlıdır (**stable**). Buna karşılık, crate'ler kolayca paylaşılabilir, kullanılabilir ve dilin geliştirilme sürecinden bağımsız bir zaman çizelgesinde geliştirilmeye devam edilebilir. Kendiniz için yararlı bulduğunuz kodları [crates.io](https://crates.io/) üzerinde paylaşmaktan çekinmeyin; büyük olasılıkla başkalarının da işine yarayacaktır!
+
+# 15. Akıllı İşaretçiler (Smart Pointers)
+
+**İşaretçi (pointer)**, bellekteki (**memory**) bir adresi tutan değişkenler için kullanılan genel bir kavramdır. Bu adres, başka bir veriye referansta bulunur veya onu "işaret eder(points at)." Rust'taki en yaygın işaretçi türü, Bölüm 4'de öğrendiğiniz **referans (reference)** türüdür. Referanslar `&` sembolüyle gösterilir ve işaret ettikleri değeri **ödünç alırlar (borrow)**. Veriye başvurmanın dışında özel bir yetenekleri yoktur ve ek bir maliyet (**overhead**) oluşturmazlar.
+
+Akıllı işaretçiler(_smart pointers_) ise normal bir işaretçi gibi davranmanın yanında, ek bilgiler(_metadata_) ve ek yetenekler de taşıyan veri yapılarıdır.  Akıllı işaretçi(_smart pointers_) kavramı Rust'a özgü değildir: Akıllı işaretçiler C++'da ortaya çıkmıştır ve diğer dillerde de bulunur. Rust'ın standart kütüphanesinde, referansların sağladığı özelliklerin ötesinde işlevsellik sunan çeşitli akıllı işaretçiler(_smart pointers_) tanımlanmıştır. Bu bölümde, akıllı işaretçilerin genel mantığını anlamak için farklı örnekleri inceleyeceğiz. Bunlardan biri de **referans sayımı yapan (reference-counted)** akıllı işaretçidir. Bu akıllı işaretçi, aynı verinin birden fazla sahip tarafından paylaşılmasına olanak tanır. Bunu, veriyi kullanan sahiplerin sayısını sürekli takip ederek yapar. Artık hiçbir sahip kalmadığında ise bellekteki veriyi otomatik olarak serbest bırakır.(**Dikkat:** Normalde Rust'ta bir verinin tek sahibi olabilir. Ama bu akıllı işaretçi sayesinde birden fazla kişi aynı veriye sahip olabilir.)
+
+Rust'ta, **sahiplik (ownership)** ve **ödünç alma (borrowing)** kavramları nedeniyle, referanslar ile akıllı işaretçiler arasında ek bir fark daha vardır: Referanslar yalnızca veriyi **ödünç alırken**, akıllı işaretçiler ise birçok durumda işaret ettikleri verinin **sahibi (owner)** olurlar.
+
+Akıllı işaretçiler genellikle struct'lar kullanılarak uygulanır. Sıradan bir struct'tan farklı olarak, akıllı işaretçiler **`Deref`** ve **`Drop`** trait'lerini uygular (**implement eder**). **`Deref`** trait'i, akıllı işaretçi struct'ının bir örneğinin (**instance**) referans gibi davranmasını sağlar. Böylece kodunuzu hem referanslarla hem de akıllı işaretçilerle çalışabilecek şekilde yazabilirsiniz. **`Drop`** trait'i ise, bir akıllı işaretçi örneği kapsam (**scope**) dışına çıktığında çalıştırılacak kodu özelleştirmenize olanak tanır. Bu bölümde bu iki trait'i ayrıntılı olarak inceleyeceğiz ve akıllı işaretçiler açısından neden bu kadar önemli olduklarını göstereceğiz.
+
+Akıllı işaretçi(**smart pointer**) deseninin Rust'ta sık kullanılan genel bir tasarım deseni(**design pattern**) olduğu göz önüne alındığında, bu bölüm mevcut her akıllı işaretçiyi kapsamayacaktır. Birçok kütüphane kendi akıllı işaretçi türlerini tanımlar; hatta siz de kendi akıllı işaretçinizi yazabilirsiniz. Standart kütüphanedeki en yaygın akıllı işaretçileri konu edeceğiz:
+
+-  `Box<T>`,  Değerleri heap üzerinde tahsis etmek (allocate) için
+- **`Rc<T>`**, Birden fazla sahipliği (**multiple ownership**) mümkün kılan referans sayımlı (**reference-counting**) bir türdür.
+- **`Ref<T>`** ve **`RefMut<T>`**, **`RefCell<T>`** aracılığıyla erişilen türlerdir. `RefCell<T>`, ödünç alma kurallarını (**borrowing rules**) derleme zamanında (**compile time**) değil, çalışma zamanında (**runtime**) uygular.
+
+Bunlara ek olarak, **iç değiştirilebilirlik deseni (interior mutability pattern)** üzerinde de duracağız. Bu desen, değiştirilemez (**immutable**) bir türün, içinde bulunan bir değeri değiştirmeye (**mutate**) olanak tanıyan bir API sunmasını ifade eder. Ayrıca, **referans döngülerini (reference cycles)** de ele alacağız: Bunların nasıl bellek sızıntısına (**memory leak**) yol açabileceğini ve bunun nasıl önlenebileceğini inceleyeceğiz.
+
+Şimdi başlayalım!(Let’s dive in!)
+
+## 15.1. Heap Üzerindeki Veriyi İşaret Etmek İçin `Box<T>` Kullanımı
+
+En basit akıllı işaretçi (**smart pointer**) türü **box**'tır ve türü **`Box<T>`** şeklinde yazılır. Box'lar, veriyi **stack** yerine **heap** üzerinde saklamanıza olanak tanır. Stack'te kalan tek şey ise heap üzerindeki veriyi işaret eden işaretçidir (**pointer**). Stack ve heap arasındaki farkı gözden geçirmek için Bölüm 4'e bakın.
+
+Veriyi stack yerine heap'te saklamanın getirdiği maliyet dışında, **Box**'ların ek bir performans yükü (**performance overhead**) yoktur. Ancak çok fazla ekstra yetenekleri de yoktur. `Box<T>`'yi en çok şu durumlarda kullanırsınız:
+
++ **Boyutu derleme zamanında (compile time) belirlenemeyen bir türe sahipseniz** ve bu türün bir değerini, **kesin bir boyut (exact size)** gerektiren bir durumda(**context**) kullanmanız gerekiyorsa.
++ Büyük miktarda veriniz olduğunda ve sahipliği(_ownership_) aktarmak istediğinizde, ancak bunu yaparken verinin kopyalanmayacağından(_no-copied_) emin olmak istediğinizde
++ Bir değere sahip olmak istediğinizde ve yalnızca belirli bir tipte olması yerine belirli bir trait'i uygulayan(_implements a particular trait_) bir tip olmasını önemsediğinizde
+
+İlk durumu, **"15.1.2. Box'larla Özyinelemeli (Recursive) Türleri Mümkün Kılma"** bölümünde ele alacağız. İkinci durumda ise, **büyük miktarda verinin sahipliğini devretmek (transferring ownership)** uzun sürebilir; çünkü bu işlem sırasında veri **stack** üzerinde kopyalanır. Bu durumda performansı artırmak için, büyük miktarda veriyi bir box içinde heap'te saklayabiliriz. Böylece, stack üzerinde yalnızca küçük boyutlu işaretçi (**pointer**) verisi kopyalanır; işaretçinin gösterdiği(_reference_) asıl veri ise heap üzerinde tek bir yerde kalmaya devam eder. Üçüncü durum, trait nesnesi (trait object) olarak bilinir ve Bölüm 18'deki ["Paylaşılan Davranışı Soyutlamak için Trait Nesnelerini Kullanma"](#) bu konuya ayrılmıştır. Dolayısıyla, burada öğrendiklerinizi o bölümde tekrar uygulayacaksınız!
+
+### 15.1.1. Veriyi Heap Üzerinde Saklama
+
+`Box<T>` için heap (öbek) üzerinde veri saklama senaryosunu tartışmadan önce, bunun sözdizimini (syntax) ve bir `Box<T>` içinde saklanan değerlerle nasıl etkileşime geçileceğini ele alacağız.
+
+`Liste 15-1`, bir `i32` değerini heap'te saklamak için bir box'ın nasıl kullanılacağını göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let b = Box::new(5);
+    println!("b = {b}");
+}
+```
+
+> **[Liste 15-1](https://doc.rust-lang.org/stable/book/ch15-01-box.html#listing-15-1):** Bir `Box` kullanarak heap üzerinde bir `i32` değerinin saklanması
+
+`b` değişkenini, heap (öbek) üzerinde tahsis edilmiş olan 5 değerini işaret eden bir `Box` değerine sahip olacak şekilde tanımlıyoruz. Bu program ekrana `b = 5` yazdıracaktır; bu durumda, kutunun içindeki veriye tıpkı stack (yığın) üzerindeymiş gibi erişebiliriz. Sahiplenilen (owned) diğer tüm değerlerde olduğu gibi, bir `Box` kapsam dışına çıktığında (tıpkı `b` değişkeninin `main` fonksiyonunun sonunda çıktığı gibi) bellekten silinir (deallocated). Bu belleği serbest bırakma(_deallocation_) işlemi hem Box'nın kendisi (stack üzerinde saklanan) hem de işaret ettiği veri (heap üzerinde saklanan) için gerçekleşir.
+
+Heap üzerine tek bir değer koymak pek kullanışlı değildir, bu nedenle `Box`'ları tek başlarına bu şekilde çok sık kullanmazsınız. Çoğu durumda, tek bir `i32` gibi değerlerin varsayılan olarak saklandıkları yer olan stack üzerinde bulunması daha uygundur. Box'ların olmadığı durumda tanımlamamıza izin verilmeyecek tipleri tanımlamamıza olanak tanıdığı bir duruma bakalım.
+
+### 15.1.2. `Box` ile Özyinelemeli (Recursive) Türleri Mümkün Kılma
+
+Özyinelemeli (**recursive**) bir türün değeri, kendi içinde yine aynı türden başka bir değeri içerebilir. Özyinelemeli (**recursive**) türler bir sorun teşkil eder; çünkü Rust'ın, bir türün bellekte ne kadar yer kaplayacağını derleme zamanında (compile time) bilmesi gerekir. Ancak, özyinelemeli türlerdeki değerlerin iç içe geçmesi teorik olarak sonsuza kadar gidebileceğinden, Rust bu değerin ne kadar alana ihtiyaç duyacağını kesin olarak bilemez. `Box`'ların boyutu önceden bilindiği için, özyinelemeli tür tanımının içine bir `Box` yerleştirerek özyinelemeli türleri kullanılabilir hale getirebiliriz.
+
+Özyinelemeli bir tip örneği olarak, cons listesini(_cons list_) keşfedelim. Bu, fonksiyonel programlama dillerinde yaygın olarak bulunan bir veri tipidir. Tanımlayacağımız **cons list** türü, özyinelemeli olması dışında oldukça basittir. Bu nedenle, bu örnek üzerinde öğreneceğimiz kavramlar, daha karmaşık özyinelemeli türlerle karşılaştığınız durumlarda da size faydalı olacaktır.
+
+#### 15.1.2.1. Cons List'i Anlama
+
+Cons list; Lisp programlama dili ve onun lehçelerinden (dialects) gelen, iç içe geçmiş çiftlerden (pairs) oluşan ve linked list (bağlı liste) yapısının Lisp versiyonu olan bir veri yapısıdır.  Adını, Lisp'te iki argümandan (**arguments**) yeni bir çift oluşturan **`cons`** fonksiyonundan gelir. (`cons`, **construct function** yani "oluşturma fonksiyonu" ifadesinin kısaltmasıdır.)  Bir değer ve başka bir çiftten oluşan bir çift üzerinde `cons` fonksiyonunu çağırarak, özyinelemeli (recursive) çiftlerden meydana gelen cons list'ler oluşturabiliriz. Bir diğer ifade ile, bir değeri ve mevcut bir listeyi `cons` fonksiyonuna verdiğimizde yeni bir liste elde ederiz. Bu işlem tekrar tekrar yapıldığında, özyinelemeli(_recursive_) olarak birbirine bağlı düğümlerden oluşan bir **cons list** meydana gelir.
+
+
+> [!TIP]
+> #### Linked List (Bağlı Liste) nedir?
+> Bağlı liste, elemanların bellekte art arda bulunmasının gerekmediği bir veri yapısıdır. Her eleman (düğüm, _node_) iki bölümden oluşur:
+> 1. Veri (data)
+> 2. Bir sonraki düğümü gösteren işaretçi (pointer/reference)
+> 
+> Örneğin şu liste:
+> ```
+> 1 → 2 → 3
+> ```
+> Bellekte kavramsal olarak şöyle düşünülebilir:
+> ```
+> +---------+      +---------+      +---------+
+> | data=1  | ---> | data=2  | ---> | data=3  | ---> None
+> +---------+      +---------+      +---------+
+> ```
+> Her düğüm yalnızca kendi verisini ve **bir sonraki düğümün adresini** tutar.
+> Lisp'te bağlı liste, çoğu dilde olduğu gibi `Node` yapısıyla değil, **cons hücreleri (cons cells)** kullanılarak oluşturulur.
+> C veya Rust'ta bağlı liste genellikle şöyle tanımlanır:
+> ```rust
+> struct Node {
+>     value: i32,
+>     next: Option<Box<Node>>,
+> }
+> ```
+> Lisp'te ise aynı fikir şu şekilde ifade edilir:
+> ```
+> cons(1,
+>     cons(2,
+>         cons(3, Nil)))
+> ```
+> veya eşdeğer olarak:
+> ```
+> (1, (2, (3, Nil)))
+> ```
+> ##### Linked list ile cons list arasındaki ilişki
+> |Linked List|Cons List|
+> |---|---|
+> |Genel bir veri yapısıdır.|Linked list'in Lisp'teki gerçekleştirimidir.|
+> |Düğümler (nodes) kullanılır.|Cons hücreleri (pairs) kullanılır.|
+> |Her düğüm: veri + sonraki düğüm|Her `cons`: değer + listenin geri kalanı|
+
+Örneğin, aşağıda her çiftin parantez içinde gösterildiği ve **1, 2, 3** listesini içeren bir **cons list**'in sözde kod (**pseudocode**) gösterimi verilmiştir:
+
+```
+(1, (2, (3, Nil)))
+```
+
+Cons listesindeki her öğe iki eleman içerir: mevcut öğenin(_current item_) değeri ve sonraki öğenin değeri(_next item_). Listedeki son öğe, sonraki öğe olmaksızın yalnızca `Nil` adlı bir değer içerir. Bir cons listesi, `cons` fonksiyonu özyinelemeli olarak çağrılarak üretilir. Özyinelemenin (**recursion**) temel durumunu (**base case**) ifade etmek için kullanılan yaygın (**canonical**) ad **`Nil`**'dir. Dikkat edin, buradaki **`Nil`**, Bölüm 6'da ele alınan **"null"** veya **"nil"** kavramıyla aynı şey değildir. Oradaki **null/nil**, geçersiz (**invalid**) veya bulunmayan (**absent**) bir değeri ifade ederken, burada **`Nil`** yalnızca listenin sonunu gösteren bir varyanttır. Bir diğer ifadeyle, burada kullanılan `Nil` kavramını, 6. Bölümde anlatılan **`null`** veya **`nil`** kavramıyla karıştırmayın. Onlar geçersiz ya da eksik bir değeri ifade ederken, bu örnekteki `Nil` yalnızca listenin sonunu belirtmek için kullanılan bir enum varyantıdır.
+
+**Cons list**, Rust'ta yaygın olarak kullanılan bir veri yapısı değildir. Rust'ta çoğu zaman bir öğe listesiyle çalışmanız gerektiğinde, **`Vec<T>`** kullanmak daha uygun bir seçimdir. Bununla birlikte, daha karmaşık özyinelemeli veri türleri çeşitli durumlarda faydalıdır. Bu bölümde **cons list** ile başlamamızın nedeni ise, `Box`'ın özyinelemeli (**recursive**) bir veri türünü nasıl tanımlamamıza olanak sağladığını, dikkatimizi gereksiz ayrıntılarla dağıtmadan keşfedebilmektir.
+
+**Liste 15-2**, bir **cons list** için yazılmış bir `enum` tanımını göstermektedir. Ancak bu kod henüz derlenmeyecektir (**compile**); çünkü `List` türünün boyutu (**size**) derleme zamanında bilinmemektedir. Bunun nedenini birazdan göreceğiz.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+enum List {
+    Cons(i32, List),
+    Nil,
+}
+
+fn main() {}
+```
+
+> [**Liste 15-2:**](https://doc.rust-lang.org/stable/book/ch15-01-box.html#listing-15-2) `i32` değerlerini saklayan bir **cons list** veri yapısını temsil edecek bir `enum` tanımlamaya yönelik ilk girişim.
+
+
+> [!NOTE]
+> Bu örnek kapsamında yalnızca `i32` değerlerini tutan bir cons list uyguluyoruz. Herhangi bir türdeki değerleri saklayabilecek bir cons list türü tanımlamak için, Bölüm 10'da tartıştığımız gibi bunu generic'ler (jenerikler) kullanarak da uygulayabilirdik.
+
+`List` türü kullanılarak **1, 2 ve 3** listesinin nasıl oluşturulacağı ise **Liste 15-3**'te gösterilmektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+enum List {
+    Cons(i32, List),
+    Nil,
+}
+
+// --snip--
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons(1, Cons(2, Cons(3, Nil)));
+}
+```
+
+> [**Liste 15-3:**](https://doc.rust-lang.org/stable/book/ch15-01-box.html#listing-15-3) `List` enum'unu kullanarak **1, 2 ve 3** listesini saklama
+
+İlk `Cons` değeri `1`'i ve başka bir `List` değerini tutar. Bu `List` değeri, `2`'yi ve başka bir `List` değerini tutan başka bir `Cons` değeridir. Bu `List` değeri, `3`'ü ve bir `List` değerini tutan bir `Cons` değeridir; bu `List` değeri ise son olarak listenin sonunu işaret eden özyinelemeli olmayan varyant olan `Nil`'dir.
+
+`Liste 15-3`'teki kodu derlemeye çalışırsak, `Liste 15-4`'te gösterilen hatayı alırız.
+
+```
+$ cargo run
+   Compiling cons-list v0.1.0 (file:///projects/cons-list)
+error[E0072]: recursive type `List` has infinite size
+ --> src/main.rs:1:1
+  |
+1 | enum List {
+  | ^^^^^^^^^
+2 |     Cons(i32, List),
+  |               ---- recursive without indirection
+  |
+help: insert some indirection (e.g., a `Box`, `Rc`, or `&`) to break the cycle
+  |
+2 |     Cons(i32, Box<List>),
+  |               ++++    +
+
+error[E0391]: cycle detected when computing when `List` needs drop
+ --> src/main.rs:1:1
+  |
+1 | enum List {
+  | ^^^^^^^^^
+  |
+  = note: ...which immediately requires computing when `List` needs drop again
+  = note: cycle used when computing whether `List` needs drop
+  = note: see https://rustc-dev-guide.rust-lang.org/overview.html#queries and https://rustc-dev-guide.rust-lang.org/query.html for more information
+
+Some errors have detailed explanations: E0072, E0391.
+For more information about an error, try `rustc --explain E0072`.
+error: could not compile `cons-list` (bin "cons-list") due to 2 previous errors
+```
+
+[**Liste 15-4**](https://doc.rust-lang.org/stable/book/ch15-01-box.html#listing-15-4): Özyinelemeli (recursive) bir enum tanımlamaya çalışırken aldığımız hata
+
+Bu hata, bu türün (**type**) **"sonsuz boyuta (infinite size) sahip olduğunu"** göstermektedir. Bunun nedeni, `List`'i özyinelemeli(_recursive_) olan bir varyantla tanımlamamızdır: Doğrudan kendisinin başka bir değerini tutar. Sonuç olarak, Rust bir `List` değerini saklamak için ne kadar alana ihtiyaç duyduğunu çözemez. Bu hatayı neden aldığımızı inceleyelim. Öncelikle, Rust'ın özyinelemeli olmayan(_non-recursive_) bir türdeki değeri saklamak için ne kadar alana ihtiyaç duyacağına nasıl karar verdiğine bakalım.
+#### 15.1.2.2. Özyinelemeli Olmayan (Non-Recursive) Bir Türün Boyutunu Hesaplamak
+
+Bölüm 6'da enum tanımlarını ele aldığımızda `Liste 6-2`'de tanımladığımız `Message` `enum`'ını hatırlayın:
+
+```rust
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+fn main() {}
+```
+
+Bir `Message` değerine ne kadar bellek alanı (**space**) ayrılması gerektiğini belirlemek için Rust, tüm varyantları (**variants**) tek tek inceler ve hangisinin en fazla belleğe ihtiyaç duyduğunu hesaplar. Rust, `Message::Quit` varyantının hiç bellek alanına ihtiyaç duymadığını, `Message::Move` varyantının ise iki adet `i32` değerini saklayacak kadar belleğe ihtiyaç duyduğunu görür; diğer varyantlar için de aynı değerlendirmeyi yapar. Bir `Message` değeri aynı anda yalnızca **tek bir varyantı** temsil edeceğinden, bir `Message`'ın ihtiyaç duyacağı en büyük bellek miktarı, **en büyük varyantını saklamak için gereken bellek kadar** olacaktır.
+
+Şimdi bunu, Rust'ın **Liste 15-2**'deki `List` enum'u gibi özyinelemeli (**recursive**) bir türün ne kadar bellek gerektirdiğini belirlemeye çalışırken karşılaştığı durumla karşılaştıralım. Derleyici işe, `i32` türünde bir değer ve `List` türünde başka bir değer tutan `Cons` varyantına bakarak başlar. Dolayısıyla `Cons`, bir `i32` boyutu ile bir `List` boyutunun toplamına eşit miktarda alana ihtiyaç duyar. `List` türünün ne kadar belleğe ihtiyaç duyduğunu çözebilmek için derleyici, yine `Cons` varyantından başlayarak varyantları inceler. `Cons` varyantı, `i32` türünde bir değer ve `List` türünde başka bir değer tutar ve bu süreç Şekil 15-1'de gösterildiği gibi sonsuza kadar devam eder.
+
+![trpl15-01](Pictures/trpl15-01.svg)
+
+**Şekil 15-1:** Sonsuz sayıda Cons varyantından oluşan sonsuz bir Liste
+
+#### 15.1.2.3. Bilinen Bir Boyuta Sahip Özyinelemeli (Recursive) Tür Elde Etmek
+
+Rust, özyinelemeli olarak tanımlanmış türler için ne kadar alan ayırması (allocate) gerektiğini hesaplayamadığından, derleyici şu yardımcı öneriyi içeren bir hata verir:
+
+```
+help: insert some indirection (e.g., a `Box`, `Rc`, or `&`) to break the cycle
+  |
+2 |     Cons(i32, Box<List>),
+  |               ++++    +
+```
+
+Buradaki öneride (**suggestion**) geçen **dolaylı yönlendirme (indirection)**, değeri doğrudan (**directly**) saklamak yerine, veri yapısını (**data structure**) değerin kendisini değil, **ona işaret eden bir işaretçiyi (pointer)** saklayacak şekilde değiştirmemiz gerektiği anlamına gelir.
+
+`Box<T>` bir işaretçi olduğundan, Rust her zaman bir `Box<T>`'nin ne kadar alana ihtiyaç duyduğunu bilir: Bir işaretçinin boyutu, işaret ettiği verinin miktarına bağlı olarak değişmez. Bu, doğrudan başka bir `List` değeri yerine `Cons` varyantının içine bir `Box<T>` koyabileceğimiz anlamına gelir. `Box<T>`, `Cons` varyantının içinde değil, heap'te olacak bir sonraki `List` değerine işaret edecektir. Kavramsal (**conceptually**) olarak hâlâ aynı listeye sahibiz; yani listeler yine başka listeleri içererek oluşturuluyor. Ancak bu gerçekleştirimde (**implementation**), öğeler (**items**) artık **birbirlerinin içine yerleştirilmek yerine**, **yan yana yerleştirilmiş** ve işaretçiler aracılığıyla birbirine bağlanmış durumdadır.
+
+Böylece **Liste 15-2**'deki `List` enum tanımını ve **Liste 15-3**'teki `List` kullanımını **Liste 15-5**'te gösterilen kodla değiştirebiliriz. Bu yeni sürüm başarıyla derlenecektir (**compile**).
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+enum List {
+    Cons(i32, Box<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}
+```
+
+> [!TIP]
+> #### ❌ `Box` kullandıktan önce
+> ```rust
+> enum List {
+>     Cons(i32, List),
+>     Nil,
+> }
+> ```
+> Bellekte şöyle düşünülüyor:
+> ```
+> Cons
+> ├── i32
+> └── List
+>      ├── i32
+>      └── List
+>           ├── i32
+>           └── List
+>                ...
+> ```
+> Yani **List'in içinde List**, onun içinde yine **List**... Bu yüzden boyut sonsuza gider.
+> #### ✅ `Box` kullandıktan sonra
+> ```rust
+> enum List {
+>     Cons(i32, Box<List>),
+>     Nil,
+> }
+> ```
+> Artık bellekte durum şöyledir:
+> ```
+> Stack
+> ─────
+> 
+> Cons
+> ├── i32
+> └── Box ───────────────┐
+>                        │
+> Heap                   ▼
+>                     Cons
+>                     ├── i32
+>                     └── Box ───────┐
+>                                    │
+> Heap                               ▼
+>                                 Cons
+>                                 ├── i32
+>                                 └── Box ───► Nil
+> ```
+> Artık her `Cons` düğümü yalnızca: bir `i32` ve  bir `Box`
+
+[**Liste 15-5**](https://doc.rust-lang.org/stable/book/ch15-01-box.html#listing-15-5): Bilinen bir boyuta sahip olmak için `Box<T>` kullanan `List` tanımı
+
+`Cons` varyantı, bir `i32`'nin boyutu ile `Box`'ın işaretçi (**pointer**) verisini saklamak için gereken alanın toplamı kadar belleğe ihtiyaç duyar. `Nil` varyantı ise herhangi bir değer saklamadığı için, yığında (**stack**) `Cons` varyantına göre daha az yer kaplar. Artık biliyoruz ki, herhangi bir `List` değeri, **bir `i32`'nin boyutu ile bir `Box` işaretçisinin boyutunun toplamı kadar** yer kaplayacaktır. Artık herhangi bir `List` değerinin bir `i32`'nin boyutu artı bir box'ın işaretçi verisinin boyutu kadar yer kaplayacağını biliyoruz. Bir box kullanarak, sonsuz özyinelemeli zinciri kırdık, böylece derleyici bir `List` değerini saklamak için ihtiyaç duyduğu boyutu anlayabilir. `Şekil 15-2`, `Cons` varyantının artık nasıl göründüğünü göstermektedir.
+
+![trpl15-02](Pictures/trpl15-02.svg)
+
+**Şekil 15-2:** `Cons` bir `Box` tuttuğu için sonsuz boyutta olmayan bir `List`
+
+Box'lar yalnızca dolaylı yönlendirme(_indirection_) ve heap tahsisi sağlar; diğer akıllı pointer (smart pointer) türlerinde göreceğimiz gibi başka hiçbir özel yetenekleri yoktur. Ayrıca bu özel yeteneklerin getirdiği performans ek yüküne de sahip değildirler, bu yüzden dolaylı yönlendirmenin(_indirection_)  ihtiyaç duyduğumuz tek özellik olduğu cons listesi gibi durumlarda kullanışlı olabilirler. Box'lar için daha fazla kullanım durumuna Bölüm 18'de bakacağız.
+
+`Box<T>` türü bir **akıllı işaretçidir (smart pointer)**; çünkü `Box<T>` değerlerinin referanslar gibi davranmasına olanak tanıyan `Deref` trait'ini uygular(_implement_). Bir `Box<T>` değeri kapsam dışına çıktığında, `Drop` trait'inin uygulaması nedeniyle box'ın işaret ettiği heap verisi de temizlenir. Bu iki trait, bu bölümün geri kalanında ele alacağımız diğer akıllı işaretçi (_smart pointer_) türlerinin sunduğu işlevsellik açısından daha da büyük bir öneme sahip olacaktır. Şimdi bu iki trait'i daha ayrıntılı bir şekilde inceleyelim.
+## 15.2. Akıllı İşaretçileri Normal Referanslar Gibi Kullanma
+
+`Deref` trait'ini (özelliğini) uygulamak, dereference (referans çözme) operatörünün `*` (çarpma veya glob operatörüyle karıştırılmamalıdır) davranışını özelleştirmenize olanak tanır. `Deref` trait'ini akıllı işaretçilerin(_smart pointer_) normal bir referans gibi davranmasını sağlayacak şekilde uygulayarak, referanslar üzerinde çalışan kodlar yazabilir ve bu kodları akıllı işaretçilerle(_smart pointer_) de kullanabilirsiniz.
+
+Öncelikle, **dereference operatörünün (`*`) normal referanslarla nasıl çalıştığına** bakalım. Ardından, `Box<T>` gibi davranan özel (**custom**) bir tür tanımlamaya çalışacağız ve dereference operatörünün yeni tanımladığımız bu tür üzerinde neden bir referansla çalıştığı gibi çalışmadığını göreceğiz. Daha sonra, `Deref` trait'ini uygulamanın akıllı işaretçilerin referanslara benzer şekilde çalışmasını nasıl mümkün kıldığını inceleyeceğiz. Son olarak, Rust'ın **deref coercion (deref zorlaması)** özelliğine ve bunun referanslarla veya akıllı işaretçilerle çalışmamızı nasıl sağladığına bakacağız.
+
+### 15.2.1. Referansı Takip Ederek Değere Ulaşma
+
+Normal bir referans (**regular reference**) bir işaretçi (**pointer**) türüdür. Bir işaretçiyi düşünmenin yollarından biri, onu başka bir yerde saklanan bir değere doğru uzanan bir **ok** olarak düşünmektir. **Liste 15-6**'da bir `i32` değerine referans oluşturuyor ve ardından **dereference operatörünü (`*`)** kullanarak referansı takip edip o değere ulaşıyoruz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let x = 5;
+    let y = &x;
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}
+```
+
+> [Liste 15-6](https://doc.rust-lang.org/stable/book/ch15-02-deref.html#listing-15-6): Bir `i32` değerine giden referansı takip etmek için dereference (referans çözme) operatörünün kullanımı
+
+> [!TIP]
+>  `y` ise `x`'in kendisini değil, `x`'in bulunduğu yeri gösteren bir **referanstır**:
+>  ```
+>  y ──────► x ──────► 5
+>  ```
+
+`x` değişkeni 5 şeklinde bir `i32` değeri tutar. `y` değişkenini ise `x`'in referansına eşitleriz. `x`'in 5'e eşit olduğunu `assert_eq!` ile doğrulayabiliriz. Ancak `y` içindeki değer hakkında bir doğrulama yapmak istiyorsak, derleyicinin gerçek değeri karşılaştırabilmesi için işaret ettiği değere giden referansı takip etmek adına `*y` ifadesini (dolayısıyla dereference/referans çözme işlemini) kullanmamız gerekir. `y`'yi dereference ettikten sonra, `y`'nin işaret ettiği **tamsayı değere** erişebilir ve bu değeri `5` ile karşılaştırabiliriz.
+
+Bunun yerine `assert_eq!(5, y);` yazmaya çalışsaydık, şu derleme hatasını alırdık:
+
+```
+$ cargo run
+   Compiling deref-example v0.1.0 (file:///projects/deref-example)
+error[E0277]: can't compare `{integer}` with `&{integer}`
+ --> src/main.rs:6:5
+  |
+6 |     assert_eq!(5, y);
+  |     ^^^^^^^^^^^^^^^^ no implementation for `{integer} == &{integer}`
+  |
+  = help: the trait `PartialEq<&{integer}>` is not implemented for `{integer}`
+  = note: this error originates in the macro `assert_eq` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `deref-example` (bin "deref-example") due to 1 previous error
+```
+
+
+> [!TIP]
+> ```rust
+> assert_eq!(5, y);
+> ```
+> ifadesinde Rust **`5` ile `&i32` türündeki `y`'yi** karşılaştırmaya çalışır. Bunlar aynı tür değildir:
+> ```rust
+> 5  → i32
+> y  → &i32
+> ```
+> Bu yüzden derleyici hata verir.
+
+Bir sayı(`i32`) ile bir sayıya olan referansı(`&i32`) karşılaştırmaya izin verilmez, çünkü bunlar **farklı türlerdir**. Referansın işaret ettiği değere ulaşmak için **dereference operatörünü (`*`)** kullanmamız gerekir.
+### 15.2.2. `Box<T>`'yi Referans Gibi Kullanmak
+
+**Liste 15-6**'daki kodu, referans yerine bir `Box<T>` kullanacak şekilde yeniden yazabiliriz. **Liste 15-7**'de `Box<T>` üzerinde kullanılan dereference operatörü, **Liste 15-6**'da referans üzerinde kullanılan dereference operatörüyle **aynı şekilde çalışır**.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let x = 5;
+    let y = Box::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}
+```
+
+[Liste 15-7](https://doc.rust-lang.org/stable/book/ch15-02-deref.html#listing-15-7): Bir `Box<i32>` üzerinde dereference (referans çözme) operatörünün kullanımı
+
+> [!TIP]
+> Burada x, `Box<i32>` türündedir. Ama `*x` kullandığımızda `Box`'in içindeki `i32` değerine ulaşırız.
+> 
+> Yani, `Box<T>`, bir referans olmamasına rağmen `*` operatörü kullanıldığında referansa benzer şekilde davranabilir.
+
+`Listing 15-7` ile `Listing 15-6` arasındaki temel fark, burada `y`'yi `x`'in değerine işaret eden bir referans yerine `x`'in kopyalanmış değerine işaret eden bir box örneği(_instance_) olarak ayarlamamızdır. Son `assertion` (doğrulama) ifadesinde, `y` bir referans olduğunda yaptığımız gibi **dereference operatörünü (`*`) kullanarak `Box`'ın işaretçisini takip edebiliriz**. Bir sonraki bölümde, kendi `Box` türümüzü tanımlayarak, **`Box<T>`'nin dereference operatörünü kullanabilmesini sağlayan özel şeyin ne olduğunu** keşfedeceğiz.
+### 15.2.3. Kendi Akıllı İşaretçimizi(Smart Pointer) Tanımlamak
+
+Akıllı pointer türlerinin varsayılan olarak referanslardan nasıl farklı davrandığını bizzat deneyimlemek için, standart kütüphane tarafından sağlanan `Box<T>` türüne benzer bir sarmalayıcı (_wrapper_) tür inşa edelim. Ardından, dereference (referans çözme) operatörünü kullanabilme yeteneğini bu türe nasıl ekleyeceğimize bakacağız.
+
+
+> [!NOTE]
+> Birazdan oluşturacağımız `MyBox<T>` türü ile gerçek `Box<T>` arasında önemli bir fark vardır: Bizim sürümümüz verilerini **heap üzerinde saklamayacaktır**. Bu örnekte `Deref` üzerine odaklandığımız için verinin gerçekte nerede saklandığından çok, **işaretçi benzeri davranış** göstermesi önemlidir.
+
+> [!tip]
+> ```
+> Box<T>
+>    │
+>    └────► Heap'teki veri
+> 
+> MyBox<T>
+>    │
+>    └────► İçinde doğrudan T değerini taşıyor
+> ```
+> Kitabın amacı burada gerçek bir heap tahsisi yapmak değil. Amaç, **`Deref` trait'inin nasıl çalıştığını kendi türümüz üzerinde göstermek**.
+
+
+`Box<T>` türü en nihayetinde tek elemanlı bir demet yapısı (tuple struct) olarak tanımlanmıştır; bu nedenle Liste 15-8, aynı şekilde bir `MyBox<T>` türü tanımlamaktadır. Ayrıca `Box<T>` üzerinde tanımlı olan `new` fonksiyonuyla eşleşecek yeni bir fonksiyon da tanımlayacağız.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+
+fn main() {}
+```
+
+[Liste 15-8](https://doc.rust-lang.org/stable/book/ch15-02-deref.html#listing-15-8): Bir `MyBox<T>` türü tanımlama
+
+`MyBox` adında bir struct tanımlıyor ve türümüzün her türden değeri tutabilmesini istediğimiz için generic bir `T` parametresi belirtiyoruz. `MyBox` türü, `T` türünde tek bir elemana sahip bir demet yapısıdır (tuple struct). `MyBox::new` fonksiyonu, `T` tipinde bir parametre alır ve geçirilen değeri tutan bir `MyBox` örneği(_instance_) döndürür.
+
+Şimdi` Liste 15-7`'deki `main` fonksiyonunu `Liste 15-8`'e eklemeyi ve `Box<T>` yerine tanımladığımız `MyBox<T>` türünü kullanacak şekilde değiştirmeyi deneyelim. `Liste 15-9`'daki kod derlenmeyecektir, çünkü Rust `MyBox` türünün referansını nasıl çözeceğini (dereference) bilmemektedir.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+
+fn main() {
+    let x = 5;
+    let y = MyBox::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}
+```
+
+> [Liste 15-9](https://doc.rust-lang.org/stable/book/ch15-02-deref.html#listing-15-9): Referansları ve `Box<T>`'yi kullandığımız şekilde `MyBox<T>`'yi kullanma girişimi
+
+İşte elde edilen derleme hatası:
+
+```
+$ cargo run
+   Compiling deref-example v0.1.0 (file:///projects/deref-example)
+error[E0614]: type `MyBox<{integer}>` cannot be dereferenced
+  --> src/main.rs:14:19
+   |
+14 |     assert_eq!(5, *y);
+   |                   ^^ can't be dereferenced
+
+For more information about this error, try `rustc --explain E0614`.
+error: could not compile `deref-example` (bin "deref-example") due to 1 previous error
+```
+
+`MyBox<T>` türümüzün referansı çözülemez (dereference edilemez), çünkü bu yeteneği türümüz üzerinde henüz uygulamadık. `*` operatörü ile referans çözmeyi etkinleştirmek için `Deref` trait'ini (özelliğini) uyguluyoruz.
+
+### 15.2.4. `Deref` Trait'ini Uygulama
+
+Bölüm 10'deki "10.2.2. Bir Tür Üzerinde Trait Uygulamak" başlığında ele alındığı gibi, bir trait'i uygulamak için o trait'in gerektirdiği metotların uygulamalarını sunmamız gerekir. Standart kütüphane tarafından sağlanan **`Deref` trait'i**, `self`'i ödünç alan (**borrows `self`**) ve içindeki veriye (**inner data**) bir referans döndüren (**returns a reference**) `deref` adlı bir metodu uygulamamızı gerektirir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::ops::Deref;
+
+impl<T> Deref for MyBox<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+
+fn main() {
+    let x = 5;
+    let y = MyBox::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}
+```
+
+**[Liste 15-10](https://doc.rust-lang.org/stable/book/ch15-02-deref.html#listing-15-10)**: `MyBox<T>` üzerinde `Deref` uygulama
+
+`type Target = T;` sözdizimi, `Deref` trait'inin kullanacağı bir **ilişkili türü (associated type)** tanımlar. İlişkili türler, generic bir parametre bildirmenin biraz farklı bir yoludur; ancak şimdilik bunlar için endişelenmenize gerek yoktur, Bölüm 20'de bunları daha detaylı ele alacağız.
+
+`deref` metodunun gövdesini `&self.0` ile dolduruyoruz; böylece `deref`, `*` operatörü ile erişmek istediğimiz değere bir referans döndürür. Bölüm 5'deki "Demet Yapılarıyla Farklı Türler Oluşturmak" konusundan hatırlayacağınız üzere `.0`, bir demet yapısındaki (tuple struct) ilk değere erişir. `Liste 15-9`'da yer alan ve `MyBox<T>` değeri üzerinde `*` operatörünü çağıran `main` fonksiyonu artık derlenir ve doğrulamalar (assertions) başarıyla geçer!
+
+`Deref` trait'i olmadan derleyici yalnızca `&` referanslarının referansını çözebilir (dereference edebilir). `deref` metodu, derleyiciye `Deref` trait'ini uygulayan herhangi bir türdeki değeri alma ve referansını nasıl çözeceğini bildiği bir referansı elde etmek için `deref` metodunu çağırma yeteneği kazandırır.
+
+
+> [!TIP]
+> #### Özel Tiplere deference özeliği kazandırma:
+> `Deref` olmadan derleyici sadece `&` ile oluşturulan referansları anlıyor. `Deref` ile kendi tipinizi de referans gibi kullanabiliyorsunuz.
+> ##### `Deref` OLMADAN:
+> ```rust
+> let x = 5;
+> let y = &x;           // Normal referans
+> println!("{}", *y);   // ✅ Derleyici biliyor: & referansının referansını kaldır
+> 
+> let z = MyBox::new(5);
+> println!("{}", *z);   // ❌ Derleyici bilmiyor: MyBox nasıl kaldırılır?
+> ```
+> ##### `Deref` İLE:
+> ```rust
+> impl Deref for MyBox<T> {
+> 	fn deref(&self) -> &T {
+> 		&self.0     // "Referansı kaldırınca şunu ver" diyoruz
+> 	}
+> }
+> 
+> let z = MyBox::new(5);
+> println!("{}", *z) // ✅ Derleyici biliyor!
+> // Rust şunu yapıyor: *(z.deref())
+> ```
+> ##### Derleyicinin Bakış Açısı:
+> ```
+> Deref OLMADAN:
+> Derleyici: "*z ne demek? MyBox'ı nasıl kaldırırım?" ❌
+> 
+> Deref İLE:
+> Derleyici: "MyBox Deref uyguluyor!"
+>          → "deref() metodunu çağır"
+>          → "& referansı elde et"
+>          → "Onu zaten biliyorum, kaldırabilirim!" ✅
+> ```
+> Siz `Deref` trait'ini uygulayıp içine `deref` metodunu yazdığınızda, derleyiciye şunu demiş olursunuz:
+> > "Ben `*my_box` yazdığımda sen bu nesneyi doğrudan çözmeye çalışma. Önce benim yazdığım `deref()` metodunu çağır. O metot sana bu nesnenin içindeki verinin **standart referansını (`&T`)** verecek. Sonra sen bildiğin o standart referans çözme işlemini yaparsın."
+> ##### Özet:
+> `Deref` trait'i olmadan derleyici yalnızca `&` referanslarını anlayabilir. `Deref` trait'i sayesinde derleyici, `deref()` metodunu çağırarak özel tipinizi(costum type) de bir referans gibi kaldırabilir.
+
+`Liste 15-9`'da `*y` yazdığımızda, Rust sahne arkasında aslında şu kodu çalıştırdı:
+
+```rust
+*(y.deref())
+```
+
+Rust, `deref` metodunu çağırıp çağırmamamız gerektiğini düşünmek zorunda kalmayalım diye `*` operatörünü önce bir `deref` metodu çağrısıyla, ardından da yalın bir dereference (referans çözme) işlemiyle değiştirir. Rust'ın bu özelliği, elimizde normal bir referans veya `Deref` trait'ini uygulayan bir tür olması fark etmeksizin aynı şekilde çalışan kodlar yazmamıza olanak tanır.
+
+> [!TIP]
+> ```rust
+> *y
+> // Rust bunu şuna dönüştürür:
+> *(y.deref())
+> //   ↑          ↑
+> // 1. deref()   2. Normal & referansını kaldır
+> // çağrılır       (* operatörü)
+> ```
+> ```
+> 1. ADIM: deref() metodu çağrılır
+>    y.deref() → &T döndürür (normal & referansı)
+> 
+> 2. ADIM: Normal & referansı kaldırılır
+>    *(&T) → T elde edilir
+> ```
+
+`deref` metodunun değere doğrudan değil, değere bir referans döndürmesinin ve `*(y.deref())` ifadesindeki parantezlerin dışındaki sıradan referans kaldırma işleminin hala gerekli olmasının nedeni, **sahiplik sistemiyle** ilgilidir. Eğer `deref` metodu değere giden bir referans yerine değeri doğrudan döndürseydi, değer `self` dışına taşınmış (moved) olurdu. Bu durumda veya dereference operatörünü kullandığımız çoğu senaryoda, `MyBox<T>` içindeki iç değerin sahipliğini almak istemeyiz.
+
+> [!TIP]
+> ##### 1. Neden `deref()` değeri doğrudan değil, referans olarak döndürüyor?
+> ```rust
+> // YANLIŞ olurdu (doğrudan değer döndürseydi):
+> fn deref(self) -> T {
+> 	self.0  // ← Değer taşındı! self yok oldu!
+> }
+> 
+> // DOĞRU (referans döndürüyor):
+> fn deref(&self) -> &T {
+> 	&self.0  // ← Sadece referans, sahiplik korunuyor!
+> }
+> ```
+> ##### 2. Neden `*(y.deref())` ifadesinde dıştaki `*` hala gerekli?
+> ```rust
+> *y
+> // şuna dönüşüyor:
+> *(y.deref())
+> //↑           ↑
+> //Dıştaki *   deref() → &T döndürür
+> 
+> // deref() sadece &T döndürür
+> // &T'yi T'ye çevirmek için dıştaki * gerekli!
+> ```
+> ##### 3. Neden Sahiplik Sistemiyle İlgili?
+> ```rust
+> let b = MyBox::new(String::from("merhaba"));
+>
+> // Eğer deref() değeri doğrudan döndürseydi:
+> let s = *b;  
+> // String b'den TAŞINDI!
+> // b artık kullanılamaz! ❌
+> 
+> // deref() referans döndürdüğü için:
+> let s = &*b;  
+> // Sadece referans alındı
+> // b hala kullanılabilir! ✅
+> ```
+> ##### Özet:
+> `deref()` metodunun değeri doğrudan değil referans olarak döndürmesinin sebebi sahiplik sistemidir: Eğer değeri doğrudan döndürseydi, değer `self`'den taşınır ve `MyBox` geçersiz olurdu. Dıştaki `*` ise `deref()`'in döndürdüğü `&T` referansını `T`'ye çevirmek için gereklidir.
+> ```
+> deref() → &T döndürür (sahipliği korumak için)
+> *       → &T'yi T'ye çevirir (değere ulaşmak için)
+> 
+> İkisi birlikte: *(y.deref()) = T ✅
+> ```
+
+`*` operatörünün, kodumuzda her `*` kullandığımızda `deref` metoduna yapılan bir çağrı ve ardından `*` operatörüne yapılan bir çağrıyla yalnızca bir kez değiştirildiğine dikkat edin. `*` operatörünün yerini doldurma işlemi sonsuz özyineleme yapmadığından, sonuçta Listing 15-9'daki `assert_eq!` içindeki `5` ile eşleşen `i32` tipinde veriye ulaşırız.
+
+> [!TIP]
+> **`*` operatörü, `deref()` + `*` zincirine yalnızca BİR KEZ dönüşür, sonsuz döngüye girmez.**
+> ##### Potansiyel Tehlike(Olmayan):
+> ```rust
+> *y
+> // Şuna dönüşüyor:
+> *(y.deref())
+> *(*(y.deref()).deref())  // ← Sonsuz döngü? 😱
+> // Hayır! ✅
+> ```
+> ##### Neden Sonsuz Döngüye Girmiyor?
+> ```rust
+> impl Deref for MyBox<T> {
+> 	fn deref(&self) -> &T {
+> 		&self.0    // ← &T döndürüyor (MyBox değil!)
+> 	}
+> }
+> 
+> *y 
+> → *(y.deref()) // MyBox → &T (1. adım) 
+> → *(& i32) // &T normal referans, Rust bunu zaten biliyor! 
+> → i32 // Bitti! ✅
+> ```
+> ##### Adım Adım:
+> ```
+> *y                     ← MyBox<i32> üzerinde *
+>     ↓
+> *(y.deref())           ← deref() çağrıldı, &i32 döndü
+>     ↓
+> *(&5)                  ← Normal & referansı, Rust biliyor!
+>     ↓
+> 5   (i32)              ← SONUÇ! assert_eq!(5, *y) ✅
+> ```
+> ##### Neden "Yalnızca Bir Kez" Deniyor?
+> ```rust
+> // * operatörü SADECE BİR KEZ dönüşüyor:
+> *y → *(y.deref())
+> 
+> // Sonraki * artık MyBox üzerinde değil, 
+> // normal &i32 üzerinde:
+> *(&i32) → i32  // Bu Rust'ın zaten bildiği şey!
+> ```
+> ##### Özet
+> Her `*` kullandığımızda bu dönüşüm yalnızca bir kez gerçekleşir. `deref()` `&T` döndürdüğü için ikinci `*` artık normal bir referans üzerinde çalışır ve sonsuz döngüye girmez. Sonuçta `i32` tipinde `5` değerine ulaşırız.
+
+### 15.2.5. Fonksiyonlarda ve Metotlarda Deref Coercion Kullanma
+
+Deref coercion, `Deref` trait'ini uygulayan bir türün referansını başka bir türün referansına dönüştürür. Örneğin Deref coercion, `&String` türünü `&str` türüne dönüştürebilir; çünkü `String` türü `Deref` trait'ini `&str` döndürecek şekilde uygular. Deref coercion, Rust'ın **fonksiyonlara ve metotlara verilen argümanlar üzerinde gerçekleştirdiği bir kolaylıktır (convenience)** ve yalnızca `Deref` trait'ini uygulayan türlerde çalışır. Deref coercion, Rust'ın **fonksiyonlara ve metotlara verilen argümanlar üzerinde gerçekleştirdiği bir kolaylıktır (convenience)** ve yalnızca `Deref` trait'ini uygulayan türlerde çalışır. Belirli bir türdeki bir değere ait referansı, parametre türüyle eşleşmeyen bir fonksiyona veya metoda argüman olarak verdiğimizde **otomatik olarak gerçekleşir**. Bir dizi `deref` metodu çağrısı sonucunda, verdiğimiz tür, parametrenin ihtiyaç duyduğu türe dönüştürülür.
+
+**Deref coercion**, fonksiyon ve metot çağrıları yazan programcıların `&` ve `*` kullanarak daha fazla **açık (explicit) referans ve dereference işlemi** eklemek zorunda kalmaması için Rust'a eklenmiştir.
+
+
+> [!TIP]
+> Deref coercion özelliği olmasaydı, `&str` parametresi alan bir fonksiyona elimizdeki `String` türünü verebilmek için manuel olarak referans çözüp (`*`) tekrar referansını (`&`) almamız gerekirdi:
+> ```rust
+> fn greeting(name: &str) {
+> 	println!("Merhaba, {}!, name");
+> }
+> 
+> fn main() {
+> 	let name = String::from("Ahmet");
+> 	// ❌ Deref coercion olmasaydı bunu yazmak zorundaydık:
+> 	// 1. (*ad) ile String içindeki str verisi çözülür.
+> 	// 2. &(*ad) ile o str'nin referansı (&str) tekrar alınır.
+> 	greeting(&(*name))
+> }
+> ```
+
+Deref coercion özelliği ayrıca, **referanslar veya akıllı işaretçilerle çalışabilen daha fazla kod yazmamıza** olanak tanır.
+
+> [!TIP]
+> ##### Ne Demek İstendiğini Bir Kod Örneğiyle Görelim:
+> ```rust
+> fn print_text(text: &str) {
+> 	println!("{}", text);
+> }
+> ```
+> Bu tek fonksiyon, **Deref coercion** özelliği sayesinde aşağıdaki **tüm farklı türlerle** hiçbir dönüştürme kodu yazmadan doğrudan çalışır:
+> ```rust
+> use std::rc::Rc;
+> 
+> fn main() {
+> 	// 1. Sıradan bir referans (&str)
+> 	let s1: &str = "Merhaba";
+> 	print_text(s1);
+> 	
+> 	// 2. Heap'te duran bir String (&String)
+> 	let s2: String = String::from("Merhaba");
+> 	print_text(&s2);
+> 	
+> 	// 3. Akıllı Pointer: Box (&Box<String>)
+> 	let s3: Box<String> = Box::new(String::from("Merhab"));
+> 	print_text(&s3); // &Box<String> -> &String -> &str dönüşümü otomatik yapılır
+> 	
+> 	// 4. Akıllı Pointer: Rc (&Rc<String>)
+> 	let s4: Rc<String> = Rc::new(String::from("Merhaba"));
+> 	print_text(&s4); // &Rc<String> -> &String -> &str dönüşümü otomatik yapılır
+> }
+> ```
+
+Deref coercion'ın çalışmasını görmek için **Liste 15-8**'de tanımladığımız `MyBox<T>` türünü ve **Liste 15-10**'da eklediğimiz `Deref` uygulamasını kullanalım. **Liste 15-11**, parametre olarak bir **string slice (`&str`)** alan bir fonksiyonun tanımını göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn hello(name: &str) {
+	println!("Hello, {name}!");
+}
+
+fn main() {}
+```
+
+> **[Liste 15-11](https://doc.rust-lang.org/stable/book/ch15-02-deref.html#listing-15-11)**: `&str` türünde `name` parametresine sahip bir `hello` fonksiyonu
+
+Örneğin, `hello("Rust");` şeklinde bir **string slice**'ı argüman olarak vererek `hello` fonksiyonunu çağırabiliriz. **Deref coercion**, `Liste 15-12`'de gösterildiği gibi `hello` fonksiyonunu `MyBox<String>` türündeki bir değerin referansıyla çağırmayı mümkün kılar.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::ops::Deref;
+
+impl<T> Deref for MyBox<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        &self.0
+    }
+}
+
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+
+fn hello(name: &str) {
+    println!("Hello, {name}!");
+}
+
+fn main() {
+    let m = MyBox::new(String::from("Rust"));
+    hello(&m);
+}
+```
+
+> **[Liste 15-12](https://doc.rust-lang.org/stable/book/ch15-02-deref.html#listing-15-12)**: Deref coercion yoluyla çalışan, bir `MyBox<String>` değerine referansla `hello`'yu çağırma
+
+Burada `hello` fonksiyonunu, bir `MyBox<String>` değerine referans olan `&m` argümanıyla çağırıyoruz. `Listing 15-10`'da `MyBox<T>` üzerinde `Deref` trait'ini uyguladığımız için, Rust `deref`'i çağırarak `&MyBox<String>`'i `&String`'e dönüştürebilir.  Standart kütüphane, `String` üzerinde bir string slice (`&str`) döndüren bir `Deref` uygulaması sunar ve bu durum `Deref` için hazırlanan API dokümantasyonunda yer almaktadır. Rust, `&String` türünü `hello` fonksiyonunun tanımıyla eşleşen `&str` türüne dönüştürmek için `deref` metodunu bir kez daha çağırır.
+
+Eğer Rust **deref coercion** özelliğini uygulamamış olsaydı, `&MyBox<String>` türündeki bir değeri `hello` fonksiyonuna göndermek için **Liste 15-12'deki kod yerine Liste 15-13'teki kodu** yazmamız gerekirdi.
+
+
+> [!TIP]
+> ##### Dönüşüm Zinciri:
+> Asıl anlatılan mekanizma şu:
+> ```rust
+> &m
+> │
+> │  &MyBox<String>
+> ▼
+> MyBox<T>::deref()
+> │
+> ▼
+> &String
+> │
+> │  String::deref()
+> ▼
+> &str
+> │
+> ▼
+> hello(name: &str)
+> ```
+> Yani Rust burada **iki kez `Deref` kullanıyor**:
+> ```rust
+> &MyBox<String>
+>       ↓
+>    &String
+>       ↓
+>      &str
+> ```
+> Bu dönüşümlerin bizim tarafımızdan açıkça yazılmasına gerek kalmıyor; **deref coercion bunları otomatik olarak gerçekleştiriyor.**
+
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::ops::Deref;
+
+impl<T> Deref for MyBox<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        &self.0
+    }
+}
+
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+
+fn hello(name: &str) {
+    println!("Hello, {name}!");
+}
+
+fn main() {
+    let m = MyBox::new(String::from("Rust"));
+    hello(&(*m)[..]);    // <--------------------
+}
+```
+
+> **[Liste 15-13](https://doc.rust-lang.org/stable/book/ch15-02-deref.html#listing-15-13)**: Rust'ta deref coercion olmasaydı yazmamız gereken kod
+
+`(*m)` ifadesi, `MyBox<String>` yapısının referansını çözerek(_dereference_) bir `String` elde eder. Ardından `&` ve `[..]` ifadeleri, `hello` fonksiyonunun imzasıyla (signature) eşleşmesi için `String`'in tamamına eşit olan bir string slice alır.  Deref coercion olmadan yazılan bu kod, bütün bu sembollerin kullanılması nedeniyle **okunması, yazılması ve anlaşılması daha zor** bir hâle gelir. Deref coercion, Rust'ın bu dönüşümleri bizim için **otomatik olarak gerçekleştirmesine** olanak tanır.
+
+İlgili türler için `Deref` trait'i tanımlandığında, Rust türleri analiz eder ve parametrenin türüyle eşleşen bir referans elde etmek için gerektiği kadar **`Deref::deref`** kullanır. Kaç kez `Deref::deref` çağrısının eklenmesi gerektiği **derleme zamanında (compile time)** belirlenir. Bu nedenle deref coercion'dan yararlanmanın **çalışma zamanında (runtime) herhangi bir performans maliyeti yoktur.**
+
+
+> [!TIP]
+> ##### 1. Adım: `*m` → `MyBox<String>`'i `String`'e dönüştür
+> ```rust
+> *m
+> // MyBox<String> üzerinde * operatörü
+> // deref() çağrılır → &String döner
+> // * uygulanır → String elde edilir
+> 
+> *m = String ("Rust")
+> ```
+> ##### 2. Adım: `[..]` → Tüm String'i dilimle
+> ```rust
+> (*m)[..]
+> // String'in tamamını al
+> // [..] = baştan sona (tüm string)
+> (*m)[..] = str("Rust")
+> ```
+> ##### 3. Adım: `&` → str'ye referans al
+> ```rust
+> &(*m)[..]
+> // str'ye referans al → &str elde edilir
+> 
+> &(*m)[..] = &str ("Rust")
+> ```
+> ##### 4. Adım: `hello(&str)` → Fonksiyon çağrısı
+> ```rust
+> hello(&(*m)[..])
+> // hello(&str) bekliyordu
+> // &str aldı ✅
+> ```
+> ##### Görsel Özet:
+> ```
+> MyBox<String>
+>     ↓ *m (deref)
+> String
+>     ↓ [..] (dilimleme)
+> str
+>     ↓ & (referans)
+> &str
+>     ↓
+> hello(&str) ✅
+> ```
+> ##### Deref Zorlaması ile Karşılaştırma:
+> ```rust
+> // MANUEL (Listing 15-13):
+> hello(&(*m)[..]);
+> // MyBox<String> → String → str → &str
+> 
+> // DEREF ZORLAMASI (Listing 15-12):
+> hello(&m);
+> // Rust otomatik halleder:
+> // &MyBox<String> → &String → &str ✅
+> ```
+> ##### Özet
+> ```rust
+> &(*m)[..]  =  Açık yazım (verbose)
+> &m         =  Deref zorlaması (otomatik)
+> 
+> İkisi de aynı sonucu verir: hello(&str) ✅
+> ```
+
+### 15.2.6. Değiştirilebilir(Mutable) Referanslarda Deref Coercion'ı Kullanma
+
+Değiştirilemez (**immutable**) referanslarda `*` operatörünün davranışını değiştirmek için `Deref` trait'ini kullandığımız gibi, değiştirilebilir (**mutable**) referanslarda `*` operatörünün davranışını değiştirmek için `DerefMut` trait'ini kullanabiliriz.
+
+Rust, türleri ve trait uygulamalarını bulduğunda şu üç durumda deref coercion gerçekleştirir:
+
+1. `T: Deref<Target=U>` olduğunda **`&T`** türünden **`&U`** türüne
+2. `T: DerefMut<Target=U>` olduğunda **`&mut T`** türünden **`&mut U`** türüne
+3. `T: Deref<Target=U>` olduğunda **`&mut T`** türünden **`&U`** türüne
+
+İlk iki durum, ikincisinin değiştirilebilirliği (mutability) uygulaması dışında tamamen aynıdır.
+
+
+> [!TIP]
+> #### Durum 1: `&T` → `&U` (`T: Deref<Target=U>`)
+>  **Gerçek Hayat Örneği:**
+>  ```rust
+>  fn print(s: &str) {   // &str bekliyor
+> 	 println!("{}", s);
+>  }
+>  let s = String::from("Merhaba");  // String tipinde
+>  print(&s);   // &String veriyoruz, &str bekleniyor
+>  // Rust otomatik: &String → &str ✅
+>  ```
+>  **Neden Çalışıyor?**
+>  ```rust
+>  // String, Deref'i şöyle uyguluyor:
+>  impl Deref for String {
+> 	 type Target = str; // U = str
+> 	 
+> 	 fn deref(&self) -> &str {
+> 		 // String'i &str'ye dönüştürüyor
+> 	 }
+>  }
+> // Yani: 
+> // T = String 
+> // U = str 
+> // &T = &String 
+> // &U = &str
+>  ```
+>  **"Şeffaf Ne Demek?"**
+>  ```rust
+>  // Siz sadece şunu yazıyorsunuz:
+> print(&s);
+> 
+> // Rust perde arkasında şunu yapıyor:
+> print(&*s);  // &String → deref() → &str
+> 
+> // Siz görmüyorsunuz, otomatik oluyor!
+> // İşte bu "şeffaf" demek! 🔍
+>  ```
+>  **Görsel:**
+>  ```
+>  String ──deref()──> str
+>   ↑                  ↑
+>  &String ─────────> &str
+>          Şeffaf!
+>          (Otomatik)
+>  ```
+
+İkinci durum ise aynı deref coercion'nın değiştirilebilir (mutable) referanslar için de geçerli olduğunu ifade eder.
+
+> [!TIP]
+> #### Durum 2: `&mut T` → `&mut U` (`T: DerefMut<Target=U>`)
+> **Örnek**
+> ```rust
+> fn make_uppercase(s: &mut str) {   // &mut str bekliyor
+> 	s.make_ascii_uppercase();   // &mut str üzerinde çalışır
+> }
+> fn main() {
+> 	let mut s = String::from("merhaba");
+> 	make_uppercase(&mut s);    // &mut String → &mut str (otomatik!)
+> 	println!("{}", s);         // MERHABA
+> }
+> ```
+> 
+
+Üçüncü durum biraz daha karmaşıktır: Rust, değiştirilebilir bir referansı(`&mut T`) değiştirilemez bir referansa(`&U`) da zorlayabilir (dönüştürebilir). Ancak bunun tersi mümkün değildir: **Değiştirilemez referanslar hiçbir zaman değiştirilebilir referanslara dönüştürülemez(coerce)**. Ödünç alma (borrowing) kuralları gereği, elinizde değiştirilebilir bir referans varsa, o değiştirilebilir referans o veriye erişen tek referans olmak zorundadır (aksi takdirde program derlenmez). Değiştirilebilir bir referansı değiştirilemez bir referansa dönüştürmek ödünç alma kurallarını asla ihlal etmez. Bir değişmez referansı değişebilir bir referansa dönüştürmek, başlangıçtaki değişmez referansın o veriye yapılan tek değişmez referans olmasını gerektirir, ancak ödünç alma kuralları bunu garanti etmez. Bu nedenle, Rust bir değişmez referansı değişebilir bir referansa dönüştürmenin mümkün olduğu varsayımını yapamaz.
+
+> [!TIP]
+> #### Problem
+> ```rust
+> fn main() {
+> 	let s = String::from("merhaba");
+> 	
+> 	let r1 = &s;    // 1. değişmez referans
+> 	let r2 = &s;    // 2. değişmez referans (aynı anda olabilir!)
+> 	
+> 	// Şimdi r1'i &mut'a çevirmeye çalışsak:
+> 	let r_mut = &mut r1;   // ❌ HATA!
+> 	// Çünkü r2 hala var!
+> 	// Değişebilir referans tek başına olmalı!
+> ```
+> #### Rust'ın Kuralı:
+> Değişmez referans → Değişebilir referans = ❌ İMKANSIZ
+> Çünkü;
+> - Aynı anda birden fazla &T olabilir
+> - Ama `&mut` T TEK BAŞINA olmalı
+> - Rust bunu garanti edemez!
+> #### Özet:
+> ```rust
+> &mut T
+>   │
+>   ├──────────────→ &mut U   ✅
+>   │
+>   └──────────────→ &U       ✅
+> ```
+> Çünkü `&mut T` zaten **"bu veriyi değiştirme konusunda tek yetki bende"** anlamına gelir. Bundan `&U` üretmek güvenlidir.
+> Ama
+> ```rust
+>  &T
+>   │
+>   └──────────────→ &mut U   ❌
+> ```
+> Fakat `&T` yalnızca **okuma yetkisi** verir. Rust, başka `&T` referanslarının bulunmadığını garanti edemez. Bu yüzden `&T`'yi sonradan `&mut U` yaparak değiştirme yetkisi vermek güvenli değildir.
+
+## 15.3. `Drop` Trait'i ile Temizleme Sırasında Kod Çalıştırma
+
+Akıllı işaretçi (**smart pointer**) deseninde önemli olan ikinci trait `Drop`'tur. `Drop`, bir değer **kapsamından (scope) çıkmak üzereyken ne olacağını özelleştirmenize** olanak tanır. Herhangi bir tür için `Drop` trait'inin bir uygulamasını (**implementation**) sağlayabilirsiniz. Bu uygulamadaki kod; dosyalar veya ağ bağlantıları gibi kaynakları serbest bırakmak (**release resources**) için kullanılabilir.
+
+`Drop` trait'ini akıllı işaretçiler bağlamında ele alıyoruz çünkü `Drop` trait'inin işlevselliği, **neredeyse her zaman bir akıllı işaretçi uygulanırken kullanılır**. Örneğin, bir `Box<T>` **drop edildiğinde**, box'ın işaret ettiği heap üzerindeki bellek alanını serbest bırakır (**deallocate eder**).
+
+Bazı dillerde, belirli türler için programcı o türlerin bir örneğini (instance) kullanmayı her bitirdiğinde belleği veya kaynakları serbest bırakacak bir kod çağırmak zorundadır. Dosya tanıtıcıları (file handles), soketler (sockets) ve kilitler (locks) buna örnektir. Buna **dosya tanıtıcıları (file handles)**, **soketler (sockets)** ve **kilitler (locks)** örnek olarak verilebilir. Eğer programcı bunu yapmayı unutursa, sistem aşırı yüklenebilir ve çökebilir. Rust'ta ise bir değer **kapsamından (scope) çıktığında** belirli bir kod parçasının çalıştırılmasını sağlayabilirsiniz ve derleyici bu kodu **otomatik olarak ekler**. Bunun sonucunda, belirli bir türe ait bir örneğin(_instance_) kullanımının sona erdiği programın her noktasına temizleme (**cleanup**) kodu yerleştirme konusunda dikkatli olmanız gerekmez. Buna rağmen kaynak sızıntısı (**resource leak**) yaşamazsınız!
+
+`Drop` trait'ini uygulayarak bir değer kapsam dışına çıktığında çalışacak kodu belirlersiniz. `Drop` trait'i, `self` parametresine değiştirilebilir (mutable) bir referans alan `drop` adında tek bir metodu uygulamanızı gerektirir(aşağıdaki koda gösterilmiş). Rust'ın `drop` metodunu ne zaman çağırdığını görmek için şimdilik `drop` metodunu `println!` ifadeleriyle uygulayalım.
+
+`Liste 15-14`, Rust'ın `drop` metodunu ne zaman çalıştırdığını göstermek amacıyla, tek özel işlevselliği örneği(_instance_) kapsam dışına çıktığında `Dropping CustomSmartPointer!` yazdıracak olan bir `CustomSmartPointer` yapısını (_struct_) göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+
+fn main() {
+    let c = CustomSmartPointer {
+        data: String::from("my stuff"),
+    };
+    let d = CustomSmartPointer {
+        data: String::from("other stuff"),
+    };
+    println!("CustomSmartPointers created");
+}
+```
+
+> [**Liste 15-14](https://doc.rust-lang.org/stable/book/ch15-03-drop.html#listing-15-14): Temizleme kodumuzu koyacağımız `Drop` trait'ini uygulayan bir `CustomSmartPointer` struct'ı
+
+`Drop` trait'i prelude (otomatik yüklenen standart kütüphane kümesi) içinde yer aldığı için onu kapsama (scope) dahil etmemize gerek yoktur. `CustomSmartPointer` üzerinde `Drop` trait'ini uyguluyoruz ve `println!`'i çağıran `drop` metodu için bir uygulama(`impl`) sağlıyoruz. `drop` metodunun gövdesi, türünüzün bir örneği (instance) kapsam dışına çıktığında çalıştırmak istediğiniz her türlü mantığı yerleştireceğiniz yerdir. Burada Rust'ın `drop` metodunu ne zaman çağıracağını görsel olarak göstermek için ekrana bir metin yazdırıyoruz.
+
+`main` fonksiyonu içinde iki tane `CustomSmartPointer` örneği(_instance_) oluşturuyor ve ardından `CustomSmartPointers created` metnini yazdırıyoruz. `main` fonksiyonunun sonunda, oluşturduğumuz `CustomSmartPointer` örnekleri kapsam dışına çıkacak ve Rust, `drop` metoduna koyduğumuz kodu çağırarak son mesajlarımızı yazdıracaktır. `drop` metodunu açıkça (explicitly) çağırmak zorunda kalmadığımıza dikkat edin.
+
+Bu programı çalıştırdığımızda, şu çıktıyı göreceğiz:
+
+```
+$ cargo run
+   Compiling drop-example v0.1.0 (file:///projects/drop-example)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running `target/debug/drop-example`
+CustomSmartPointers created
+Dropping CustomSmartPointer with data `other stuff`!
+Dropping CustomSmartPointer with data `my stuff`!
+```
+
+Rust, örneklerimiz(_instance_) kapsam dışına çıktığında bizim için otomatik olarak `drop` metodunu çağırdı ve belirlediğimiz kodu çalıştırdı. Değişkenler oluşturulma sıralarının tersi sırayla bellekten temizlenir (`dropped`); bu yüzden `d`, `c`'den önce silinmiştir(`dropped`). Bu örneğin(_example_) amacı, `drop` metodunun nasıl çalıştığına dair görsel bir rehber sunmaktır; genellikle bir yazdırma mesajı yerine türünüzün çalıştırması gereken temizleme kodunu belirtirsiniz.
+
+Ne yazık ki otomatik `drop` işlevselliğini devre dışı bırakmak kolay değildir. Aslında `drop`'u devre dışı bırakmak genellikle gerekli değildir; çünkü `Drop` trait'inin temel amacı, bu işlemin **otomatik olarak gerçekleştirilmesidir**. Ancak bazen bir değeri erkenden temizlemek isteyebilirsiniz. Kilitleri (locks) yöneten akıllı işaretçileri(_smart pointer_) kullanmak buna bir örnektir: Aynı kapsamdaki (scope) diğer kodların kilidi alabilmesi için, kilidi serbest bırakan `drop` metodunu çalışmaya zorlamak isteyebilirsiniz. Rust, `Drop` trait'inin `drop` metodunu manuel olarak çağırmanıza izin vermez; bunun yerine, bir değerin kapsamının sonundan önce silinmesini zorlamak istiyorsanız standart kütüphanenin sunduğu `std::mem::drop` fonksiyonunu çağırmanız gerekir.
+
+> [!TIP]
+> #### Kilitler(Locks) nedir?
+> Rust'ta **kilitler (Locks)**, birden fazla iş parçacığının (thread) aynı anda aynı veriye erişip onu değiştirmesini engelleyen ve **veri yarışlarını (data races)** önleyen eşzamanlılık (concurrency) mekanizmalarıdır.
+> 
+> Rust standart kütüphanesinde en yaygın kullanılan kilit mekanizması **`Mutex<T>`** (Mutual Exclusion - Karşılıklı Dışlama) yapısıdır.
+> ##### Kilitlerin (Mutex) Çalışma Mantığı
+> 1. **Guard (Muhafız) Yapısı:** Bir veri `Mutex::new(veri)` içine sarılır.
+> 2. **Kilitleme (`lock()`):** Veriye erişmek isteyen iş parçacığı `.lock()` metodunu çağırır.
+> 	+ Eğer kilit boşsa, kilit alınır ve geriye veriye erişim sağlayan bir `MutexGuard` döner.
+> 	+ Eğer kilit başka bir thread tarafındaysa, kilit serbest kalana kadar o thread **bekletilir (block edilir)**.
+> 3. **Otomatik Temizleme (`Drop`):** Elde edilen `MutexGuard` değişkeni kapsam dışına (out of scope) çıktığında Rust'ın **`Drop` trait'i** otomatik devreye girer ve kilidi serbest bırakır. Yani manuel olarak `unlock()` yazmanız gerekmez.
+
+
+> [!TIP]
+> #### Kilitler(Locks) ile ilgili Basit bir Örnek
+> Aşağıda birden fazla thread'in emniyetli bir şekilde paylaşımlı bir sayacı artırdığı basit bir örnek yer almaktadır:
+> ```rust
+> use std::sync::{Arc, Mutex};
+> use std::thread;
+> 
+> fn main() {
+>     // Sayacı bir Mutex içine alıyoruz. 
+>     // Arc (Atomic Reference Counting) ise bu kilidi thread'ler arasında 
+>     // güvenle paylaşmamızı (sahipliğini çoğaltmamızı) sağlar.
+>     let sayac = Arc::new(Mutex::new(0));
+>     let mut handles = vec![];
+> 
+>     for _ in 0..10 {
+>         let sayac_clone = Arc::clone(&sayac);
+>         
+>         let handle = thread::spawn(move || {
+>             // Kilidi alıyoruz. lock() metodu bize MutexGuard döndürür.
+>             let mut num = sayac_clone.lock().unwrap();
+>             
+>             *num += 1; // Deref sayesinde doğrudan içindeki veriyi güncelliyoruz.
+>             
+>         }); // <-- 'num' değişkeni burada scope dışına çıkar. 
+>             // Drop trait'i otomatik çalışır ve KİLİT SERBEST KALIR!
+> 
+>         handles.push(handle);
+>     }
+> 
+>     // Tüm thread'lerin işini bitirmesini bekliyoruz
+>     for handle in handles {
+>         handle.join().unwrap();
+>     }
+> 
+>     // Sonucu yazdırıyoruz
+>     println!("Sonç: {}", *sayac.lock().unwrap()); // Çıktı: Sonuç: 10
+> }
+> ```
+
+`Liste 15-14`'teki `main` fonksiyonunu değiştirerek `Drop` trait'inin `drop` metodunu manuel olarak çağırmaya çalışmak, `Liste 15-15`'te gösterildiği gibi çalışmayacaktır.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+
+fn main() {
+    let c = CustomSmartPointer {
+        data: String::from("some data"),
+    };
+    println!("CustomSmartPointer created");
+    c.drop();
+    println!("CustomSmartPointer dropped before the end of main");
+}
+```
+
+**[Liste 15-15](https://doc.rust-lang.org/stable/book/ch15-03-drop.html#listing-15-15)**: Erkenden temizlik(yani, erkenden bellekten silme) yapmak amacıyla `Drop` trait'ine ait `drop` metodunu manuel olarak çağırma girişimi
+
+Bu kodu derlemeye çalıştığımızda şu hatayı alırız:
+
+```rust
+$ cargo run
+   Compiling drop-example v0.1.0 (file:///projects/drop-example)
+error[E0040]: explicit use of destructor method
+  --> src/main.rs:16:7
+   |
+16 |     c.drop();
+   |       ^^^^ explicit destructor calls not allowed
+   |
+help: consider using `drop` function
+   |
+16 -     c.drop();
+16 +     drop(c);
+   |
+
+For more information about this error, try `rustc --explain E0040`.
+error: could not compile `drop-example` (bin "drop-example") due to 1 previous error
+```
+
+Bu hata mesajı, `drop` metodunu açıkça (explicitly) çağırmamıza izin verilmediğini belirtir. Hata mesajında kullanılan **destructor** (yıkıcı) terimi, yazılım dünyasında genel olarak bir örneği (instance) temizleyen(bellekten silen) fonksiyonlar için kullanılan bir terimdir. Destructor, bir örnek oluşturan **constructor** (yapıcı) teriminin karşıtıdır. Rust'taki `drop` fonksiyonu da bu yıkıcılardan (destructor) biridir.
+
+Rust, `drop` metodunu açıkça çağırmamıza izin vermez; çünkü çağırsaydık bile `main` fonksiyonunun sonunda o değer için `drop` metodunu otomatik olarak tekrar çalıştırırdı. Bu durum, Rust'ın aynı değeri iki kez temizlemeye çalışmasına, yani bir **double free** (çift serbest bırakma) hatasına yol açardı.
+
+Bir değer kapsam dışına çıktığında `drop` metodunun otomatik olarak eklenmesini engelleyemeyiz ve `drop` metodunu açıkça kendimiz çağıramayız. Bu nedenle, bir değerin erkenden temizlenmesini zorunlu kılmamız gerekiyorsa `std::mem::drop` fonksiyonunu kullanırız.
+
+`std::mem::drop` fonksiyonu, `Drop` trait'i içindeki `drop` metodundan farklıdır. Bu fonksiyonu, **drop(bellekten silmek) edilmesini zorlamak istediğimiz değeri argüman olarak vererek** çağırırız. Fonksiyon prelude (otomatik yüklenen standart kütüphane kümesi) içinde yer aldığından, `Liste 15-15`'teki `main` fonksiyonunu `Liste 15-16`'da gösterildiği gibi `drop` fonksiyonunu çağıracak şekilde güncelleyebiliriz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+
+fn main() {
+    let c = CustomSmartPointer {
+        data: String::from("some data"),
+    };
+    println!("CustomSmartPointer created");
+    drop(c);
+    println!("CustomSmartPointer dropped before the end of main");
+}
+```
+
+**[Liste 15-16](https://doc.rust-lang.org/stable/book/ch15-03-drop.html#listing-15-16)**: Bir değeri kapsamından çıkmadan önce açıkça drop(bellekten silmek) etmek için `std::mem::drop` çağrısı
+
+Bu kodu çalıştırmak aşağıdakini yazdıracaktır:
+
+```
+$ cargo run
+   Compiling drop-example v0.1.0 (file:///projects/drop-example)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.73s
+     Running `target/debug/drop-example`
+CustomSmartPointer created
+Dropping CustomSmartPointer with data `some data`!
+CustomSmartPointer dropped before the end of main
+```
+
+`Dropping CustomSmartPointer with data "some data"!` metni, `CustomSmartPointer created` ile `CustomSmartPointer dropped before the end of main` metinlerinin arasında yazdırılır; bu da `c` değişkenini drop(bellekten silmek) etmek için `drop` metodu kodunun tam o noktada çağrıldığını gösterir.
+
+Temizlemeyi kolay ve güvenli hale getirmek için `Drop` trait uygulamasında belirtilen kodu birçok şekilde kullanabilirsiniz: Örneğin, kendi bellek ayırıcınızı (memory allocator) oluşturmak için kullanabilirsiniz! `Drop` trait'i ve Rust'ın sahiplik sistemiyle, temizlemeyi hatırlamak zorunda kalmazsınız, çünkü Rust bunu otomatik olarak yapar.
+
+Ayrıca hâlâ kullanılmakta olan değerleri yanlışlıkla temizlemekten kaynaklanan sorunlar hakkında da endişelenmenize gerek yoktur: Referansların her zaman geçerli kalmasını sağlayan sahiplik sistemi, `drop` metodunun değer artık kullanılmadığında yalnızca bir kez çağrılmasını da garanti eder.
+
+Artık `Box<T>`'yi ve akıllı işaretçilerin bazı özelliklerini incelediğimize göre, standart kütüphanede tanımlanan birkaç başka akıllı işaretçiye bakalım.
+
+## 15.4. `Rc<T>`, Referans Sayımlı Akıllı İşaretçi( [`Rc<T>`, the Reference-Counted Smart Pointer](https://doc.rust-lang.org/stable/book/ch15-04-rc.html#rct-the-reference-counted-smart-pointer))
+
+Çoğu durumda sahiplik (ownership) nettir: Belirli bir değerin hangi değişkene ait olduğunu tam olarak bilirsiniz. Ancak tek bir değerin birden fazla sahibinin olabileceği durumlar da vardır. Örneğin graf (graph) veri yapılarında, birden fazla kenar (edge) aynı düğümü (node) işaret edebilir ve o düğüm, kavramsal olarak kendisini işaret eden tüm kenarlara aittir. Bir düğüm, kendisini işaret eden hiçbir kenar kalmayana ve dolayısıyla hiçbir sahibi olmayana kadar bellekten temizlenmemelidir.
+
+Birden fazla sahipliği(_multiple ownership_), `reference counting`(referans sayımı) ifadesinin kısaltması olan **`Rc<T>` Rust türünü** kullanarak açıkça etkinleştirmeniz gerekir. `Rc<T>` türü, bir değere yapılan referansların sayısını takip ederek değerin hâlâ kullanılıp kullanılmadığını belirler. Bir değere yönlendirilmiş **sıfır referans** kaldığında, o değer hiçbir referansı geçersiz kılmadan emniyetli bir şekilde temizlenebilir.
+
+`Rc<T>`'yi bir aile odasındaki televizyon gibi düşünebilirsiniz. Bir kişi televizyon izlemek için odaya girdiğinde televizyonu açar. Başka kişiler de odaya gelip televizyonu izleyebilir. **Son kişi odadan çıktığında**, televizyon artık kullanılmadığı için onu kapatır. Eğer diğer kişiler hâlâ televizyon izlerken birisi televizyonu kapatsaydı, odada kalan televizyon izleyicileri büyük bir tepki gösterirdi!
+
+Programımızın birden fazla bölümünün okuyabilmesi için bazı verileri **heap üzerinde tahsis etmek** istediğimizde ve veriyi hangi bölümün en son kullanmayı bitireceğini derleme zamanında belirleyemediğimizde `Rc<T>` türünü kullanırız. Eğer hangi bölümün en son kullanacağını bilseydik, o bölümü verinin sahibi yapabilirdik ve derleme zamanında uygulanan normal sahiplik kuralları geçerli olurdu.
+
+`Rc<T>`'nin yalnızca **tek iş parçacıklı (single-threaded)** senaryolarda kullanılabileceğini unutmayın. Bölüm 16'da eşzamanlılığı (concurrency) ele alırken, çok iş parçacıklı (multithreaded) programlarda referans sayımının nasıl yapılacağına değineceğiz.
+### 15.4.1. Veri Paylaşımı
+
+Şimdi `Liste 15-5`'teki cons list örneğimize geri dönelim. Onu `Box<T>` kullanarak tanımladığımızı hatırlayın. Bu kez, her ikisi de üçüncü bir listenin sahipliğini paylaşan iki liste oluşturacağız. Kavramsal olarak bu durum `Şekil 15-3`'e benzer görünür.
+
+![trpl15-03|897](Pictures/trpl15-03.svg)
+> **Şekil 15-3**: `b` ve `c` adlı iki listenin, `a` adlı üçüncü bir listenin sahipliğini paylaşması
+
+Önce 5 ve ardından 10 değerlerini içeren bir `a` listesi oluşturacağız. Sonra iki liste daha yapacağız: 3 ile başlayan bir `b` listesi ve 4 ile başlayan bir `c` listesi. Ardından hem `b` hem de `c` listesi, 5 ve 10 değerlerini barındıran ilk `a` listesine bağlanarak devam edecektir. Başka bir deyişle, her iki liste de 5 ve 10 içeren ilk listeyi paylaşacaktır.
+
+Bu senaryoyu `Box<T>` içeren `List` tanımımızı kullanarak uygulamaya çalışmak, `Liste 15-17`'de gösterildiği gibi çalışmayacaktır.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+enum List {
+    Cons(i32, Box<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let a = Cons(5, Box::new(Cons(10, Box::new(Nil))));
+    let b = Cons(3, Box::new(a));
+    let c = Cons(4, Box::new(a));
+}
+```
+
+**[Liste 15-17](https://doc.rust-lang.org/stable/book/ch15-04-rc.html#listing-15-17)**: `Box<T>` kullanan iki listenin, üçüncü bir listenin sahipliğini paylaşmaya çalışmasına izin verilmediğinin gösterilmesi
+
+Bu kodu derlediğimizde şu hatayı alırız:
+
+```rust
+$ cargo run
+   Compiling cons-list v0.1.0 (file:///projects/cons-list)
+error[E0382]: use of moved value: `a`
+  --> src/main.rs:11:30
+   |
+ 9 |     let a = Cons(5, Box::new(Cons(10, Box::new(Nil))));
+   |         - move occurs because `a` has type `List`, which does not implement the `Copy` trait
+10 |     let b = Cons(3, Box::new(a));
+   |                              - value moved here
+11 |     let c = Cons(4, Box::new(a));
+   |                              ^ value used here after move
+   |
+note: if `List` implemented `Clone`, you could clone the value
+  --> src/main.rs:1:1
+   |
+ 1 | enum List {
+   | ^^^^^^^^^ consider implementing `Clone` for this type
+...
+10 |     let b = Cons(3, Box::new(a));
+   |                              - you could clone this value
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `cons-list` (bin "cons-list") due to 1 previous error
+```
+
+`Cons` varyantları, içlerinde tuttukları verilerin **sahipliğini üstlenir**. Bu nedenle `b` listesini oluşturduğumuzda, `a` `b`'ye taşınır (_moved_) ve `b`, `a`'nın sahibi olur. Daha sonra `c` listesini oluştururken `a`'yı tekrar kullanmaya çalıştığımızda buna izin verilmez; çünkü `a` daha önce taşınmıştır.
+
+Bunun yerine `Cons` tanımını, veriyi doğrudan sahiplenmek yerine **referansları tutacak şekilde** değiştirebilirdik. Ancak bu durumda **yaşam süresi (lifetime) parametrelerini** belirtmemiz gerekirdi. Yaşam süresi parametrelerini belirterek, listedeki her öğenin en azından listenin tamamı kadar uzun süre yaşayacağını ifade etmiş olurduk. `Liste 15-17`'deki elemanlar(liste elemanını) ve listeler için durum böyledir, ancak **her senaryoda durum böyle değildir**.
+
+Bunun yerine `List` tanımımızı, Liste 15-18'de gösterildiği gibi `Box<T>` yerine `Rc<T>` kullanacak şekilde değiştireceğiz. Artık her `Cons` varyantı bir değer ve bir `List` yapısını işaret eden bir `Rc<T>` tutacaktır. `b`'yi oluştururken `a`'nın sahipliğini almak yerine, `a`'nın tuttuğu `Rc<List>` yapısını klonlayacağız (`clone`). Böylece referans sayısını birden ikiye çıkaracak, `a` ile `b`'nin bu `Rc<List>` içindeki verinin sahipliğini paylaşmasını sağlayacağız. `c`'yi oluştururken de `a`'yı tekrar klonlayarak referans sayısını ikiden üçe çıkaracağız. `Rc::clone` metodunu her çağırdığımızda, `Rc<List>` içindeki verinin referans sayısı artacak ve veri, ona yönlendirilmiş sıfır referans kalana kadar bellekten temizlenmeyecektir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+enum List {
+    Cons(i32, Rc<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+use std::rc::Rc;
+
+fn main() {
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    let b = Cons(3, Rc::clone(&a));
+    let c = Cons(4, Rc::clone(&a));
+}
+```
+
+**[Liste 15-18](https://doc.rust-lang.org/stable/book/ch15-04-rc.html#listing-15-18)**: `Rc<T>` kullanan bir `List` tanımı
+
+`Rc<T>` yapısı prelude (otomatik yüklenen standart kütüphane kümesi) içinde yer almadığı için onu kapsama (scope) dahil etmek amacıyla bir `use` ifadesi eklememiz gerekir. `main`'de, `5` ve `10`'u tutan listeyi oluşturup `a`'daki yeni bir `Rc<List>`'te saklıyoruz. Ardından, `b` ve `c`'yi oluştururken `Rc::clone` fonksiyonunu çağırıyor ve `a`'daki `Rc<List>`'e bir referansı argüman olarak geçiriyoruz.
+
+`Rc::clone(&a)` yerine `a.clone()` çağırabilirdik, ancak Rust'ın bu durumda kullanılan kuralı `Rc::clone`'dur. `Rc::clone`'un uygulaması, çoğu tipin `clone` uygulamasının yaptığı gibi tüm verinin derin bir kopyasını (_deep copy_) oluşturmaz. `Rc::clone` çağrısı yalnızca referans sayısını artırır, bu da fazla zaman almaz. Verilerin derin kopyalarını(_deep copy_)  oluşturmak ise oldukça fazla zaman alabilir. Kod içindeki performans sorunlarını ararken, yalnızca derin kopya oluşturan klonları dikkate almamız yeterli olur ve `Rc::clone` çağrılarını göz ardı edebiliriz.
+
+> [!TIP] Title
+> #### deep copy vs `Rc::clone`
+> `Rc::clone` kullandığında, kodunu okuyan biri "bu sadece referans sayısını artırıyor, veriyi kopyalamıyor" diye hemen anlıyor.
+> ##### Karşılaştırma:
+> ```rust
+> use std::rc::Rc;
+> 
+> fn main() {
+>     let s = String::from("merhaba");
+>     let v = vec![1, 2, 3];
+>     
+>     // Rc için basit bir değer kullanalım
+>     let a = Rc::new(5);  // List yerine basit i32 kullandık
+> 
+>     // DERİN KOPYA (yavaş, bellek kullanır):
+>     let s2 = s.clone();      // String kopyalandı 🐢
+>     let v2 = v.clone();      // Vec kopyalandı 🐢
+> 
+>     // SADECE SAYAÇ ARTIRMA (hızlı, bellek kullanmaz):
+>     let a2 = Rc::clone(&a);  // Sadece sayaç +1 ⚡
+> 
+>     println!("s2: {}", s2);
+>     println!("v2: {:?}", v2);
+>     println!("a: {}", a);
+>     println!("a2: {}", a2);
+>     println!("Referans sayısı: {}", Rc::strong_count(&a));  // 2
+> }
+> ```
+> **Çıktı:**
+> ```
+> s2: merhaba
+> v2: [1, 2, 3]
+> a: 5
+> a2: 5
+> Referans sayısı: 2
+> ```
+> ##### Görsel Ayrım:
+> ```rust
+> // Kodu okurken:
+> let x = birsey.clone();     // ← "Veri kopyalanıyor olabilir!" 🤔
+> let y = Rc::clone(&birsey); // ← "Sadece referans sayısı artıyor!" ✅
+> ```
+> ##### Neden Önemli?
+> ```rust
+> // Performans sorunu ararken:
+> let a2 = Rc::clone(&a);   // ← Bunu atlayabiliriz, hızlı! ⚡
+> let b2 = buyuk_veri.clone(); // ← Buna bakmalıyız, yavaş olabilir! 🐢
+> ```
+> ##### Özet:
+> +  **`Rc::clone` = "Kopyalama yok, sadece sayaç artırma"**  
+> + **`.clone()` = "Veri kopyalanıyor olabilir, dikkat et!"**
+> + Kodda `Rc::clone` görünce → Performans sorunu yok ✅
+> + Kodda `.clone()` görünce → Performans sorunu olabilir ⚠️ 🎯
+
+### 15.4.2. Referans Sayısını Artırmak İçin Klonlama
+
+`Liste 15-18`'deki çalışma örneğimizi, `a` içerisindeki `Rc<List>`'e yönelik referanslar oluşturup bunları bıraktıkça **referans sayısının nasıl değiştiğini görebileceğimiz şekilde** değiştirelim.
+
+`Liste 15-19`'da, `main` fonksiyonunu `c` listesinin etrafında **iç içe bir kapsam (inner scope)** olacak şekilde değiştireceğiz. Böylece `c` kapsam dışına çıktığında referans sayısının nasıl değiştiğini görebileceğiz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+enum List {
+    Cons(i32, Rc<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+use std::rc::Rc;
+
+// --snip--
+
+fn main() {
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    println!("count after creating a = {}", Rc::strong_count(&a));
+    let b = Cons(3, Rc::clone(&a));
+    println!("count after creating b = {}", Rc::strong_count(&a));
+    {
+        let c = Cons(4, Rc::clone(&a));
+        println!("count after creating c = {}", Rc::strong_count(&a));
+    }
+    println!("count after c goes out of scope = {}", Rc::strong_count(&a));
+}
+```
+
+> **[Liste 15-19](https://doc.rust-lang.org/stable/book/ch15-04-rc.html#listing-15-19)**: Referans sayısının yazdırılması
+
+Programın referans sayısının değiştiği her noktasında, `Rc::strong_count` fonksiyonunu çağırarak elde ettiğimiz referans sayısını yazdırıyoruz. Bu fonksiyonun adı `count` yerine **`strong_count`** olarak belirlenmiştir; çünkü `Rc<T>` türünde ayrıca bir **`weak_count`** da bulunur. `weak_count`'un ne amaçla kullanıldığını **"15.6.2.  `Weak<T>` Kullanarak Referans Döngülerini Önleme"** bölümünde göreceğiz.
+
+Bu kod aşağıdaki çıktıyı yazdırır:
+
+```
+$ cargo run
+   Compiling cons-list v0.1.0 (file:///projects/cons-list)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.45s
+     Running `target/debug/cons-list`
+count after creating a = 1
+count after creating b = 2
+count after creating c = 3
+count after c goes out of scope = 2
+```
+
+`a`'daki `Rc<List>`'in başlangıç referans sayısının 1 olduğunu görebiliriz; ardından, her `clone` çağırdığımızda sayı 1 artar. `c` kapsam dışına çıktığında ise referans sayısı 1 azalır. Referans sayısını artırmak için `Rc::clone` çağırmamız gerekirken, referans sayısını azaltmak için ayrıca bir fonksiyon çağırmamız gerekmez. Bunun nedeni, bir `Rc<T>` değeri kapsam dışına çıktığında **`Drop` trait'inin uygulanmasının referans sayısını otomatik olarak azaltmasıdır.**
+
+Bu örnekte göremediğimiz şey, `main` fonksiyonunun sonunda önce `b`'nin, ardından `a`'nın kapsam dışına çıkmasıyla referans sayısının(`count`) **0** olması ve `Rc<List>`'in tamamen temizlenmesidir. `Rc<T>` kullanmak, tek bir değerin **birden fazla sahibi olmasına** olanak tanır ve referans sayısı(`count`), sahiplerden herhangi biri hâlâ var olduğu sürece değerin geçerli kalmasını sağlar.
+
+`Rc<T>`, **değiştirilemez referanslar (immutable references)** aracılığıyla programınızın birden fazla bölümünün veriyi yalnızca **okuma amacıyla paylaşmasına** olanak tanır. Eğer `Rc<T>` aynı zamanda birden fazla **değiştirilebilir referansa (mutable references)** sahip olmanıza izin verseydi, Bölüm 4'de ele aldığımız ödünç alma(borrowing) kurallarından birini ihlal edebilirdiniz: Aynı konuma yönelik birden fazla değiştirilebilir ödünç alma, **veri yarışlarına (data races)** ve tutarsızlıklara neden olabilir. Ancak verileri değiştirebilmek oldukça kullanışlıdır! Bir sonraki bölümde, bu değişmezlik kısıtlamasıyla(_immutability restriction_) çalışmak için kullanabileceğiniz **iç değişebilirlik (interior mutability) desenini** ve `Rc<T>` ile birlikte kullanabileceğiniz **`RefCell<T>` türünü** ele alacağız.
+
+> [!TIP]
+> #### `Rc<T>` ve `RefCell<T>` ile basit Örnek:
+> ##### Problem
+> ```rust
+> use std::rc::Rc;
+>  fn main() {
+> 	let a = Rc::new(5);
+> 	let b = Rc::clone(&a);
+> 
+> 	// Rc<T> sadece değişmez referans verir:
+> 	*a = 10;  // ❌ HATA! Rc<T> değiştirilemez!
+> }
+> ```
+> **"Değişmezlik Kısıtlaması" Ne Demek?**
+> `Rc<T>` ile
+> + ✅ Birden fazla sahip olabilirsin
+> + ✅ Veriyi okuyabilirsin
+> + ❌ Veriyi DEĞİŞTİREMEZSİN!
+> ##### Çözüm: `Rc<T>` + `RefCell<T>`:
+> ```rust
+> use std::rc::Rc;
+> use std::cell::RefCell;
+> 
+> let a = Rc::new(RefCell::new(5));  // ← İkisini birleştir!
+> let b = Rc::clone(&a);             // ← Çoklu sahip
+> let c = Rc::clone(&a);             // ← Çoklu sahip
+> 
+> // Artık hem paylaşabilir hem değiştirebilirsin:
+> *a.borrow_mut() = 10;  // ✅ Değiştirildi!
+> 
+> println!("{}", b.borrow());  // 10 ✅
+> println!("{}", c.borrow());  // 10 ✅
+> ```
+> ##### Özet:
+> + `Rc<T>` → Çoklu sahip ✅, değiştirme ❌
+> + `RefCell<T>` → Tek sahip ✅, değiştirme ✅
+> + `Rc<RefCell<T>>` → Çoklu sahip ✅, değiştirme ✅ 🎯
+
+## 15.5. `RefCell<T>` ve İç Değiştirilebilirlik (Interior Mutability) Deseni
+
+
+
 
 ---
 
