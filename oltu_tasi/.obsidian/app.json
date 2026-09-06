@@ -9,5 +9,6 @@
   "alwaysUpdateLinks": true,
   "vimMode": false,
   "readableLineLength": false,
-  "showLineNumber": true
+  "showLineNumber": true,
+  "showInlineTitle": true
 }

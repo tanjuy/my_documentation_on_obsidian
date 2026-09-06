@@ -2,7 +2,8 @@
 > [!NOTE]
 > Django'un [Resmi Site](https://docs.djangoproject.com/en/5.1/intro/tutorial01/)sinden Türkçeye  çevrilmiştir.
 
-# İlk Django uygulamanızı yazma, 1. bölüm:
+# 1. İlk Django uygulamanızı yazma, 1. bölüm:
+
 + Örnekler ile öğrenelim
 + Bu eğitim boyunca, temel bir anket uygulamasının nasıl oluşturulacağı konusunda size yol göstereceğiz.
 + İki bölümden oluşacak:

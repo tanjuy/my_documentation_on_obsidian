@@ -115,11 +115,11 @@ Bu kitabı okumanın yanlış bir yolu yoktur: Eğer ileri atlamak istiyorsanız
 
 Rust öğrenme sürecinin önemli bir parçası, derleyicinin gösterdiği hata mesajlarını okumayı öğrenmektir: Bunlar sizi çalışan koda doğru yönlendirecektir. Bu nedenle, her durumda derleyicinin size göstereceği hata mesajıyla birlikte derlenmeyen birçok örnek sunacağız. Rastgele bir örneği girip çalıştırırsanız derlenmeyebileceğini bilin! Çalıştırmaya çalıştığınız örneğin hata vermesinin amaçlanıp amaçlanmadığını görmek için çevresindeki metni okuduğunuzdan emin olun. Çoğu durumda, derlenmeyen kodların doğru sürümüne sizi yönlendireceğiz. Ferris de çalışması amaçlanmayan kodları ayırt etmenize yardımcı olacaktır:
 
-|                           Ferris                            |              Anlam              |
-| :---------------------------------------------------------: | :-----------------------------: |
-|   <img src="./Pictures/does_not_compile.svg" width="100">   |       Bu kod derlenmiyor!       |
-|        <img src="./Pictures/panics.svg" width="100">        |       Bu kod panik verir!       |
-| <img src="./Pictures/not_desired_behavior.svg" width="100"> | Bu kod istenen sonucu vermiyor. |
+|                           Ferris                            |                Anlam                |
+| :---------------------------------------------------------: | :---------------------------------: |
+|   <img src="./Pictures/does_not_compile.svg" width="100">   |       <br>Bu kod derlenmiyor!       |
+|        <img src="./Pictures/panics.svg" width="100">        |       <br>Bu kod panik verir!       |
+| <img src="./Pictures/not_desired_behavior.svg" width="100"> | <br>Bu kod istenen sonucu vermiyor. |
 
 Çoğu durumda, derlenmeyen kodların doğru sürümüne sizi yönlendireceğiz. 
 
@@ -10953,7 +10953,6 @@ hello.txt should be included in this project: Os { code: 2, kind: NotFound, mess
 > + **`unwrap`**: "Bunu aç, hata varsa standart bir mesajla çök."
 > + **`expect`**: "Bunu aç, hata varsa **benim belirlediğim şu açıklamayla** çök."
 
-
 ### 9.2.2. Hataların Yayılması (Propagating Errors)
 
 + Bir fonksiyonun gerçekleştiriminde (implementation) hata oluşturabilecek bir işlem çağrıldığında, hatayı fonksiyonun içinde ele almak yerine, **hatayı çağıran koda geri döndürebilirsiniz**. Buna hatanın **yayılması (propagating)** denir.
@@ -11646,7 +11645,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 + Fonksiyonunuza "hiçlik" (null/nothing) geçirmeye çalışan kod derlenmeyecektir bile; dolayısıyla fonksiyonunuzun çalışma zamanında (runtime) bu durumu kontrol etmesine gerek kalmaz.
 + Başka bir örnek, parametrenin asla negatif olmamasını sağlayan `u32` gibi işaretsiz bir tam sayı tipi kullanmaktır.
 
-### 9.3.4. Doğrulama için Özel Tüpler (Custom Types for Validation)
+### 9.3.4. Doğrulama için Özel Türler (Custom Types for Validation)
 
 + Rust’un tür sistemini kullanarak geçerli bir değere sahip olduğumuzu garanti etme fikrini bir adım daha ileri götürelim ve **doğrulama için özel bir tür (custom type)** oluşturmayı inceleyelim.
 + Bölüm 2'deki, tahmin oyunu örneğini hatırlayın: Kodumuz kullanıcıdan 1 ile 100 arasında bir sayı tahmin etmesini istiyordu.
@@ -16921,8 +16920,4476 @@ fn it_adds_two() {
 	2. **Entegrasyon testleri (integration tests):** kütüphanenin birçok parçasının birlikte doğru çalışıp çalışmadığını kontrol eder ve kodu, dış kodların kullanacağı şekilde test etmek için kütüphanenin genel (public) API'sini kullanır.
 + Rust’ın tip sistemi ve ownership kuralları bazı hata türlerini engellemeye yardımcı olur; ancak kodunuzun beklenen davranışıyla ilgili mantıksal (logic) hataları azaltmak için testler yine de kritik öneme sahiptir.
 
+# 12. Bir G/Ç Projesi: Komut Satırı Programı Geliştirmek
+
+Bu bölüm, şu ana kadar öğrendiğiniz birçok becerinin bir özeti ve standart kütüphanedeki (*standard library*) birkaç yeni özelliğin keşfi niteliğindedir. Artık ustalaşmaya başladığınız Rust kavramlarını pratik etmek için; dosyalarla ve komut satırı giriş/çıkış işlemleriyle etkileşime giren bir komut satırı aracı inşa edeceğiz.
+
+Rust'ın hızı, güvenliği, tek bir ikili (*binary*) çıktı üretmesi ve platformlar arası(*cross-platform*) destek sunması; onu komut satırı araçları oluşturmak için ideal bir dil haline getirir. Bu yüzden projemiz için klasik bir komut satırı arama aracı olan **grep**'in (_globally search a regular expression and print_) kendi versiyonumuzu yapacağız. En basit kullanım durumunda `grep`, belirtilen bir dosya içerisinde yine belirtilen bir dizgeyi(*string*) arar. Bunu yapabilmek için `grep`, argüman olarak bir dosya yolu(*path*) ve bir dizge(*string*) alır. Ardından dosyayı okur, dosya içinde bu dizgeyi(*string argument*) içeren satırları bulur ve bu satırları ekrana yazdırır.
+
+Bu süreçte, komut satırı aracımızın diğer birçok araçta bulunan terminal özelliklerini nasıl kullanacağını göstereceğiz. Kullanıcının aracımızın davranışını yapılandırmasına izin vermek için bir **ortam değişkeninin** (*environment variable*) değerini okuyacağız. Ayrıca hata mesajlarını standart çıktıya (`stdout`) değil, standart hata konsol akışına (`stderr`) yazdıracağız; böylece örneğin kullanıcı, hata mesajlarını ekranda görmeye devam ederken başarılı çıktıyı bir dosyaya yönlendirebilecek.
+
+Rust topluluğu üyelerinden Andrew Gallant, zaten `ripgrep` adında, tam özellikli ve oldukça hızlı bir `grep` sürümü geliştirmiştir. Bizim geliştireceğimiz sürüm ise buna kıyasla oldukça basit olacak; ancak bu bölüm, `ripgrep` gibi gerçek dünya projelerini anlayabilmeniz için gerekli olan arka plan bilgisini sağlayacaktır.
+
+`grep` projemiz, şimdiye kadar öğrendiğiniz birçok kavramı bir araya getirecek:
+
+- Kodun organize edilmesi (Bölüm 7)
+- Vektörlerin ve dizgelerin(*strings*) kullanımı (Bölüm 8)
+- Uygun yerlerde **trait** ve **lifetime** kullanımı (Bölüm 10)
+- Test yazımı (Bölüm 11)
+
+Ayrıca, Bölüm 13 ve Bölüm 18'de ayrıntılı olarak ele alınacak olan closure'lara, iterator'lara ve trait nesnelerine de 
+kısaca giriş yapacağız.
+##  12.1. Komut Satırı Argümanlarını Kabul Etme
+
+Her zamanki gibi `cargo new` ile yeni bir proje oluşturalım. Sisteminizde halihazırda bulunabilecek `grep` aracından ayırt etmek için projemize `minigrep` adını vereceğiz:
+
+```bash
+$ cargo new minigrep
+     Created binary (application) `minigrep` project
+$ cd minigrep
+```
+
+İlk görevimiz, **minigrep**’in iki adet komut satırı argümanını kabul etmesini sağlamaktır: dosya yolu ve aranacak metin. Yani programımızı `cargo run` komutuyla çalıştırırken, `--` (çift tire) kullanarak bundan sonraki argümanların Cargo’ya değil programımıza ait olduğunu belirtmek, ardından aranacak metni(*searchstring*) ve içinde arama yapılacak dosyanın yolunu(_example-filename.txt_) vermek istiyoruz. Örneğin:
+
+```bash
+$ cargo run -- searchstring example-filename.txt
+```
+
+Şu anda `cargo new` tarafından oluşturulan program, verdiğimiz argümanları işleyemez. crates.io üzerinde, komut satırı argümanlarını kabul eden programlar yazmayı kolaylaştıran bazı hazır kütüphaneler bulunmaktadır. Ancak siz bu kavramı yeni öğrendiğiniz için, bu özelliği kendimiz gerçekleştireceğiz.
+### 12.1.1. Argüman Değerlerini Okumak 
+
+`minigrep`'in kendisine ilettiğimiz komut satırı argümanlarının değerlerini okuyabilmesini sağlamak için, Rust'ın standart kütüphanesinde sunulan `std::env::args` fonksiyonuna ihtiyacımız olacak. Bu fonksiyon, `minigrep`'e iletilen komut satırı argümanlarının bir iterator'nü döndürür. Iterator'ları **Bölüm 13**'te tam kapsamlı olarak ele alacağız. Şuan için, Iterator’ler hakkında yalnızca iki detayı bilmeniz yeterli: Iterator’ler bir dizi değer üretir ve bir iterator üzerinde `collect` metodunu çağırarak onu, iterator'ın ürettiği tüm elemanları barındıran bir vektör gibi bir koleksiyona dönüştürebiliriz.(**Not:** `collect()` metodun çalışma ilkesi açıklanmış son cümlede, [detay için](https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.collect))
+
+`Liste 12-1`'deki kod, `minigrep` programınızın kendisine iletilen herhangi bir komut satırı argümanını okumasına ve ardından değerleri bir vektör içinde toplamasına olanak tanır.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    dbg!(args);
+}
+```
+
+> **Liste 12-1:** Komut satırı argümanlarını bir vektörde içerisinde toplamak ve yazdırmak
+
+İlk olarak, `args` fonksiyonunu kullanabilmek için `use` deyimiyle(*statement*) `std::env` modülünü kapsama (*scope*) dahil ediyoruz. `std::env::args` fonksiyonunun iki modül seviyesine iç içe yerleştirilmiş olduğuna dikkat edin. Bölüm 7’de de tartıştığımız gibi, istediğimiz fonksiyon birden fazla modülün içinde yer aldığında, doğrudan fonksiyonu değil, üst (*parent*) modülü kapsamımıza almayı tercih ediyoruz. Bu sayede `std::env` içindeki diğer fonksiyonları da kolayca kullanabiliriz. Ayrıca bu yaklaşım, `use std::env::args` yazıp fonksiyonu sadece `args` olarak çağırmaktan daha az belirsizlik yaratır; çünkü `args`, mevcut modülde tanımlanmış başka bir fonksiyonla kolayca karıştırılabilir.
+
+
+> [!NOTE]
+> #### `args` Fonksiyonu ve Geçersiz Unicode
+> `std::env::args` fonksiyonunun, herhangi bir argümanın geçersiz Unicode içermesi durumunda panikleyeceğini (programı hata vererek durduracağını) unutmayın. Eğer programınızın geçersiz Unicode içeren argümanları kabul etmesi gerekiyorsa, bunun yerine `std::env::args_os` kullanın. Bu fonksiyon, `String` yerine `OsString` değerleri üreten bir iterator döndürür. Biz burada basitlik adına `std::env::args` kullanıyoruz; çünkü `OsString` değerleri platforma göre farklılık gösterir ve `String`’e kıyasla kullanımı daha karmaşıktır.
+
+`main` fonksiyonunun ilk satırında `env::args` fonksiyonunu çağırıyoruz ve iterator tarafından üretilen tüm değerleri bir vektöre dönüştürmek için hemen `collect` metodunu kullanıyoruz. `collect` fonksiyonunu birçok farklı koleksiyon türü oluşturmak için kullanabiliriz; bu nedenle, bir string vektörü(`Vec<String>`) istediğimizi belirtmek için `args` değişkeninin tipini açıkça belirtiyoruz (*type annotation*). Rust’ta genellikle tür belirtimi (*type annotation*) yapmanız gerekmez; ancak `collect` özelinde, Rust hangi koleksiyonu istediğimizi çıkaramadığı için çoğu zaman bunu açıkça belirtmemiz gerekir.
+
+Son olarak, hata ayıklama (debug) makrosunu kullanarak vektörü yazdırıyoruz. Kodu önce hiç argüman vermeden, ardından iki argümanla çalıştırmayı deneyelim:
+
+```bash
+$ cargo run
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running `target/debug/minigrep`
+[src/main.rs:5:5] args = [
+    "target/debug/minigrep",
+]
+```
+
+```bash
+$ cargo run -- needle haystack
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.57s
+     Running `target/debug/minigrep needle haystack`
+[src/main.rs:5:5] args = [
+    "target/debug/minigrep",
+    "needle",
+    "haystack",
+]
+```
+
+Vektördeki ilk değerin `"target/debug/minigrep"` olduğunu fark edin; bu, oluşturduğumuz çalıştırılabilir dosyanın (*binary*) adıdır. Bu, C dilindeki argüman listesi davranışıyla eşleşir ve programların çalıştırılırken hangi isimle çağrıldıklarını kullanmalarına olanak tanır. Program adını mesajlarda yazdırmak veya programın hangi komut satırı takma adıyla (*alias*) çağrıldığına bağlı olarak davranışını değiştirmek istediğiniz durumlarda, bu isme erişebilmek genellikle kolaylık sağlar. Ancak bu bölümün amacı açısından, bu değeri göz ardı edeceğiz ve yalnızca ihtiyacımız olan iki argümanı kaydedeceğiz.
+
+
+> [!tip] Title
+> #### C dilindeki argüman listesi
+> C programlama dilinde `main` fonksiyonu şöyle tanımlanır:
+> ```C
+> int main(int argc, char *argv[]) { ... }
+> ```
+> Burada `argv[0]` her zaman **programın kendi adıdır**. Bu, C'den gelen köklü bir gelenektir.
+> Rust da aynı geleneği sürdürmektedir — yani `args` vektörünün **ilk elemanı (indeks 0) her zaman programın adıdır**, kullanıcının verdiği gerçek argümanlar ise 1. indeksten itibaren başlar.
+
+### 12.1.2. Argüman Değerlerini Değişkenlerde Saklamak
+
+Program şu anda komut satırı argümanları olarak verilen değerlere erişebiliyor. Şimdi bu iki argümanın değerlerini değişkenlerde saklamamız gerekiyor; böylece bu değerleri programın geri kalanında kullanabiliriz. Bunu `Liste 12-2`’de gerçekleştireceğiz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let query = &args[1];
+    let file_path = &args[2];
+
+    println!("Searching for {query}");
+    println!("In file {file_path}");
+}
+```
+
+> **Liste 12-2:** Liste 12-2: Sorgu(*query*) argümanını ve dosya yolu(*file path*) argümanını tutacak değişkenlerin oluşturulması
+
+Vektörü yazdırdığımızda gördüğümüz gibi, programın adı `args[0]` konumunda yer alır; bu nedenle argümanları `1` indeksinden itibaren almaya başlıyoruz. **minigrep**’in aldığı ilk argüman, aramak istediğimiz metindir; bu yüzden ilk argümanın bir referansını alarak bunu `query` değişkenine atıyoruz. İkinci argüman ise dosya yoludur; bu nedenle ikinci argümanın bir referansını alarak bunu `file_path` değişkenine atıyoruz.
+
+Kodun beklediğimiz gibi çalıştığını doğrulamak için, bu değişkenlerin değerlerini geçici olarak ekrana yazdırıyoruz. Şimdi programı `test` ve `sample.txt` argümanlarıyla tekrar çalıştıralım:
+
+```bash
+$ cargo run -- test sample.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep test sample.txt`
+Searching for test
+In file sample.txt
+```
+
+Harika, program çalışıyor! İhtiyacımız olan argüman değerleri doğru değişkenlere atanmış durumda. Daha sonra, kullanıcı hiç argüman vermediğinde ortaya çıkabilecek bazı hatalı durumları ele almak için hata yönetimi (*error handling*) ekleyeceğiz; ancak şimdilik bu durumu göz ardı edip bunun yerine dosya okuma yeteneği eklemeye odaklanacağız.
+## 12.2.  Bir Dosya Okumak
+
+Şimdi `file_path` argümanında belirtilen dosyayı okuma işlevini ekleyeceğiz. Öncelikle bunu test edebilmek için örnek bir dosyaya ihtiyacımız var: Birkaç satırdan oluşan ve içinde bazı tekrar eden kelimeler bulunan küçük bir metin dosyası kullanacağız. `Liste 12-3`, bu iş için gayet uygun olan bir Emily Dickinson şiiri içermektedir! Projenizin kök dizininde `poem.txt` adında bir dosya oluşturun ve "*I’m Nobody! Who are you?*" şiirini girin.
+
+**Dosya adı:** `poem.txt`
+
+```text
+I'm nobody! Who are you?
+Are you nobody, too?
+Then there's a pair of us - don't tell!
+They'd banish us, you know.
+
+How dreary to be somebody!
+How public, like a frog
+To tell your name the livelong day
+To an admiring bog!
+```
+
+> **Liste 12-3:** Emily Dickinson’a ait bir şiir, iyi bir test örneği oluşturur.
+
+Metni yerine yerleştirdikten sonra, `src/main.rs` dosyasını düzenleyin ve Liste 12-4’te gösterildiği gibi dosyayı okumak için gerekli kodu ekleyin.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::fs;                                     // <======
+
+fn main() {
+    // --snip--
+    let args: Vec<String> = env::args().collect();
+
+    let query = &args[1];
+    let file_path = &args[2];
+
+    println!("Searching for {query}");
+	println!("In file {file_path}");              // <======
+
+    let contents = fs::read_to_string(file_path)  // <======
+        .expect("Should have been able to read the file"); // <======
+
+    println!("With text:\n{contents}");           // <======
+}
+```
+
+> **Liste 12-4:** İkinci argüman tarafından belirtilen dosyanın içeriğini okumak
+
+> [!tip]
+> ##### Projenin Ağaç Yapısı:
+> Burada `poem.txt` dosyasın nerede bulunduğuna dikkat ediniz:
+> ```bash
+> .
+> ├── Cargo.lock
+> ├── Cargo.toml
+> ├── poem.txt           <=== Dikkat
+> ├── src
+> │   └── main.rs        <=== Dikkat
+> └── target
+>     ├── CACHEDIR.TAG
+>     ├── debug
+>     └── flycheck0
+> ```
+
+Öncelikle, `use` deyimi(*statement*) ile standart kütüphanenin ilgili bir bölümünü kapsamımıza dahil ederiz: Dosya işlemleri için `std::fs` modülüne ihtiyacımız var.
+
+`main` fonksiyonunda, yeni eklenen `fs::read_to_string` deyimi(*statement*) `file_path` değişkenini alır, ilgili dosyayı açar ve dosyanın içeriğini barındıran `std::io::Result<String>` türünde bir değer döndürür.
+
+Bundan sonra, dosya okunduktan sonra `contents` değişkeninin değerini yazdıran geçici bir `println!` ifadesi daha ekliyoruz; böylece programın şu ana kadar düzgün çalışıp çalışmadığını kontrol edebiliriz.
+
+Bu kodu, birinci komut satırı argümanı olarak herhangi bir string ile (çünkü henüz arama kısmını uygulamadık) ve ikinci argüman olarak `poem.txt` dosyasıyla çalıştıralım:
+
+```
+$ cargo run -- the poem.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep the poem.txt`
+Searching for the
+In file poem.txt
+With text:
+I'm nobody! Who are you?
+Are you nobody, too?
+Then there's a pair of us - don't tell!
+They'd banish us, you know.
+
+How dreary to be somebody!
+How public, like a frog
+To tell your name the livelong day
+To an admiring bog!
+```
+
+Harika! Kod, dosyanın içeriğini okuyup ekrana yazdırdı. Ancak kodun birkaç kusuru var. Şu anda `main` fonksiyonu birden fazla sorumluluk üstleniyor: Genel olarak, her fonksiyonun yalnızca tek bir işi üstlenmesi durumunda kod daha anlaşılır ve bakımı daha kolay olur. Bir diğer sorun ise hataları olabileceği kadar iyi ele almıyor olmamızdır. Program şu an küçük olduğu için bu kusurlar büyük bir problem oluşturmuyor; ancak program büyüdükçe, bu sorunları düzgün bir şekilde düzeltmek daha zor olacaktır. Bir program geliştirirken erken aşamada yeniden düzenleme (*refactoring*) yapmak iyi bir yöntemdir(*Good Practice*); çünkü küçük kod parçalarını yeniden düzenlemek(*refactoring*) çok daha kolaydır. Bir sonraki adımda bunu yapacağız.
+
+
+## 12.3.  Modülerliği ve Hata Yönetimini İyileştirmek İçin Yeniden Düzenleme(Refactoring)
+
+Programımızı geliştirmek için, programın yapısı ve potansiyel hataları nasıl ele aldığıyla ilgili dört sorunu düzelteceğiz. **İlk olarak,** `main` fonksiyonumuz şu an iki görevi yerine getiriyor: hem argümanları ayrıştırıyor (parse ediyor) hem de dosya okuyor.  Program büyüdükçe, `main` fonksiyonunun üstlendiği görev sayısı da artacaktır. Bir fonksiyonun sorumlulukları arttıkça, onu anlamak zorlaşır, test etmek güçleşir ve bir değişiklik yaparken başka bir kısmı bozma riski artar. İşlevselliği, her fonksiyonun tek bir görevden sorumlu olacağı şekilde ayırmak en iyisidir.(Yani, her fonksiyonun tek bir işi üstlenecek şekilde yapılandırılması en sağlıklı yaklaşımdır.)
+
+Bu sorun aynı zamanda **ikinci problemle** de bağlantılıdır: `query` ve `file_path` programımız için yapılandırma (*configuration*) değişkenleri olsa da, `contents` gibi değişkenler programın mantığını (*logic*) yürütmek için kullanılır.(Yani, `query` ve `file_path` → kullanıcının verdiği ayarlar (yapılandırma), `contents` → programın işi yaparken kullandığı veri (mantık)). `main` fonksiyonu uzadıkça, kapsam (*scope*) içine almamız gereken değişken sayısı da artar; kapsamda ne kadar çok değişken olursa, her birinin ne işe yaradığını takip etmek de o kadar zorlaşır. Bu nedenle, yapılandırma değişkenlerini tek bir yapı (*struct*) içinde toplamak, amaçlarını daha anlaşılır hale getirir.
+
+**Üçüncü sorun**, dosya okuma işlemi başarısız olduğunda bir hata mesajı yazdırmak için `expect` kullanmış olmamızdır; ancak bu hata mesajı sadece "Dosya okunabilmeliydi" (_Should have been able to read the file_) yazdırıyor. Bir dosyayı okumak birçok nedenden dolayı başarısız olabilir: Örneğin dosya eksik olabilir veya onu açmak için iznimiz olmayabilir. Şu anda, durum ne olursa olsun her şey için aynı hata mesajını yazdırıyoruz ve bu da kullanıcıya hiçbir bilgi vermiyor!
+
+**Dördüncü olarak**, bir hatayı yönetmek için `expect` kullanıyoruz ve eğer kullanıcı programımızı yeterli argüman belirtmeden çalıştırırsa, Rust'tan sorunu net bir şekilde açıklamayan bir "indeks sınırların dışında" (_index out of bounds_) hatası alacaklar. Tüm hata yönetimi(*error-handling*) kodlarının tek bir yerde olması en iyisidir; böylece gelecekteki geliştiriciler(*maintainers*), hata yönetimi mantığının değişmesi gerektiğinde danışacakları tek bir yere sahip olurlar. Tüm hata yönetimi(*error-handling*) kodunun tek bir yerde toplanması, son kullanıcılarımız(*end users*) için anlamlı mesajlar yazdırmamızı garantileyecek.
+
+Projemizi yeniden düzenleyerek(*refactoring*) hadi bu dört sorunu çözmeye başlayalım?
+### 12.3.1. Binary Projelerde Sorumlulukların Ayrılması
+
+Birden fazla görevin sorumluluğunu `main` fonksiyonuna yükleme şeklindeki organizasyonel problem, birçok binary(ikili) projede yaygındır. Sonuç olarak birçok Rust programcısı, `main` fonksiyonu büyümeye başladığında binary(ikili) bir programın farklı sorumluluklarını (*concerns*) ayırmayı faydalı bulur. Bu süreç şu adımlardan oluşur:
+
++ Programınızı `main.rs` ve `lib.rs` olarak ikiye bölün ve programın asıl mantığını(*logic*) `lib.rs` dosyasına taşıyın.
++ Komut satırı argümanlarını ayrıştırma (*parsing*) mantığı basit olduğu sürece `main` fonksiyonunda kalabilir.
++ Komut satırı ayrıştırma mantığı karmaşıklaşmaya başladığında, onu `main` fonksiyonundan çıkarıp diğer fonksiyonlara veya türlere(`struct`, `enum`, vb.) aktarın.
+
+Bu süreçten sonra `main` fonksiyonunda kalan sorumluluklar aşağıdakilerle sınırlı olmalıdır:
+
+- Komut satırı ayrıştırma mantığını argüman değerleriyle çağırmak.(`parse_config(&args);`)
+- Diğer tüm yapılandırmaları (*configuration*) kurmak.
+- `lib.rs` içindeki bir `run` fonksiyonunu çağırmak.
+-  Eğer `run` bir hata döndürürse bu hatayı yönetmek.
+
+Bu kalıp, sorumlulukların ayrılmasıyla (*separating concerns*) ilgilidir: `main.rs` programın çalıştırılmasından sorumludur, `lib.rs` ise işin asıl mantığını içerir. `main` fonksiyonunu doğrudan test edemediğiniz için, bu yapı programınızın tüm mantığını `main` dışına taşıyarak test edebilmenize olanak tanır. `main` fonksiyonunda kalan kod ise, sadece okuyarak doğruluğunu kontrol edebileceğiniz kadar küçük olur. Bu süreci takip ederek programımızı yeniden düzenleyelim.
+
+#### 12.3.1.1. Argüman Ayrıştırıcısını Dışarı Çıkarma(Extracting the Argument Parser)
+
+Argümanları ayrıştırma(*Argument Parser*) işlevselliğini, `main` fonksiyonunun çağıracağı ayrı bir fonksiyona aktaracağız. `Liste 12-5`, `main` fonksiyonunun `src/main.rs` içinde tanımlayacağımız yeni bir `parse_config` fonksiyonunu çağıran yeni başlangıç halini göstermektedir.
+
+**Dosya adı:** `scr/main.rs`
+
+```rust
+use std::env;
+use std::fs;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let (query, file_path) = parse_config(&args);
+
+
+    println!("Searching for {query}");
+    println!("In file {file_path}");
+
+    let contents = fs::read_to_string(file_path)
+        .expect("Should have been able to read the file");
+
+    println!("With text:\n{contents}");
+}
+
+fn parse_config(args: &[String]) -> (&str, &str) {
+    let query = &args[1];
+    let file_path = &args[2];
+
+    (query, file_path)
+}
+```
+
+> `Liste 12-5`: `parse_config` fonksiyonunu `main` fonksiyonundan ayırma(*Extracting*)
+
+Komut satırı argümanlarını hâlâ bir vektörde topluyoruz; ancak artık `main` fonksiyonu içinde 1. indeksteki argümanı `query` değişkenine ve 2. indeksteki argümanı `file_path` değişkenine atamak yerine, tüm vektörü `parse_config` fonksiyonuna gönderiyoruz. Ardından `parse_config` fonksiyonu, hangi argümanın hangi değişkene gideceğini belirleyen mantığı yürütür ve değerleri tekrar `main`’e geri döndürür. `query` ve `file_path` değişkenlerini hâlâ `main` içinde oluşturuyoruz, ancak `main` artık komut satırı argümanlarının ve değişkenlerin birbirine nasıl karşılık geldiğini belirleme sorumluluğuna sahip değildir.
+
+Bu yeniden düzenleme küçük programımız için biraz gereksiz gibi görünebilir; ancak küçük ve aşamalı adımlarla yeniden düzenleme yapıyoruz(*refactoring*). Bu değişikliği yaptıktan sonra, argüman ayrıştırmanın(*argument parsing*) hâlâ çalışıp çalışmadığını doğrulamak için programı tekrar çalıştırın. İlerlemenizi sık sık kontrol etmek iyi bir pratiktir; çünkü bir sorun ortaya çıktığında sebebini tespit etmeyi kolaylaştırır.
+
+#### 12.3.1.2. Yapılandırma Değerlerini Gruplamak
+
+`parse_config` fonksiyonunu daha da geliştirmek için küçük bir adım daha atabiliriz. Şu anda bir demet (*tuple*) döndürüyoruz, ancak hemen ardından bu demeti tekrar parçalarına ayırıyoruz. Bu, henüz doğru **soyutlamaya** sahip olmadığımızın bir işaretidir.
+
+Geliştirme yapılması gerektiğini gösteren bir diğer gösterge de `parse_config` ismindeki "config" (yapılandırma) kısmıdır; bu, döndürdüğümüz iki değerin birbiriyle ilişkili olduğunu ve her ikisinin de tek bir yapılandırma değerinin parçası olduğunu ima eder. Şu anda bu iki değeri bir demet içinde gruplandırmak dışında, verinin yapısında bu anlamı tam olarak iletemiyoruz. Bunun yerine, bu iki değeri bir **struct** (yapı) içine koyacağız ve her bir struct alanına(*struct field*) anlamlı bir isim vereceğiz. Bunu yapmak, bu kodun gelecekteki bakımını yapacak kişilerin farklı değerlerin birbirleriyle nasıl ilişkili olduğunu ve amaçlarının ne olduğunu anlamasını kolaylaştıracaktır.
+
+`Liste 12-6`, `parse_config` fonksiyonunda yapılan bu iyileştirmeleri göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::fs;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = parse_config(&args);
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    let contents = fs::read_to_string(config.file_path)
+        .expect("Should have been able to read the file");
+
+    // --snip--
+
+    // println!("With text:\n{contents}");
+}
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+fn parse_config(args: &[String]) -> Config {
+    let query = args[1].clone();
+    let file_path = args[2].clone();
+
+    Config { query, file_path }
+}
+```
+
+**Liste 12-6:** `parse_config` fonksiyonunu bir `Config` struct’ı döndürecek şekilde yeniden düzenleme(*refactoring*)
+
+`query` ve `file_path` adında alanlara (*fields*) sahip `Config` isimli bir yapı (*struct*) ekledik. `parse_config` fonksiyonunun imzası artık bir `Config` değeri döndürdüğünü gösteriyor. `parse_config` gövdesinde, daha önce `args` içindeki `String` değerlerine referans veren string slice'lar döndürürken; artık `Config` yapısını sahipli (*owned*) `String` değerleri içerecek şekilde tanımlıyoruz. `main` içindeki `args` değişkeni, argüman değerlerinin sahibidir(yani, `args` değişkeni içindeki tüm `String` verilerin **sahibidir**) ve `parse_config` fonksiyonunun bunları sadece ödünç almasına (*borrow*) izin verir. Bu durum, eğer `Config` yapısı `args` içindeki değerlerin sahipliğini almaya çalışsaydı, Rust'ın ödünç alma kurallarını ihlal edeceğimiz anlamına gelirdi.
+
+`String` verisini yönetmenin pek çok yolu vardır; en kolay, ancak biraz verimsiz yol, değerler üzerinde `clone` metodunu çağırmaktır. Bu, `Config` örneğinin sahip olacağı string verisinin tam bir kopyasını oluşturur; bu da referans(`&str`) saklamaya kıyasla daha fazla zaman ve bellek kullanımı anlamına gelir. Ancak veriyi klonlamak, referansların yaşam sürelerini(*lifetimes*) yönetmek zorunda kalmadığımız için kodumuzu oldukça sadeleştirir. Bu durumda, biraz performanstan feragat edip sadelik kazanmak makul bir takas(_trade-off_) olur.
+
+
+> [!NOTE]
+> #### `clone` Kullanmanın Getirdiği Takaslar (Trade-Offs)
+> Birçok Rust geliştiricisi (_Rustacean_), çalışma zamanı(*runtime cost*) maliyeti nedeniyle sahiplik(*ownership*) problemlerini çözmek için `clone` kullanmaktan kaçınma eğilimindedir. [Bölüm 13](https://doc.rust-lang.org/stable/book/ch13-00-functional-features.html)’te, bu tür durumlarda daha verimli yöntemlerin nasıl kullanılacağını öğreneceksiniz. Ancak şimdilik, ilerlemeye devam edebilmek için birkaç string verisini kopyalamak kabul edilebilir bir yaklaşımdır; çünkü bu kopyalama işlemini yalnızca bir kez yapacaksınız ve dosya yolu ile arama metni oldukça küçüktür. İlk denemede kodu aşırı optimize(*hyperoptimization*) etmeye çalışmak yerine, biraz verimsiz de olsa çalışan bir programa sahip olmak daha iyidir. Rust konusunda deneyim kazandıkça, en verimli çözümlerle başlamak daha kolay hale gelecektir; ancak şimdilik `clone` kullanmak tamamen kabul edilebilir bir yaklaşımdır.
+
+`main`'i, `parse_config` tarafından döndürülen `Config` örneğini(_instance_) `config` adlı bir değişkene atayacak şekilde güncelledik ve daha önce ayrı `query` ve `file_path` değişkenlerini kullanan kodu, artık bunlar yerine `Config` struct'ındaki alanları(_fields_) kullanacak şekilde güncelledik.
+
+Artık kodumuz, `query` ve `file_path`'in birbiriyle ilişkili olduğunu ve amaçlarının programın nasıl çalışacağını yapılandırmak olduğunu daha açık bir şekilde ifade etmektedir. Bu değerleri kullanan her kod parçası, onları `config` örneği(*instance*) içinde, amaçlarına göre adlandırılmış alanlarda(_fields_) bulacağını bilir.
+
+> [!tip]
+> Yukarıdaki paragrafı biraz daha açıklarsak:
+> 
+> Artık kodumuz, `query` ve `file_path`'in birbiriyle ilişkili olduğunu ve ikisinin de programın nasıl çalışacağını belirlemek amacıyla kullanıldığını daha açık bir şekilde ortaya koymaktadır. Bu değerlere ihtiyaç duyan her kod parçası, onları `config` örneği içinde, amacını yansıtan isimlerle tanımlanmış alanlarda arayacağını bilir.
+> 
+> Yani cümle şunu anlatmaktadır:
+> - **Önce:** `query` ve `file_path` ayrı değişkenlerdi; aralarındaki ilişki belirsizdi.
+> - **Sonra:** İkisi de `Config` struct'ı içinde toplandı; böylece ikisinin de aynı amaca, yani programı yapılandırmaya hizmet ettiği açıkça görülmektedir.
+> 
+> Ve artık bu değerlere ihtiyaç duyan her kod:
+> ```rust
+> config.query
+> config.file_path
+> ```
+> şeklinde erişir; bu da kodun daha okunabilir ve anlaşılır olmasını sağlar.
+
+#### 12.3.1.3. `Config` için Bir Kurucu (*Constructor*) Oluşturmak
+
+Şimdiye kadar, komut satırı argümanlarını ayrıştırmaktan sorumlu mantığı `main`'den çıkarıp `parse_config` fonksiyonuna yerleştirdik. Bunu yapmak, `query` ve `file_path` değerlerinin birbiriyle ilişkili olduğunu görmemize yardımcı oldu ve bu ilişkinin kodumuzda yansıtılması gerekiyordu. Ardından, `query` ve `file_path` değerlerinin ortak amacını isimlendirmek ve bu değerleri `parse_config` fonksiyonundan yapı alan(*struct field*) isimleri olarak döndürebilmek için bir `Config` struct'ı ekledik.
+
+Artık `parse_config` fonksiyonunun amacı bir `Config` örneği(_instance_) oluşturmak olduğuna göre, bu fonksiyonu sıradan bir fonksiyon olmaktan çıkarıp `Config` struct’ı ile ilişkili `new` adlı bir fonksiyona dönüştürebiliriz. Bu değişikliği yapmak kodu daha **idiomatik** (dile uygun - Rust’ın yaygın kullanım tarzına daha uygun) hale getirecektir. Standart kütüphanedeki `String` gibi türlerin örneklerini(_instance_) `String::new` çağrısıyla oluşturabiliyoruz. Benzer şekilde, `parse_config` fonksiyonunu `Config` ile ilişkilendirilmiş bir `new` fonksiyonuna dönüştürerek, `Config::new` çağrısıyla `Config` örnekleri oluşturabileceğiz. `Liste 12-7`, yapmamız gereken değişiklikleri göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::fs;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::new(&args);
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    let contents = fs::read_to_string(config.file_path)
+        .expect("Should have been able to read the file");
+
+    println!("With text:\n{contents}");
+
+    // --snip--
+}
+
+// --snip--
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+impl Config {
+    fn new(args: &[String]) -> Config {  // A associated function
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Config { query, file_path }
+    }
+}
+```
+
+> **Liste 12-7:** `parse_config` fonksiyonunun `Config::new` olarak değiştirilmesi
+
+`main` fonksiyonunda `parse_config`’i çağırdığımız yeri, bunun(yani,`parse_config`) yerine `Config::new`’u çağıracak şekilde güncelledik. `parse_config` fonksiyonunun adını `new` olarak değiştirdik ve onu bir `impl` bloğu içine taşıdık; böylece `new` fonksiyonu `Config` ile ilişkilendirilmiş oldu. Kodun hâlâ doğru çalıştığından emin olmak için tekrar derlemeyi deneyin.
+### 12.3.2. Hata Yönetimini Düzeltme(Fixing the Error Handling)
+
+Şimdi hata yönetimimizi düzeltmeye odaklanacağız. Hatırlarsanız, eğer `args` vektörü üçten az öğe içeriyorsa, 1. veya 2. indeksteki değerlere erişmeye çalışmak programın **panic** yapmasına(aniden kapanmasına) neden olacaktır. Programı hiçbir argüman vermeden çalıştırmayı deneyin; şuna benzer bir çıktı alacaksınız:
+
+```
+$ cargo run
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep`
+
+thread 'main' panicked at src/main.rs:27:21:
+index out of bounds: the len is 1 but the index is 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+Buradaki _“index out of bounds: the len is 1 but the index is 1”_ satırı, aslında programcılar için yazılmış bir hata mesajıdır. Son kullanıcılarımızın bunun yerine ne yapmaları gerektiğini anlamalarına yardımcı olmayacaktır. Hadi bunu şimdi düzeltelim.
+
+#### 12.3.2.1. Hata Mesajlarını Geliştirme(Improving the Error Message)
+
+`Liste 12-8`'de, `new` fonksiyonuna 1. ve 2. indekse erişmeden önce dilimin(`slice`) yeterince uzun olup olmadığını doğrulayacak bir kontrol ekliyoruz. Eğer `slice` yeterince uzun değilse, program `panic` yapar ve daha iyi bir hata mesajı görüntüler.
+
+> [!tip]
+> İşte buradaki `&[String]` bir **dilimdir.** Yani:
+> - `Vec<String>` → sahipli, dinamik boyutlu bir koleksiyon
+> - `&[String]` → bu koleksiyonun tamamına veya bir bölümüne yapılan **referans (dilim)**
+> 
+> **Kısaca:** `args` olarak iletilen `&[String]` diliminde en az 3 eleman yoksa (program adı + 2 argüman), program panikler.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::fs;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::new(&args);
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    let contents = fs::read_to_string(config.file_path)
+        .expect("Should have been able to read the file");
+
+    println!("With text:\n{contents}");
+}
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+impl Config {
+    // --snip--
+    fn new(args: &[String]) -> Config {
+        if args.len() < 3 {
+            panic!("not enough arguments");
+        }
+        // --snip--
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Config { query, file_path }
+    }
+}
+```
+
+> **Liste 12-8:** Argüman sayısı için kontrol eklenmesi
+
+Bu kod, Liste 9-13'te yazdığımız `Guess::new` fonksiyonuna benzerdir(*9.3.4. Doğrulama için Özel Türler*); orada `value` argümanı geçerli değerler aralığının dışında olduğunda `panic!` çağırmıştık. Burada bir değer aralığını denetlemek yerine, `args`'ın uzunluğunun en az `3` olduğunu denetliyoruz ve fonksiyonun geri kalanı bu koşulun sağlandığı varsayımı altında çalışabilir. `args` üçten az öğe içeriyorsa, bu koşul `true` olacak ve programı hemen sonlandırmak için `panic!` makrosunu çağırıyoruz.
+
+`new` fonksiyonuna eklediğimiz bu birkaç satır kodla birlikte, hatanın şimdi nasıl göründüğünü görmek için programı argüman olmadan tekrar çalıştıralım:
+
+```
+$ cargo run
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep`
+
+thread 'main' panicked at src/main.rs:26:13:
+not enough arguments
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+Bu çıktı daha iyi: Artık makul bir hata mesajımız var. Ancak, kullanıcılarımıza vermek istemediğimiz gereksiz(*extraneous*) bilgiler de hala orada duruyor. Belki de `Liste 9-13`'te kullandığımız teknik burası için en iyisi değildir: Bölüm 9'da tartışıldığı gibi, bir `panic!` çağrısı, bir kullanım sorunundan ziyade bir programlama sorunu(*bug*) için daha uygundur.(`panic!` → geliştirici hataları için, `Result` → kullanıcı hataları için). Bunun yerine, [Bölüm 9](https://doc.rust-lang.org/stable/book/ch09-03-to-panic-or-not-to-panic.html#guidelines-for-error-handling)’da(*9.3.3. Hata Yönetimi İçin Genel Kılavuzlar*) öğrendiğiniz diğer yöntemi kullanacağız—başarı ya da hata durumunu ifade eden bir [`Result` döndürmek](https://doc.rust-lang.org/stable/book/ch09-02-recoverable-errors-with-result.html)(9.2. Result ile Kurtarılabilir Hatalar).
+#### 12.3.2.2. `panic!` Çağırmak Yerine `Result` Döndürmek
+
+Bunun yerine, başarılı durumda bir `Config` örneği içeren ve hata durumunda sorunu açıklayan bir `Result` değeri döndürebiliriz. Ayrıca fonksiyon ismini `new` yerine `build` olarak değiştireceğiz; çünkü birçok programcı `new` fonksiyonlarının asla hata vermemesini bekler. `Config::build`, `main` ile iletişim kurarken, bir sorun olduğunu belirtmek için `Result` türünü(*type*) kullanabilir. Ardından `main` fonksiyonunu, `Err` varyantını kullanıcılarımız için daha pratik bir hataya dönüştürecek şekilde değiştirebiliriz; böylece `panic!` çağrısının neden olduğu `thread 'main'` ve `RUST_BACKTRACE` gibi çevreleyici metinlerden kurtulmuş oluruz.
+
+`Liste 12-9`, artık `Config::build` olarak adlandırdığımız fonksiyonun dönüş değerinde ve `Result` döndürebilmesi için fonksiyon gövdesinde yapmamız gereken değişiklikleri göstermektedir. Bu noktada kod henüz derlenmeyecektir; çünkü `main` fonksiyonunu da güncellememiz gerekiyor. Bunu bir sonraki listede yapacağız(Bir sonraki `Liste: 12-10`).
+
+<img src="./Pictures/does_not_compile.svg" width="60"> 
+**Dosya adı:** `src/main.rs`    
+
+```rust
+use std::env;
+use std::fs;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::new(&args);
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    let contents = fs::read_to_string(config.file_path)
+        .expect("Should have been able to read the file");
+
+    println!("With text:\n{contents}");
+}
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Ok(Config { query, file_path })
+    }
+}
+```
+
+> **Liste 12-9:** `Config::build` fonksiyonundan bir `Result` döndürmek
+
+`build` fonksiyonumuz, başarı durumunda bir `Config` örneği ve hata durumunda bir string literal içeren bir `Result` döndürür. Hata değerlerimiz her zaman `'static` yaşam süresine(_lifetime_) sahip string literal’lar olacaktır. `Config` dönüş değerini bir `Ok` içine sardık(*wrap*) yani, `Config` dönüş değerini `Ok` içine alıyoruz. Bu değişiklikler, fonksiyonun yeni tür imzasına (*type signature*) uymasını sağlar.
+
+> [!TIP]
+> + Eski fonksiyon imzası(*type signature*): `fn new(args: &[String]) -> Config {`, 
+> + Yeni fonksiyon imzası(*type signature*): `fn build(args: &[String]) -> Result<Config, &'static str> {`
+
+`Config::build` fonksiyonundan bir `Err` değeri döndürmek, `main` fonksiyonunun `build` fonksiyonundan dönen `Result` değerini ele almasına ve hata durumunda süreci daha temiz bir şekilde sonlandırmasına olanak tanır.
+#### 12.3.2.3. `Config::build` Fonksiyonunu Çağırma ve Hataları Ele Alma
+
+Hata durumunu ele almak ve kullanıcı dostu bir mesaj yazdırmak için, `Liste 12-10`'da gösterildiği gibi `Config::build` tarafından döndürülen `Result`'ı ele alacak şekilde `main`'i güncellememiz gerekir. Ayrıca komut satırı aracından sıfır olmayan bir hata koduyla(`process::exit(1)`) çıkış yapma sorumluluğunu `panic!`'ten alacağız ve bunun yerine elle uygulayacağız. Sıfır olmayan(*nonzero*) bir çıkış durumu (exit status), programımızı çağıran sürece - *process* (örneğin terminale veya bir script'e), programın bir hata durumuyla sonlandığını bildirmek için kullanılan bir gelenektir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::fs;
+use std::process;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    // --snip--
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    let contents = fs::read_to_string(config.file_path)
+        .expect("Should have been able to read the file");
+
+    println!("With text:\n{contents}");
+}
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Ok(Config { query, file_path })
+    }
+}
+```
+
+> **Liste 12-10:** Bir `Config` oluşturma işlemi başarısız olursa bir hata koduyla çıkış yapma
+
+Bu listede, henüz detaylı olarak incelemediğimiz bir metot kullandık: `unwrap_or_else`. [Bu metod](https://doc.rust-lang.org/std/result/enum.Result.html#method.unwrap_or_else), standart kütüphane tarafından `Result<T, E>` üzerinde tanımlanmıştır. `unwrap_or_else` kullanmak, bize `panic!` içermeyen(`non-panic`), özel bir hata yönetimi tanımlama imkanı sağlar. Eğer `Result` bir `Ok` değeri ise, bu metodun davranışı `unwrap` ile benzerdir: `Ok`'un sardığı iç değeri döndürür(Yani, `Ok` içindeki değeri döndürür.). Ancak, eğer değer bir `Err` ise, bu metot bir **closure** (*anonim fonksiyon*) içindeki **kodu**(`println!("Problem parsing arguments: {err}");` ve `process::exit(1);`) çağırır; **closure**, tanımladığımız ve `unwrap_or_else`'e argüman olarak aktardığımız isimsiz bir fonksiyondur(anonymous function - *anonim fonksiyon*). Closure'ları [Bölüm 13](https://doc.rust-lang.org/stable/book/ch13-00-functional-features.html)'te daha ayrıntılı olarak ele alacağız. Şimdilik, yalnızca `unwrap_or_else`'in `Err`'ün iç değerini —bu durumda `Liste 12-9`'da eklediğimiz `"not enough arguments"` statik string'ini— dikey çizgiler(`|err|`) arasında görünen `err` argümanı içinde closure'ımıza aktaracağını bilmeniz yeterlidir. Daha sonra, closure içindeki kod, çalıştığında bu `err` değerini kullanabilir.
+
+Standart kütüphaneden `process` modülünü kapsama(*scope*) dahil etmek için yeni bir `use` satırı ekledik. Hata durumunda çalıştırılacak closure içindeki kod yalnızca iki satırdır: `err` değerini yazdırıyoruz ve ardından `process::exit` çağırıyoruz. `process::exit` fonksiyonu programı derhal durduracak ve çıkış durumu kodu(*exit status code*) olarak kendisine geçilen sayıyı döndürecektir. Bu, `Liste 12-8`'de kullandığımız `panic!` tabanlı işlemeye benzerdir; ancak artık tüm ekstra çıktıyı almıyoruz. Hadi deneyelim:
+
+```rust
+$ cargo run
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running `target/debug/minigrep`
+Problem parsing arguments: not enough arguments
+```
+
+Harika! Bu çıktı kullanıcılarımız için çok daha dostane.
+
+> [!TIP]
+> + **Unwrap_or_else:** "Ya paketi aç ya da şunu yap" anlamına gelir. Başarılıysa veriyi alır, hata oluşursa `else` kısmındaki kod bloğunu çalıştırır.
+> + **Vertical pipes (`| |`):** Dikey çizgiler. Closure'ın aldığı parametreleri (burada hata mesajı olan `err`) içine yazdığımız yerdir.
+> + **Process::exit(1):** Programı belirli bir hata koduyla (genelde 1) kapatır. Bu, işletim sistemine "İşlem hatalı bitti" demenin standart yoludur.
+
+### 12.3.3. `main`'den Mantığı Ayırma(Extracting Logic from main)
+
+Ayarların işlenmesini(*configuration parsing*) yeniden düzenlemeyi(*refactoring*) tamamladığımıza göre, şimdi programın asıl mantığına odaklanalım. "12.3.1. Binary Projelerde Sorumlulukların Ayrılması" bölümünde belirttiğimiz gibi; şu anda `main` fonksiyonunda bulunan ve yapılandırmayı ayarlama(*setting up configuration*) veya hataları ele alma(_handling errors_) ile ilgili olmayan tüm mantığı barındıracak `run` adlı bir fonksiyon ayıracağız(*extract*). İşimiz bittiğinde, `main` fonksiyonu özlü(*concise*) ve sadece gözle bakarak kolayca doğrulanabilir bir halde olacak; ayrıca diğer tüm mantık işlemleri için testler yazabileceğiz.
+
+`Liste 12-11`, `run` fonksiyonunu ayırmaya yönelik küçük ve aşamalı bir iyileştirmeyi göstermektedir.
+
+> [!TIP]
+> #### "Extract" Ne Demek?
+> Yazılım mühendisliğinde **"extract"** (çıkarmak), mevcut bir fonksiyonun içindeki bir kod bloğunu alıp **ayrı bir fonksiyona taşımak** anlamına gelir.
+> Bu tekniğe İngilizce'de:
+> - **"Extract Function"** (Fonksiyon çıkarma)
+> - **"Extract Method"** (Metot çıkarma)
+> 
+> denir ve Martin Fowler'ın ünlü "Refactoring" kitabında tanımlanmış standart bir tekniktir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::fs;
+use std::process;
+
+fn main() {
+    // --snip--
+
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    run(config);
+}
+
+fn run(config: Config) {
+    let contents = fs::read_to_string(config.file_path)
+        .expect("Should have been able to read the file");
+
+    println!("With text:\n{contents}");
+}
+
+// --snip--
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Ok(Config { query, file_path })
+    }
+}
+```
+
+> **Liste 12-11:** Program mantığının geri kalanını içeren bir `run` fonksiyonunun dışarı çıkarılması(*extracting*)
+
+`run` fonksiyonu artık `main` içindeki kalan tüm işleyişi(*mantığı*) içerir; bu, dosyanın okunmasıyla başlayan kısmı kapsar. `run` fonksiyonu, bir `Config` örneğini(`instance`) argüman olarak alır.
+#### 12.3.3.1. `run` Fonksiyonundan Hata Döndürmek
+
+Geri kalan program mantığının `run` fonksiyonuna ayrılmasıyla, `Liste 12-9`'daki `Config::build` örneğinde yaptığımız gibi hata yönetimini iyileştirebiliriz. `expect` çağırarak programın paniklemesine izin vermek yerine, `run` fonksiyonu bir şeyler ters gittiğinde bir `Result<T, E>` döndürecektir.  Bu, hata yönetimiyle ilgili mantığı `main` fonksiyonu içinde, kullanıcı dostu bir şekilde daha da  sağlamlaştırmamıza(*consolidate*) olanak tanıyacaktır. Liste 12-12, `run` fonksiyonunun imzasında ve gövdesinde yapmamız gereken değişiklikleri göstermektedir.
+
+> [!tip]
+> #### Teknik Detay: "Consolidate" (Sağlamlaştırmak/Merkezileştirmek)
+> + Metinde geçen "consolidate" ifadesi çok önemlidir. Eğer projeniz büyürse ve 10 farklı fonksiyonunuz olursa, hepsinin kendi kendine `panic!` yapması kaosa yol açar. 
+> + Hataları `Result` ile `main`'e "paslamak", tüm hata mesajlarının nasıl görüneceğine ve programın nasıl kapanacağına **tek bir noktadan** karar vermenizi sağlar.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::fs;
+use std::process;
+use std::error::Error;
+
+// --snip--
+
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    run(config);
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {     // <=========
+    let contents = fs::read_to_string(config.file_path)?;  // <=========
+
+    println!("With text:\n{contents}");                    // <=========
+
+    Ok(())                                                 // <=========
+}                                                          // <=========
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Ok(Config { query, file_path })
+    }
+}
+```
+
+> **Liste: 12-12:** `run` fonksiyonunun `Result` döndürecek şekilde değiştirilmesi
+
+Burada üç önemli değişiklik yaptık. İlk olarak, `run` fonksiyonunun dönüş türünü `Result<(), Box<dyn Error>>` olarak değiştirdik.  Bu fonksiyon daha önce birim tipi(*unit type*) ,`()`, döndürüyordu ve biz bunu `Ok` durumunda döndürülen değer olarak koruyoruz.
+
+> [!TIP]
+>  #### 1. Eski Durum: Sadece İşini Yap ve Bitir
+>  Önceki halinde `run` fonksiyonunun dönüş türü yazılmamıştı, yani varsayılan olarak `()` (birim tür/unit type) döndürüyordu.
+>  ```rust
+>   fn run(config: Config) { // Dönüş türü yazılmasa da aslında -> () demektir.
+>      let contents = fs::read_to_string(config.file_path).expect("hata");
+>      println!("Dosya içeriği: {}", contents);
+>      // Fonksiyon biterken gizli bir () döndürür.
+> }
+>  ```
+>  #### 2. Yeni Durum: Başarıyı Bir Raporla Bildir
+>  Şimdi fonksiyonun dönüş türünü `Result<(), Box<dyn Error>>` yaptık. Bu, "Sana bir rapor gönderiyorum; raporun başarı kısmında yine bir boş kutu (`()`) var, ama hata kısmında ne olduğu belli olmayan bir hata olabilir," demektir.
+>  ```rust
+>  fn run(config: Config) -> Result<(), Box<dyn Error>> {
+>     let contents = fs::read_to_string(config.file_path)?; // Hata olursa Err döner
+>     println!("Dosya içeriği: {}", contents);
+> 
+>     Ok(()) // İşte bahsedilen kısım burası!
+>}
+>  ```
+
+Hata tipi için ise bir trait object olan `Box<dyn Error>` kullandık (ve `std::error::Error`’ı dosyanın başında bir `use` ifadesiyle kapsamımıza dahil ettik). Trait object’leri [Bölüm 18](https://doc.rust-lang.org/stable/book/ch18-00-oop.html)’de detaylı olarak ele alacağız. Şimdilik sadece şunu bilmeniz yeterli: `Box<dyn Error>`, fonksiyonun `Error` trait'ini (özelliğini) uygulayan bir tür döndüreceği anlamına gelir; ancak geri dönen değerin tam olarak hangi türde olacağını belirtmek zorunda değiliz. Bu, farklı hata durumlarında farklı tipte olabilecek hata değerleri döndürme esnekliği sağlar. `dyn` anahtar kelimesi “dynamic” (dinamik) ifadesinin kısaltmasıdır.
+
+> [!TIP]
+> #### `Box<dyn Error>` Nedir?
+> `Box<dyn Error>`, Rust'ta "kutusuna konmuş herhangi bir hata tipi" anlamına gelir. Hadi parçalara ayıralım:
+> #####  Parçaların Anlamı:
+> - **`Error`**: Standart kütüphanede bulunan bir **özellik (trait)**. Bir tipin hata olarak davranabilmesi için bu özelliği uygulaması(*trait implement*) gerekir.
+> - **`dyn`**: "Dynamic" kelimesinin kısaltması. Bu, "tam olarak hangi tip olduğunu şimdi söylemeyeceğim, çalışma zamanında belli olacak" demektir.
+> - **`Box`**: Veriyi heap'te (yığın bellek) saklayan akıllı bir işaretçi. Hata tipinin boyutu derleme zamanında bilinemediği için `Box` kullanırız.
+> ##### Basit Benzetme:
+> `Box<dyn Error>`'ı şöyle düşünebilirsiniz: "İçine her türlü hata konulabilen bir kutu." Bu kutu; ister dosya hatası, ister ağ hatası, ister kendi özel hatanız olsun, `Error` özelliğini gerçekleyen her şeyi kabul eder.
+
+İkinci olarak, Bölüm 9’da(*9.2.2.1. ? Operatörü Kısayolu*) bahsettiğimiz gibi `expect` çağrısını kaldırıp yerine `?` operatörünü kullandık. Hata durumunda `panic!` yapmak yerine, `?` operatörü hatayı mevcut fonksiyondan çağırana geri döndürür.
+
+> [!TIP]
+> #### Hatırlatma: ? 
+> `Result<T, E>` döndüren bir fonksiyon çağrısından sonra kullanılır ve şu mantıkla çalışır:
+> - Eğer `Result` → **`Ok(değer)`** ise → değeri çıkarır ve devam eder
+> - Eğer `Result` → **`Err(hata)`** ise → hatayı **hemen döndürür** (fonksiyondan çıkar)
+> 
+> ##### `?` Operatörü **Olmadan:**
+> ```rust
+> fn read_file() -> Result<String, std::io::Error> {
+>     let contents = match fs::read_to_string("dosya.txt") {
+>         Ok(s) => s,
+>         Err(e) => return Err(e), // Hata varsa hemen döndür
+>     };
+>     
+>     Ok(contents)
+> }
+> ```
+> ##### `?` Operatörü **İle:**
+> ```rust
+> fn read_file() -> Result<String, std::io::Error> {
+>     let contents = fs::read_to_string("dosya.txt")?; // Çok daha kısa!
+>     Ok(contents)
+> }
+> ```
+> ##### Nasıl Çalışır?
+> ```rust
+> let contents = fs::read_to_string(config.file_path)?;
+> ```
+> Bu satır şu anlama gelir:
+> 1.  `fs::read_to_string()` çağrısı bir `Result` döndürür
+> 2.  Eğer `Ok(içerik)` → `contents` değişkenine `içerik` atanır
+> 3.  Eğer `Err(hata)` → **fonksiyon hemen durur** ve hatayı döndürür
+> 
+> **Önemli Kural:** `?` operatörünü **yalnızca** `Result` veya `Option` döndüren fonksiyonlar içinde kullanabilirsiniz:
+
+Üçüncü olarak, `run` fonksiyonu artık başarı durumunda bir `Ok` değeri döndürüyor. Fonksiyon imzasında başarı türünü `()` olarak bildirdiğimiz için, bu birim tür(_unit type_) değerini bir `Ok` içine sarmalamamız gerekiyor. Bu `Ok(())` yazımı ilk bakışta biraz tuhaf görünebilir. Ancak `()` değerini bu şekilde kullanmak, `run` fonksiyonunu sadece yan etkileri (side effects - örneğin ekrana bir şey yazdırmak) için çağırdığımızı, bize ihtiyaç duyacağımız bir değer döndürmediğini belirtmenin **idiomatik** (dile özgü) yoludur.
+
+> [!tip]
+> #### Yan Etki (Side Effect) Nedir?
+> Bir fonksiyonun **dönüş değeri dışında** yaptığı her şey "yan etki" olarak adlandırılır.
+> **Yan Etkiler Şunları İçerir:**
+> + Dosyaya yazma/okuma
+> + Ekrana çıktı yazdırma
+> + Veritabanını güncelleme
+> + Global bir değişkeni değiştirme
+> + Ağ isteği yapma
+> + Rastgele sayı üretme
+
+Bu kodu çalıştırdığınızda derlenecektir; ancak bir uyarı (warning) gösterecektir:
+
+```rust
+$ cargo run -- the poem.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+warning: unused `Result` that must be used
+  --> src/main.rs:19:5
+   |
+19 |     run(config);
+   |     ^^^^^^^^^^^
+   |
+   = note: this `Result` may be an `Err` variant, which should be handled
+   = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+   |
+19 |     let _ = run(config);
+   |     +++++++
+
+warning: `minigrep` (bin "minigrep") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.71s
+     Running `target/debug/minigrep the poem.txt`
+Searching for the
+In file poem.txt
+With text:
+I'm nobody! Who are you?
+Are you nobody, too?
+Then there's a pair of us - don't tell!
+They'd banish us, you know.
+
+How dreary to be somebody!
+How public, like a frog
+To tell your name the livelong day
+To an admiring bog!
+```
+
+Rust bize kodumuzun `Result` değerini yok saydığını ve `Result` değerinin bir hatanın oluştuğunu gösterebileceğini söylüyor. Ancak bir hata olup olmadığını denetlemiyoruz ve derleyici bize muhtemelen burada bir hata yönetim kodu(_error-handling code_) olması gerektiğini hatırlatıyor! Bu sorunu şimdi düzeltelim.
+####  12.3.3.2. `run` Fonksiyonundan Dönen Hataları `main` İçinde Ele Alma
+
+Hataları kontrol edeceğiz ve `Liste 12-10`'daki `Config::build` örneğinde kullandığımıza benzer bir teknikle bunları ele alacağız; ancak küçük bir farkla:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+fn main() {
+    // --snip--
+
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    if let Err(e) = run(config) {                 // <============
+        println!("Application error: {e}");       // <============
+        process::exit(1);                         // <============
+    }                                             // <============
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    println!("With text:\n{contents}");
+
+    Ok(())
+}
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Ok(Config { query, file_path })
+    }
+}
+```
+
+`run` fonksiyonunun bir `Err` değeri döndürüp döndürmediğini kontrol etmek ve eğer döndürürse `process::exit(1)` fonksiyonunu çağırmak için `unwrap_or_else` yerine `if let` kullanıyoruz. `run` fonksiyonu, `Config::build`'in `Config` örneğini(*instance*) döndürdüğü şekilde `unwrap` yapmak isteyeceğimiz bir değer döndürmüyor. `run` başarı durumunda `()` döndürdüğünden, yalnızca bir hatayı tespit etmeyi önemsiyoruz; bu nedenle yalnızca `()` olacak olan sarılmış değeri döndürmek için `unwrap_or_else`'e ihtiyacımız yok.
+
+Her iki durumda da `if let` ve `unwrap_or_else` fonksiyonlarının gövdeleri aynıdır: Hatayı yazdırıp çıkış yapıyoruz.
+
+> [!TIP]
+> #### Hatırlatma: `if let`
+> ```rust
+> if let Err(e) = run(config) {
+> 	println!("Hata: {}" ,e);
+> }
+> ``` 
+> 👉 Bu ne demek?
+> - Eğer `Err` ise → çalıştır
+> - Eğer `Ok` ise → hiçbir şey yapma
+> #### Ne zaman kullanılır?
+> 👉 Şu durumlarda:
+> + sadece **Err** ile ilgileniyorsan
+> + veya sadece **Ok** ile ilgileniyorsan
+> + diğer durum önemsizse
+### 12.3.4. Kodun Bir Kütüphane Crate'ine Bölünmesi
+
+Şu ana kadar `minigrep` projemiz oldukça iyi görünüyor! Şimdi `src/main.rs` dosyasını böleceğiz ve bazı kodları `src/lib.rs` dosyasına koyacağız. Bu şekilde, kodu test edebilir ve daha az sorumluluk taşıyan bir `src/main.rs` dosyasına sahip olabiliriz.
+
+Metin arama sorumluluğunu taşıyan kodu `src/main.rs` yerine `src/lib.rs` içinde tanımlayalım; bu, bizim (veya `minigrep` kütüphanemizi kullanan başka birinin) arama fonksiyonunu sadece ikili (binary) dosyamızdan değil, daha fazla bağlamdan çağırmamıza olanak tanıyacaktır.
+
+İlk olarak, Liste 12-13'te gösterildiği gibi `src/lib.rs` içinde `search` fonksiyonunun imzasını, `unimplemented!` makrosunu çağıran bir gövdeyle tanımlayalım. Uygulamayı doldurduğumuzda imzayı daha ayrıntılı açıklayacağız.
+
+<img src="./Pictures/does_not_compile.svg" width="60">    Bu kod henüz derlenmez!
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    unimplemented!();
+}
+```
+
+> **Liste 12-13:** `src/lib.rs` içinde `search` fonksiyonunun tanımlanması
+
+`search` fonksiyonunu kütüphane crate'imizin herkese açık(*public*) API'sinin bir parçası olarak belirlemek için fonksiyon tanımında `pub` anahtar kelimesini kullandık. Artık ikili(binary) crate'imizden kullanabileceğimiz ve test edebileceğimiz bir kütüphane crate'ine sahibiz!
+
+Şimdi, `Liste 12-14`'te gösterildiği gibi `src/lib.rs` içinde tanımlanan kodu `src/main.rs` içindeki binary crate'in kapsamına(*scope*) dahil etmemiz ve çağırmamız gerekiyor.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+// --snip--
+use minigrep::search;
+
+fn main() {
+    // --snip--
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    if let Err(e) = run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
+}
+
+// --snip--
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Ok(Config { query, file_path })
+    }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {     // <===========
+    let contents = fs::read_to_string(config.file_path)?;  // <===========
+
+    for line in search(&config.query, &contents) {         // <===========
+        println!("{line}");                                // <===========
+    }                                                      // <===========
+
+    Ok(())                                                 // <===========
+}                                                          // <===========
+```
+
+> **Liste 12-14:**  `src/main.rs` içinde `minigrep` kütüphane crate'inin `search` fonksiyonunun kullanılması(`lib.rs` içinde tanımladığımız `search` fonksiyonunu, `main.rs` içinde kullanacağız.)
+
+`search` fonksiyonunu kütüphane crate'inden binary crate'in kapsamına(*scope*) dahil etmek için bir `use minigrep::search` satırı ekliyoruz. Ardından, `run` fonksiyonunda dosya içeriğini yazdırmak yerine, `search` fonksiyonunu çağırıyoruz ve argüman olarak `config.query` değerini ve `contents` değişkenini geçiyoruz. Daha sonra `run` fonksiyonu, sorgu(`&config.query`) eşlemesi olmuş `search`  fonksiyonundan dönen  her bir satırı yazdırmak için bir `for` döngüsü kullanacaktır. Ayrıca bu an, `main` fonksiyonunda sorguyu(`config.query`) ve dosya yolunu(`config.file_path`) görüntüleyen `println!` çağrılarını kaldırmak için de iyi bir zamandır; böylece programımız (eğer hata oluşmazsa) sadece arama sonuçlarını yazdırır.
+
+`search` fonksiyonunun, herhangi bir yazdırma işlemi gerçekleşmeden önce tüm sonuçları döndürdüğü bir vektörde toplayacağını unutmayın(yani, `search` fonksiyonu, sonuçları yazdırmadan önce hepsini bir vektörde toplar ve sonra döndürür.). Bu uygulama, büyük dosyalarda arama yaparken sonuçları görüntülemede yavaş olabilir; çünkü sonuçlar bulundukça yazdırılmaz; bunu düzeltmenin olası bir yolunu Bölüm 13'de iterator'ler kullanarak ele alacağız.
+
+Vay be! Bu çok fazla iş oldu, ama gelecekte başarı için kendimizi hazırladık. Artık hataları ele almak çok daha kolay ve kodu daha modüler hale getirdik. Bundan sonra hemen hemen tüm çalışmalarımız `src/lib.rs` içinde yapılacaktır.
+
+Eski kodla zor olacak ancak yeni kodla kolay olan bir şey yaparak bu yeni kazanılan modülerlikten(_modularity_) faydalanalım: Bazı testler yazacağız!(Yani, Şimdi bu yeni modüler yapının avantajını kullanalım: Eski kodla zor olan ama yeni yapıyla kolay hale gelen bir şey yapacağız—testler yazmak!)
+## 12.4.  Test Odaklı Geliştirme ile İşlevsellik Eklemek(Adding Functionality with Test-Driven Development)
+
+Artık arama mantığını `src/main.rs` dosyasından ayırıp `src/lib.rs` içine yerleştirdiğimiz için, kodumuzun temel işlevselliği için test yazmak çok daha kolaydır. Fonksiyonları çeşitli argümanlarla doğrudan çağırabilir ve komut satırından binary dosyamızı(`src/main.rs`) çağırmak zorunda kalmadan dönüş değerlerini denetleyebiliriz.
+
+Bu bölümde, aşağıdaki adımları içeren **test odaklı geliştirme(TDD)** sürecini kullanarak `minigrep` programına arama mantığını ekleyeceğiz:
+
+1. Başarısız olan bir test yaz ve gerçekten beklediğin nedenle başarısız olduğunu doğrulamak için çalıştır.
+2. Yeni testin geçmesini sağlayacak kadar (ne eksik ne fazla) kod yaz veya mevcut kodu değiştir.
+3.  Yeni eklediğiniz veya değiştirdiğiniz **kodu yeniden düzenleyin (refactor)** ve testlerin başarılı olmaya devam ettiğinden emin olun.
+4.  1. adımdan itibaren süreci tekrar et!
+
+Her ne kadar yazılım geliştirme için birçok yöntem olsa da, TDD kod tasarımını yönlendirmeye yardımcı olabilir. Testi geçecek kodları yazmadan önce test yazma, süreç boyunca yüksek test kapsamını(*test coverage*) korumaya yardımcı olur(önce testi yaz; kod henüz yok, test başarısız olur -> Sonra kodu yaz; testi geçecek kadar).
+
+
+> [!TIP]
+> #### Test Kapsamı (Test Coverage) Nedir?
+> Test kapsamı, yazdığınız kodun yüzde kaçının testler tarafından kontrol edildiğini gösteren bir ölçüdür.
+> + Eğer 10 satır kodunuz varsa ve testleriniz bu 10 satırın tamamını bir şekilde çalıştırıp doğruluğunu denetliyorsa, kapsamınız **%100**'dür.
+> + Kod yazıldıktan sonra test yazmak genellikle zordur; çünkü bazı senaryoları (hata durumları gibi) koda sonradan dahil etmek karmaşıklaşabilir.
+> #### "Önce Test" Mantığı Kapsamı Nasıl Artırır?
+> Eğer bir kural olarak **"testini yazmadığım tek bir satır kod bile eklemeyeceğim"** derseniz, doğal olarak kodunuzun kapsamı her zaman zirvede kalır.
+> + **Atlanmış Senaryo Kalmaz:** Kodun her bir dalı (if/else blokları gibi) zaten o dalı tetikleyen bir test sayesinde var olmuştur.
+> + **Gereksiz Kod Yazılmaz:** TDD'de sadece "testi geçecek kadar" kod yazarsınız. Bu da kütüphanenizde test edilmemiş, "belki lazım olur" diye eklenmiş "ölü kodların" oluşmasını engeller.
+> #### Süreç Boyunca Güvenlik
+> Metinde kastedilen "korumaya yardımcı olur" ifadesi şu anlama gelir: Projeniz büyüdükçe (örneğin `minigrep`'e yeni özellikler eklediğinizde), her yeni adımda önce test yazdığınız için, eski testler mevcut kodu korurken yeni testler de yeni eklenen alanı korumaya başlar. Böylece projenin hiçbir yerinde **"karanlıkta kalmış"** (doğruluğundan emin olunmayan) bir kod parçası kalmaz.
+
+Dosya içeriğinde sorgu string'i için gerçekten arama yapacak ve sorguyla eşleşen satırların bir listesini üretecek işlevselliğin uygulamasını test odaklı olarak geliştireceğiz. Bu işlevselliği `search` adlı bir fonksiyon içinde tanımlayacağız.
+### 12.4.1. Başarısız Bir Test Yazmak
+
+`src/lib.rs` dosyasında, Bölüm 11'de(*11.1.1. Test Fonksiyonlarını Kurma*) yaptığımız gibi bir test fonksiyonu içeren bir `tests` modülü ekleyeceğiz. Bu test fonksiyonu, `search` fonksiyonunun sahip olmasını istediğimiz davranışı belirler: Fonksiyon(`search`) bir sorgu(*query*) ve aranacak metni alacak(*contents*); ardından metin içinden sadece sorguyu içeren satırları döndürecektir. `Liste 12-15` bu testi göstermektedir.
+
+
+<img src="./Pictures/does_not_compile.svg" width="60">    Bu kod derlenmiyor!
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    unimplemented!();
+}
+
+// --snip--
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+}
+```
+
+> **Liste 12-15:** Sahip olmayı istediğimiz işlevsellik için `search` fonksiyonu için başarısız bir test oluşturma
+
+Bu test `"duct"` string'ini arar. Aradığımız metin üç satırdan oluşur ve bu satırlardan yalnızca biri `"duct"` içerir (açılış çift tırnağından sonra gelen ters eğik çizginin(*backslash*) `\`, Rust’a bu string literal’ının başına yeni satır karakteri eklememesini söylediğine dikkat edin). `search` fonksiyonundan dönen değerin yalnızca beklediğimiz satırı içerdiğini doğruluyoruz(*assert*).
+
+Eğer bu testi çalıştırırsak, şu anda başarısız olacaktır çünkü `unimplemented!` makrosu “not implemented” (uygulanmadı) mesajıyla panik yapar (programı çökertir). TDD(Test Odaklı Geliştirme) ilkelerine uygun olarak, `Liste 12-16`'da gösterildiği gibi `search` fonksiyonunu her zaman boş bir vektör döndürecek şekilde tanımlayarak fonksiyonu çağırırken testin paniklemesini önleyecek kadar küçük bir adım atacağız. Ardından test derlenecek ve başarısız olacaktır; çünkü boş bir vektör, içinde "safe, fast, productive." satırını içeren bir vektörle eşleşmez.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    vec![]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+}
+```
+
+> **Liste 12-16:** `search` fonksiyonunu, çağrıldığında panik(`panic`) oluşturmaması için yeterli olacak şekilde tanımlama
+
+Şimdi, `search` fonksiyonunun imzasında neden belirgin bir `'a` yaşam süresi(*lifetime*) tanımlamamız gerektiğini ve bu yaşam süresini hem `contents` argümanında hem de dönüş değerinde neden kullandığımızı tartışalım. Bölüm 10'dan hatırlayacağınız üzere; yaşam süresi parametreleri, hangi argümanın yaşam süresinin dönüş değerinin yaşam süresine bağlı olduğunu belirtir. Bu durumda, döndürülen vektörün, `contents` argümanının dilimlerine(*slice*) referans veren string slice’lar içermesi gerektiğini belirtiyoruz (yani `query` argümanına değil).
+
+
+> [!TIP]
+> `'a` işareti şunu söyler:
+> > "Döndürdüğüm vektördeki string dilimleri(*string slice*), **`contents` parametresinin içinden** gelir, `query`'den değil."
+
+> [!TIP]
+> Yaşam süresi (`'a`) burada **zorunludur** çünkü Rust'ın **borrow checker**'ı (ödünç alma denetleyicisi) şunu bilmek zorundadır:
+> > "Fonksiyondan döndürülen referanslar ne kadar süre geçerli kalacak?"
+> ---
+> Rust şunu sorar:
+> > "Bu `Vec<&str>` içindeki referanslar **hangi veriye** işaret ediyor? `query`'ye mi, `contents`'e mi?"
+> 
+> Çünkü:
+> + Eğer `query`'ye işaret ediyorsa → `query` yaşadığı sürece geçerlidir
+> + Eğer `contents`'e işaret ediyorsa → `contents` yaşadığı sürece geçerlidir
+> #### Yaşam Süresi İle Çözüm
+> Burada `'a` şunu söyler:
+> > "Döndürülen `Vec<&str>` içindeki referanslar, **`contents` parametresinin yaşam süresine** bağlıdır."
+> 
+> Derleyici der ki:
+> > "`results` içindeki referanslar `contents` yaşadığı sürece geçerlidir. Eğer `contents` yok olursa, `results`'ı kullanamazsın!"
+> 
+> ```rust
+> fn main() {
+>     let query = String::from("duct");
+>     let results;
+>    
+>    {
+>         let contents = String::from("safe, fast, productive.");
+>         results = search(&query, &contents);
+>     } // ← contents yok oluyor
+>    
+>     println!("{:?}", results); // ❌ Derleyici bunu engeller!
+>     // "error: `contents` does not live long enough"
+> }
+> ```
+> ##### Özet
+> **Neden `'a` kullanılıyor?**
+> 1. Rust, döndürülen referansların ne kadar geçerli olduğunu bilmek zorunda
+> 2. `'a` derleyiciye şunu söyler: "Döndürülen vektör, `contents` yaşadığı sürece geçerlidir"
+> 3. Bu sayede Rust, `contents` yok olduktan sonra `results`'ı kullanmanızı **engeller**
+> 4. Böylece **bellek güvenliği** sağlanır
+
+Başka bir deyişle, Rust'a `search` fonksiyonu tarafından döndürülen verinin, `search` fonksiyonuna `contents` argümanında iletilen veri kadar yaşayacağını söylüyoruz. Bu çok önemlidir! Bir slice tarafından referans verilen verinin, referansın geçerli olabilmesi için kendisinin de geçerli olması gerekir; eğer derleyici `contents` yerine `query` üzerinden string slice'leri oluşturduğumuzu varsayarsa, güvenlik denetimlerini yanlış yapacaktır.
+
+Yaşam süresi belirtimlerini(*annotations*) unutur ve bu fonksiyonu derlemeye çalışırsak, şu hatayı alırız:
+
+```
+$ cargo build
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+error[E0106]: missing lifetime specifier
+ --> src/lib.rs:1:51
+  |
+1 | pub fn search(query: &str, contents: &str) -> Vec<&str> {
+  |                      ----            ----         ^ expected named lifetime parameter
+  |
+  = help: this function's return type contains a borrowed value, but the signature does not say whether it is borrowed from `query` or `contents`
+help: consider introducing a named lifetime parameter
+  |
+1 | pub fn search<'a>(query: &'a str, contents: &'a str) -> Vec<&'a str> {
+  |              ++++         ++                 ++              ++
+
+For more information about this error, try `rustc --explain E0106`.
+error: could not compile `minigrep` (lib) due to 1 previous error
+
+```
+
+Rust, çıktı için bu iki parametreden hangisine ihtiyaç duyduğumuzu bilemez, bu yüzden bunu ona açıkça söylememiz gerekir. Yardım metninin(*error message*), tüm parametreler ve çıktı türü için aynı yaşam süresi parametresini belirtmeyi önerdiğine dikkat edin; **ancak bu yanlıştır!** Çünkü `contents`, tüm metnimizi barındıran parametredir ve biz bu metnin eşleşen kısımlarını döndürmek istiyoruz; bu yüzden `contents` parametresinin, yaşam süresi söz dizimi(*lifetime syntax*) kullanılarak dönüş değeriyle ilişkilendirilmesi gereken **tek** parametre olduğunu biliyoruz.
+
+Diğer programlama dilleri, imza(*signature*) kısmında argümanları dönüş değerlerine bağlamanızı gerektirmez, ancak bu uygulama(*practice*) zamanla kolaylaşacaktır. Bu örneği, Bölüm 10'daki "**10.3. Yaşam Süreleri(*Lifetimes*) ile Referansları Doğrulamak**" bölümündeki örneklerle karşılaştırmak isteyebilirsiniz.
+### 12.4.2. Testi Geçmek İçin Kod Yazma
+
+Şu anda testimiz başarısız oluyor çünkü her zaman boş bir vektör döndürüyoruz. Bunu düzeltmek ve `search` fonksiyonunu gerçekleştirmek için programımızın şu adımları izlemesi gerekir:
+
+1. İçeriğin (`contents`) her bir satırını tek tek dolaş (**iterate**).
+2. Satırın sorgu(`query`) string'imizi içerip içermediğini kontrol et.
+3. Eğer içeriyorsa, bunu döndüreceğimiz değerler listesine ekle.
+4. İçermiyorsa hiçbir şey yapma.
+5. Eşleşen sonuçların listesini döndür.
+
+Şimdi her adımı tek tek ele alalım; satırları dolaşmakla(*iteration*) başlayalım.
+#### 12.4.2.1. `lines` Metodu ile Satırlar Üzerinde Gezinme(*iterating*)
+
+Rust, string'lerin satır satır gezinerek(*iteration*) işlenmesini sağlayan ve ismi de kullanım amacına uygun olarak `lines` olan yardımcı bir metoda sahiptir. Bu metot, `Liste 12-17`'de gösterildiği gibi çalışır. Bu kodun henüz derlenmeyeceğini unutmayın.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    for line in contents.lines() {
+        if line.contains(query) {
+            // do something with line
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+}
+```
+
+> **Liste 12-17:** `contents` içindeki her bir satır üzerinde gezinme(*iterate*). 
+
+`lines` metodu bir iterator döndürür. Iterator'ları [Bölüm 13](https://doc.rust-lang.org/stable/book/ch13-02-iterators.html)'de derinlemesine ele alacağız. Ancak `Liste 3-5`'te iterator kullanmanın bu yolunu gördüğünüzü hatırlayın; orada bir koleksiyondaki her öğe üzerinde bazı kodlar çalıştırmak için iterator ile bir `for` döngüsü kullanmıştık(yani, `Listing 3-5`’te bir koleksiyon içindeki her öğe üzerinde işlem yapmak için bir iterator ile birlikte `for` döngüsü kullanmıştık).
+
+> [!TIP]
+> #### `lines()` metodu nedir?
+> `lines()` metodu, bir string'i **satır satır** ayıran ve her satırı ayrı ayrı işlemenize olanak tanıyan bir **iterator** döndürür.
+> ```rust
+> let text = "birinci satır\nikinci satır\nüçüncü satır";
+> 
+> for line in text.lines() {
+>     println!("{}", line);
+> }
+> ```
+> **Çıktı:**
+> ```
+> birinci satır
+> ikinci satır
+> üçüncü satır
+> ```
+> ##### Nasıl Çalışır?
+> `lines()` metodu:
+> - String'i `\n` (yeni satır) karakterlerine göre böler(linux için: `\n`, windows için: `\n\r`)
+> - Her satırı ayrı bir `&str`(string slice) olarak döndürür
+> - Satır sonlarındaki `\n` karakterini **dahil etmez**
+> ##### Dosya İçeriğini Satırlara Ayırmak
+> ```rust
+> let contents = "Rust:\nsafe, fast, productive.\nPick three.";
+> 
+> let lines: Vec<&str> = contents.lines().collect();
+> 
+> println!("{:?}", lines);
+> // ["Rust:", "safe, fast, productive.", "Pick three."]
+> ```
+#### 12.4.2.2. Her Satırda Sorguyu Arama(Searching Each Line for the Query)
+
+Sonraki adımda, mevcut satırın sorgu string'imizi içerip içermediğini denetleyeceğiz. Neyse ki string'lerin bunu bizim için yapan `contains` adlı yardımcı bir metodu var! `Listing 12-18`’de gösterildiği gibi, `search` fonksiyonunda `contains` metodunu çağırarak kontrol ekleyin.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    for line in contents.lines() {
+        if line.contains(query) {
+            // do something with line
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+}
+```
+
+> **Liste 12-18:** Satırın(`line`) , `query` içindeki string'i içerip içermediğini görmek için işlevselliğin eklenmesi
+
+Şu anda işlevselliği adım adım inşa ediyoruz. Kodun derlenebilmesi için, fonksiyon imzasında belirttiğimiz gibi fonksiyon gövdesinden bir değer döndürmemiz gerekir.
+#### 12.4.2.3. Eşleşen Satırları Depolama
+
+Bu fonksiyonu tamamlamak için, geri döndürmek istediğimiz eşleşen satırları depolayacak bir yola ihtiyacımız var. Bunun için `for` döngüsünden önce değiştirilebilir(**mutable**) bir vektör oluşturabilir ve satırları bu vektöre depolamak için `push` metodunu çağırabiliriz. `Liste 12-19`'da gösterildiği gibi, `for` döngüsü bittikten sonra bu vektörü döndürürüz.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.contains(query) {
+            results.push(line);
+        }
+    }
+
+    results
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+}
+```
+
+> **Liste: 12-19:**  Eşleşen satırları depoluyoruz(`results`'da), böylece onları(`results`) geri döndürebiliriz.
+
+Artık `search` fonksiyonu yalnızca `query`'i içeren satırları döndürmeli ve testimiz geçmelidir. Hadi testi çalıştıralım:
+
+```rust
+$ cargo test
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.22s
+     Running unittests src/lib.rs (target/debug/deps/minigrep-9cd200e5fac0fc94)
+
+running 1 test
+test tests::one_result ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/minigrep-9cd200e5fac0fc94)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests minigrep
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+Testimiz geçti, yani kodun çalıştığını biliyoruz!
+
+Bu noktada, aynı işlevselliği korumak ve testlerin geçmeye devam etmesini sağlamak şartıyla, `search` fonksiyonunun uygulamasını yeniden düzenleme(**refactoring**) fırsatlarını değerlendirebiliriz. `search` fonksiyonundaki kod çok kötü değil, ancak iterator’ların bazı faydalı özelliklerinden henüz yararlanmıyor. Bölüm 13'de iterator’ları detaylı olarak ele aldığımızda bu örneğe geri dönecek ve nasıl geliştirebileceğimize bakacağız.
+
+Artık tüm program çalışıyor olmalı! Hadi deneyelim; önce Emily Dickinson’ın şiirinden tam olarak bir satır döndürmesi gereken bir kelimeyle başlayalım: **frog**.
+
+```
+$ cargo run -- frog poem.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.38s
+     Running `target/debug/minigrep frog poem.txt`
+How public, like a frog
+```
+
+Harika! Şimdi de "*body*" gibi birden fazla satırla eşleşecek bir kelimeyi deneyelim:
+
+```
+$ cargo run -- body poem.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep body poem.txt`
+I'm nobody! Who are you?
+Are you nobody, too?
+How dreary to be somebody!
+```
+
+Son olarak, şiirde hiç geçmeyen bir kelime aradığımızda hiçbir satır döndürülmediğinden emin olalım; örneğin *monomorphization*:
+
+```
+$ cargo run -- monomorphization poem.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep monomorphization poem.txt`
+```
+
+Mükemmel! Klasik bir aracın kendi mini versiyonunu inşa ettik ve uygulamaların nasıl organize edileceği(*structure*) hakkında çok şey öğrendik. Ayrıca dosya giriş-çıkışı (I/O), yaşam süreleri(*lifetimes*), test etme ve komut satırı ayrıştırma(*parsing*) konularında da bilgi edindik.
+
+Bu projeyi tamamlamak için, ortam değişkenleriyle(*environment variables*) nasıl çalışılacağını ve standart hata çıktısına(*standard error*) nasıl yazdırılacağını kısaca göstereceğiz. Bunların ikisi de komut satırı programları yazarken oldukça faydalıdır.
+## 12.4. Ortam Değişkenleri ile Çalışma
+
+`minigrep` binary programını, ek bir özellik ekleyerek geliştireceğiz: kullanıcının bir ortam değişkeni aracılığıyla etkinleştirebileceği büyük/küçük harfe duyarsız(*case-insensitive*) arama seçeneği. Bu özelliği bir komut satırı seçeneği(*command line option*) haline getirebilir ve kullanıcıların bunu her uygulamak istediklerinde girmelerini zorunlu tutabilirdik; ancak bunun yerine bir çevre değişkeni yaparak, kullanıcılarımızın bu değişkeni bir kez ayarlamasına ve o terminal oturumundaki tüm aramalarının büyük-küçük harfe duyarsız(*case-insensitive*) olmasına olanak tanıyoruz.
+
+### 12.4.1. Büyük/Küçük Harf Duyarsız Arama İçin Başarısız Bir Test Yazma
+
+Öncelikle, `minigrep` kütüphanesine çevre değişkeni bir değere sahip olduğunda çağrılacak olan yeni bir `search_case_insensitive` fonksiyonu ekliyoruz. Test odaklı geliştirme (TDD) sürecini izlemeye devam edeceğiz; bu nedenle ilk adım yine başarısız olan bir test yazmaktır. Yeni `search_case_insensitive` fonksiyonu için yeni bir test ekleyeceğiz ve `Liste 12-20`'de gösterildiği gibi, iki test arasındaki farkı netleştirmek için eski testimizin ismini `one_result` yerine `case_sensitive` olarak değiştireceğiz.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.contains(query) {
+            results.push(line);
+        }
+    }
+
+    results
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn case_sensitive() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Duct tape.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+
+    #[test]
+    fn case_insensitive() {
+        let query = "rUsT";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Trust me.";
+
+        assert_eq!(
+            vec!["Rust:", "Trust me."],
+            search_case_insensitive(query, contents)
+        );
+    }
+}
+```
+
+> **Liste 12-20:** Birazdan ekleyeceğimiz büyük-küçük harfe duyarsız(*case-insensitive*) fonksiyonu için yeni bir başarısız test ekleme
+
+Eski testin `contents`(içerik) kısmını da düzenlediğimize dikkat edin. Büyük harf **"D"** ile başlayan `"Duct tape."` metnini içeren yeni bir satır ekledik; bu satır, büyük-küçük harf duyarlı(*case-sensitive*) bir arama yaptığımızda `"duct"` sorgusuyla eşleşmemelidir. Eski testi bu şekilde değiştirmek, halihazırda uyguladığımız büyük-küçük harf duyarlı(*case-sensitive*) arama işlevini yanlışlıkla bozmadığımızdan emin olmamıza yardımcı olur. Bu test şu an geçmeli ve biz büyük-küçük harf duyarsız(*case-insensitive*) arama üzerinde çalışırken de geçmeye devam etmelidir(Bu test şu anda geçmelidir ve yeni özelliği geliştirirken de geçmeye devam etmelidir.).
+
+Büyük/küçük harf duyarsız(_case-insensitive_) arama için yazdığımız yeni testte sorgu olarak `"rUsT"` kullanılıyor. Eklemek üzere olduğumuz `search_case_insensitive` fonksiyonunda, `"rUsT"` sorgusu büyük “R” içeren `"Rust:"` satırıyla eşleşmeli ve ayrıca `"Trust me."` satırıyla da eşleşmelidir; her ikisi de sorgudan farklı büyük/küçük(*casing*) harf kullanımına sahip olsa bile. Bu bizim başarısız testimizdir ve `search_case_insensitive` fonksiyonunu henüz tanımlamadığımız için derleme hatası verecektir. `Liste 12-16`'da `search` fonksiyonu için yaptığımız şekilde, testin derlenmesini ve başarısız olmasını görmek için her zaman boş bir vektör döndüren bir iskelet(*skeleton*) uygulama eklemekten çekinmeyin.
+
+### 12.4.2. `search_case_insensitive` Fonksiyonunu Uygulama
+
+`Liste 12-21`'de gösterilen `search_case_insensitive` fonksiyonu, `search` fonksiyonuyla neredeyse aynı olacaktır. Tek fark, hem `query`'yi hem de her bir `line`'ı (satırı) küçük harfe çevirecek olmamızdır; böylece giriş argümanlarının harf büyüklüğü ne olursa olsun, satırın sorguyu içerip içermediğini kontrol ederken aynı harf büyüklüğünde olacaklardır.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.contains(query) {
+            results.push(line);
+        }
+    }
+
+    results
+}
+
+pub fn search_case_insensitive<'a>(
+    query: &str,
+    contents: &'a str,
+) -> Vec<&'a str> {
+    let query = query.to_lowercase();
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.to_lowercase().contains(&query) {
+            results.push(line);
+        }
+    }
+
+    results
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn case_sensitive() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Duct tape.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+
+    #[test]
+    fn case_insensitive() {
+        let query = "rUsT";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Trust me.";
+
+        assert_eq!(
+            vec!["Rust:", "Trust me."],
+            search_case_insensitive(query, contents)
+        );
+    }
+}
+```
+
+> **Liste 12-21:** Karşılaştırma yapmadan önce sorguyu ve satırı küçük harfe dönüştüren `search_case_insensitive` fonksiyonunun tanımlanması
+
+İlk olarak, `query` string'ini küçük harfe dönüştürüyoruz ve orijinal `query`'yi gölgeleyerek(*shadowing*) aynı adla yeni bir değişkende depoluyoruz. Sorgu üzerinde `to_lowercase` metodunu çağırmak gereklidir; böylece kullanıcının sorgusu "rust", "RUST", "Rust" veya "rUsT" olsa bile, sorguyu "rust"mış gibi ele alırız ve harf büyüklüğüne karşı duyarsız oluruz. `to_lowercase` temel Unicode karakterlerini işleyebilse de yüzde yüz doğru sonuç vermeyebilir. Gerçek bir uygulama yazıyor olsaydık burada biraz daha fazla çalışma yapmamız gerekirdi, ancak bu bölüm Unicode değil çevre değişkenleri hakkında olduğundan konuyu burada bırakacağız.
+
+`query`'nin artık bir string slice(`&str`) yerine bir `String` olduğuna dikkat edin; çünkü `to_lowercase` çağırmak mevcut verilere referans vermek yerine yeni veri oluşturur. Örneğin sorgunun "rUsT" olduğunu varsayalım: Bu string slice(`&str`), bizim kullanabileceğimiz küçük harfli bir "u" veya "t" karakteri içermez; bu nedenle içinde "rust" barındıran yeni bir `String` tahsis etmek(*allocate*) zorundayız. Artık `query`'yi `contains` metoduna bir argüman olarak geçirirken başına bir ampersand (`&`) eklememiz gerekir; çünkü `contains` metodunun imzası bir string slice(`&str`) alacak şekilde tanımlanmıştır
+
+Ardından, tüm karakterleri küçük harfe çevirmek için her bir `line` (satır) üzerinde `to_lowercase` çağrısı ekliyoruz. Artık hem `line` hem de `query` değişkenlerini küçük harfe dönüştürdüğümüze göre, sorgunun harf büyüklüğü ne olursa olsun eşleşmeleri bulabiliriz.
+
+Bakalım bu uygulama testlerden geçecek mi:
+
+```
+$ cargo test
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.33s
+     Running unittests src/lib.rs (target/debug/deps/minigrep-9cd200e5fac0fc94)
+
+running 2 tests
+test tests::case_insensitive ... ok
+test tests::case_sensitive ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/minigrep-9cd200e5fac0fc94)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests minigrep
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+Harika! Testler geçti. Şimdi yeni `search_case_insensitive` fonksiyonunu `run` fonksiyonu içerisinden çağıralım. İlk olarak, büyük/küçük harf duyarlı(*case-sensitive*) ve büyük/küçük harf duyarsız(*case-insensitive*) arama arasında geçiş yapmak için `Config` struct'ına bir yapılandırma(*configuration option*) seçeneği ekleyeceğiz. Bu alanı(*struct field*) eklemek derleyici hatalarına neden olacaktır; çünkü henüz bu alanı hiçbir yerde başlatmıyoruz.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+use minigrep::{search, search_case_insensitive};  
+
+// --snip--
+
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    if let Err(e) = run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
+}
+
+pub struct Config {             // <==========
+    pub query: String,          // <==========
+    pub file_path: String,      // <==========
+    pub ignore_case: bool,      // <==========
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Ok(Config { query, file_path })
+    }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
+`Config` struct'ımıza  boolean türündeki `ignore_case` alanını(*field*) ekledik. Şimdi, `Liste 12-22`'de gösterildiği gibi, `run` fonksiyonunun bu `ignore_case` alanındaki(*field*) değeri kontrol etmesi ve `search` fonksiyonunu mu yoksa `search_case_insensitive` fonksiyonunu mu çağıracağına karar vermesi gerekiyor. Bu kod da henüz derlenmeyecektir.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+use minigrep::{search, search_case_insensitive};    // <==========
+
+// --snip--
+
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    if let Err(e) = run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
+}
+
+pub struct Config {
+    pub query: String,
+    pub file_path: String,
+    pub ignore_case: bool,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Ok(Config { query, file_path })
+    }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {       // <==========
+    let contents = fs::read_to_string(config.file_path)?;    // <==========
+
+    let results = if config.ignore_case {                    // <==========
+        search_case_insensitive(&config.query, &contents)    // <==========
+    } else {                                                 // <==========
+        search(&config.query, &contents)                     // <==========
+    };                                                       // <==========
+
+    for line in results {                                    // <==========
+        println!("{line}");                                  // <==========
+    }
+
+    Ok(())                                                   // <==========
+}                                                            // <==========
+```
+
+> **Liste 12-22:** `config.ignore_case` değerine göre `search` veya `search_case_insensitive` fonksiyonunun çağrılması
+
+Son olarak, ortam değişkenini kontrol etmemiz gerekiyor. Çevre değişkenleriyle çalışmamızı sağlayan fonksiyonlar, standart kütüphanedeki `env` modülünde bulunur ve bu modül `src/main.rs` dosyasının en üstünde zaten kapsama (scope) dahil edilmiştir. `Liste 12-23`'te gösterildiği gibi, `IGNORE_CASE` adındaki bir ortam değişkenine herhangi bir değer atanıp atanmadığını kontrol etmek için `env` modülündeki `var` fonksiyonunu kullanacağız.
+
+> [!TIP]
+> #### `env::var` Nasıl Çalışır?
+> 1. **Değişken Varsa (`Ok`):** Eğer kullanıcı terminalde `IGNORE_CASE=1` (veya herhangi bir değer) tanımladıysa, fonksiyon `Ok` döndürür.
+> 2. **Değişken Yoksa (`Err`):** Eğer böyle bir değişken tanımlanmamışsa, fonksiyon `Err` döndürür.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+use minigrep::{search, search_case_insensitive};
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    if let Err(e) = run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
+}
+
+pub struct Config {
+    pub query: String,
+    pub file_path: String,
+    pub ignore_case: bool,
+}
+
+impl Config {                                                      // <==========
+    fn build(args: &[String]) -> Result<Config, &'static str> {    // <==========
+        if args.len() < 3 {                                        // <==========
+            return Err("not enough arguments");                    // <==========
+        }                                                          // <==========
+
+        let query = args[1].clone();                               // <==========
+        let file_path = args[2].clone();                           // <==========
+
+        let ignore_case = env::var("IGNORE_CASE").is_ok();         // <==========
+
+        Ok(Config {                                                // <==========
+            query,                                                 // <==========
+            file_path,                                             // <==========
+            ignore_case,                                           // <==========
+        })                                                         // <==========
+    }                                                              // <==========
+}                                                                  // <==========
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
+> **Liste 12-23:** `IGNORE_CASE` adlı ortam değişkeninde herhangi bir değer olup olmadığının kontrol edilmesi
+
+Burada `ignore_case` adında yeni bir değişken oluşturuyoruz. Değerini ayarlamak için `env::var` fonksiyonunu çağırıyoruz ve ona `IGNORE_CASE` ortam değişkeninin adını veriyoruz. `env::var` fonksiyonu bir `Result` döndürür. Eğer ortam değişkenine herhangi bir değer atanmışsa, bu değer `Ok` varyantı içinde döndürülür. Eğer ortam değişkeni ayarlanmamışsa, `Err` varyantı döner.
+
+Ortam değişkeninin ayarlanıp ayarlanmadığını kontrol etmek için `Result` üzerindeki `is_ok` metodunu kullanıyoruz; bu ayarlanmışsa programın büyük-küçük harf duyarsız(*case-insensitive*) bir arama yapması gerektiği anlamına gelir. Eğer `IGNORE_CASE` çevre değişkenine hiçbir şey atanmamışsa, `is_ok` metodu `false` döndürecek ve program büyük-küçük harf duyarlı bir arama gerçekleştirecektir. Çevre değişkeninin **değeriyle** ilgilenmiyoruz, sadece ayarlanıp ayarlanmadığına bakıyoruz; bu yüzden `unwrap`, `expect` veya `Result` üzerinde gördüğümüz diğer metotlar yerine `is_ok` metodunu kontrol ediyoruz.
+
+`ignore_case` değişkenindeki değeri `Config` örneğine geçiriyoruz; böylece `run` fonksiyonu bu değeri okuyabilir ve `Liste 12-22`’de uyguladığımız gibi `search_case_insensitive` ya da `search` fonksiyonlarından hangisini çağıracağına karar verebilir.
+
+Hadi bir deneyelim! Önce ortam değişkenini ayarlamadan ve sorgu olarak `"to"` vererek programı çalıştıralım; bu durumda `"to"` kelimesini tamamen küçük harflerle içeren tüm satırlarla eşleşmesi gerekir:
+
+```
+$ cargo run -- to poem.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep to poem.txt`
+Are you nobody, too?
+How dreary to be somebody!
+```
+
+Görünüşe göre bu hala çalışıyor! Şimdi programı `IGNORE_CASE` değişkenini `1` yaparak ama aynı `"to"` sorgusuyla çalıştıralım:
+
+```bash
+$ IGNORE_CASE=1 cargo run -- to poem.txt
+```
+
+Eğer PowerShell kullanıyorsanız, ortam değişkenini ayarlamanız ve programı ayrı komutlar olarak çalıştırmanız gerekecektir:
+
+```powershell
+PS> $Env:IGNORE_CASE=1; cargo run -- to poem.txt
+```
+
+Bu işlem, `IGNORE_CASE` ortam değişkeninin mevcut kabuk (shell) oturumu boyunca geçerli olmasını sağlar. Bu değişkeni kaldırmak için `Remove-Item` cmdlet’i kullanılabilir:
+
+```powershell
+PS> Remove-Item Env:IGNORE_CASE
+```
+
+Büyük harf içerebilecek ve `"to"` barındıran satırları almalıyız:
+
+```
+Are you nobody, too?
+How dreary to be somebody!
+To tell your name the livelong day
+To an admiring bog!
+```
+
+Mükemmel, içinde `"To"` geçen satırları da aldık! Artık `minigrep` programımız, bir ortam değişkeni aracılığıyla kontrol edilen büyük/küçük harf duyarsız(*case-insensitive*) arama yapabiliyor. Böylece, komut satırı argümanları veya ortam değişkenleri kullanılarak ayarlanan seçeneklerin nasıl yönetileceğini öğrenmiş oldunuz.
+
+Bazı programlar, aynı yapılandırma(*configuration*) için hem argümanlara hem de ortam değişkenlerine izin verir. Bu durumlarda programlar, birinin veya diğerinin öncelikli olduğuna karar verir. Kendi başınıza yapacağınız başka bir alıştırma olarak; büyük-küçük harf duyarlılığını(*case sensitivity*) hem bir komut satırı argümanı hem de bir ortam değişkeni aracılığıyla kontrol etmeyi deneyin. Program birinde duyarlı(*case sensitivity*), diğerinde duyarsız(*case insensitivity*) olacak şekilde çalıştırılırsa, komut satırı argümanının mı yoksa çevre değişkeninin mi öncelikli olması gerektiğine karar verin.
+
+`std::env` modülü, ortam değişkenleriyle çalışmak için çok daha fazla kullanışlı özellik içerir. Nelerin mevcut olduğunu görmek için dokümantasyonuna göz atabilirsiniz.
+#### 12.4.3. Hataları Standart Hata Çıkışına Yönlendirme
+
+Şu anda tüm çıktılarımızı terminale `println!` makrosunu kullanarak yazdırıyoruz. Genel bilgiler için **standart çıktı** (`stdout`) ve hata mesajları için **standart hata** (`stderr`). Bu ayrım, kullanıcıların bir programın başarılı çıktısını bir dosyaya yönlendirmeyi seçmelerine olanak tanırken, hata mesajlarını hala ekrana yazdırabilmelerini sağlar.
+
+`println!` makrosu yalnızca standart çıktıya yazdırabilir, bu nedenle standart hataya yazdırmak için başka bir şey kullanmamız gerekir.
+#### 12.4.3.1. Hataların Nereye Yazıldığını Kontrol Etme
+
+İlk olarak, `minigrep` tarafından yazdırılan içeriğin şu anda standart çıktıya nasıl yazıldığını gözlemleyelim; buna standart hataya yazmak istediğimiz hata mesajları da dahil. Bunu yapmak için, standart çıktı(*stdout*) akışını bir dosyaya yönlendireceğiz ve bilinçli olarak bir hata oluşturacağız. Standart hata(*stderr*) akışını yönlendirmeyeceğiz; böylece stderr’e gönderilen içerikler ekranda görünmeye devam edecek.
+
+Komut satırı programlarının hata mesajlarını standart hata(*stderr*) akışına göndermesi beklenir, böylece standart(*stdout*) çıktı akışını bir dosyaya yönlendirsek bile hata mesajlarını ekranda görebiliriz. Ancak programımız şu anda doğru davranmıyor: Birazdan hata mesajı çıktısını ekrana basmak yerine bir dosyaya kaydettiğini göreceğiz!
+
+Bu davranışı göstermek için, programı `>` ve standart(*stdout*) çıktı akışını yönlendirmek istediğimiz dosya yolu olan `output.txt` ile çalıştıracağız. Herhangi bir argüman geçirmeyeceğiz, bu da bir hata oluşmasına neden olacak:
+
+```bash
+$ cargo run > output.txt
+```
+
+`>` sözdizimi, kabuğa(*shell*) standart çıktının içeriğini ekran yerine `output.txt` dosyasına yazmasını söyler. Ekrana yazdırılmasını beklediğimiz hata mesajını görmedik, bu da onun dosyada sonlanmış olması gerektiği anlamına gelir. `output.txt` dosyasının içeriği şu şekildedir:
+
+```
+Problem parsing arguments: not enough arguments
+```
+
+Evet, hata mesajımız standart çıktıya yazdırılıyor. Bu tür hata mesajlarının standart hataya(*stderr*) yazdırılması çok daha kullanışlıdır; böylece dosyada yalnızca başarılı bir çalıştırmadan elde edilen veriler yer alır. Bunu değiştireceğiz.
+### 12.4.3. Hataları Standart Hataya Yazdırma
+
+Hata mesajlarının yazdırılma şeklini değiştirmek için `Liste 12-24`'teki kodu kullanacağız. Bu bölümün başında yaptığımız yeniden düzeneleme(*refactoring*) sayesinde, hata mesajlarını yazdıran tüm kodlar tek bir fonksiyonda, yani `main` fonksiyonunda toplanmıştır. Standart kütüphane, standart hata(*stderr*) akışına yazdıran `eprintln!` makrosunu sunar; bu nedenle hata yazdırmak için `println!` çağırdığımız iki yeri `eprintln!` kullanacak şekilde değiştirelim.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+use minigrep::{search, search_case_insensitive};
+
+fn main() {                                                   // <==========
+    let args: Vec<String> = env::args().collect();            // <==========
+
+    let config = Config::build(&args).unwrap_or_else(|err| {  // <==========
+        eprintln!("Problem parsing arguments: {err}");        // <==========
+        process::exit(1);                                     // <==========
+    });                                                       // <==========
+
+    if let Err(e) = run(config) {                             // <==========
+        eprintln!("Application error: {e}");                  // <==========
+        process::exit(1);                                     // <==========
+    }                                                         // <==========
+}
+
+pub struct Config {
+    pub query: String,
+    pub file_path: String,
+    pub ignore_case: bool,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+
+        Ok(Config {
+            query,
+            file_path,
+            ignore_case,
+        })
+    }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
+> **Liste 12-24:** Hata mesajlarını `eprintln!` kullanarak standart çıktı yerine standart hataya yazma
+
+Şimdi programı tekrar aynı şekilde, hiçbir argüman vermeden ve standart çıktıyı `>` ile yönlendirerek çalıştıralım:
+
+```bash
+$ cargo run > output.txt
+Problem parsing arguments: not enough arguments
+```
+
+Artık hatayı ekranda görüyoruz ve `output.txt` hiçbir şey içermiyor; bu, komut satırı programlarından beklediğimiz davranıştır.
+
+Şimdi programı hata vermeyecek argümanlarla tekrar çalıştıralım ve standart çıktıyı yine bir dosyaya yönlendirelim:
+
+```bash
+$ cargo run -- to poem.txt > output.txt
+```
+
+Terminalde herhangi bir çıktı görmeyeceğiz ve `output.txt` sonuçlarımızı içerecek:
+
+**Dosya adı:** `output.txt`
+
+```
+Are you nobody, too?
+How dreary to be somebody!
+```
+
+Bu, artık başarılı çıktı için standart çıktıyı(*stdout*) ve hata çıktısı için uygun şekilde standart hatayı(*stderr*) kullandığımızı göstermektedir.
+
+> [!tip]
+> Rust’ta iki farklı çıktı vardır:
+> - `println!` → **stdout (normal çıktı)**
+> - `eprintln!` → **stderr (hata çıktısı)**
+> 
+> **Özet:** `eprintln!` hata mesajları için, `println!` normal program çıktıları için kullanılır. Bu ayrım, çıktıları yönlendirirken (piping/redirecting) çok işe yarar ve profesyonel komut satırı araçlarının standart davranışıdır.
+## 12.5. Özet
+
+Bu bölüm, şimdiye kadar öğrendiğiniz bazı önemli kavramları tekrar ele aldı ve Rust'ta yaygın G/Ç (I/O) işlemlerinin nasıl gerçekleştirileceğini konu aldı. Komut satırı argümanlarını, dosyaları, ortam değişkenlerini ve hataları yazdırmak için `eprintln!` makrosunu kullanarak artık komut satırı uygulamaları yazmaya hazırsınız. Önceki bölümlerde öğrendiğiniz kavramlarla birlikte, yazdığınız kod iyi organize edilmiş olacak, veriyi uygun veri yapılarında etkili bir şekilde depolayacak, hataları düzgün bir şekilde yönetecek ve iyi bir şekilde test edilmiş olacaktır.
+
+Bir sonraki bölümde, fonksiyonel programlama dillerinden etkilenmiş bazı Rust özelliklerini inceleyeceğiz: **closure’lar** ve **iterator’lar**.
+
+# 13. Fonksiyonel Programlama Özellikleri: Iterator’lar ve Closure’lar
+
+Rust’ın tasarımı, birçok mevcut dil ve teknikten ilham almıştır ve önemli etkilerden biri de fonksiyonel programlamadır. Fonksiyonel tarzda programlama, sıklıkla **fonksiyonların birer değer gibi kullanılmasını** içerir; yani fonksiyonların argüman olarak geçirilmesi, başka fonksiyonlardan döndürülmesi, daha sonra çalıştırılmak üzere değişkenlere atanması gibi durumlar söz konusudur.
+
+Bu bölümde, fonksiyonel programlamanın ne olduğu ya da olmadığı konusunu tartışmayacağız, bunun yerine Rust'ın genellikle fonksiyonel olarak adlandırılan birçok dildeki özelliklere benzer bazı özelliklerini ele alacağız.
+
+Daha spesifik olarak şunları konu alacağız:
+
+- **Closure’lar**: Bir değişkende depolayabileceğiniz, fonksiyona benzer yapılar
+- **Iterator'lar**: bir dizi elemanı işlemenin bir yolu
+- **Bölüm 12**'deki G/Ç (I/O) projesini iyileştirmek(*improve*) için **closure**'ların ve **iterator**'ların nasıl kullanılacağı
+- **Closure**'ların ve **iterator**'ların performansı (spoiler uyarısı: Düşündüğünüzden daha hızlılar!)
+
+Daha önce, fonksiyonel tarzdan etkilenmiş olan pattern matching ve enum gibi bazı Rust özelliklerini zaten gördük. Closure’ları ve iterator’ları iyi öğrenmek, hızlı ve idiomatic (Rust’a özgü, doğru stilde) kod yazmanın önemli bir parçası olduğu için bu bölümü tamamen bu konulara ayıracağız.("**Etkilenmiş**" demek, Rust’ın fonksiyonel programlamadan bazı fikirleri alıp kendi yapısına uyarlaması demektir.)
+## 13.1. Closure’lar
+
+Rust’taki closure’lar, bir değişkende saklayabileceğiniz veya diğer fonksiyonlara argüman olarak geçirebileceğiniz anonim fonksiyonlardır. Closure'ı bir yerde oluşturabilir ve ardından farklı bir bağlamda(durumda) değerlendirmek için başka bir yerde çağırabilirsiniz. Fonksiyonlardan farklı olarak, **closure**'lar tanımlandıkları kapsamdaki(*scope*) değerleri yakalayabilir. Bu closure özelliklerinin kod yeniden kullanımına ve davranış özelleştirmesine nasıl olanak sağladığını göstereceğiz.
+
+> [!TIP]
+> ##### 1. Kod Yeniden Kullanımı (Code Reuse)
+> Aynı kodu tekrar tekrar yazmak yerine, bir closure oluşturup farklı yerlerde kullanabilirsiniz.
+> ```rust
+> // Bir closure tanımlama
+> let multiple = |x| x * 2;
+>  // Farklı yerle de kullan
+>  let result_1 = multiple(5);   // 10
+>  let result_2 = multiple(10);  // 20
+>  let result_3 = multiple(20);  // 40
+> ```
+> ##### 2. Davranış Özelleştirmesi (Behavior Customization)
+> Closure'lar, bulundukları ortamdaki değişkenleri "yakalar" (capture), böylece aynı fonksiyon farklı durumlarda farklı davranabilir.
+> ```rust
+> let multiple = 3;
+> new_multiple = |x| x * multiple;   // 'multiple' değişkenini yakaladı
+> let result = new_multiple(5); // 15 (5 * 3)
+> // multiple değişirse, closure'ın davranışıda değişir
+> ```
+### 13.1.1. Ortamı Yakalama (Capturing the Environment)
+
+İlk olarak, daha sonra kullanmak üzere tanımlandıkları ortamdaki değerleri yakalamak için closure'ları nasıl kullanabileceğimizi inceleyeceğiz. Senaryo şöyle: Tişört şirketimiz, tanıtım amaçlı(promosyon) olarak ara sıra posta listemizden birine özel, sınırlı sayıda bir tişört hediye ediyor. Posta listesindeki kişiler isteğe bağlı olarak profillerine favori renklerini ekleyebilirler. Ücretsiz tişört kazanan kişinin favori rengi ayarlanmışsa, o renkte tişört alır. Kişi favori bir renk belirtmemişse, şirketin o anda en çok stokta bulundurduğu rengi alır.
+
+Bunu uygulamanın birçok yolu vardır. Bu örnekte, `Red` ve `Blue` varyantlarına sahip `ShirtColor` adlı bir enum kullanacağız (basitlik için mevcut renk sayısını sınırlıyoruz). Şirketin envanterini, içinde mevcut tişört renklerini temsil eden `Vec<ShirtColor>` tipinde `shirts` adlı bir alan(*field*) bulunduran `Inventory` adlı bir struct ile temsil edeceğiz. `Inventory` üzerinde tanımlanan `giveaway` metodu, kazananın isteğe bağlı renk tercihini alır ve kişinin alacağı tişört rengini döndürür. Bu kurulum `Liste 13-1`'de gösterilmiştir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+#[derive(Debug, PartialEq, Copy, Clone)]
+enum ShirtColor {
+    Red,
+    Blue,
+}
+
+struct Inventory {
+    shirts: Vec<ShirtColor>,
+}
+
+impl Inventory {
+    fn giveaway(&self, user_preference: Option<ShirtColor>) -> ShirtColor {
+        user_preference.unwrap_or_else(|| self.most_stocked())
+    }
+
+    fn most_stocked(&self) -> ShirtColor {
+        let mut num_red = 0;
+        let mut num_blue = 0;
+
+        for color in &self.shirts {
+            match color {
+                ShirtColor::Red => num_red += 1,
+                ShirtColor::Blue => num_blue += 1,
+            }
+        }
+        if num_red > num_blue {
+            ShirtColor::Red
+        } else {
+            ShirtColor::Blue
+        }
+    }
+}
+
+fn main() {
+    let store = Inventory {
+        shirts: vec![ShirtColor::Blue, ShirtColor::Red, ShirtColor::Blue],
+    };
+
+    let user_pref1 = Some(ShirtColor::Red);
+    let giveaway1 = store.giveaway(user_pref1);
+    println!(
+        "The user with preference {:?} gets {:?}",
+        user_pref1, giveaway1
+    );
+
+    let user_pref2 = None;
+    let giveaway2 = store.giveaway(user_pref2);
+    println!(
+        "The user with preference {:?} gets {:?}",
+        user_pref2, giveaway2
+    );
+}
+```
+
+> **Liste 13-1:** Tişört şirketinin hediye dağıtım senaryosu
+
+`main` içinde tanımlanan `store`, bu sınırlı sayıda tanıtım(promosyon) için dağıtılacak iki mavi ve bir kırmızı tişörte sahiptir. Kırmızı tişört tercihi olan bir kullanıcı ve herhangi bir tercihi olmayan bir kullanıcı için `giveaway` metodunu çağırıyoruz.
+
+Tekrar belirtmek gerekirse, bu kod birçok şekilde uygulanabilirdi; ve burada closure'lara odaklanmak için, closure kullanan `giveaway` metodunun gövdesi dışında, daha önce öğrendiğiniz kavramlara bağlı kaldık(yani, Bu kodda **sadece `giveaway` metodunun içindeki closure kısmı yeni**, geri kalan her şey daha önce öğrendiğiniz konulardan oluşuyor.). `giveaway` metodunda, kullanıcı tercihini `Option<ShirtColor>` tipinde bir parametre olarak alıyoruz. `giveaway` metodunda, kullanıcı tercihini `Option<ShirtColor>` tipinde bir parametre olarak alıyoruz ve `user_preference` üzerinde `unwrap_or_else` metodunu çağırıyoruz. `Option<T>` üzerindeki `unwrap_or_else` metodu standart kütüphane tarafından tanımlanmıştır. Bu metot(`unwrap_or_else`) bir argüman alır: herhangi bir argüman almayan ve `T` değeri döndüren bir **closure** (bu durumda `Option<T>`'nin `Some` varyantında saklanan aynı tip, yani `ShirtColor`). Eğer `Option<T>`, `Some` varyantıysa, `unwrap_or_else` `Some` içindeki değeri döndürür. Eğer `Option<T>`, `None` varyantıysa, `unwrap_or_else` closure'ı çağırır ve closure tarafından döndürülen değeri döndürür.
+
+`unwrap_or_else` metoduna argüman olarak `|| self.most_stocked()` closure ifadesini veriyoruz. Bu, kendisi hiçbir parametre almayan bir closure'dır (eğer closure parametrelere sahip olsaydı, iki dikey çubuk(`||`) arasında görünürlerdi). Closure'ın gövdesi `self.most_stocked()` metodunu çağırır. Closure'ı burada tanımlıyoruz ve `unwrap_or_else`'in uygulanması(*implemention*), sonuç gerekli olduğunda closure'ı daha sonra değerlendirecektir, yani çalıştıracaktır.
+
+Bu kodu çalıştırmak şunları yazdırır:
+
+```
+$ cargo run
+   Compiling shirt-company v0.1.0 (file:///projects/shirt-company)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running `target/debug/shirt-company`
+The user with preference Some(Red) gets Red
+The user with preference None gets Blue
+```
+
+Buradaki ilginç yönlerden biri, mevcut `Inventory` örneği(*instance*) üzerinde `self.most_stocked()` metodunu çağıran bir closure geçmiş olmamızdır. Closure, `self` (Inventory) örneğine ait **değiştirilemez bir referansı (immutable reference; &self)** yakalar ve belirttiğimiz kodla birlikte bunu `unwrap_or_else` metoduna iletir. Fonksiyonlar ise ortamlarını bu şekilde yakalama yeteneğine sahip değildir.
+
+
+> [!TIP]
+> #### Automatic Dereferencing veya Autoref
+> ##### 1. Rust Sizin Yerinize Ekliyor
+> `most_stocked` metodunun tanımına bakalım:
+> ```rust
+> fn most_stocked(&self) -> ShirtColor { ... }
+> ```
+> Bu metot `&self` (immutable reference) bekliyor. Ancak Rust, bir metot çağırırken eğer nesnenin kendisi elinizdeyse veya nesneye bir referansınız varsa, metodun beklediği tipe göre otomatik olarak referans alır (`&`) veya referansı çözer (`*`).
+> Yani siz `self.most_stocked()` yazdığınızda, derleyici arka planda şunu kontrol eder:
+> - `self` bir `Inventory` mi? Evet.
+> - `most_stocked` ne bekliyor? `&Inventory`.
+> - **O halde:** Derleyici bunu otomatik olarak `(&self).most_stocked()` şekline dönüştürür.
+> ##### 2. Closure İçindeki Durum
+> Closure (`|| self.most_stocked()`) içinde `self`’i kullandığınızda, closure bu `self`’i zaten **immutable reference** olarak yakalar. Yani closure'ın içindeki o `self` kelimesi artık aslında bir `&Inventory` gibi davranır.
+> ##### 3. Okunabilirlik
+> Eğer her seferinde `(&self).metot()` yazmak zorunda kalsaydık, kod çok kalabalık ve okunması zor bir hale gelirdi. Rust tasarımcıları, metodun tanımı zaten ne tür bir referans (`&self` veya `&mut self`) gerektiğini bildiği için, çağırma kısmında bunu belirtmeyi isteğe bağlı (ve genellikle gereksiz) kılmıştır.
+> ##### Özet:
+> + `self.most_stocked()` yazdığınızda Rust, metodun `&self` beklediğini görür ve otomatik olarak referansı sizin yerinize oluşturur.
+> + Closure, `self`'i yakalarken onun üzerine bir "bakış" (reference) oluşturduğu için, içerde tekrar `&` kullanmanıza gerek kalmaz.
+> 
+> **Küçük bir ipucu:** Eğer `most_stocked` metodu `&self` yerine doğrudan `self` (ownership) bekleseydi, o zaman durum çok farklı olurdu; ama Rust'ta metotların %90'ı veriyi sahiplenmek yerine ödünç almak için `&self` kullanır.
+
+### 13.1.2. Closure Türlerini Çıkarsama ve Tür Belirtme(Inferring and Annotating)
+
+Fonksiyonlar ve closure'lar arasında daha fazla fark vardır. Closure'lar genellikle `fn` fonksiyonlarının yaptığı gibi parametrelerin veya dönüş değerinin tiplerini belirtmenizi gerektirmez(*annotate*). Fonksiyonlarda tip belirtimi(*type annotation*) zorunludur çünkü bu tipler, kullanıcılarınıza sunulan açık bir arayüzün (*an exposed interface*) parçasıdır. Bu arayüzü katı bir şekilde tanımlamak, herkesin bir fonksiyonun hangi tip değerleri kullandığı ve döndürdüğü konusunda hemfikir olmasını sağlamak için önemlidir. Öte yandan closure’lar ise bunun gibi dışa açık bir arayüzde kullanılmazlar. Bunun yerine, değişkenlerde depolanırlar ve isimlendirilmeden, kütüphanemizin kullanıcılarına doğrudan sunulmadan kullanılırlar(Burada denmek istenen, closure’ların genellikle public API’nin parçası olmadığı ve sadece iç kullanım için yazıldığıdır.).
+
+Closure’lar tipik olarak kısa olur ve herhangi bir rastgele senaryodan ziyade sadece dar bir bağlamda(durumda) geçerlidirler. Bu sınırlı bağlamlar dahilinde derleyici, çoğu değişkenin tipini çıkarım(*infer*) yapabildiği gibi parametrelerin ve dönüş değerinin tiplerini de tahmin(*infer*) edebilir (derleyicinin closure tip belirteçlerine(*annotation*) ihtiyaç duyduğu nadir durumlar da vardır).
+
+Değişkenlerde olduğu gibi, kesinlikle gerekli olandan daha ayrıntılı olmak pahasına açıklık ve netlik artırmak istiyorsak tip belirteçleri(*annotation*) ekleyebiliriz. Bir closure için tipleri belirtmek, `Liste 13-2`'deki tanımlamaya benzer görünecektir. Bu örnekte, closure'ı Liste 13-1'de yaptığımız gibi argüman olarak geçtiğimiz noktada tanımlamak yerine, bir closure tanımlayıp onu bir değişkende saklıyoruz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::thread;
+use std::time::Duration;
+
+fn generate_workout(intensity: u32, random_number: u32) {     // <=========
+    let expensive_closure = |num: u32| -> u32 {               // <=========
+        println!("calculating slowly...");                    // <=========
+        thread::sleep(Duration::from_secs(2));                // <=========
+        num                                                   // <=========
+    };                                                        // <=========
+
+    if intensity < 25 {
+        println!("Today, do {} pushups!", expensive_closure(intensity));
+        println!("Next, do {} situps!", expensive_closure(intensity));
+    } else {
+        if random_number == 3 {
+            println!("Take a break today! Remember to stay hydrated!");
+        } else {
+            println!(
+                "Today, run for {} minutes!",
+                expensive_closure(intensity)
+            );
+        }
+    }
+}
+
+fn main() {
+    let simulated_user_specified_value = 10;
+    let simulated_random_number = 7;
+
+    generate_workout(simulated_user_specified_value, simulated_random_number);
+}
+```
+
+> **Liste 13-2**: Closure'da parametre ve dönüş değeri tiplerinin isteğe bağlı tip belirteçlerini(*annotation*) ekleme
+
+Tip belirteçleri eklendiğinde, closure'ların sözdizimi fonksiyonların sözdizimine daha çok benzer hale gelir. Burada, karşılaştırma yapabilmek için parametresine 1 ekleyen bir fonksiyon ve aynı davranışa sahip bir closure tanımlıyoruz. İlgili kısımları hizalamak için bazı boşluklar ekledik. Bu durum, dikey boru (`|`) kullanımı ve isteğe bağlı olan kısımlar hariç, closure sözdiziminin fonksiyon sözdizimine ne kadar benzer olduğunu göstermektedir:
+
+```rust
+fn  add_one_v1   (x: u32) -> u32 { x + 1 }
+let add_one_v2 = |x: u32| -> u32 { x + 1 };
+let add_one_v3 = |x|             { x + 1 };
+let add_one_v4 = |x|               x + 1  ;
+```
+
+İlk satır bir fonksiyon tanımını gösterir ve ikinci satır tamamen tip belirtilmiş bir closure tanımını gösterir. Üçüncü satırda, closure tanımından tip belirteçlerini kaldırıyoruz. Dördüncü satırda, süslü parantezleri kaldırıyoruz; bunlar isteğe bağlıdır çünkü closure gövdesi yalnızca bir ifade(*expression*) içerir. Bunların hepsi çağrıldıklarında aynı davranışı üretecek geçerli tanımlardır. `add_one_v3` ve `add_one_v4` satırlarının derlenebilmesi için closure'ların değerlendirilmesi (çağrılması) gerekir; çünkü tipler(*type*) kullanımlarından çıkarım yapılacaktır(*infer*). Bu durum, `let v = Vec::new();` örneğinde olduğu gibi, Rust'ın tipi anlayabilmesi için ya tip belirtimine(*annotation*) ya da `Vec` içine belirli bir tipte değerlerin eklenmesine ihtiyaç duymasına benzer.
+
+> [!tip]
+> Rust bazen tipi tek başına çıkarım yapamaz, **nasıl kullanıldığını görmesi gerekir**.
+> ```rust
+> // ❌ HATA - Rust tipi bilmiyor
+> let v = Vec::new();  // Vec ne tipte olacak? i32? String? bool?
+> 
+> // ✅ Çözüm 1: Tip belirteci ekle
+> let v: Vec<i32> = Vec::new();
+> 
+> // ✅ Çözüm 2: Kullanımdan çıkar
+> let v = Vec::new();
+> v.push(5);  // Ah, 5 bir i32! Demek ki Vec<i32>
+> ```
+> Bu durum, `let v = Vec::new();` ifadesinin de Rust'ın tipi çıkarabilmesi(*annotation*) için ya tip belirteci (`Vec<i32>`) ya da `Vec`'e eklenen değerlerden (örneğin `v.push(5)`) tip bilgisine ihtiyaç duymasına benzer.
+> 
+> Her iki durumda da Rust şunu diyor:
+> > "Bana ya **tipini söyle** ya da **nasıl kullanacağını göster**, öyle çıkarayım!"
+
+Closure tanımları için derleyici, her bir parametre ve dönüş değeri için **tek bir somut tip (concrete type)** çıkarsayacaktır. Örneğin, `Liste 13-3`, parametre olarak aldığı değeri olduğu gibi döndüren kısa bir closure tanımını göstermektedir. Bu closure, bu örnekteki amaçlarımız dışında pek kullanışlı değildir. Tanıma herhangi bir tip belirteci(*type annotation*) eklemediğimize dikkat edin. Tip belirteçleri(*type annotation*) olmadığı için, closure'ı herhangi bir tiple çağırabiliriz; burada ilk seferde `String` ile bunu yaptık. Eğer daha sonra `example_closure`'ı bir tamsayı (*integer*) ile çağırmaya çalışırsak, bir hata alırız.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let example_closure = |x| x;
+
+    let s = example_closure(String::from("hello"));
+    let n = example_closure(5);
+}
+```
+
+> **Liste 13-3:** Tipleri çıkarımla(*infer*) belirlenen bir closure'ı iki farklı tiple çağırma denemesi
+
+Derleyici bize şu hatayı verir:
+
+```rust
+$ cargo run
+   Compiling closure-example v0.1.0 (file:///projects/closure-example)
+error[E0308]: mismatched types
+ --> src/main.rs:5:29
+  |
+5 |     let n = example_closure(5);
+  |             --------------- ^ expected `String`, found integer
+  |             |
+  |             arguments to this function are incorrect
+  |
+note: expected because the closure was earlier called with an argument of type `String`
+ --> src/main.rs:4:29
+  |
+4 |     let s = example_closure(String::from("hello"));
+  |             --------------- ^^^^^^^^^^^^^^^^^^^^^ expected because this argument is of type `String`
+  |             |
+  |             in this closure call
+note: closure parameter defined here
+ --> src/main.rs:2:28
+  |
+2 |     let example_closure = |x| x;
+  |                            ^
+help: try using a conversion method
+  |
+5 |     let n = example_closure(5.to_string());
+  |                              ++++++++++++
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `closure-example` (bin "closure-example") due to 1 previous error
+
+```
+
+`example_closure`'ı `String` değeriyle ilk kez çağırdığımızda, derleyici `x`'in tipini ve closure'ın dönüş tipini `String` olarak çıkarım yapar(*infer*). Bu tipler daha sonra `example_closure` içindeki closure'a kilitlenir ve aynı closure'ı farklı bir tiple kullanmaya çalıştığımızda bir tip hatası alırız.
+### 13.1.3. Referansları Yakalama veya Sahipliği Taşıma
+
+Closure'lar, ortamlarındaki değerleri üç şekilde yakalayabilir; bunlar bir fonksiyonun parametre alabileceği üç yola doğrudan karşılık gelir: **değişmez ödünç alma (borrowing immutably)**, **değişebilir ödünç alma (borrowing mutably)** ve **sahipliği alma (taking ownership)**.
+
+
+> [!tip]
+> Closure'ın bir değeri nasıl yakalayacağı (referans mı, sahiplik mi), o değeri closure içinde nasıl kullandığınıza bağlıdır.
+> **Rust Otomatik Karar Veriyor:**
+> ```rust
+> let mut list = vec![1, 2, 3];
+>
+> // Durum 1: Sadece okuma → Değişmez referans yakalanır
+> let sadece_oku = || println!("Liste: {:?}", list);
+> // Rust: "Sadece yazdırıyor, &list yeterli"
+> 
+> // Durum 2: Değiştirme → Değişebilir referans yakalanır  
+> let degistir = || list.push(4);
+> // Rust: "push yapıyor, &mut list gerekli"
+> 
+> // Durum 3: Sahiplik alma → Değer taşınır
+> let sahiplen = || drop(list);
+> // Rust: "drop çağırıyor, sahipliği almalı"
+> ```
+> Rust closure'ın **içine bakıyor**:
+> - Sadece okuyorsan → `&T` (değişmez referans)
+> - Değiştiriyorsan → `&mut T` (değişebilir referans)
+> - Tüketiyorsan → `T` (sahiplik)
+> 
+> **SEN karar vermiyorsun, Rust KODUNA bakarak karar veriyor!**
+
+`Liste 13-4`’te, `list` adlı vektöre değiştirilemez bir referans(*immutable reference*) yakalayan bir **closure** tanımlıyoruz; çünkü **closure**’ın yalnızca değeri ekrana yazdırmak için değiştirilemez bir referansa(*immutable reference*) ihtiyacı vardır.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let list = vec![1, 2, 3];
+    println!("Before defining closure: {list:?}");
+
+    let only_borrows = || println!("From closure: {list:?}");
+
+    println!("Before calling closure: {list:?}");
+    only_borrows();
+    println!("After calling closure: {list:?}");
+}
+```
+
+> **Liste 13-4:** Değişmez bir referans(*immutable reference*) yakalayan bir closure'ı tanımlama ve çağırma
+
+Bu örnek ayrıca bir değişkenin bir closure tanımına bağlanabileceğini ve daha sonra değişken adını ve parantezleri kullanarak, sanki değişken adı bir fonksiyon adıymış gibi closure'ı çağırabileceğimizi göstermektedir.
+
+Aynı anda `list` değişkenine ait birden fazla değiştirilemez referansa (*immutable reference*) sahip olabildiğimiz için; `list`, closure tanımından önce, closure tanımından sonra ama çağrılmadan önce ve closure çağrıldıktan sonra hala kod tarafından erişilebilirdir. Bu kod derlenir, çalışır ve şu çıktıyı verir:
+
+> [!tip]
+> Değişmez(*immutable reference*) referanslar (`&T`) birden fazla olabilir, bu yüzden `list`'i her yerde kullanabiliyoruz.
+> 
+> **Kod Örneği:**
+> ```rust
+> let list = vec![1, 2, 3];
+> 
+> // 1. Closure tanımından ÖNCE
+> println!("Before defining closure: {:?}", list);  // ✅ Çalışır
+> 
+> // Closure tanımı (değişmez referans yakalıyor)
+> let sadece_oku = || println!("From closure: {:?}", list);
+> 
+> // 2. Closure tanımından SONRA ama çağrılmadan ÖNCE
+> println!("Before calling closure: {:?}", list);  // ✅ Çalışır
+> 
+>// 3. Closure çağrısı
+> sadece_oku();
+> 
+>// 4. Closure çağrıldıktan SONRA
+> println!("After calling closure: {:?}", list);  // ✅ Çalışır
+> ```
+> **Özet:** 
+> + Değişmez referans (`&T`) → Paylaşımlı → Herkes okuyabilir → Sorun yok! ✅ 
+> + Değişebilir referans (`&mut T`) → Özel → Sadece biri kullanabilir → Dikkatli ol! ⚠️
+
+```
+$ cargo run
+   Compiling closure-example v0.1.0 (file:///projects/closure-example)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running `target/debug/closure-example`
+Before defining closure: [1, 2, 3]
+Before calling closure: [1, 2, 3]
+From closure: [1, 2, 3]
+After calling closure: [1, 2, 3]
+```
+
+Ardından, Liste 13-5'te, closure gövdesini `list` vektörüne bir eleman ekleyecek şekilde değiştiriyoruz. Closure artık **değiştirilebilir bir referans(*mutable reference*)** yakalar.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let mut list = vec![1, 2, 3];
+    println!("Before defining closure: {list:?}");
+
+    let mut borrows_mutably = || list.push(7);
+
+    borrows_mutably();
+    println!("After calling closure: {list:?}");
+}
+```
+
+> **Liste 13-5:** Değiştirilebilir bir referansı(**mutable reference**) yakalayan bir closure tanımlama ve çağırma
+
+Bu kod derlenir, çalışır ve şu çıktıyı verir:
+
+```
+$ cargo run
+   Compiling closure-example v0.1.0 (file:///projects/closure-example)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running `target/debug/closure-example`
+Before defining closure: [1, 2, 3]
+After calling closure: [1, 2, 3, 7]
+```
+
+`borrows_mutably` closure'ının tanımı ile çağrılması arasında artık bir `println!` bulunmadığına dikkat edin: `borrows_mutably` tanımlandığında, `list` değişkenine ait **değiştirilebilir bir referansı(*mutable reference*)** yakalar. Closure çağrıldıktan sonra closure'ı tekrar kullanmıyoruz, dolayısıyla değişebilir ödünç alma(*mutable borrow*) sona erer.
+
+> [!tip]
+> ```rust
+> let mut list = vec![1, 2, 3];
+> 
+> println!("Before: {:?}", list);  // ✅ list serbest
+> 
+> let mut borrows_mutably = || list.push(7);  
+> // Closure tanımlandı ve &mut list'i yakaladı
+> // Artık list KİLİTLİ - başka kimse kullanamaz!
+> 
+> // println!("Buraya koyamazsın: {:?}", list);  // ❌ HATA!
+> // Çünkü closure hala &mut list tutuyor
+> 
+> borrows_mutably();  // Closure çağrıldı
+> // SON KULLANIM - artık closure bitti, &mut list SERBEST!
+> 
+> println!("After: {:?}", list);  // ✅ Artık list tekrar kullanılabilir
+> ```
+
+Closure tanımı ile closure çağrısı arasında, yazdırmak için değişmez bir ödünç almaya(_immutable borrow_) izin verilmez, çünkü değişebilir bir ödünç alma(_mutable borrow_) varken başka hiçbir ödünç almaya izin verilmez. Hangi hata mesajını alacağınızı görmek için oraya bir `println!` eklemeyi deneyin!
+
+Closure gövdesi aslında sahipliğe ihtiyaç duymasa bile, closure’ın çevresindeki(_environment_) değerlerin sahipliğini(_ownership_) almasını zorlamak istiyorsanız, parametre listesinden önce `move` anahtar sözcüğünü kullanabilirsiniz.
+
+Bu teknik çoğunlukla bir closure'ı yeni bir iş parçacığına(*thread*) geçirirken verileri taşımak için kullanışlıdır, böylece veriler yeni iş parçacığına ait olur. Bölüm 16'da eşzamanlılık(*concurrency*) hakkında konuştuğumuzda iş parçacıklarını ve neden kullanmak isteyebileceğinizi ayrıntılı olarak tartışacağız, ancak şimdilik `move` anahtar kelimesine ihtiyaç duyan bir closure kullanarak yeni bir iş parçacığı oluşturmayı(_spawn_) kısaca keşfedelim. `Listing 13-6`, ana iş parçacığı yerine yeni bir iş parçacığında vektörü yazdıracak şekilde değiştirilmiş `Listing 13-4`'ü göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::thread;
+
+fn main() {
+    let list = vec![1, 2, 3];
+    println!("Before defining closure: {list:?}");
+
+    thread::spawn(move || println!("From thread: {list:?}"))
+        .join()
+        .unwrap();
+}
+```
+
+> **Liste 13-6**: İş parçacığı(*thread*) için closure'ın `list`'in sahipliğini almasını zorlamak üzere `move` kullanımı
+
+**Kod Çıktısı:**
+
+```
+Before defining closure: [1, 2, 3]  
+From thread: [1, 2, 3]
+```
+
+Yeni bir iş parçacığı(*thread*) oluşturuyoruz ve iş parçacığına(*thread*) argüman olarak çalıştıracağı bir closure veriyoruz. Closure gövdesi `list`'i yazdırıyor. `Liste 13-4`'te, closure `list`'i sadece değiştirilemez bir referans(i*mmutable reference*) kullanarak yakalamıştı; çünkü yazdırmak için gereken en az erişim buydu. Bu örnekte, closure gövdesi hala sadece değiştirilemez(*immutable reference*) bir referansa ihtiyaç duymasına rağmen, closure tanımının başına `move` anahtar kelimesini koyarak `list`'in closure içine **taşınması (moved)** gerektiğini belirtmemiz gerekir. Eğer ana iş parçacığı(*thread*), yeni iş parçacığı(*thread*) üzerinde `join` çağırmadan önce daha fazla işlem gerçekleştirse, yeni iş parçacığı ana iş parçacığının geri kalanı bitmeden önce bitebilir veya ana iş parçacığı önce bitebilir. Eğer ana iş parçacığı(*thread*) `list`'in sahipliğini(*ownership*) korusaydı ancak yeni iş parçacığından önce sona erip `list`'i bellekten silseydi(*drop*), iş parçacığı(*thread*) içindeki değiştirilemez referans geçersiz olurdu. Bu nedenle derleyici, referansın geçerli kalabilmesi için `list`'in yeni iş parçasına verilen closure içine taşınmasını şart koşar. Hangi derleyici hatalarını aldığınızı görmek için `move` anahtar kelimesini kaldırmayı veya closure tanımlandıktan sonra ana iş parçacığında `list`'i kullanmayı deneyin!
+
+
+> [!tip]
+> - **`move`** → "list artık senin, güvendesin!" (sahiplik)
+> - **`join()`** → "Bitene kadar seni bekleyeceğim!" (sıralama)
+
+> [!tip]
+> #### `move` anahtar kelimesi nedir?
+> **move** anahtar kelimesi, bir closure'ın çevresindeki değişkenleri **ödünç almak (borrow)** yerine, o değişkenlerin **sahipliğini (ownership)** tamamen kendi üzerine almasını sağlar.
+> Normalde Rust derleyicisi, closure içinde bir değişken kullanıldığında en az kısıtlayıcı yöntemi (genelde referans almayı) seçer. Ancak `move` kullandığınızda şu gerçekleşir:
+> - **Sahiplik Devri:** Değişken ana kapsamdan çıkarılır ve closure'ın içine taşınır.
+> - **Erişim Kısıtlaması:** Değişken closure'a taşındığı için, artık dışarıdaki (ana kapsamdaki) kod o değişkeni bir daha kullanamaz.
+> - **Yaşam Süresi Güvencesi:** Özellikle yeni bir **thread** (iş parçacığı) başlatırken kullanılır. Ana thread kapansa bile, veri closure ile birlikte yeni thread'e taşındığı için programın hata vermesini (geçersiz referans oluşmasını) engeller.
+
+
+> [!TIP]
+> #### `join()` metotu nedir?
+> İki iş parçacığı (thread) aynı anda çalışıyor, hangisinin önce biteceği belirsiz. Ana thread ve yeni thread **yarışıyor**. Hangisi önce bitecek belli değil:
+> - Eğer **yeni thread önce biterse** → Sorun yok ✅
+> - Eğer **ana thread önce biterse** → `list` silinir, yeni thread çöker! ❌
+> 
+> ** `join()` Bunu Çözer:**
+> ```rust
+> fn main() {
+>     let list = vec![1, 2, 3];
+>   
+>     thread::spawn(|| {
+>         println!("From thread: {:?}", list);
+>     })
+>     .join()  // ← BEKLE! Yeni thread bitene kadar ana thread durur
+>     .unwrap();
+>     
+>     // Buraya ancak yeni thread bittikten sonra gelir
+>     println!("Both done!");
+> }
+> ```
+> **Özet:**
+> ```
+> join() OLMADAN:
+> Ana Thread ─────────────► BİTTİ (list silindi!)
+> Yeni Thread ──────────────────────► 💥 ÇÖKTÜ (list yok!)
+> 
+> join() İLE:
+> Ana Thread ─────────────┐ BEKLE
+> Yeni Thread ────────►BİTTİ
+> Ana Thread        ─────────► DEVAM ✅
+> ```
+
+### 13.1.4. Yakalanan Değerleri Closure'dan Dışarı Taşıma
+
+Bir closure, tanımlandığı ortamdan bir referansı veya bir değerin sahipliğini yakaladıktan sonra (bu durum closure'ın **içine** neyin taşındığını etkiler), closure gövdesindeki kod, closure daha sonra değerlendirildiğinde bu referanslara veya değerlere ne olacağını belirler (bu da closure'dan **dışarı** neyin taşındığını etkiler).
+
+> [!tip]
+> Closure tanımlandığında ortamdan değerleri yakalar (GİRİŞ), closure çalıştırıldığında ise gövdesindeki kod bu değerlere ne olacağını belirler (ÇIKIŞ).
+> **Görsel Açıklama:**
+> ```
+> ORTAM                 CLOSURE İÇİ           CLOSURE DIŞI
+>   │                        │                     │
+>   │  Aşama 1: Yakalama     │                     │
+>   ├──────────────────────> │                     │
+>   │     (x, y, z)          │                     │
+>   │                        │                     │
+>   │  Aşama 2: Çalıştırma   │                     │
+>   │                        ├─────────────────────>
+>   │                        │    drop(x)          │
+>   │                        │    return y         │
+>   │                        │    (z içeride kalır)│
+> ```
+
+Bir closure gövdesi şunlardan herhangi birini yapabilir: Yakalanan bir değeri closure dışına taşıyabilir(**move**),  yakalanan değeri değiştirebilir(**mutate**), değeri ne taşıyabilir ne de değiştirebilir veya en başta ortamdan hiçbir şey yakalamayabilir.
+
+Bir closure'ın ortamdaki değerleri yakalama ve işleme biçimi, closure'ın hangi trait'leri uygulayacağını etkiler; trait'ler ise fonksiyonların ve yapıların(structs) ne tür closure'lar kullanabileceklerini belirleme yoludur. 
+
+> [!tip]
+> Closure'ın değerleri nasıl kullandığı, onun hangi trait'i alacağını belirler. Bu trait sayesinde fonksiyonlar "ben sadece şu tür closure'ları kabul ederim" diyebilir.
+> ```rust
+> let x = String::from("hey");
+> 
+> // Sadece okuyor → Fn trait'i
+> let c1 = || println!("{}", x);
+> 
+> // Değiştiriyor → FnMut trait'i  
+> let mut c2 = || x.push_str("!");
+> 
+> // Tüketiyor → FnOnce trait'i
+> let c3 = || drop(x);
+> ```
+
+Closure'lar, gövdelerinin değerleri nasıl işlediğine bağlı olarak, aşağıdaki **Fn** trait'lerinden birini, ikisini veya üçünü birden artımlı (*additive*=eklemeli, kademeli) bir şekilde otomatik olarak uygulayacaktır:
+
++ **FnOnce:** Bir kez çağrılabilen closure'lar için geçerlidir. Tüm closure'lar bu trait'i uygular(_implement_) çünkü her closure en az bir kez çağrılabilir. Yakaladığı değerleri kendi gövdesinin dışına taşıyan(*move*) bir closure, yalnızca `FnOnce` trait'ini uygular(_implement_) ve diğer `Fn` trait'lerinden hiçbirini uygulamaz(_implement_); çünkü bu closure sadece bir kez çağrılabilir.
++ **FnMut:** Yakaladığı değerleri gövdesinin dışına taşımayan ancak yakalanan değerleri değiştirebilen(*mutate*) closure'lar için geçerlidir. Bu closure'lar birden fazla kez çağrılabilir.
++ **Fn:** Yakaladığı değerleri dışarı taşımayan, değerleri değiştirmeyen ve aynı zamanda ortamdan hiçbir şey yakalamayan closure'lar için geçerlidir. Bu closure'lar, çevrelerini değiştirmeden birden fazla kez çağrılabilir; bu durum, bir closure'ın aynı anda (*concurrently*=eşzamanlı olarak) birden fazla kez çağrılması gibi durumlarda önemlidir.
+
+Şimdi, `Liste 13-1`’de kullandığımız `Option<T>` üzerindeki `unwrap_or_else` metodunun tanımına bakalım:
+
+```rust
+impl<T> Option<T> {
+    pub fn unwrap_or_else<F>(self, f: F) -> T
+    where
+        F: FnOnce() -> T
+    {
+        match self {
+            Some(x) => x,
+            None => f(),
+        }
+    }
+}
+```
+
+`T`'nin, bir `Option`'ın `Some` varyantındaki değerin tipini temsil eden generic tip olduğunu hatırlayın. Bu `T` tipi, aynı zamanda `unwrap_or_else` fonksiyonunun dönüş tipidir: Örneğin, bir `Option<String>` üzerinde `unwrap_or_else` çağıran kod, sonuç olarak bir `String` alacaktır.
+
+Ardından, `unwrap_or_else` fonksiyonunun `F` adında ek bir generic tip parametresine sahip olduğuna dikkat edin. `F` tipi, `unwrap_or_else` çağrılırken sağladığımız closure olan `f` parametresinin tipidir(Bu `f` parametresi bir closure (bir işlev bloğu), `F` ise bu closure'ın **türünü** temsil eden generic tip).
+
+`F` jenerik(*generic*) tipi üzerinde belirtilen **trait bound** (trait kısıtlaması) `FnOnce() -> T` şeklindedir; bu da `F`'in bir kez çağrılabilmesi, hiç argüman almaması ve bir `T` döndürmesi gerektiği anlamına gelir.  Trait kısıtlamada(**trait bound**) `FnOnce` kullanılması, `unwrap_or_else` metodunun `f`'i birden fazla kez çağırmayacağı kısıtlamasını ifade eder. `unwrap_or_else` gövdesinde, eğer `Option` değeri `Some` ise `f`'in hiç çağrılmayacağını görebiliriz. Eğer `Option` değeri `None` ise `f` bir kez çağrılacaktır. Tüm closure'lar `FnOnce`'ı uyguladığından, `unwrap_or_else` her üç closure türünü de kabul eder ve mümkün olduğunca esnek bir yapıya kavuşur(`Fn` ve `FnMut` uygulayan her closure, **aynı zamanda** `FnOnce`'ı da uygular. Çünkü birden fazla çağrılabilen bir şey, en az bir kez de çağrılabilir demektir.Yani cümlenin özeti şu: **`FnOnce` en az kısıtlayıcı trait olduğundan, onu talep eden bir fonksiyon her tür closure'ı kabul edebilir → bu da maksimum esneklik demektir.**).
+
+
+> [!NOTE]
+> Eğer yapmak istediğimiz işlem ortamdan bir değer yakalamayı (capturing) gerektirmiyorsa, `Fn` trait'lerinden birini uygulayan bir yapıya ihtiyaç duyduğumuz yerde bir closure yerine doğrudan bir **fonksiyonun adını** kullanabiliriz. Örneğin, bir `Option<Vec<T>>` değeri üzerinde, eğer değer `None` ise yeni ve boş bir vektör elde etmek için `unwrap_or_else(Vec::new)` şeklinde çağrı yapabiliriz. Derleyici, bir fonksiyon tanımı için geçerli olan `Fn` trait'lerinden hangisi uygunsa onu otomatik olarak uygular.
+
+Şimdi, dilimler (slices) üzerinde tanımlanmış olan standart kütüphane metodu `sort_by_key`'e bakalım; bunun `unwrap_or_else` metodundan nasıl ayrıldığını ve `sort_by_key`'in trait kısıtlaması(*trait bound*) için neden `FnOnce` yerine **`FnMut`** kullandığını inceleyelim. Closure, üzerinde işlem yapılan dilimdeki(_slice'daki_) mevcut öğeye bir referans şeklinde tek bir argüman alır ve sıralanabilir `K` tipinde bir değer döndürür. Bu fonksiyon, bir dilimi her bir öğenin belirli bir niteliğine (attribute) göre sıralamak istediğinizde kullanışlıdır. `Liste 13-7`'de, `Rectangle` örneklerinden(*instances*) oluşan bir listemiz var ve bunları `width` niteliklerine göre küçükten büyüğe sıralamak için `sort_by_key` kullanıyoruz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let mut list = [
+        Rectangle { width: 10, height: 1 },
+        Rectangle { width: 3, height: 5 },
+        Rectangle { width: 7, height: 12 },
+    ];
+
+    list.sort_by_key(|r| r.width);
+    println!("{list:#?}");
+}
+```
+
+> **Liste 13-7:** Dikdörtgenleri(_rectangles_) genişliğe göre sıralamak için `sort_by_key` kullanımı
+
+Bu kod şu çıktıyı verir:
+
+```
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.41s
+     Running `target/debug/rectangles`
+[
+    Rectangle {
+        width: 3,
+        height: 5,
+    },
+    Rectangle {
+        width: 7,
+        height: 12,
+    },
+    Rectangle {
+        width: 10,
+        height: 1,
+    },
+]
+```
+
+`sort_by_key` metodunun bir `FnMut` closure alacak şekilde tanımlanmasının sebebi, closure'ı birden fazla kez çağırmasıdır: dilimdeki(*slice*'daki) her bir öğe için bir kez. `|r| r.width` closure'ı ortamından hiçbir şeyi yakalamaz, değiştirmez(*mutate*) veya dışarı taşımaz(*move*); bu nedenle trait kısıtlaması(*trait bound*) gereksinimlerini karşılar.
+
+Buna karşılık, `Liste 13-8`, ortamdan bir değeri dışarı taşıdığı(_move_) için **yalnızca `FnOnce`** trait'ini uygulayan(_implement_) bir closure örneğini göstermektedir. Derleyici, bu closure'ı `sort_by_key` ile kullanmamıza izin vermeyecektir.
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let mut list = [
+        Rectangle { width: 10, height: 1 },
+        Rectangle { width: 3, height: 5 },
+        Rectangle { width: 7, height: 12 },
+    ];
+
+    let mut sort_operations = vec![];
+    let value = String::from("closure called");
+
+    list.sort_by_key(|r| {
+        sort_operations.push(value);
+        r.width
+    });
+    println!("{list:#?}");
+}
+```
+
+> [Liste 13-8](https://doc.rust-lang.org/stable/book/ch13-01-closures.html#listing-13-8): `sort_by_key` ile `FnOnce` closure kullanmaya çalışma
+
+Bu, `sort_by_key` fonksiyonunun sıralama sırasında closure’ı kaç kez çağırdığını saymaya çalışmanın yapay ve karmaşık bir yoludur (ve çalışmaz). Bu kod, closure’ın çevresindeki `value` adlı `String` değeri `sort_operations` vektörüne ekleyerek(_push_) bu sayımı yapmaya çalışır. Closure, `value` değişkenini yakalar ve ardından `value`’nun sahipliğini(_ownership_) `sort_operations` vektörüne aktararak onu closure dışına taşır (move eder). Bu closure yalnızca bir kez çağrılabilir; ikinci kez çağrılmaya çalışıldığında çalışmaz, çünkü `value` artık tekrar `sort_operations` içine eklenebilmek için ortamda bulunmayacaktır! Bu nedenle, bu closure yalnızca `FnOnce` trait'ini uygular(_trait implement_). Bu kodu derlemeye çalıştığımızda, closure'ın `FnMut` uygulaması(_implement_) gerektiği, ancak `value` değerinin closure dışına taşınamayacağı yönünde bir hata alırız.
+
+```
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+error[E0507]: cannot move out of `value`, a captured variable in an `FnMut` closure
+  --> src/main.rs:18:30
+   |
+15 |     let value = String::from("closure called");
+   |         -----   ------------------------------ move occurs because `value` has type `String`, which does not implement the `Copy` trait
+   |         |
+   |         captured outer variable
+16 |
+17 |     list.sort_by_key(|r| {
+   |                      --- captured by this `FnMut` closure
+18 |         sort_operations.push(value);
+   |                              ^^^^^ `value` is moved here
+   |
+help: consider cloning the value if the performance cost is acceptable
+   |
+18 |         sort_operations.push(value.clone());
+   |                                   ++++++++
+
+For more information about this error, try `rustc --explain E0507`.
+error: could not compile `rectangles` (bin "rectangles") due to 1 previous error
+```
+
+Hata, closure gövdesinde `value` değişkenini ortamın dışına taşıyan(*move*) satıra işaret eder. Bunu düzeltmek için, closure gövdesini ortamdan değerleri dışarı taşımayacak şekilde değiştirmemiz gerekir. Ortamda(_environment_) bir sayaç tutmak ve closure gövdesi içinde bu sayacın değerini artırmak, closure'ın kaç kez çağrıldığını saymanın çok daha doğrudan ve basit bir yoludur. `Liste 13-9`'daki closure, `sort_by_key` ile sorunsuz çalışır; çünkü `num_sort_operations` sayacına ait yalnızca **değiştirilebilir bir referansı (mutable reference)** yakalar ve bu sayede birden fazla kez çağrılabilir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let mut list = [
+        Rectangle { width: 10, height: 1 },
+        Rectangle { width: 3, height: 5 },
+        Rectangle { width: 7, height: 12 },
+    ];
+
+    let mut num_sort_operations = 0;
+    list.sort_by_key(|r| {
+        num_sort_operations += 1;
+        r.width
+    });
+    println!("{list:#?}, sorted in {num_sort_operations} operations");
+}
+```
+
+> [Liste 13-9](https://doc.rust-lang.org/stable/book/ch13-01-closures.html#listing-13-9): sort_by_key ile FnMut bir closure kullanımına izin verilir.
+
+`Fn` özellikleri(trait'leri), closure kullanan fonksiyonları veya tipleri tanımlarken veya kullanırken önemlidir. Bir sonraki bölümde iterator'ları tartışacağız. Birçok iterator metodu closure argümanları alır, bu yüzden devam ederken bu closure detaylarını aklınızda tutun!
+
+## 13.2. Iterator'larla Bir Dizi Öğeyi İşleme
+
+Iterator deseni, bir dizi öğe üzerinde sırayla bir görev gerçekleştirmenize olanak tanır. Bir iterator, her öğe üzerinde dolaşma mantığından(*iterating*) ve dizinin ne zaman sona erdiğini belirlemekten sorumludur. Iterator'lar kullandığınızda, bu mantığı kendiniz yeniden uygulamak zorunda kalmazsınız.
+
+> [!TIP]
+> Iterator kullanmazsanız, döngü mantığını elle yazmanız gerekir. Iterator kullanırsanız, bu iş sizin için hazır.
+> ##### Iterator KULLANMADAN (Elle Yazmak):
+> ```rust
+> let v = vec![1, 2, 3];
+> 
+> // Mantığı KENDİNİZ yazıyorsunuz:
+> let mut index = 0;               // İndeks takibi
+> while index < v.len() {          // Bitiş kontrolü
+> 	let item = &v[index];       // Öğeye erişim
+> 	println!("{}", item);       
+> 	index += 1;                 // İndeksi artırma
+> }                         
+> ```
+> ##### Kendiniz yapmanız gerekenler:
+> + ✍️ İndeks değişkeni oluşturmak
+> + ✍️ Bitiş koşulunu kontrol etmek
+> + ✍️ Her adımda indeksi artırmak
+> + ✍️ Sınır kontrolü yapmak (v.len())
+
+Rust'ta iterator'lar **tembeldir(_lazy_)**; yani, onları tüketerek(*consume*) tamamen bitirecek bir metot çağırana kadar hiçbir etkileri yoktur. Örneğin, `Liste 13-10`’daki kod, `Vec<T>` üzerinde tanımlı `iter` metodunu çağırarak `v1` vektöründeki öğeler üzerinde bir iterator oluşturur. Bu kod tek başına faydalı bir iş yapmaz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let v1 = vec![1, 2, 3];
+
+    let v1_iter = v1.iter();
+}
+```
+
+> **[Liste 13-10](https://doc.rust-lang.org/stable/book/ch13-02-iterators.html#listing-13-10)**: Bir iterator oluşturma
+
+Iterator, `v1_iter` değişkeninde saklanır. Bir iterator oluşturduktan sonra onu çeşitli şekillerde kullanabiliriz. . Liste 3-5'te, bir dizinin her bir ögesi üzerinde kod çalıştırmak için bir `for` döngüsü kullanarak dolaşmıştık.  Arka planda(*under the hood*) bu işlem, üstü kapalı bir şekilde(*implicitly*) bir iterator oluşturdu ve tüketti; ancak şimdiye kadar bunun tam olarak nasıl çalıştığına değinmemiştik.
+
+Liste 13-11'deki örnekte, iterator'ın oluşturulması ile `for` döngüsünde kullanılması işlemlerini birbirinden ayırıyoruz. `for` döngüsü `v1_iter` içindeki iterator'ı kullanarak çağrıldığında, iterator'daki her bir eleman döngünün bir tekrarında (iteration) kullanılır ve bu da her bir değeri ekrana yazdırır.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let v1 = vec![1, 2, 3];
+
+    let v1_iter = v1.iter();
+
+    for val in v1_iter {
+        println!("Got: {val}");
+    }
+}
+```
+
+> **[Liste 13-11](https://doc.rust-lang.org/stable/book/ch13-02-iterators.html#listing-13-11)**: Bir `for` döngüsünde iterator kullanılması
+
+Standart kütüphaneleri tarafından iterator sağlanmayan dillerde, muhtemelen bu aynı işlevselliği 0 indeksinde bir değişken başlatarak, o değişkeni vektöre indekslemek için kullanarak bir değer elde ederek ve döngü içinde değişken değerini vektördeki toplam öğe sayısına ulaşana kadar artırarak yazardınız.
+
+> [!TIP]
+> Iterator olmayan dillerde, manuel döngü yazmanız gerekir.
+> ```C
+> // C dilinde (iterator yok):
+> int numbers[] = {1,2,3,4,5}
+> int length = 5;
+> 
+> int i = 0;                    // ← "0 indeksinde değişken başlat"
+> while (i < length) {          // ← "toplam öğe sayısına ulaşana kadar"
+> 	int value = number[i];   // ← "vektöre indekslemek için kullan"
+> 	printf("%d\n", value);
+> 	i++;                     // ← "değişken değerini artır"
+> }
+> ```
+> Standart kütüphanesinde iterator olmayan dillerde, aynı işi yapmak için şunları yapmanız gerekir: bir indeks değişkeni oluşturmak (i=0), her adımda bu indeksi kullanarak vektörden değer almak (numbers[i]), ve döngü bitene kadar indeksi artırmak (i++).
+
+Iterator'lar tüm bu mantığı sizin için halleder ve potansiyel olarak hata yapabileceğiniz tekrarlayan kodları azaltır. Iterator'lar, aynı mantığı sadece vektörler gibi indeksleyebileceğiniz veri yapılarıyla değil, birçok farklı dizi çeşidiyle(_kinds of sequences_) de kullanabilmeniz için size daha fazla esneklik sağlar. Şimdi iterator'ların bunu nasıl yaptığını inceleyelim.
+### 13.2.1. `Iterator` Trait’i ve `next` Metodu
+
+Tüm iterator'lar, standart kütüphanede tanımlanmış olan `Iterator` adlı bir trait'i (özellik) uygular(_implement_). Bu trait'in tanımı şuna benzer:
+
+```rust
+#![allow(unused)]
+fn main() {
+	pub trait Iterator {
+	    type Item;
+
+	    fn next(&mut self) -> Option<Self::Item>;
+
+	    // methods with default implementations elided
+	}
+}
+```
+
+Bu tanımın bazı yeni sözdizimleri(_syntax_) kullandığına dikkat edin: `type Item` ve `Self::Item`. bunlar bu trait ile ilişkilendirilmiş bir tip(*associated type*) tanımlıyor. İlişkilendirilmiş tipler(*associated type*) hakkında Bölüm 20'de derinlemesine konuşacağız. Şimdilik bilmeniz gereken şey şudur: Bu kod, `Iterator` trait’ini implement etmenin aynı zamanda bir `Item` türü tanımlamayı gerektirdiğini söyler ve bu `Item` türü, `next` metodunun dönüş tipinde kullanılır. Başka bir deyişle, `Item` türü iterator’dan döndürülecek olan türdür.
+
+> [!tip]
+> #### Associated types (İlişkili Tipler)
+> **Associated types (İlişkili Tipler)**, Rust'ta bir trait (özellik) tanımlarken, o trait'in içine yerleştirilen ve henüz ne olduğu kesinleşmemiş **placeholder (yer tutucu)** bir tiptir.
+> En net örneğini az önce incelediğimiz `Iterator` trait'inde görebiliriz:
+> ```rust
+>  pub trait Iterator {
+>     type Item; // İşte ilişkili tip bu!
+> 
+>     fn next(&mut self) -> Option<Self::Item>;
+> }
+> ```
+> #### Kısaca Mantığı ve Amacı:
+> 1. **"Tipi Sonra Seç" Sözü:** Trait'i yazan kişi der ki: _"Ben bir iterator arayüzü tasarlıyorum ama bu iterator'ın `i32` mi, `String` mi yoksa bir `User` struct'ı mı üreteceğini şimdiden bilemem. O yüzden buraya geçici olarak `Item` adını koyuyorum."_
+> 2. **Uygulama Esnasında Belirleme:** Bir struct için bu trait'i uyguladığınızda (implementasyon anında), bu tipin gerçekte ne olacağını beyan edersiniz:
+
+`Iterator` trait'i, onu uygulayan yapıların(implementors) yalnızca tek bir metot tanımlamasını zorunlu kılar:  `next` metodu. Bu metod, iterator’daki öğeleri birer birer `Some` içine sarılmış şekilde döndürür; iterasyon(_iteration_) sona erdiğinde ise `None` döndürür.
+
+Iterator’lar üzerinde `next` metodunu doğrudan çağırabiliriz. `Liste 13-12`, vektörden oluşturulan iterator üzerinde tekrarlayan `next` çağrılarından hangi değerlerin döndüğünü göstermektedir.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn iterator_demonstration() {
+        let v1 = vec![1, 2, 3];
+
+        let mut v1_iter = v1.iter();
+
+        assert_eq!(v1_iter.next(), Some(&1));
+        assert_eq!(v1_iter.next(), Some(&2));
+        assert_eq!(v1_iter.next(), Some(&3));
+        assert_eq!(v1_iter.next(), None);
+    }
+}
+```
+
+`v1_iter`'i değişebilir (mutable) yapmamız gerektiğine dikkat edin: Bir iterator üzerinde `next` metodunu çağırmak, iterator'ın dizi içinde nerede olduğunu takip etmek için kullandığı **iç durumu (internal state) değiştirir**. Başka bir deyişle, bu kod iterator’ı tüketir (_consume eder_), yani kullanıp bitirir. `next`'e yapılan her çağrı, iterator'dan bir öğe yer. Bir `for` döngüsü kullandığımızda `v1_iter`'i değişebilir(_mutable_) yapmamıza gerek yoktu, çünkü döngü `v1_iter`'in sahipliğini(_ownership_) aldı ve onu perde arkasında değişebilir(_mutable_) hale getirdi.
+
+Ayrıca, `next` çağrılarından elde ettiğimiz değerlerin, vektördeki değerlere ait **değiştirilemez referanslar (`immutable references`)** olduğuna dikkat edin. `iter` metodu, değişmez referanslar(_immutable references_) üzerinde bir iterator üretir. Eğer `v1`'in sahipliğini alan ve sahiplenilmiş değerler(_owned values_) döndüren bir iterator oluşturmak istiyorsak, `iter` yerine `into_iter` çağırabiliriz. Benzer şekilde, eğer değiştirilebilir referanslar (`mutable references`) üzerinde dolaşmak(_iteration_) istersek, `iter` yerine **`iter_mut`** metodunu çağırabiliriz.
+
+
+> [!TIP]
+> #### Üç Iterator Metodu:
+> ##### 1. `iter()` - Değişmez Referans
+> ```rust
+> let v = vec![1,2,3];
+> 
+> let iter = v.iter();           // &T türünde iterator
+> for &x in iter {
+> 	println!("{}", x);        // x değişmez referans
+> }
+> println!("{:?}", v);          // ✅ v hala kullanılabilir
+> ```
+> ##### 2. `iter_mut()` - Değişebilir Referans
+> ```rust
+> let mut v = vec![1,2,3];
+> 
+> let iter = v.iter_mut();     // &mut T türünde iterator
+> for x in iter {
+> 	*x += 1;                // x'i değiştirebiliriz
+> }
+> println!("{:?}", v);        // ✅ v hala kullanılabilir (değişti)
+> ```
+> ##### 3. `into_iter()` - Sahiplik(Ownership)
+> ```rust
+> let v = vec![1,2,3];
+> 
+> let iter = v.into_iter();  // T türünde iterator (sahiplik)
+> for x in iter {
+> 	println!("{}", x);    // x'in sahipliği iterator'dan geçti
+> 	// drop(x) otomatik olmuş gibi
+> }
+> // println!("{:?}", v); // ❌ HATA! v artık ait değil
+> ```
+> ##### Karşılaştırma Tablosu:
+> |Metot|Referans Tipi|Sahiplik|v Kullanılabilir?|
+> |---|---|---|---|
+> |`iter()`|`&T`|Hayır|✅ Evet|
+> |`iter_mut()`|`&mut T`|Hayır|✅ Evet|
+> |`into_iter()`|`T`|**Evet**|❌ Hayır|
+> 
+> ##### Özet:
+> - **`iter()`** → "Ödünç almak" (borrows)
+> - **`iter_mut()`** → "Ödünç almak (değişebilir)" (borrows mutably)
+> - **`into_iter()`** → "Taşımak" (moves ownership)
+> 
+> **into = in + to** = "İçine taşı" = Sahipliği iterator'a ver! 🚚
+
+### 13.2.2. Iterator'ı Tüketen Metotlar (Consuming Adapters)
+
+`Iterator` trait'i, standart kütüphane tarafından sağlanan varsayılan uygulamalarla(_default implementations_) birçok farklı metoda sahiptir; `Iterator` trait'i için standart kütüphane API dokümantasyonuna bakarak bu metodlar hakkında bilgi alabilirsiniz. Bu metotlardan bazıları kendi tanımları içinde `next` metodunu çağırır; `Iterator` trait'ini uygularken `next` metodunu uygulamanızın zorunlu olmasının sebebi de tam olarak budur.
+
+
+> [!TIP]
+> #### `next` metodu uygulamak neden zorunlu?
+> `Iterator` trait'inin diğer bütün metodları `next` metoduna bağlıdır. Sadece `next`'i yazarsanız, geri kalanı otomatik olarak çalışır.
+> ##### `Iterator` Trait'inin Yapısı:
+> ```rust
+>  trait Iterator {
+>     type Item;
+>     
+>     // SADECEKİ ZORUNLU metot:
+>     fn next(&mut self) -> Option<Self::Item>;
+>     
+>     // Geri kalanı VARSAYILAN uygulamalarla geliyor:
+>     fn sum(self) -> Self::Item { ... }      // next kullanıyor
+>     fn map<F>(self, f: F) -> ... { ... }    // next kullanıyor
+>     fn filter<P>(self, p: P) -> ... { ... } // next kullanıyor
+>     fn count(self) -> usize { ... }         // next kullanıyor
+>     // ... ve daha 50+ metot
+> }
+> ```
+> ##### `sum` Metodu İçeri Bakarsanız:
+> ```rust
+> // Standart kütüphanedeki uygulama (basitleştirilmiş):
+> fn sum<S>(self) -> S 
+> where S: Sum<Self::Item>
+> {
+>    let mut total = S::default();
+>     while let Some(item) = self.next() {  // ← next() burada!
+>         total = total + item;
+>     }
+>     total
+> }
+> ```
+> ##### Sizin İşiniz:
+> ```rust
+> struct MyIterator {
+>     current: u32,
+> }
+> 
+> impl Iterator for MyIterator {
+>    type Item = u32;
+>    
+>     // SADECEKİ bunu yazmalısınız:
+>     fn next(&mut self) -> Option<Self::Item> {
+>         if self.current < 5 {
+>             let val = self.current;
+>             self.current += 1;
+>             Some(val)
+>         } else {
+>             None
+>         }
+>     }
+> }
+> 	
+> // Geri kalanı HAZIR:
+> let iter = MyIterator { current: 0 };
+> let total: u32 = iter.sum();  // ✅ Otomatik çalışır!
+> let count = MyIterator { current: 0 }.count();  // ✅ Otomatik çalışır!
+> ```
+> ##### Analoji
+> Sanki şöyle bir sözleşme:
+> > "Sen bana `next()` metodunu yaz, ben sana `sum()`, `map()`, `filter()`, `count()` vb. 50+ metodu bedava veririm!"
+> 
+> ```rust
+> Sen yazarsın:          Rust verir:
+> next()        ───────> sum()
+>               ───────> map()
+>               ───────> filter()
+>               ───────> count()
+>               ───────> find()
+>               ───────> any()
+>               ... ve 45+ daha!
+> ```
+> ##### Özet
+> `Iterator` trait'ini uygulamak için sadece `next` metodunu yazmanız gerekir; diğer bütün metodlar (`sum`, `map`, `filter` vb.) `next`'i kullanan varsayılan uygulamalara zaten sahiptir.
+
+`next` metodunu çağıran metodlar, tüketici adaptörler(*consuming adapters*) olarak adlandırılır çünkü onları çağırmak iterator'ı kullanır. Bir örnek `sum` metodudur; bu metod iterator'ın sahipliğini alır ve `next`'i tekrarlayan şekilde çağırarak öğeler üzerinde dolaşır(_iteration_), böylece iterator'ı tüketir. Bu metot, ögeler üzerinde dolaşırken(_iteration_) her bir ögeyi yürüyen bir toplama(running total = Her adımda değeri toplama ekleyerek güncellenmiş toplamı tutar.) ekler ve dolaşma(_iteration_) tamamlandığında toplam sonucu döndürür. `Liste 13-13`, `sum` metodunun kullanımını gösteren bir test içermektedir.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn iterator_sum() {
+        let v1 = vec![1, 2, 3];
+
+        let v1_iter = v1.iter();
+
+        let total: i32 = v1_iter.sum();
+
+        assert_eq!(total, 6);
+    }
+}
+```
+
+> **[Liste 13-13](https://doc.rust-lang.org/stable/book/ch13-02-iterators.html#listing-13-13)**: Iterator'daki tüm ögelerin toplamını almak için `sum` metodunun çağrılması
+
+`sum` metodunu çağırdıktan sonra `v1_iter` değişkenini kullanmamıza izin verilmez; çünkü `sum` metodu, üzerinde çağrıldığı iterator'ın **sahipliğini (ownership) alır**.
+### 13.2.3. Başka Iterator'lar Üreten Metotlar
+
+Iterator adaptörleri, `Iterator` trait'i üzerinde tanımlanan ve iterator'ı tüketmeyen metodlardır. Bunun yerine, orijinal iterator'ın bazı yönlerini değiştirerek farklı iterator'lar üretirler. `Liste 13-14`, iterator adaptör metodu olan `map`'i çağırmanın bir örneğini göstermektedir; bu metod, öğeler üzerinde dolaşırken(_iteration_) her öğe üzerinde çağrılacak bir closure alır. `map` metodu, değiştirilmiş öğeleri üreten yeni bir iterator döndürür. Buradaki closure, vektördeki her öğenin değerini 1 artıran yeni bir iterator oluşturur.
+
+<img src="./Pictures/not_desired_behavior.svg" width="60">  Bu kod istenen sonucu vermiyor.
+
+**Dosya adı:** `scr/main.rs`
+
+```rust
+fn main() {
+    let v1: Vec<i32> = vec![1, 2, 3];
+
+    v1.iter().map(|x| x + 1);
+}
+```
+
+> **Liste 13-14:** Yeni bir iterator oluşturmak için `map` iterator adapter’ını çağrılması
+
+Ancak, bu kod bir uyarı(*warning*) üretir:
+
+```
+$ cargo run
+   Compiling iterators v0.1.0 (file:///projects/iterators)
+warning: unused `Map` that must be used
+ --> src/main.rs:4:5
+  |
+4 |     v1.iter().map(|x| x + 1);
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: iterators are lazy and do nothing unless consumed
+  = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+  |
+4 |     let _ = v1.iter().map(|x| x + 1);
+  |     +++++++
+
+warning: `iterators` (bin "iterators") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.47s
+     Running `target/debug/iterators`
+```
+
+`Liste 13-14`’teki kod aslında hiçbir şey yapmaz; belirttiğimiz closure hiçbir zaman çağrılmaz. Uyarı bize bunun nedenini hatırlatır: Iterator adapter’ları _lazy_’dir (tembel çalışır) ve burada iterator’ı tüketmemiz(_consume_) gerekir.
+
+> [!TIP]
+> #### Tembel (Lazy) Ne Demek?
+> **Iterator adaptörleri, siz "çalıştır" demeden hiçbir şey yapmaz.**
+> ```rust
+> let v = vec![1,2,3];
+> 
+> // map() çağrıldı AMA henüz hiçbir şey olmadı!
+> let iter = v.iter().map(|x| x + 1);    // ← Bu satırda closure ÇALIŞMADI bile!
+> // Rust sadece "tamam, bu işlemi yapacaksın" diye not etti
+> ```
+> ##### Gerçek Hayat Analojisi:
+> ```
+> Tembel olmayan (eager) garson:
+> "Kahve getir" → Hemen gider, hemen getirir ✅
+> 
+> Tembel (lazy) garson:
+> "Kahve getir" → "Tamam" der ama yerinden kalkmaz 😴
+> "Şimdi getir!" deyince → O zaman kalkar getirir
+> ```
+> ##### Kod Örneği:
+> ```rust
+> let v = vec![1,2,3];
+> 
+> // ADIM 1: map() çağrıldı
+> // Ama TEMBEL - henüz hiçbir şey yapmadı!
+> let iter = v.iter().map(|x| {
+> 	println!("Çalıştım!");
+> 	x + 1
+> })
+> println!("map() çağrıldı ama closure çalışmadı!");
+> 
+> // ADIM 2: collect() ile "tüket"
+> // Şimdi iterator çalışmaya başladı!
+> let result: Vec<_> = iter.collect();
+> // Çıktı: "Çalıştım!" (3 kere)
+> ```
+> **Kod Çıktısı:**
+> ```
+> map() çağrıldı ama closure çalışmadı!
+>  Çalıştım!
+>  Çalıştım! 
+>  Çalıştım!
+> ```
+
+
+> [!TIP]
+> #### Neden Tembel Tasarlanmış?
+> **Performans için!**
+> ```rust
+> let v: Vec<i32> = (1..1_000_000).collect();
+> 
+> // TEMBEL: Sadece ilk 3 öğeyi işler!
+> let first_terminal: Vec<i32> = v.iter()
+> 	.map(|x| x * 2)       // ← 1.000.000 işlem yapılmadı!
+> 	.filter(|x| x > &0)   // ← 1.000.000 işlem yapılmadı!
+> 	.take(3)              // ← Sadece 3 öğe alınacak
+> 	.collect();           // ← Şimdi sadece 3 işlem yapıldı! ✅
+> ```
+> + `take(n)` = "Bana sadece ilk n tanesini ver, geri kalanıyla ilgilenme!"
+> ##### "Tüketmek" Ne Demek?
+> ```
+> // Tüketici metodlar (consuming) - iterator'ı çalıştırır:
+> .collect()  // ← Hepsini topla
+> .sum()      // ← Hepsini topla
+> .count()    // ← Hepsini say
+> .for_each() // ← Hepsini işle
+> 
+> // Bunlar "tüket" komutu gibi - lazy iterator'ı harekete geçirir!
+> ```
+> Iterator adaptörleri, siz onları tüketici bir metotla (`collect`, `sum` vb.) çalıştırana kadar bekler ve hiçbir şey yapmaz.
+> ##### Özet:
+> ```
+> TEMBEL (Lazy):
+> map(), filter(), take()  →  "Tamam, not aldım" 📝 (bekler)
+> 
+> TÜKETİCİ (Consuming):
+> collect(), sum()         →  "Haydi çalış!" 🚀 (harekete geçirir)
+> ```
+> **Tembel + Tüketici = Verimli Rust Kodu!** 🎯
+
+Bu uyarıyı düzeltmek ve iterator’ı tüketmek için, `Liste 12-1`’de `env::args` ile kullandığımız `collect` metodunu kullanacağız. Bu metod iterator'ı tüketir(_consume_) ve ortaya çıkan değerleri bir koleksiyon veri tipinde toplar.
+
+`Liste 13-15`'te, `map` çağrısından döndürülen iterator üzerinde dönülerek(_iterating_) elde edilen sonuçları bir vektörün içine topluyoruz(`Liste 13-15`'te, `map`'in ürettiği yeni iterator'ı `collect` ile bir vektöre dönüştürüyoruz.). Sonuçta oluşan bu vektör, orijinal vektördeki her öğenin 1 artırılmış hâlini içerecektir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+fn main() {
+    let v1: Vec<i32> = vec![1, 2, 3];
+
+    let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
+
+    assert_eq!(v2, vec![2, 3, 4]);
+}
+```
+
+> **[Liste 13-15](https://doc.rust-lang.org/stable/book/ch13-02-iterators.html#listing-13-15)**: Yeni bir iterator oluşturmak için `map` metodunu, ardından yeni iterator'ı tüketip bir vektör oluşturmak için `collect` metodunu çağırma
+
+`map` bir closure aldığı için, her öğe üzerinde gerçekleştirmek istediğimiz herhangi bir işlemi belirtebiliriz. Bu, `Iterator` trait'inin sağladığı yineleme(_iteration_) davranışını yeniden kullanırken, closure'ların belirli bir davranışı nasıl özelleştirmenize(_customize_) izin verdiğine dair harika bir örnektir(Bu, vektörün elemanlarını tek tek gezme işini `Iterator` trait'ine bırakırken, her elemana ne yapacağınızı bir closure yardımıyla tamamen kendinize göre nasıl özelleştirebileceğinizi gösteren harika bir örnektir.).
+
+Karmaşık eylemleri okunabilir bir şekilde gerçekleştirmek için yineleyici adaptörlerine(_iterator adapters_) yapılan birden fazla çağrıyı arka arkaya zincirleyebilirsiniz(chaining). Ancak tüm iterator'lar tembel(_lazy_) olduğundan, yineleyici adaptörlerine(_iterator adapters_) yapılan çağrılardan sonuç elde etmek için mutlaka tüketen adaptör metotlarından(_consuming adapter methods_) birini çağırmanız gerekir.
+
+### 13.2.4. Ortamlarını Yaklayan Closure’lar
+
+Birçok iterator adapter’ı argüman olarak closure alır ve iterator adapter’larına verdiğimiz closure’lar çoğunlukla ortamalarını(_environment_) yakalayan closure’lar olacaktır.
+
+Bu örnek için, argüman olarak bir closure alan **`filter`** metodunu kullanacağız. Bu closure, iterator'dan bir öge alır ve bir `bool` (`true` veya `false`) döndürür. Eğer closure `true` döndürürse, o değer `filter` tarafından üretilen yinelemeye(_iteration_) dahil edilir. Eğer closure `false` döndürürse, değer dahil edilmez.
+
+`Liste 13-16`'da, bir `Shoe` struct örnekleri(_instance_) koleksiyonu üzerinde dönmek için, ortamından `shoe_size` değişkenini yakalayan bir closure ile birlikte `filter` metodunu kullanıyoruz. Bu işlem, yalnızca belirtilen boyuttaki ayakkabıları(_shoes_) döndürecektir.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+#[derive(PartialEq, Debug)]
+struct Shoe {
+    size: u32,
+    style: String,
+}
+
+fn shoes_in_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
+    shoes.into_iter().filter(|s| s.size == shoe_size).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn filters_by_size() {
+        let shoes = vec![
+            Shoe {
+                size: 10,
+                style: String::from("sneaker"),
+            },
+            Shoe {
+                size: 13,
+                style: String::from("sandal"),
+            },
+            Shoe {
+                size: 10,
+                style: String::from("boot"),
+            },
+        ];
+
+        let in_my_size = shoes_in_size(shoes, 10);
+
+        assert_eq!(
+            in_my_size,
+            vec![
+                Shoe {
+                    size: 10,
+                    style: String::from("sneaker")
+                },
+                Shoe {
+                    size: 10,
+                    style: String::from("boot")
+                },
+            ]
+        );
+    }
+}
+```
+
+> **[Liste 13-16:](https://doc.rust-lang.org/stable/book/ch13-02-iterators.html#listing-13-16)** `shoe_size` değişkenini yakalayan bir closure ile `filter` metodunun kullanılması
+
+> [!TIP]
+> ##### Ortamı Ödünç Alma (Borrowing the Environment):
+> Closure gövdesindeki `s.size == shoe_size` ifadesinde yer alan `shoe_size`, closure'a parametre olarak gelen bir değer değildir. Fonksiyonun parametre listesinden gelen bir değişkendir.
+> Closure bu değeri ortamdan **değiştirilemez bir referans (`&u32`)** olarak otomatik olarak yakalar. Rust'ın sahiplik kuralları sayesinde, bu filtreleme işlemi sürerken `shoe_size` değişkeninin güvenli bir şekilde bellekte kalacağı garanti edilir.
+
+`shoes_in_size` fonksiyonu, parametre olarak bir ayakkabı vektörünün(`shoes: Vec<Shoe>`) sahipliğini(_ownership_) ve bir ayakkabı numarasını(`shoe_size: u32`) alır. Fonksiyon, yalnızca belirtilen numaradaki(`shoe_size: u32`) ayakkabıları içeren bir vektör döndürür.
+
+`shoes_in_size` fonksiyonunun gövdesinde, vektörün sahipliğini alan bir iterator oluşturmak için `into_iter` metodunu çağırırız. Ardından, bu iterator'ı yalnızca closure'ın `true` döndürdüğü elemanları içeren yeni bir iterator'a dönüştürmek(adapt etmek) için `filter` metodunu çağırırız.
+
+Closure, ortamdan(environment) `shoe_size` parametresini yakalar ve bu değeri her bir ayakkabının numarasıyla karşılaştırarak yalnızca belirtilen numaradaki ayakkabıları tutar. Son olarak, `collect` metodunu çağırmak, dönüştürülmüş(_adapted_) iterator tarafından döndürülen değerleri bir araya getirerek fonksiyon tarafından döndürülecek olan bir vektörün içine toplar.
+
+> [!tip] Title
+> #### _Adapt_ ile _convert_ arasında fark:
+> İngilizce metinde; Yazar bilinçli olarak "convert" (dönüştür) değil "adapt" (adapte et) kelimesini seçmiş. İkisi arasında önemli bir fark var:
+> ##### "Convert" (Dönüştürme):
+> ```rust
+> // Tamamen farklı bir şeye dönüşür
+> let s = 5.to_string();  // i32 → String (tamamen farklı tip)
+> ```
+> ##### "Adapt" (Adapte Etme):
+> ```rust
+> // Aynı yapı, sadece davranışı değişir
+> v.iter()
+>     .filter(|x| x > 0)  // Hala iterator, ama filtrelenmiş
+>     .map(|x| x + 1)     // Hala iterator, ama dönüştürülmüş
+> ```
+> ##### Fark Nedir?
+> ```rust
+> Orijinal iterator:  [1, 2, 3, 4, 5]  ← Iterator
+>                           ↓ filter
+> Adapte edilmiş:     [2, 4]            ← Hala Iterator!
+>                           ↓ map  
+> Adapte edilmiş:     [3, 5]            ← Hala Iterator!
+> ```
+> **Yani:** `filter` ve `map` iterator'ı tamamen farklı bir şeye çevirmez, sadece **davranışını adapte eder.** Çıktı hala bir iterator!
+> ##### Özet:
+> + **"Adapt"** → Iterator hala iterator, sadece davranışı değişti
+> + **"Convert"** → Tamamen farklı bir şeye dönüştü
+
+Test, `shoes_in_size`'ı çağırdığımızda yalnızca belirttiğimiz değerle aynı numaraya sahip ayakkabıları geri aldığımızı göstermektedir.
+
+## 13.3. G/Ç Projemizi İyileştirme(Improving Our I/O Project)
+
+Iterator'lar hakkındaki bu yeni bilgiyle, kodun bazı yerlerini daha anlaşılır ve öz hale getirmek için iterator'lar kullanarak Bölüm 12'deki G/Ç projesini iyileştirebiliriz. Iterator'ların `Config::build` fonksiyonu ile `search` fonksiyonu üzerindeki uygulamalarımızı(_implementation-impl_) nasıl daha iyi hale getirebileceğine bir bakalım.
+### 13.3.1. Bir Iterator Kullanarak `clone`'u Kaldırma
+
+Listing 12-6’da, `String` değerlerinden oluşan bir slice alan ve bu slice’ın elemanlarına indeksleme yapıp değerleri klonlayarak(`clone()`) bir `Config` struct örneği oluşturan kod eklemiştik. bu sayede `Config` struct'ının bu değerlere sahip olmasını (own) sağlamıştık. `Liste 13-17`'de, `Config::build` fonksiyonunun uygulamasını(_implementation-impl_) `Liste 12-23`'te olduğu haliyle yeniden gösteriyoruz.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+use minigrep::{search, search_case_insensitive};
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    if let Err(e) = run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
+}
+
+pub struct Config {
+    pub query: String,
+    pub file_path: String,
+    pub ignore_case: bool,
+}
+
+impl Config {                                                     // <--------------
+    fn build(args: &[String]) -> Result<Config, &'static str> {   // <--------------
+        if args.len() < 3 {                                       // <--------------
+            return Err("not enough arguments");                   // <--------------
+        }                                                         // <--------------
+
+        let query = args[1].clone();                              // <--------------
+        let file_path = args[2].clone();                          // <--------------
+
+        let ignore_case = env::var("IGNORE_CASE").is_ok();        // <--------------
+
+        Ok(Config {                                               // <--------------
+            query,                                                // <--------------
+            file_path,                                            // <--------------
+            ignore_case,                                          // <--------------
+        })                                                        // <--------------
+    }                                                             // <--------------
+}                                                                 // <--------------
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
+> **[Liste 13-17](https://doc.rust-lang.org/stable/book/ch13-03-improving-our-io-project.html#listing-13-17)**: `Liste 12-23`’teki `config::build` fonksiyonunun yeniden gösterimi
+
+O zamanlar verimsiz olan `clone` çağrıları hakkında endişelenmememizi söylemiştik; çünkü bunları ileride kaldıracaktık. İşte o zaman geldi!
+
+Burada `clone`'a ihtiyaç duyduk çünkü `args` parametresinde `String` elemanlarına sahip bir dilimimiz (slice) vardı, ancak `build` fonksiyonu `args`'ın sahibi değildi. Bir `Config` örneğinin(_instance_) sahipliğini(_ownership_) döndürmek için, `Config` örneğinin(_instance_) kendi değerlerine sahip olabilmesi amacıyla `Config`'in `query` ve `file_path` alanlarındaki(_field_) değerleri klonlamak zorunda kaldık.
+
+Iterator'lar hakkındaki yeni bilgimizle, `build` fonksiyonunu bir dilimi ödünç almak(_borrowing a slice_) yerine argüman olarak bir iterator'ın sahipliğini alacak şekilde değiştirebiliriz. Dilimin(_slice_) uzunluğunu kontrol eden ve belirli konumlara indeksleyen kod yerine iterator işlevselliğini kullanacağız. Bu, `Config::build` fonksiyonunun ne yaptığını daha net hale getirecektir çünkü değerlere iterator erişecektir.
+
+`Config::build` fonksiyonu iterator'ın sahipliğini aldığında ve ödünç alma işlemi yapan indeksleme operasyonlarını kullanmayı bıraktığında, `clone` çağrısı yapıp yeni bir bellek alanı açmak (allocation) yerine, `String` değerlerini iterator'dan doğrudan `Config` içine **taşıyabiliriz (move)**.
+
+
+> [!TIP]
+> **Eskiden:** `clone` kullanıyorduk çünkü dilimi ödünç alıyorduk, sahipliğimiz yoktu.
+> **Şimdi:** Iterator'ın sahipliğini alıyoruz, bu yüzden `clone` yerine değerleri **doğrudan taşıyabiliriz.**
+> ##### Kod Karşılaştırması:
+> ```rust
+> // ESKİ (clone gerekli):
+> fn build(args: &[String]) {  // ← Ödünç aldık
+>     let query = args[1].clone();  // ← Klonlamak zorundayız
+> }
+> 
+> // YENİ (clone gereksiz):
+> fn build(mut args: impl Iterator<Item = String>) {  // ← Sahipliği aldık
+>     let query = args.next().unwrap();  // ← Doğrudan taşıdık ✅
+> }
+> ```
+> Iterator'ın sahipliğini aldığımızda, değerleri kopyalamak (clone) yerine doğrudan `Config`'e taşıyabiliriz.
+
+#### 13.3.1.1. Döndürülen Iterator’ı Doğrudan Kullanma
+
+I/O projenizin `src/main.rs` dosyasını açın. Dosya şu şekilde görünmelidir:
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+use minigrep::{search, search_case_insensitive};
+
+fn main() {
+    let args: Vec<String> = env::args().collect();            // <--------------
+
+    let config = Config::build(&args).unwrap_or_else(|err| {  // <--------------
+        eprintln!("Problem parsing arguments: {err}");        // <--------------
+        process::exit(1);                                     // <--------------
+    });                                                       // <--------------
+
+    // --snip--
+
+    if let Err(e) = run(config) {
+        eprintln!("Application error: {e}");
+        process::exit(1);
+    }
+}
+
+pub struct Config {
+    pub query: String,
+    pub file_path: String,
+    pub ignore_case: bool,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+
+        Ok(Config {
+            query,
+            file_path,
+            ignore_case,
+        })
+    }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
+<img src="./Pictures/does_not_compile.svg" width="60">  Bu kod derlenmiyor!
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+use minigrep::{search, search_case_insensitive};
+
+fn main() {                                                         // <--------------
+    let config = Config::build(env::args()).unwrap_or_else(|err| {  // <--------------
+        eprintln!("Problem parsing arguments: {err}");              // <--------------
+        process::exit(1);                                           // <--------------
+    });                                                             // <--------------
+
+    // --snip--
+
+    if let Err(e) = run(config) {
+        eprintln!("Application error: {e}");
+        process::exit(1);
+    }
+}
+
+pub struct Config {
+    pub query: String,
+    pub file_path: String,
+    pub ignore_case: bool,
+}
+
+impl Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+
+        Ok(Config {
+            query,
+            file_path,
+            ignore_case,
+        })
+    }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
+> **[Liste 13-18](https://doc.rust-lang.org/stable/book/ch13-03-improving-our-io-project.html#listing-13-18)**: `env::args` dönüş değerinin `config::build` fonksiyonuna geçirilmesi
+
+`env::args` fonksiyonu bir iterator döndürür! Iterator değerlerini bir vektörde toplayıp ardından `Config::build`'e bir dilim(_slice_) geçirmek yerine, artık `env::args`'tan döndürülen iterator'ın sahipliğini doğrudan `Config::build`'e geçiriyoruz.
+
+> [!TIP]
+> #### HATIRLATMA
+> ##### "Dilim" (Slice) Nedir?
+> Bir vektörün veya dizinin bir bölümüne referans.
+> **Eski Yöntem (Dilim ile):**
+> ```rust
+> // Önce iterator'ı vektöre topla
+> let args: Vec<String> = env::args().collect();
+> 
+> // Sonra vektörün DİLİMİNİ geçir (&[String])
+> Config::build(&args)
+> //            ↑
+> //        Bu bir dilim! (vektörün tamamına referans)
+> ```
+> **Yeni Yöntem (Iterator ile):**
+> ```rust
+> // Doğrudan iterator'ı geç (vektör oluşturmaya gerek yok!)
+> Config::build(env::args())
+> //            ↑
+> //        Bu bir iterator! (dilim değil)
+> ```
+> ##### Göresel Karşılaştırma:
+> ```rust
+> ESKİ:
+> env::args() → collect() → Vec<String> → &[String] → Config::build
+>                               ↑               ↑
+>                          Vektör oluştu    Dilim geçirildi
+> 
+> YENİ:
+> env::args() → Config::build
+>       ↑
+> Doğrudan iterator geçirildi (ara adım yok!)
+> ```
+> **Özet:**
+> + **Dilim** (`&[String]`) → Vektörün içine referans
+> + **Iterator** → Değerleri birer birer üreten yapı
+
+Sırada `Config::build`'in tanımını güncellememiz gerekiyor. `Config::build`'in imzasını `Liste 13-19`'daki gibi görünecek şekilde değiştirelim. Kod bu haliyle henüz derlenmeyecektir; çünkü fonksiyonun gövdesini de güncellememiz gerekir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+use minigrep::{search, search_case_insensitive};
+
+fn main() {
+    let config = Config::build(env::args()).unwrap_or_else(|err| {
+        eprintln!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    if let Err(e) = run(config) {
+        eprintln!("Application error: {e}");
+        process::exit(1);
+    }
+}
+
+pub struct Config {
+    pub query: String,
+    pub file_path: String,
+    pub ignore_case: bool,
+}
+
+impl Config {                                      // <--------------
+    fn build(                                      // <--------------
+        mut args: impl Iterator<Item = String>,    // <--------------
+    ) -> Result<Config, &'static str> {            // <--------------
+        // --snip--
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+
+        Ok(Config {
+            query,
+            file_path,
+            ignore_case,
+        })
+    }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
+> **[Liste 13-19](https://doc.rust-lang.org/stable/book/ch13-03-improving-our-io-project.html#listing-13-19)**: `Config::build` imzasının bir iterator bekleyecek şekilde güncellenmesi
+
+`env::args` fonksiyonu için standart kütüphane dokümantasyonu, döndürdüğü iterator'ın tipinin `std::env::Args` olduğunu ve bu tipin `Iterator` trait'ini uygulayıp(_implement-impl_) `String` değerleri döndürdüğünü göstermektedir.
+
+`Config::build` fonksiyonunun imzasını güncelledik; böylece `args` parametresi artık `&[String]` yerine `impl Iterator<Item = String>` trait bound’una sahip generic bir tür olarak tanımlanıyor. Bölüm 10'un "10.2.3. Trait'leri Parametre Olarak Kullanma" bölümünde ele aldığımız `impl Trait` sözdiziminin bu kullanımı, `args`'ın `Iterator` trait'ini uygulayan ve `String` öğeleri döndüren herhangi bir tip olabileceği anlamına gelir.
+
+`args`'ın sahipliğini(_ownership_) aldığımız ve üzerinde dolaşarak(_iteration_) `args`'ı değiştireceğimiz (`mutate` edeceğimiz) için, `args` parametresinin tanımına onu değiştirilebilir kılmak adına **`mut`** anahtar kelimesini ekleyebiliriz.
+#### 13.3.1.2. Iterator Trait Metodlarını Kullanma
+
+Sırada `Config::build`'in gövdesini düzelteceğiz. `args`, `Iterator` trait'ini uyguladığından(_implement-impl_), üzerinde `next` metodunu çağırabileceğimizi biliyoruz! `Liste 13-20`, `Liste 12-23`’teki kodu `next` metodunu kullanacak şekilde günceller.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::env;
+use std::error::Error;
+use std::fs;
+use std::process;
+
+use minigrep::{search, search_case_insensitive};
+
+fn main() {
+    let config = Config::build(env::args()).unwrap_or_else(|err| {
+        eprintln!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    if let Err(e) = run(config) {
+        eprintln!("Application error: {e}");
+        process::exit(1);
+    }
+}
+
+pub struct Config {
+    pub query: String,
+    pub file_path: String,
+    pub ignore_case: bool,
+}
+
+impl Config {                                                // <--------------
+    fn build(                                                // <--------------
+        mut args: impl Iterator<Item = String>,              // <--------------
+    ) -> Result<Config, &'static str> {                      // <--------------
+        args.next();                                         // <--------------
+
+        let query = match args.next() {                      // <--------------
+            Some(arg) => arg,                                // <--------------
+            None => return Err("Didn't get a query string"), // <--------------
+        };                                                   // <--------------
+
+        let file_path = match args.next() {                  // <--------------
+            Some(arg) => arg,                                // <--------------
+            None => return Err("Didn't get a file path"),    // <--------------
+        };                                                   // <--------------
+
+        let ignore_case = env::var("IGNORE_CASE").is_ok();   // <--------------
+
+        Ok(Config {                                          // <--------------
+            query,                                           // <--------------
+            file_path,                                       // <--------------
+            ignore_case,                                     // <--------------
+        })                                                   // <--------------
+    }                                                        // <--------------
+}                                                            // <--------------
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
+> **[Liste 13-20](https://doc.rust-lang.org/stable/book/ch13-03-improving-our-io-project.html#listing-13-20)**: `Config::build` gövdesinin iterator metotlarını kullanacak şekilde değiştirilmesi
+
+`env::args`'ın dönüş değerindeki ilk değerin programın adı olduğunu hatırlayın. Bunu yok saymak ve sonraki değere geçmek istiyoruz, bu yüzden önce `next`'i çağırıyoruz ve dönüş değeriyle hiçbir şey yapmıyoruz. Ardından, `Config` struct'ının `query` alanına koymak istediğimiz değeri almak için tekrar `next` metodunu çağırıyoruz. Eğer `next` bir `Some` döndürürse, değeri dışarı çıkarmak (extract etmek) için bir `match` yapısı kullanıyoruz. Eğer `None` döndürürse, bu yeterli argüman verilmediği anlamına gelir ve bir `Err` değeriyle fonksiyondan erken döneriz (`return early`). Aynı işlemi `file_path` değeri için de tekrarlıyoruz.
+### 13.3.2. Iterator Adapter’ları ile Kodu Daha Açık Hâle Getirme
+
+G/Ç projemizdeki `search` fonksiyonunda da iterator'lardan yararlanabiliriz; bu fonksiyon, `Liste 12-19`'daki haliyle burada `Liste 13-21`'de tekrar gösterilmektedir.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {  // <--------------
+    let mut results = Vec::new();                        // <--------------
+
+    for line in contents.lines() {                       // <--------------
+        if line.contains(query) {                        // <--------------
+            results.push(line);                          // <--------------
+        }                                                // <--------------         
+    }                                                    // <--------------
+
+    results                                              // <--------------
+}                                                        // <--------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+}
+```
+
+> **[Liste 13-21](https://doc.rust-lang.org/stable/book/ch13-03-improving-our-io-project.html#listing-13-21)**: `Liste 12-19`'daki `search` fonksiyonunun uygulaması
+
+Bu kodu, iterator adapter metodlarını kullanarak daha kısa ve öz bir şekilde yazabiliriz. Bunu yapmak, arada değiştirilebilir(`mutable`) bir `results` vektörü bulundurma zorunluluğunu da ortadan kaldırır.  Fonksiyonel programlama tarzı, kodu daha net hale getirmek için değiştirilebilir durum (*mutable state*) miktarını en aza indirmeyi tercih eder. Değişebilir durumu(_mutable state_) kaldırmak, gelecekte aramayı paralel olarak gerçekleştirmeye yönelik bir iyileştirmeye olanak tanıyabilir çünkü `results` vektörüne eşzamanlı erişimi yönetmek zorunda kalmayacağımız. `Liste 13-22` bu değişikliği göstermektedir.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {  // <--------------
+    contents                                                 // <--------------
+        .lines()                                             // <--------------
+        .filter(|line| line.contains(query))                 // <--------------
+        .collect()                                           // <--------------
+}                                                            // <--------------
+
+pub fn search_case_insensitive<'a>(
+    query: &str,
+    contents: &'a str,
+) -> Vec<&'a str> {
+    let query = query.to_lowercase();
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.to_lowercase().contains(&query) {
+            results.push(line);
+        }
+    }
+
+    results
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn case_sensitive() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Duct tape.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+
+    #[test]
+    fn case_insensitive() {
+        let query = "rUsT";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Trust me.";
+
+        assert_eq!(
+            vec!["Rust:", "Trust me."],
+            search_case_insensitive(query, contents)
+        );
+    }
+}
+```
+
+> **[Liste 13-22](https://doc.rust-lang.org/stable/book/ch13-03-improving-our-io-project.html#listing-13-22)**: `search` fonksiyonunun uygulanmasında iterator adaptör(_iterator Adapter_) metotlarının kullanılması
+
+`search` fonksiyonunun amacının `contents` içinde `query`'yi içeren tüm satırları döndürmek olduğunu hatırlayın. `Liste 13-16`’daki `filter` örneğine benzer şekilde, bu kod yalnızca `line.contains(query)` ifadesinin `true` döndürdüğü satırları tutmak için `filter` adapter’ını kullanır. Ardından eşleşen satırları `collect` ile başka bir vektörde topluyoruz. Çok daha basit! `search_case_insensitive` fonksiyonunda da iterator metodlarını kullanmak için aynı değişikliği yapmaktan çekinmeyin.
+
+> [!TIP]
+> ##### `search_case_insensitive` fonksiyonun iterator adaptor ile metodun tekrar uygulanması
+> ```rust
+> pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+> 
+>     let query = query.to_lowercase();
+>     contents
+>         .lines()
+>         .filter(|line| line.to_lowercase().contains(&query))
+>         .collect()
+> 
+>    /*
+>     let query = query.to_lowercase();
+> 
+>     let mut results = Vec::new();
+> 
+>     for line in contents.lines() {
+>         if line.to_lowercase().contains(&query) {
+>             results.push(line);
+>         }
+>     }
+>     results
+>     */
+> }
+> ```
+
+Daha fazla iyileştirme için, `collect` çağrısını kaldırarak ve dönüş tipini `impl Iterator<Item = &'a str>` olarak değiştirerek `search` fonksiyonundan bir iterator döndürün; böylece fonksiyon bir iterator adaptörü haline gelir. Testleri de güncellemeniz gerektiğini unutmayın! Bu değişikliği yapmadan önce ve sonra `minigrep` aracınızı kullanarak büyük bir dosyada arama yapın ve davranış farkını gözlemleyin. Bu değişiklikten önce, program **tüm sonuçları toplayana kadar hiçbir sonuç yazdırmayacaktır**; ancak değişiklikten sonra, sonuçlar eşleşen her satır bulunduğu anda ekrana basılacaktır, çünkü `run` fonksiyonundaki `for` döngüsü **iterator'ın tembelliğinden (laziness)** yararlanabilecektir.
+
+> [!TIP]
+> ##### Değişiklikten Önce
+> ```rust
+> contents
+>     .lines()
+>     .filter(|line| line.contains(query))
+>     .collect()
+> ```
+> Burada:
+> 1. Tüm satırlar taranır.
+> 2. Eşleşen tüm sonuçlar bir `Vec` içinde toplanır.
+> 3. Ancak bundan sonra sonuçlar yazdırılabilir.
+> 
+> Yani program:
+> > "Önce bütün sonuçları bul, sonra göster."
+> 
+> ##### Değişiklikten Sonra
+> ```rust
+> pub fn search<'a>( query: &'a str, contents: &'a str,)
+>	-> impl Iterator<Item = &'a str> {
+>     contents
+>         .lines()
+>         .filter(move |line| line.contains(query))
+}
+> ```
+> Artık:
+> +  Sonuçlar bir `Vec` içinde biriktirilmez.
+> + Her eşleşme bulunduğu anda kullanılabilir.
+> + Ek bellek tahsisi azalır.
+> + Iterator'ın _lazy_ yapısından faydalanılır.
+
++ Dönüş tipini `impl Iterator<Item = &'a str>` olarak değiştirerek;
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::{
+    env, error::Error, fs, process
+};
+use minigrep::{
+    search, search_case_insensitive
+};
+
+fn main() {
+    // let args: Vec<String> = env::args().collect();
+
+    let config = Config::build(env::args()).unwrap_or_else(
+        |err| {
+            eprintln!("Problem parsing arguments: {err}");
+            process::exit(1);
+        }
+    );
+
+    if let Err(e) =  run(config) {
+        eprintln!("Application error: {e}");
+        process::exit(1);
+    }
+
+}
+
+struct Config {
+    pub query: String,
+    pub file_path: String,
+    pub ignore_case: bool,
+}
+
+impl Config {
+    fn build(
+        mut args: impl Iterator<Item = String>,
+    ) -> Result<Config, &'static str> {
+        args.next();
+
+
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+        let file_path = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file path"),
+        };
+
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+
+        Ok(Config { query, file_path, ignore_case })
+    }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    let results: Vec<_> = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents).collect()
+    } else {
+        search(&config.query, &contents).collect()
+    };
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+pub fn search<'a>(query: &str, contents: &'a str)
+    -> impl Iterator<Item = &'a str> {
+    contents.lines()
+        .filter(move |line| line.contains(query))
+}
+
+pub fn search_case_insensitive<'a>(query: &str, contents: &'a str)
+    -> impl Iterator<Item = &'a str> {
+        let query = query.to_lowercase();
+        contents.lines()
+            .filter(
+	            move |line| line.to_lowercase().contains(&query)
+	        )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn case_sensitive() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Duck tape";
+
+        assert_eq!(
+            vec!["safe, fast, productive."],
+            search(query, contents).collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn case_insensitive() {
+        let query = "rUsT";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Trust me.";
+
+        assert_eq!(
+            vec!["Rust:", "Trust me."],
+            search_case_insensitive(query, contents).collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+        assert_eq!(
+            vec!["safe, fast, productive."],
+            search(query, contents).collect::<Vec<_>>()
+        );
+    }
+}
+```
+
+### 13.3.3. Döngüler ve Iterator'lar Arasında Seçim Yapma
+
+Bir sonraki mantıklı soru, kendi kodunuzda hangi tarzı ve neden seçmeniz gerektiğidir: `Liste 13-21`'deki orijinal uygulama mı yoksa `Liste 13-22`'deki iterator kullanan sürüm mü (iterator'ı döndürmek yerine tüm sonuçları döndürmeden önce topladığımızı varsayarak)? Rust programcılarının çoğu iterator stilini kullanmayı tercih eder. İlk başta alışmak biraz daha zordur, ancak çeşitli iterator adaptörlerine(_iterator adapters_) ve ne yaptıklarına dair bir his edindiğinizde, iterator'lar anlaşılması daha kolay olabilir. Döngünün çeşitli kısımlarıyla uğraşmak ve yeni vektörler oluşturmak yerine, kod döngünün üst düzey(_high-level objective of the loop_) amacına odaklanır. Bu, sıradan kodun bir kısmını soyutlayarak iterator'daki her elemanın geçmesi gereken filtreleme koşulu gibi bu koda özgü kavramları görmeyi kolaylaştırır.
+
+> [!TIP]
+> #### Karşılaştırma
+> Iterator kullandığınızda, tekrar eden genel kod gizlenir ve asıl önemli olan kısım öne çıkar.
+> ##### Döngü ile (Genel kod görünüyor):
+> ```rust
+> let mut results = Vec::new();      // ← Sıradan kod (her yerde aynı)
+> for line in contains.lines() {     // ← Sıradan kod (her yerde aynı)
+> 	if line.contains(query) {     // ← ASIL ÖNEMLİ KISIM!
+> 		results.push(line);       // ← Sıradan kod (her yerde aynı)
+> 	}
+> }
+> ```
+> ##### Iterator ile (Sadece önemli kısım görünüyor):
+> ```rust
+> contains.lines()
+> 	.filter(|line| line.contains(query))  // ← Sıradan kod (her yerde aynı)
+> 	.collect()
+> ```
+> ##### Özet:
+> Iterator, tekrar eden genel kodları gizler ve asıl önemli olan kısmı (filtreleme koşulunu) öne çıkarır, böylece kod daha kolay anlaşılır.
+
+Peki iki uygulama gerçekten eşdeğer midir? Sezgisel varsayım, daha alt düzey döngünün(_lower-level loop_) daha hızlı olacağı yönünde olabilir. Performans hakkında konuşalım.
+
+## 13.4. Döngüler ve Iterator'lar Arasındaki Performans İlişkisi
+
+Döngüleri mi yoksa iterator'ları mı kullanacağınıza karar vermek için hangi uygulamanın daha hızlı olduğunu bilmeniz gerekir: Açık bir `for` döngüsü kullanan `search` fonksiyonu sürümü mü, yoksa iterator kullanan sürüm mü?
+
+Sir Arthur Conan Doyle'un Sherlock Holmes'un Maceraları kitabının tüm içeriğini bir `String`'e yükleyerek ve içerikte "the" kelimesini arayarak bir kıyaslama(_benchmark_) testi yaptık. İşte `for` döngüsü kullanan `search` sürümü ve iterator kullanan sürüm üzerindeki kıyaslama(_benchmark_) testinin sonuçları:
+
+```
+test bench_search_for  ... bench:  19,620,300 ns/iter (+/- 915,700)
+test bench_search_iter ... bench:  19,234,900 ns/iter (+/- 657,200)
+```
+
+Her iki uygulama da benzer bir performansa sahip! Kıyaslama kodunu(_benchmark code_) burada açıklamayacağız çünkü mesele iki sürümün eşdeğer olduğunu kanıtlamak değil, bu iki uygulamanın performans açısından nasıl karşılaştırıldığına dair genel bir fikir edinmektir.
+
+Daha kapsamlı bir kıyaslama için, `contents` olarak çeşitli boyutlarda çeşitli metinler, `query` olarak farklı kelimeler ve farklı uzunluklardaki kelimeler ve diğer her türlü varyasyonu kullanarak kontrol etmelisiniz. Esas nokta şudur: Iterator’lar yüksek seviyeli bir soyutlama(_high-level abstraction_) olmalarına rağmen, derlendiklerinde genellikle sizin elle yazacağınız düşük seviyeli kodla(_lower-level code_) yaklaşık olarak aynı makine koduna dönüştürülürler. Iterator'lar, Rust'ın **sıfır maliyetli soyutlamalarından (zero-cost abstractions)** biridir; bununla kastettiğimiz şey, bu soyutlamayı kullanmanın çalışma zamanında(_runtime_) ekstra hiçbir ek yük(_overhead_) getirmemesidir. Bu, C++'ın orijinal tasarımcısı ve uygulayıcısı Bjarne Stroustrup'un 2012 ETAPS açılış konuşması "C++'ın Temelleri(Foundations of C++)"nde sıfır yük (zero-overhead) kavramını tanımlama şekline benzerdir:
+
+> Genel olarak, C++ uygulamaları sıfır yük(**zero-overhead**) ilkesine uymaktadır: Kullanmadığınız şey için bedel ödemezsiniz. Ve daha da ötesi: Kullandığınız şeyi, elle daha iyi kodlayamazdınız.
+
+Birçok durumda, iterator kullanan Rust kodu elle yazacağınız assembly koduyla aynı koda derlenir. Döngü açma(*loop unrolling*) ve dizi(_array_) erişiminde sınır denetimini(*bounds checking*) ortadan kaldırma gibi optimizasyonlar uygulanır ve ortaya çıkan kodu son derece verimli hale getirir. Bunu artık bildiğinize göre, **iterator**'ları ve **closure**'ları çekinmeden kullanabilirsiniz! Kodu daha üst düzeydeymiş gibi gösterirler, ancak bunu yaparken çalışma zamanı performans cezası getirmezler.
+
+> [!TIP]
+> #### Döngünün Düzleştirilmesi (Loop Unrolling):
+> İşlemciler (CPU) için bir döngüyü çalıştırmak maliyetlidir. Her adımda döngü sayacını artırmak, "Sona geldik mi?" diye kontrol etmek ve döngünün başına geri atlamak (branching) işlemci boru hattında (pipeline) gecikmelere neden olur.
+> Derleyici, eğer eleman sayısı derleme aşamasında belliyse veya tahmin edilebiliyorsa döngüyü "düzleştirir".
+> **Bizim yazdığımız:**
+> ```rust
+> for i in 0..4 { println!("{}", i)}
+> ```
+> **Derleyicinin makine koduna dönüştürdüğü (Unrolled):**
+> ```rust
+> println!("{}", 0);
+> println!("{}", 1);
+> println!("{}", 2);
+> println!("{}", 3);
+> ```
+> Böylece işlemci hiçbir atlama (jump/branch) komutuyla uğraşmaz, kodu dümdüz bir hat üzerinde maksimum hızda işler.
+> #### Sınır Kontrollerinin Kaldırılması (Eliminating Bounds Checking):
+> Rust, güvenli bir dil olduğu için normal şartlarda bir diziye indeksle (`vektör[i]`) eriştiğinizde arka planda gizli bir `if` kontrolü çalıştırır: _"Acaba `i` değeri vektörün boyutundan büyük mü? Bellek taşması var mı?"_ Bu kontrol güvenliği sağlar ama her adımda çalışması performansa minik bir darbe vurur.
+> Ancak bir iterator kullandığınızda (örneğin `contents.lines()` veya `.iter()`), Rust zaten listenin başını ve sonunu kesin olarak bilir. Sınırların dışına çıkılması teknik olarak imkansızdır. Derleyici bunu fark ettiği an, **"Burada bellek hatası olması imkansız" diyerek tüm o gizli `if` kontrollerini (bounds check) assembly kodundan tamamen siler (eliminate eder).** Sonuç? Elinizle yazacağınız riskli, güvensiz ve kontrolsüz bir C kodunun hızıyla, Rust'ın %100 güvenli iterator kodunun hızı tamamen eşitlenir!
+
+## 13.5. Özet
+
+Closure'lar ve iterator'lar, fonksiyonel programlama dili fikirlerinden esinlenen Rust özellikleridir. Rust'ın üst düzey fikirleri, alt düzey performansla net bir şekilde ifade etme yeteneğine katkıda bulunurlar. Closure ve iterator uygulamaları, çalışma zamanı (runtime) performansının etkilenmeyeceği şekildedir. Bu, Rust'ın sıfır maliyetli soyutlamalar(_ zero-cost abstractions_) sağlamaya çalışma hedefinin bir parçasıdır.
+
+G/Ç projemizin ifade gücünü iyileştirdiğimize göre, şimdi projeyi dünyayla paylaşmamıza yardımcı olacak `cargo`'nun bazı özelliklerine bakalım.(**"İfade gücü(expressiveness)"** = Kodun amacını ne kadar az kelimeyle, ne kadar açık anlattığı. Iterator'lar sayesinde kod daha az satırla daha çok şey anlatıyor, yani **ifade gücü artıyor!** 🎯)
+
+# 14. Cargo ve Crates.io Hakkında Daha Fazlası
+
+Şimdiye kadar kodumuzu derlemek, çalıştırmak ve test etmek için Cargo'nun yalnızca en temel özelliklerini kullandık, ancak Cargo çok daha fazlasını yapabilir. Bu bölümde, size aşağıdakileri nasıl yapacağınızı göstermek için diğer, daha gelişmiş özelliklerinden bazılarını ele alacağız:
+
+- **Yayın profilleri (release profiles)** aracılığıyla derlemenizi özelleştirmek.
+- Kütüphaneleri [crates.io](https://crates.io/)'da yayımlama.
+- Büyük projeleri **çalışma alanları(workspaces)** ile organize etmek.
+- [crates.io](https://crates.io/)'dan ikili dosyalar (binaries) yükleme.
+- Özel komutlar kullanarak Cargo'yu genişletme(Cargo'ya yeni alt komutlar ekleyerek yeteneklerini artırma. Örneğin; `cargo audit`, `cargo watch`).
+
+Cargo, bu bölümde ele aldığımız işlevsellikten çok daha fazlasını yapabilir, bu yüzden tüm özelliklerinin tam bir açıklaması için [dokümantasyonuna](https://doc.rust-lang.org/cargo/) bakın.
+
+## 14.1. Yayın Profilleri(Release Rrofiles) ile Derlemeleri Özelleştirmek
+
+Rust'ta yayın profilleri(release profiles); bir programcının kod derleme seçenekleri üzerinde daha fazla kontrol sahibi olmasını sağlayan, farklı yapılandırmalara(*configurations*) sahip, önceden tanımlanmış ve özelleştirilebilir profillerdir. Her profil, diğerlerinden bağımsız olarak yapılandırılır.
+
+Cargo'nun iki ana profili vardır: `cargo build` çalıştırdığınızda Cargo'nun kullandığı `dev` profili ve `cargo build --release` çalıştırdığınızda Cargo'nun kullandığı `release` profili. `dev` profili, geliştirme(*development*) için iyi varsayılan değerlerle tanımlanmıştır ve `release` profili, üretim/yayın(*release*) derlemeleri için iyi varsayılan değerlere sahiptir.
+
+Bu profil adları, derlemelerinizin(_build_) çıktısından tanıdık gelebilir:
+
+```
+$ cargo build
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.00s
+$ cargo build --release
+    Finished `release` profile [optimized] target(s) in 0.32s
+```
+
+`dev` ve `release`, derleyici tarafından kullanılan farklı profillerdir.
+
+Cargo, projenin Cargo.toml dosyasına herhangi bir `[profile.*]` bölümü açıkça eklemediğinizde geçerli olan her profil için varsayılan ayarlara sahiptir. Özelleştirmek istediğiniz herhangi bir profil için `[profile.*]` bölümleri ekleyerek, varsayılan ayarların herhangi bir alt kümesini geçersiz(_override_) kılabilirsiniz. Örneğin, `dev` ve `release` profilleri için `opt-level` ayarının varsayılan değerleri şunlardır:
+
+**Dosya adı:** `Cargo.toml`
+
+```toml
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+```
+
+`opt-level` ayarı, Rust'ın kodunuza uygulayacağı optimizasyon sayısını 0'dan 3'e kadar bir aralıkla kontrol eder. Daha fazla optimizasyon uygulamak derleme süresini uzatır, bu yüzden geliştirme aşamasındaysanız ve kodunuzu sık sık derliyorsanız, ortaya çıkan kod daha yavaş çalışsa bile daha hızlı derlemek için daha az optimizasyon isteyeceksinizdir. Bu nedenle `dev` için varsayılan `opt-level` değeri `0`'dır. Kodunuzu yayınlamaya(*release*) hazır olduğunuzda, derlemeye daha fazla zaman harcamak en iyisidir. Yayın(*release*) modunda yalnızca bir kez derleyeceksiniz, ancak derlenmiş programı birçok kez çalıştıracaksınız, bu yüzden yayın(*release*) modu daha uzun derleme süresi karşılığında daha hızlı çalışan kod elde etmenizi sağlar. İşte bu nedenle `release` profili için varsayılan `opt-level` değeri `3`'tür.
+
+Cargo.toml dosyasına farklı bir değer ekleyerek varsayılan bir ayarı geçersiz kılabilirsiniz(_override_). Örneğin, geliştirme profilinde optimizasyon seviyesi 1'i kullanmak istiyorsak, proje Cargo.toml dosyamıza şu iki satırı ekleyebiliriz:
+
+**Dosya adı:** `Cargo.toml`
+
+```toml
+[profile.dev]
+opt-level = 1
+```
+
+Bu kod, varsayılan değer olan `0`'ı geçersiz kılar (_override_). Artık `cargo build` çalıştırdığımızda, Cargo `dev` profili için varsayılan ayarları kullanacak ve buna ek olarak bizim `opt-level` özelleştirmemizi de kullanacaktır. `opt-level`'ı `1` olarak ayarladığımız için, Cargo varsayılandan daha fazla optimizasyon uygulayacak, ancak bir yayın derlemesindeki(_release build_) kadar fazla olmayacaktır.
+
+Her profil için yapılandırma seçeneklerinin ve varsayılan değerlerin tam listesi için [Cargo'nun dokümantasyonuna](https://doc.rust-lang.org/cargo/reference/profiles.html) bakın.
+
+## 14.2. Bir Crate'i Crates.io'da Yayımlama
+
+Projelerimizde bağımlılık(*dependency*) olarak [crates.io](https://crates.io/) üzerindeki paketleri kullandık, ancak kendi paketlerinizi yayınlayarak(_publishing_) kodunuzu diğer insanlarla da paylaşabilirsiniz. [crates.io](https://crates.io/) üzerindeki crate kayıt sistemi (_crate registry = Rust paketlerinin depolandığı ve dağıtıldığı merkezi bir depodur._), paketlerinizin kaynak kodunu dağıtır. Bu nedenle ağırlıklı olarak açık kaynak (_open source_) kodları barındırır.
+
+Rust ve Cargo, yayınladığınız paketin insanlar tarafından daha kolay bulunmasını ve kullanılmasını sağlayan özelliklere sahiptir. Gelecek bölümlerde bu özelliklerin bazılarından bahsedeceğiz ve ardından bir paketin nasıl yayınlanacağını(_publish_) açıklayacağız.
+
+### 14.2.1. Faydalı Dokümantasyon Yorumları Yazmak
+
+Paketlerinizi doğru ve eksiksiz bir şekilde belgelemek, diğer kullanıcıların bunları nasıl ve ne zaman kullanacaklarını bilmelerine yardımcı olur; bu nedenle dokümantasyon yazmaya zaman ayırmaya kesinlikle değer. Bölüm 3'de, iki eğik çizgi (`//`) kullanarak Rust koduna nasıl yorum ekleneceğini tartışmıştık. Rust ayrıca dokümantasyon için özel bir yorum türüne sahiptir. Bunlara **documentation comment (dokümantasyon yorumu)** denir ve bu yorumlardan HTML dokümantasyonu üretilebilir. HTML, crate'inizin nasıl uygulandığından ziyade onu nasıl kullanacaklarını bilmekle ilgilenen programcılar için tasarlanmış, `public API` öğelerine ait dokümantasyon yorumlarının içeriğini görüntüler.(API = Fonksiyonu dışa açılan imzası veya Enum ve varyantları da API'nin parçasıdır. vb.)
+
+Dokümantasyon yorumları, iki yerine üç eğik çizgi `///` kullanır ve metni biçimlendirmek için Markdown gösterimini(_Markdown notation_) destekler. Dokümantasyon yorumlarını, belgeledikleri ögenin hemen önüne yerleştirmeniz gerekir. Liste 14-1, `my_crate` adlı bir crate'deki `add_one` fonksiyonu için dokümantasyon yorumlarını göstermektedir.
+
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+/// Adds one to the number given.
+///
+/// # Examples
+///
+/// ```
+/// let arg = 5;
+/// let answer = my_crate::add_one(arg);
+///
+/// assert_eq!(6, answer);
+/// ```
+pub fn add_one(x: i32) -> i32 {
+    x + 1
+}
+```
+
+> **[Liste 14-1:](https://doc.rust-lang.org/stable/book/ch14-02-publishing-to-crates-io.html#listing-14-1)** Bir Fonksiyon İçin Dokümantasyon Yorumu
+
+Burada, `add_one` fonksiyonunun ne yaptığını açıklayan bir açıklama veriyoruz, ardından **Examples (Örnekler)** başlıklı bir bölüm başlatıyoruz ve `add_one` fonksiyonunun nasıl kullanılacağını gösteren bir kod örneği sunuyoruz. `cargo doc` komutunu çalıştırarak bu dokümantasyon yorumundan HTML dokümantasyonu oluşturabiliriz. Bu komut, Rust ile birlikte dağıtılan `rustdoc` aracını çalıştırır ve oluşturulan HTML dokümantasyonunu target/doc dizinine koyar.
+
+Kolaylık olması açısından, `cargo doc --open` komutunu çalıştırmak mevcut crate'inizin dokümantasyonu için HTML dosyalarını (ayrıca crate'inizin tüm bağımlılıklarının dokümantasyonlarını da) oluşturur ve sonucu bir web tarayıcısında açar. `add_one` fonksiyonuna gidin ve dokümantasyon yorumlarındaki metnin `Şekil 14-1`'de gösterildiği gibi nasıl işlendiğini göreceksiniz.
+
+![trpl14-01](Pictures/trpl14-01.png)
+
+> **Şekil 14-1**: `add_one` fonksiyonu için HTML dokümantasyonu
+#### 14.2.1.1. Yaygın Olarak Kullanılan Bölümler
+
+Liste 14-1'de, HTML sayfasında "Examples" (Örnekler) başlıklı bir bölüm oluşturmak için `# Examples` Markdown başlığını kullandık. Crate yazarlarının dokümantasyonlarında yaygın olarak kullandıkları diğer bazı bölümler şunlardır:
+
++ **Panics (Panikler):**  Belgelenen fonksiyonun panikleyebileceği senaryolardır. (Yani, Belgelenen fonksiyonun hangi senaryolarda `panic!` fırlatıp çökeceğini açıklar.) Programlarının paniklemesini istemeyen fonksiyon çağırıcıları, bu durumlarda fonksiyonu çağırmadıklarından emin olmalıdır.
++ **Errors (Hatalar):** Eğer fonksiyon bir `Result` döndürüyorsa; ne tür hataların oluşabileceğini, bu hatalara hangi koşulların sebep olabileceğini açıklamak kullanıcılar için son derece faydalıdır. Böylece farklı hata türlerini farklı şekillerde ele alacak kodlar yazabilirler.
++ **Safety (Güvenlik):** Fonksiyonun çağrılması `unsafe` (güvensiz) ise (güvensizliği Bölüm 20'de ele alıyoruz), fonksiyonun neden güvensiz olduğunu açıklayan ve fonksiyonun çağırıcıların uymasını beklediği değişmezleri (invariants) ele alan bir bölüm olmalıdır.
+
+
+> [!TIP]
+> #### Invariant Nedir?
+> Buradaki **invariant**, fonksiyonun doğru çalışabilmesi için her zaman doğru olması gereken koşullar anlamına gelir.
+> ```rust
+> unsafe fn read(ptr: *const u8, len: usize)
+> ```
+> fonksiyonu için şu bir invariant olabilir:
+> > `ptr`, en az `len` byte uzunluğunda geçerli bir bellek bölgesini göstermelidir.
+>
+> Fonksiyon bu koşulun sağlandığını varsayar; kontrol etmeyebilir.
+
+Çoğu dokümantasyon yorumunun bu bölümlerin tamamına ihtiyacı yoktur; ancak bu liste, kullanıcıların kodunuz hakkında bilmek isteyeceği kritik detayları size hatırlatacak harika bir kontrol listesidir (checklist).
+#### 14.2.1.2. Test Olarak Dokümantasyon Yorumları
+
+Dokümantasyon yorumlarınıza örnek kod blokları eklemek, kütüphanenizin nasıl kullanılacağını göstermeye yardımcı olabilir ve ek bir avantajı da vardır: **`cargo test` çalıştırmak, dokümantasyonunuzdaki kod örneklerini test olarak çalıştıracaktır!** Örneklerle birlikte gelen dokümantasyondan daha iyisi yoktur. Ancak dokümantasyon yazıldıktan sonra kod değiştiği için çalışmayan örneklerden daha kötüsü de yoktur(Gerçek kod güncellendi ama dokümantasyondaki örnekler güncellenmedi, ikisi uyumsuz hale geldi!). `Liste 14-1`'deki `add_one` fonksiyonunun dokümantasyonuyla `cargo test` çalıştırırsak, test sonuçlarında şuna benzer bir bölüm göreceğiz:
+
+```rust
+   Doc-tests my_crate
+
+running 1 test
+test src/lib.rs - add_one (line 5) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+```
+
+Şimdi, fonksiyonu veya örneği değiştirirsek ve örnekteki `assert_eq!` panikler hale gelirse ve `cargo test`'i tekrar çalıştırırsak, doc testlerinin örnek ile kodun birbirleriyle uyumsuz olduğunu yakaladığını göreceğiz!
+#### 14.2.1.3. İçerilen Öğe Yorumları(Contained Item Comments)
+
+`//!` dokümantasyon yorum stili, yorumları takip eden öğelere değil, yorumları içeren öğeye dokümantasyon ekler. Bu dokümantasyon yorumlarını(_doc comments_) genellikle crate veya modülü bir bütün olarak belgelemek için crate kök dosyasının içinde (geleneksel olarak `src/lib.rs`) veya bir modülün içinde kullanırız.
+
+Örneğin, `add_one` fonksiyonunu içeren `my_crate` crate'inin amacını açıklayan dokümantasyon eklemek için, `Liste 14-2`'de gösterildiği gibi `src/lib.rs` dosyasının başına `//!` ile başlayan dokümantasyon yorumları ekliyoruz.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+//! # My Crate
+//!
+//! `my_crate` is a collection of utilities to make performing certain
+//! calculations more convenient.
+
+/// Adds one to the number given.
+// --snip--
+///
+/// # Examples
+///
+/// ```
+/// let arg = 5;
+/// let answer = my_crate::add_one(arg);
+///
+/// assert_eq!(6, answer);
+/// ```
+pub fn add_one(x: i32) -> i32 {
+    x + 1
+}
+```
+
+> **[Liste 14-2](https://doc.rust-lang.org/stable/book/ch14-02-publishing-to-crates-io.html#listing-14-2)**: Bir bütün olarak `my_crate` crate'inin dokümantasyonu
+
+
+> [!TIP]
+> #### Teknik Analiz: `///` ile `//!` Arasındaki Yapısal Fark Nedir?
+> Bu iki yorum tarzı arasındaki farkı anlamak, dokümantasyonunuzun HTML sayfalarında doğru yerde görünmesi açısından kritiktir:
+> + **`///` (Dışsal / İleriye Dönük):** Kendisinden **hemen sonra gelen** ögeyi (bir fonksiyon, struct, enum veya modül tanımı) belgeler. HTML sayfasında o fonksiyonun kendi başlığı altında görünür.
+> + **`//!` (İçsel / Kapsayıcıya Yönelik):** İçinde bulunduğu **dosyanın veya modülün tamamını** belgeler. Bu yüzden her zaman dosyanın en üstüne, herhangi bir kod satırı başlamadan önce yazılır. HTML sayfasında ise kütüphanenizin (veya ilgili modülün) **ana giriş (Readme/Giriş) sayfasını** oluşturur.
+
+`//!` ile başlayan son satırdan sonra herhangi bir kod olmadığına dikkat edin. Yorumları `///` yerine `//!` ile başlattığımız için, bu yorumu takip eden bir öğeyi değil, bu yorumu içeren ögenin kendisini belgeliyoruz. Bu durumda, o öğe crate kökü(_crate root_) olan src/lib.rs dosyasıdır. Bu yorumlar tüm crate'i açıklar.
+
+`cargo doc --open` komutunu çalıştırdığımızda, bu yorumlar `my_crate` dokümantasyonunun ana sayfasında(_front page_), crate içindeki public öğelerin listelenmesinden önce görüntülenir. Bu durum `Şekil 14-2`'de gösterilmektedir.
+
+Öğelerin içindeki dokümantasyon yorumları, özellikle crate'leri ve modülleri açıklamak için kullanışlıdır. Kullanıcılarınızın crate'in organizasyonunu ve yapısını anlamalarına yardımcı olmak adına, **kapsayıcının(*container*) genel amacını** açıklamak için bu yorumları kullanın.
+
+![trpl14-02](Pictures/trpl14-02.png)
+
+> **Şekil 14-2**: Crate'in tamamını açıklayan yorum da dahil olmak üzere `my_crate` için oluşturulmuş dokümantasyon
+
+### 14.2.2. Kullanışlı Bir Public API Dışa Aktarma
+
+Public API'nizin yapısı, bir crate yayımlarken önemli bir husustur.  Crate'inizi kullanan kişiler, yapıya sizden daha az aşinadır ve crate'inizin büyük bir modül hiyerarşisi varsa kullanmak istedikleri parçaları bulmakta güçlük çekebilirler.
+
+Bölüm 7'de, `pub` anahtar kelimesini kullanarak öğeleri nasıl halka açık(_public_) hale getireceğimizi ve `use` anahtar kelimesiyle öğeleri bir kapsama(_scope_) nasıl dahil edeceğimizi ele aldık. Ancak, bir crate geliştirirken size mantıklı gelen yapı, kullanıcılarınız için çok kullanışlı olmayabilir. Struct'larınızı birden fazla seviye içeren bir hiyerarşi içinde organize etmek isteyebilirsiniz; ancak hiyerarşinin derinliklerinde tanımladığınız bir türü (type) kullanmak isteyen kişiler, o türün varlığından haberdar olmakta bile zorlanabilirler. Ayrıca `use my_crate::UsefulType;` yerine `use my_crate::some_module::another_module::UsefulType;` yazmak zorunda kalmaktan rahatsız olabilirler.
+
+İyi haber şu ki, eğer kütüphanenizin yapısı başka bir kütüphaneden kullanan diğer kişiler için kullanışlı değilse, iç organizasyonunuzu yeniden düzenlemek zorunda değilsiniz: Bunun yerine, **`pub use`** kullanarak gizli(_private_) yapınızdan farklı bir halka açık(_public_) yapı oluşturmak üzere ögeleri **yeniden dışa aktarabilirsiniz (re-export)**. Yeniden dışa aktarma işlemi, bir konumdaki halka açık(_public_) bir ögeyi alır ve sanki orada tanımlanmış gibi başka bir konumda da halka açık(_public_) hale getirir.
+
+Örneğin, sanatsal kavramları modellemek için `art` adında bir kütüphane yaptığımızı varsayalım. Bu kütüphanenin içinde iki modül vardır: `PrimaryColor` ve `SecondaryColor` adlı iki enum içeren bir `kinds` modülü ve `Liste 14-3`'te gösterildiği gibi `mix` adlı bir fonksiyon içeren bir `utils` modülü.
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+//! # Art
+//!
+//! A library for modeling artistic concepts.
+
+pub mod kinds {
+    /// The primary colors according to the RYB color model.
+    pub enum PrimaryColor {
+        Red,
+        Yellow,
+        Blue,
+    }
+
+    /// The secondary colors according to the RYB color model.
+    pub enum SecondaryColor {
+        Orange,
+        Green,
+        Purple,
+    }
+}
+
+pub mod utils {
+    use crate::kinds::*;
+
+    /// Combines two primary colors in equal amounts to create
+    /// a secondary color.
+    pub fn mix(c1: PrimaryColor, c2: PrimaryColor) -> SecondaryColor {
+        // --snip--
+        unimplemented!();
+    }
+}
+```
+
+> **Liste 14-3**: Öğeleri(`PrimaryColor`, `SecondaryColor` ve `mix`) `kinds` ve `utils` modülleri içinde düzenlenmiş bir `art` kütüphanesi
+
+`Şekil 14-3`, bu crate için `cargo doc` tarafından oluşturulan dokümantasyonun ana sayfasının nasıl görüneceğini göstermektedir.
+
+![trpl14-03](Pictures/trpl14-03.png)
+
+> **Şekil 14-3**: `kinds` ve `utils` modüllerini listeleyen `art` dokümantasyonunun ana sayfası
+
+`PrimaryColor` ve `SecondaryColor` türlerinin yanı sıra `mix` fonksiyonunun da ana sayfada(_front page_) listelenmediğine dikkat edin. Bunları görebilmek için `kinds` ve `utils` modüllerine tıklamamız gerekir. Bu kütüphaneye bağımlı olan başka bir crate, halihazırda tanımlanmış olan modül yapısını belirterek `art`'tan öğeleri kapsama dahil eden `use` ifadelerine ihtiyaç duyacaktır(yani, Bu kütüphaneyi kullanan başka bir crate, `art`'taki öğeleri içe aktarmak için modülün tam yolunu (`art::kinds::PrimaryColor` gibi) yazmak zorunda kalacaktır.). `Liste 14-4`, `art` crate'inden `PrimaryColor` ve `mix` öğelerini kullanan bir crate örneğini göstermektedir.
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use art::kinds::PrimaryColor;
+use art::utils::mix;
+
+fn main() {
+    let red = PrimaryColor::Red;
+    let yellow = PrimaryColor::Yellow;
+    mix(red, yellow);
+}
+```
+
+> **[Liste 14-4](https://doc.rust-lang.org/stable/book/ch14-02-publishing-to-crates-io.html#listing-14-4)**: İç yapısı dışa aktarılmış olan `art` crate'nin öğelerini(`PrimaryColor` ve `mix`) kullanan bir crate
+
+`Liste 14-4`'te `art` crate'ini kullanan kodun yazarı, `PrimaryColor` ögesinin(_item_) `kinds` modülünde, `mix` fonksiyonunun ise `utils` modülünde olduğunu çözmek (anlamak) zorunda kaldı. `art` crate'inin modül yapısı, onu kullananlardan çok `art` crate'i üzerinde çalışan geliştiricilerle daha ilgilidir. İç yapı, `art` crate'ini nasıl kullanacağını anlamaya çalışan biri için yararlı herhangi bir bilgi içermez; aksine, onu kullanan geliştiricilerin nereye bakacaklarını bulmak zorunda kalmaları ve `use` ifadelerinde modül adlarını belirtmek zorunda olmaları nedeniyle kafa karışıklığına yol açar(yani, İç modül yapısı, kütüphaneyi kullanmak isteyen birine hiçbir şey anlatmıyor; tam tersine 'hangi modüle bakayım?' ve 'use ifadesine ne yazayım?' gibi gereksiz sorular doğurarak kafayı karıştırıyor.).
+
+İç organizasyonu halka açık(*public*) API'den arındırmak için, `Liste 14-3`'teki `art` crate'i kodunu, ögeleri en üst katmanda yeniden dışa aktaracak(*re-export*) `pub use` ifadelerini ekleyecek şekilde değiştirebiliriz; bu durum `Liste 14-5`'te gösterilmiştir."
+
+**Dosya adı:** `src/lib.rs`
+
+```rust
+//! # Art
+//!
+//! A library for modeling artistic concepts.
+
+pub use self::kinds::PrimaryColor;
+pub use self::kinds::SecondaryColor;
+pub use self::utils::mix;
+
+pub mod kinds {
+    // --snip--
+    /// The primary colors according to the RYB color model.
+    pub enum PrimaryColor {
+        Red,
+        Yellow,
+        Blue,
+    }
+
+    /// The secondary colors according to the RYB color model.
+    pub enum SecondaryColor {
+        Orange,
+        Green,
+        Purple,
+    }
+}
+
+pub mod utils {
+    // --snip--
+    use crate::kinds::*;
+
+    /// Combines two primary colors in equal amounts to create
+    /// a secondary color.
+    pub fn mix(c1: PrimaryColor, c2: PrimaryColor) -> SecondaryColor {
+        SecondaryColor::Orange
+    }
+}
+```
+
+> **[Liste 14-5](https://doc.rust-lang.org/stable/book/ch14-02-publishing-to-crates-io.html#listing-14-5)**: Ögeleri yeniden dışa aktarmak için `pub use` ifadelerinin(_statements_) eklenmesi
+
+`cargo doc` komutunun bu crate için oluşturduğu API dokümantasyonu, `Şekil 14-4`'te gösterildiği gibi artık yeniden dışa aktarılan(_re-export_) ögeleri ana sayfada(_front-page_) listeleyecek ve onlara bağlantı(*link*) verecektir; bu da `PrimaryColor` ve `SecondaryColor` türleri ile `mix` fonksiyonunun bulunmasını çok daha kolay hale getirir.
+
+![trpl14-04](Pictures/trpl14-04.png)
+
+> **Şekil 14-4**: Yeniden dışa aktarılan(_re-export_) öğeleri listeleyen `art` dokümantasyonunun ana sayfası(_front page_)
+
+`art` crate'ini kullananlar, `Liste 14-4`'te gösterildiği gibi `Liste 14-3`'teki iç yapıyı hâlâ görebilir ve kullanabilirler. Bunun yanında, `Liste 14-6`'da gösterildiği gibi, `Liste 14-5` ile sunulan daha kullanışlı yapıyı da tercih edebilirler.(Burada yazarın vermek istediği mesaj şudur: `pub use` ile yapılan **re-export**, eski kullanım biçimini bozmaz (geriye dönük uyumluluk korunur); sadece kullanıcılar için daha kısa ve daha kolay bir erişim yolu sağlar.).
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use art::PrimaryColor;
+use art::mix;
+
+fn main() {
+    // --snip--
+    let red = PrimaryColor::Red;
+    let yellow = PrimaryColor::Yellow;
+    mix(red, yellow);
+}
+```
+
+> **[Liste 14-6](https://doc.rust-lang.org/stable/book/ch14-02-publishing-to-crates-io.html#listing-14-6)**: `art` crate'inden yeniden dışa aktarılan öğeleri kullanan bir program
+
+Çok sayıda iç içe geçmiş(*nested*) modülün bulunduğu durumlarda, türleri **`pub use`** ile en üst katmanda yeniden dışa aktarmak(_re-export_), crate'i kullanan kişilerin deneyiminde önemli bir fark yaratabilir.
+
+`pub use` ifadesinin diğer bir yaygın kullanımı ise, mevcut crate'inizdeki bir bağımlılığın(dependency) tanımlarını yeniden dışa aktararak, o bağımlılığın tanımlarını kendi crate'inizin halka açık (public) API'sinin bir parçası haline getirmektir.(**TIP eklenecek**).
+
+Kullanışlı bir halka açık API yapısı oluşturmak bilimden ziyade bir sanattır ve kullanıcılarınız için en iyi çalışan API'yi bulmak adına denemeler (iterasyonlar) yapabilirsiniz. `pub use`'u seçmek, crate'inizi kendi içinde nasıl yapılandıracağınız konusunda size esneklik sağlar ve bu iç yapıyı kullanıcılarınıza sunduğunuz şeyden ayrıştırır(*decouple*). Yüklediğiniz crate'lerin bazı kodlarına bakın ve iç yapılarının halka açık(_public_) API'lerinden farklı olup olmadığını görün.
+
+### 14.2.3. Crates.io Hesabı Oluşturma
+
+Herhangi bir crate yayımlayabilmeniz için önce [crates.io](https://crates.io/) üzerinde bir hesap oluşturmanız ve bir API token'ı edinmeniz gerekir. Bunun için [crates.io](https://crates.io/) ana sayfasını ziyaret edin ve bir GitHub hesabı aracılığıyla giriş yapın. (Şu anda GitHub hesabı kullanmak zorunludur, ancak gelecekte site hesap oluşturmak için başka yöntemleri de destekleyebilir.) Giriş yaptıktan sonra, [https://crates.io/me/](https://crates.io/me/) adresindeki hesap ayarlarınızı ziyaret edin ve API anahtarınızı alın.
+
+```
+$ cargo login
+abcdefghijklmnopqrstuvwxyz012345
+```
+
+Bu komut, API token'ınızı Cargo'ya bildirir ve onu yerel olarak `~/.cargo/credentials.toml` dosyasında saklar. Bu token'ın gizli bir bilgi olduğunu unutmayın; onu hiç kimseyle paylaşmayın. Eğer herhangi bir nedenle bu token'ı biriyle paylaşırsanız, [crates.io](https://crates.io/) üzerinden mevcut token'ı iptal etmeli (_revoke_) ve yeni bir token oluşturmalısınız.
+### 14.2.4. Yeni Bir Crate'e Metadata(Künye Bilgisi) Ekleme
+
+Yayınlamak istediğiniz bir crate olduğunu varsayalım. Yayınlamadan önce, crate'in `Cargo.toml` dosyasındaki `[package]` bölümüne bazı metadata(*künye bilgileri*) eklemeniz gerekecektir.
+
+> [!tip]
+> + Buradaki **metadata** terimi, crate'in kendisiyle ilgili açıklayıcı bilgiler anlamına gelir. 
+> + Örneğin crate'in adı (`name`), sürümü (`version`), yazarı (`authors`), lisansı (`license`) ve açıklaması (`description`) metadata örnekleridir. Bu bilgiler crates.io üzerinde crate'inizin nasıl görüntüleneceğini belirler.
+
+Crate'inizin benzersiz(*unique*) bir adı olmalıdır. Bir crate üzerinde yerel ortamınızda çalışırken ona istediğiniz adı verebilirsiniz. Ancak [crates.io](https://crates.io/) üzerindeki crate adları "ilk gelen alır" *(first-come, first-served*) prensibine göre tahsis edilir. Bir crate adı bir kez alındığında, başka hiç kimse aynı adla bir crate yayımlayamaz. Bir crate'i yayımlamaya çalışmadan önce kullanmak istediğiniz adı aratın. Eğer ad kullanılmışsa, başka bir ad bulmanız ve yayımlama için yeni adı kullanmak üzere `Cargo.toml` dosyasındaki `[package]` bölümü altında `name` alanını düzenlemeniz gerekecektir, şöyle:
+
+**Dosya adı:** `Cargo.toml`
+
+```toml
+[package]
+name = "guessing_game"
+```
+
+Benzersiz bir ad seçmiş olsanız bile, bu noktada crate'i yayımlamak için `cargo publish` çalıştırdığınızda, bir uyarı ve ardından bir hata alacaksınız:
+
+```
+$ cargo publish
+    Updating crates.io index
+warning: manifest has no description, license, license-file, documentation, homepage or repository.
+See https://doc.rust-lang.org/cargo/reference/manifest.html#package-metadata for more info.
+--snip--
+error: failed to publish to registry at https://crates.io
+
+Caused by:
+  the remote server responded with an error (status 400 Bad Request): missing or empty metadata fields: description, license. Please see https://doc.rust-lang.org/cargo/reference/manifest.html for more information on configuring these fields
+```
+
+Bu, bir hatayla sonuçlanır çünkü bazı önemli bilgileri eksik bıraktınız: Bir açıklama (description) ve lisans (license) bilgisi gereklidir. Böylece insanlar crate'inizin ne işe yaradığını ve onu hangi koşullar altında kullanabileceklerini anlayabilirler. Cargo.toml'da, sadece bir veya iki cümlelik bir açıklama ekleyin, çünkü bu, crate'inizle birlikte arama sonuçlarında görünecektir. `license` alanı için ise bir lisans tanımlayıcısı (license identifier) değeri belirtmeniz gerekir. [Linux Foundation'ın Yazılım Paket Veri Değişimi (SPDX; Software Package Data Exchange)](https://spdx.org/licenses/), bu değer için kullanabileceğiniz tanımlayıcıları listeler. Örneğin, crate'inizi MIT Lisansı kullanarak lisansladığınızı belirtmek için, MIT tanımlayıcısını ekleyin:
+
+> [!TIP]
+> Burada **SPDX (Software Package Data Exchange)**, yazılımlarda kullanılan lisansların standartlaştırılmış kısa adlarını tanımlayan bir sistemdir. Örneğin:
+> + `MIT` → MIT Lisansı
+> + `Apache-2.0` → Apache License 2.0
+> + `GPL-3.0-only` → GNU General Public License v3
+> + `BSD-3-Clause` → BSD 3-Clause License
+> 
+> Cargo, lisans bilgisini bu standart tanımlayıcılar üzerinden okumayı tercih eder.
+> Lisans isimleri yazarken herkes farklı yazabilir: SPDX bunu standartlaştırıyor: **Hepsi için tek bir tanımlayıcı kullan!**
+
+**Dosya adı:** `Cargo.toml`
+
+```toml
+[package]
+name = "guessing_game"
+license = "MIT"
+```
+
+Eğer SPDX'te görünmeyen bir lisans kullanmak istiyorsanız, o lisansın metnini bir dosyaya koymanız, dosyayı projenize dahil etmeniz ve ardından `license` anahtarını kullanmak yerine o dosyanın adını belirtmek için `license-file`'ı kullanmanız gerekir. 
+
+Projeniz için hangi lisansın uygun olduğuna karar vermek bu kitabın kapsamı dışındadır. Rust topluluğundaki pek çok kişi, projelerini Rust ile aynı şekilde, `MIT OR Apache-2.0` şeklinde ikili bir lisans (dual license) kullanarak lisanslar. Bu uygulama, projeniz için birden fazla lisans kullanmak istediğinizde lisans tanımlayıcılarını `OR` ile ayırarak belirtebileceğinizi de göstermektedir.
+
+Benzersiz bir ad, sürüm numarası, açıklama ve lisans bilgisi eklendikten sonra, yayımlanmaya hazır bir projenin `Cargo.toml` dosyası aşağıdaki gibi görünebilir:
+
+**Dosya adı:** `Cargo.toml`
+
+```toml
+[package]
+name = "guessing_game"
+version = "0.1.0"
+edition = "2024"
+description = "A fun game where you guess what number the computer has chosen."
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+```
+
+> [!TIP]
+> Buradaki **MIT OR Apache-2.0** ifadesi şu anlama gelir:
+> + Kullanıcı isterse MIT Lisansı'nın şartlarına göre,
+> + İsterse Apache 2.0 Lisansı'nın şartlarına göre
+> 
+> yazılımınızı kullanabilir. Bu nedenle buna **çift lisanslama (dual licensing)** denir ve Rust ekosisteminde oldukça yaygın bir uygulamadır.
+
+[Cargo'nun dokümantasyonu](https://doc.rust-lang.org/cargo/),başkalarının crate'inizi daha kolay keşfedebilmesi ve kullanabilmesi için belirtebileceğiniz diğer metadata(künye bilgileri) bilgilerini de açıklamaktadır.
+### 14.2.5. Crates.io'da Yayınlama
+
+Bir hesap oluşturduğunuza, API token'ınızı kaydettiğinize, crate'iniz için bir isim seçtiğinize ve gerekli metadata bilgilerini belirttiğinize göre artık yayımlamaya hazırsınız! Bir crate'i yayımlamak, belirli bir sürümünü diğer insanların kullanabilmesi için [crates.io](https://crates.io/)'ya yüklemek anlamına gelir.
+
+Dikkatli olun, çünkü bir yayımlama işlemi **kalıcıdır**. Belirli bir sürümün üzerine asla tekrar yazılamaz ve belirli durumlar haricinde kod silinemez.
+
+---
 
 # 15. Referansı Takip Ederek Değere Ulaşma
+
+
 
 
 ## 18.2. Paylaşılan Davranış Üzerinde Soyutlama Yapmak için Trait Object’lerin Kullanılması
@@ -16931,3 +21398,5 @@ fn it_adds_two() {
 # Kaynak:
 
 + [READ THE BOOK!](https://doc.rust-lang.org/book/ch05-01-defining-structs.html)
+
+[^1]: 

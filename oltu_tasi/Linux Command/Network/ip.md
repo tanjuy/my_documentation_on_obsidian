@@ -35,3 +35,4 @@ $ ip link set dev eth0 down
 > **Explanation:**
 > - **Bir ağ arayüzünü devre dışı bırakma için kullanılır**
 > - `eth0` adlı ağ arayüzünü(interface) devre dışı bırakır.
+

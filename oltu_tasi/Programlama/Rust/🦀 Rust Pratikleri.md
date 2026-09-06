@@ -268,6 +268,175 @@ fn main() {
 
 ```
 
+# String Alıştırmaları:
+
+## Problem 1: + operatörü
+
+Verilen kelimeyi belirli bir sayıda ekran yazdırınız.
+Aşağıdaki çıktıyı üreten `repeat` fonksiyonunu **`+` operatörünü kullanarak** yazınız:
+
+Çıktı:
+
+```
+Enter a world:
+Rust
+Enter repeat number:
+3
+Rust Rust Rust
+```
+
+Kullanım:
+
+```rust
+use std::io::stdin;
+
+fn main() {
+    let mut world = String::new();
+
+    println!("Enter a world:");
+    stdin().read_line(&mut world).expect("Failed to read line! 1");
+    let world = world.trim();
+
+    println!("Enter repeat number:");
+    let mut times = String::new();
+    stdin().read_line(&mut times).expect("Failed to read line! 2");
+    let times: u32 = times.trim().parse().expect("Invalid number");
+
+    let result = repeat(world, times);
+    println!("{}", result);
+}
+
+fn repeat(text: &str, times: u32) -> String {
+	// Code... 
+}
+```
+
+Kurallar:
+- Fonksiyon imzası değiştirilmemelidir:
+
+```rust
+fn repeat(text: &str, times: u32) -> String
+```
+
+### Çözüm 1: `+` operatörü ile
+
+**Dosya adı:** `src/main.rs`
+
+```rust
+use std::io::stdin;
+
+fn main() {
+    let mut world = String::new();
+
+    println!("Enter a world:");
+    stdin().read_line(&mut world).expect("Failed to read line! 1");
+    let world = world.trim();
+
+    println!("Enter repeat number:");
+    let mut times = String::new();
+    stdin().read_line(&mut times).expect("Failed to read line! 2");
+    let times: u32 = times.trim().parse().expect("Invalid number");
+
+    let result = repeat(world, times);
+    println!("{}", result);
+}
+
+
+fn repeat(text: &str, times: u32) -> String {
+    let mut result = String::new();
+    for _ in 0..times {
+        result = result + text + " ";
+    }
+    result
+}
+
+```
+
+- `+` operatörü kullanılarak `String` ve `&str` değerleri birleştirilmektedir.
+- `+` operatörü sadece şu şekilde çalışır:
+
+```rust
+String + &str
+```
+
+- Bu yüzden `result` değişkeni `String` olmak zorundadır ve `text` ise `&str` olarak eklenebilir.
+
+> [!CAUTION]
+> `+` operatörü **sol taraftaki String’in ownership’ini alır**
+> Bu yüzden şu olur:
+> ```rust
+> let s1 = String::from("Hello");
+> let s2 = "World";
+> 
+> let s3 = s1 + s2;
+> ```
+> - `s1` → `+`’ın sol tarafı → **taşınır (move)**
+> - `s2` → sağ taraf → borrow edilir (`&str`)
+> 
+> Bu yüzden şunu yapamazsın:
+> ```rust
+> println!("{}", s1); // ❌ artık kullanılamaz
+> ```
+
+###  Çözüm 2: `push_str` ve push  string metotları
+
+```rust
+use std::io::stdin;
+
+fn main() {
+    let mut world = String::new();
+
+    println!("Enter a world:");
+    stdin().read_line(&mut world).expect("Failed to read line! 1");
+    let world = world.trim();
+
+    println!("Enter repeat number:");
+    let mut times = String::new();
+    stdin().read_line(&mut times).expect("Failed to read line! 2");
+    let times: u32 = times.trim().parse().expect("Invalid number");
+
+    let result = repeat(world, times);
+    println!("{}", result);
+}
+
+fn repeat(text:&str, times: u32) -> String {
+    let mut result = String::new();
+    for _ in 0..times {
+        result.push_str(text);
+        result.push(' ');
+    }
+    result
+}
+```
+
++ `push_str` → mevcut buffer’ı kullanır, yeni `String` oluşturmaz ve çok daha **performanslı ve idiomatic Rust**
+###  Çözüm 3:  map metotu ile
+
+```rust
+use std::io::stdin;
+
+fn main() {
+    let mut world = String::new();
+
+    println!("Enter a world:");
+    stdin().read_line(&mut world).expect("Failed to read line! 1");
+    let world = world.trim();
+
+    println!("Enter repeat number:");
+    let mut times = String::new();
+    stdin().read_line(&mut times).expect("Failed to read line! 2");
+    let times: u32 = times.trim().parse().expect("Invalid number");
+
+    let result = repeat(world, times);
+    println!("{}", result);
+}
+
+fn repeat(text:&str, times: u32) -> String {
+	let result: Vec<&str> = (0..times).map(|_| text).collect();
+	result.join(" ");
+}
+```
+
 # Kaynak:
 
 1.  [Learn Rust Programming - Complete Course 🦀](https://www.youtube.com/watch?v=BpPEoZW5IiY)

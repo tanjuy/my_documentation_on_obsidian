@@ -307,5 +307,23 @@ $ firewall-cmd --get-active-zones
 > **Explanation:**
 > + Parametreden de anlaşıldığı üzeri ekran mevcutta aktif olan `zone` getirir.
 
-### Port İşlemleri:
+### D. Port İşlemleri:
 
+#### D.1. Geçici(runtime) olarak port açma:
+
+```bash
+sudo firewall-cmd --add-port=8000/tcp
+```
+
+#### D.2. Kalıcı (permanent) olarak port açma:
+
+```bash
+sudo firewall-cmd --permanent --add-port=8000/tcp
+```
+
+
+> [!CAUTION]
+> Kalıcı ayarların geçerli olabilmesi için aşağıdaki komutu çalıştırılması gerekmektedir.
+> ```bash
+> sudo firewall-cmd --reload
+> ```
